@@ -391,6 +391,12 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
+cli-engine-example-plugin@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-example-plugin/-/cli-engine-example-plugin-1.0.0.tgz#f19e3792eecf9f9458d41bab3d33d255b9e038da"
+  dependencies:
+    heroku-cli-command "0.1.4"
+
 cli-width@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.1.0.tgz#b234ca209b29ef66fc518d9b98d5847b00edf00a"
