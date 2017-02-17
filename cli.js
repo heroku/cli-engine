@@ -3,7 +3,7 @@ if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 const path = require('path')
 const dirs = require('./lib/dirs')
 const findConfig = require('find-config')
-if (module.parent) dirs.parentRoot = path.dirname(findConfig('package.json', {dir: path.dirname(module.parent.filename)}))
+if (module.parent) dirs.cliRoot = path.dirname(findConfig('package.json', {dir: path.dirname(module.parent.filename)}))
 const config = require('./lib/config')
 const version = config.version
 const plugins = require('./lib/plugins')

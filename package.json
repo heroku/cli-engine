@@ -26,6 +26,7 @@
   "devDependencies": {
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
+    "cli-engine-example-plugin": "1.0.0",
     "heroku-cli-test": "0.0.2",
     "mocha": "3.2.0",
     "nyc": "10.1.2",
@@ -49,6 +50,11 @@
   "standard": {
     "ignore": [
       "lib/linewrap.js"
+    ]
+  },
+  "cli-engine": {
+    "plugins": [
+      "cli-engine-example-plugin"
     ]
   }
 }
