@@ -4,9 +4,11 @@ set -ex
 
 VERSION=`./bin/version`
 
-PLATFORMS=(darwin-x64 \
-  linux-x86 \
-  linux-x64)
+PLATFORMS=(
+  darwin-x64
+  linux-x86
+  linux-x64
+)
 
 if [ $# -ne 1 ]; then
   echo "USAGE: ./bin/release CHANNEL"
