@@ -1,9 +1,7 @@
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
-const path = require('path')
-const dirs = require('./lib/dirs')
-if (module.parent) dirs.cliRoot = path.join(module.parent.filename, '..', '..')
 const config = require('./lib/config')
+if (module.parent) config.init(module.parent)
 const version = config.version
 const plugins = require('./lib/plugins')
 let argv = process.argv.slice(2)
