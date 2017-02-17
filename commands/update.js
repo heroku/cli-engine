@@ -3,7 +3,6 @@
 const {Command} = require('heroku-cli-command')
 const path = require('path')
 const dirs = require('../lib/dirs')
-const version = require('../lib/version')
 const currentChannel = require('../lib/channel')
 const lock = require('rwlockfile')
 const config = require('../lib/config')
@@ -14,8 +13,8 @@ class Update extends Command {
     this.action('heroku-cli: Updating CLI')
     let channel = this.args.channel || currentChannel
     this.manifest = await this.fetchManifest(channel)
-    if (!this.flags.force && version === this.manifest.version) {
-      this.action.done(`already on latest version: ${version}`)
+    if (!this.flags.force && config.version === this.manifest.version) {
+      this.action.done(`already on latest version: ${config.version}`)
     } else if (!this.flags.force && config.updateDisabled) {
       this.action.done(`not updating CLI: ${config.updateDisabled}`)
     } else {
