@@ -115,8 +115,8 @@ class Update extends Command {
 
   async warnIfUpdateAvailable () {
     const manifest = await this.fetchManifest(currentChannel)
-    if (version !== manifest.version) {
-      console.error(`heroku-cli: update available from ${version} to ${manifest.version}`)
+    if (config.version !== manifest.version) {
+      console.error(`heroku-cli: update available from ${config.version} to ${manifest.version}`)
     }
   }
 

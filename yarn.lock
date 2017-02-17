@@ -1171,6 +1171,10 @@ heroku-cli-command@0.1.4:
     netrc "0.1.4"
     string "3.3.3"
 
+heroku-cli-test@0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/heroku-cli-test/-/heroku-cli-test-0.0.2.tgz#680c6df37f5c54f5eead1535f0999644259baa77"
+
 heroku-client@3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.1.tgz#9c6a3c54ceeb805b45c3833926bf8ef0d1fb7ca5"

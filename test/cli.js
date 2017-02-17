@@ -20,7 +20,7 @@ describe('cli', () => {
     process.argv = ['node', 'heroku', 'version']
     await require('../cli')
     console.log = this.log
-    this.output.should.match(/^heroku-cli/)
+    this.output.should.match(/^cli-engine/)
     this.code.should.eq(0)
   })
 })
