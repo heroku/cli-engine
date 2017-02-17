@@ -34,8 +34,8 @@ WORKSPACE=tmp/build/$TARBALL_BASE
 rm -rf $WORKSPACE
 mkdir -p $WORKSPACE/node_modules
 mkdir -p $WORKSPACE/bin
-cp README.md $WORKSPACE
-cp LICENSE $WORKSPACE
+if [ -f README.md ]; then cp README.md $WORKSPACE; fi
+if [ -f LICENSE ]; then cp LICENSE $WORKSPACE; fi
 cp package.json $WORKSPACE
 cp yarn.lock $WORKSPACE
 
