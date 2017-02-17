@@ -11,7 +11,6 @@
   "dependencies": {
     "ansi-escapes": "1.4.0",
     "execa": "0.6.0",
-    "find-config": "1.0.0",
     "find-up-sync": "1.0.2",
     "fs-extra": "2.0.0",
     "heroku-cli-command": "0.1.4",
