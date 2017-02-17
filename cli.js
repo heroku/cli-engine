@@ -1,8 +1,8 @@
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
+const findConfig = require('find-config')
 const path = require('path')
 const dirs = require('./lib/dirs')
-const findConfig = require('find-config')
 if (module.parent) dirs.cliRoot = path.dirname(findConfig('package.json', {dir: path.dirname(module.parent.filename)}))
 const config = require('./lib/config')
 const version = config.version
