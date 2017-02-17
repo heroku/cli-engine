@@ -2,28 +2,42 @@
 
 set -ex
 
-VERSION=`./bin/version`
+get_script_dir () {
+	SOURCE="${BASH_SOURCE[0]}"
+	# While $SOURCE is a symlink, resolve it
+	while [ -h "$SOURCE" ]; do
+		DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+		SOURCE="$( readlink "$SOURCE" )"
+		# If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+		[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+	done
+	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+	echo "$DIR"
+}
+DIR=$(get_script_dir)
+
+VERSION=`$DIR/version`
 NODE_VERSION=7.5.0
 
 if [ $# -ne 2 ]; then
-  echo "USAGE: ./bin/build PLATFORM CHANNEL"
+  echo "USAGE: $0 PLATFORM CHANNEL"
   exit 1
 fi
 
 PLATFORM=$1
 CHANNEL=$2
+NAME=`node -p "require('./package.json')['cli-engine'].bin"`
 
 # setup workspace
-HEROKU_BASE=heroku-v$VERSION-$PLATFORM
-WORKSPACE=tmp/build/$HEROKU_BASE
+TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
+WORKSPACE=tmp/build/$TARBALL_BASE
 rm -rf $WORKSPACE
 mkdir -p $WORKSPACE/node_modules
+mkdir -p $WORKSPACE/bin
 cp README.md $WORKSPACE
 cp LICENSE $WORKSPACE
 cp package.json $WORKSPACE
 cp yarn.lock $WORKSPACE
-cp cli.js $WORKSPACE
-cp -r lib $WORKSPACE
 
 # install node
 NODE_BASE=node-v$NODE_VERSION-$PLATFORM
@@ -41,7 +55,7 @@ echo $VERSION > VERSION
 echo $CHANNEL > CHANNEL
 
 # create bin runner
-cat << EOF > heroku
+cat << EOF > bin/$NAME
 #!/usr/bin/env bash
 set -e
 get_script_dir () {
@@ -57,20 +71,27 @@ get_script_dir () {
 	echo "\$DIR"
 }
 XDG_DATA_HOME=\${XDG_DATA_HOME:="\$HOME/.local/share"}
-if [ -x \$XDG_DATA_HOME/heroku/jscli/heroku ]; then
-  \$XDG_DATA_HOME/heroku/jscli/heroku \$*
+if [ -x \$XDG_DATA_HOME/$NAME/jscli/$NAME ]; then
+  \$XDG_DATA_HOME/$NAME/jscli/$NAME \$*
 else
   DIR=\$(get_script_dir)
-  \$DIR/node/bin/node --harmony-async-await --use_strict \$DIR/cli.js \$*
+  \$DIR/../node/bin/node --harmony-async-await --use_strict \$DIR/$NAME.js \$*
 fi
 EOF
-chmod +x heroku
+chmod +x bin/$NAME
+
+cat << EOF > bin/$NAME.js
+global['cli-engine'] = {
+  autoupdate: true
+}
+require('cli-engine')
+EOF
 
 # create tarball
 cd ..
-tar czf $HEROKU_BASE.tar.gz $HEROKU_BASE
+tar czf $TARBALL_BASE.tar.gz $TARBALL_BASE
 
-SHA256=`shasum -a 256 $HEROKU_BASE.tar.gz | awk {'print \$1'}`
+SHA256=`shasum -a 256 $TARBALL_BASE.tar.gz | awk {'print \$1'}`
 cat << EOF > $PLATFORM
 {
   "version": "$VERSION",

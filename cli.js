@@ -5,7 +5,7 @@ if (module.parent) config.init(module.parent)
 const version = config.version
 const plugins = require('./lib/plugins')
 let argv = process.argv.slice(2)
-argv.unshift('heroku')
+argv.unshift(config['cli-engine'].bin)
 
 function onexit (options) {
   const ansi = require('ansi-escapes')

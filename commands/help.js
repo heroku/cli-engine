@@ -1,10 +1,10 @@
 const {Command} = require('heroku-cli-command')
 const util = require('../lib/util')
-
-const argv0 = 'heroku'
+const config = require('../lib/config')
 
 class Help extends Command {
   async run () {
+    const argv0 = config['cli-engine'].bin
     let cmd = this.args.find(arg => !['help', '-h', '--help'].includes(arg))
     if (!cmd) return this.topics({argv0})
     let topicName = cmd.split(':')[0]
@@ -41,7 +41,7 @@ class Help extends Command {
     const max = require('lodash.maxby')
     const S = require('string')
 
-    this.log(`Usage: ${this.argv[0]} COMMAND [--app APP] [command-specific-options]
+    this.log(`Usage: ${argv0} COMMAND [--app APP] [command-specific-options]
 
   Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:
   `)
