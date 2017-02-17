@@ -4,8 +4,8 @@
   "version": "0.0.5",
   "author": "Jeff Dickey @dickeyxxx",
   "bin": {
-    "cli-build": "bin/build",
-    "cli-release": "bin/release"
+    "cli-build": "bin/cli-build",
+    "cli-release": "bin/cli-release"
   },
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
