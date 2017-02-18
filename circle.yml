@@ -23,7 +23,13 @@ test:
     - nyc report --reporter=text-lcov > coverage.lcov && bash <(curl -s https://codecov.io/bash)
 
 deployment:
-  master:
+  beta:
     branch: master
+    owner: heroku
     commands:
       - cd example && npm run release beta
+  stable:
+    tag: /v[0-9]+(\.[0-9]+)*/
+    owner: heroku
+    commands:
+      - cd example && npm run release stable
