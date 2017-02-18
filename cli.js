@@ -5,7 +5,7 @@ if (module.parent) config.init(module.parent)
 const version = config.version
 const plugins = require('./lib/plugins')
 let argv = process.argv.slice(2)
-argv.unshift(config['cli-engine'].bin)
+argv.unshift(config.bin)
 
 function onexit (options) {
   const ansi = require('ansi-escapes')
@@ -23,7 +23,7 @@ async function main () {
     const update = new Update({version})
     await update.checkIfUpdating()
     let Command
-    command = plugins.commands[argv[1] || 'dashboard']
+    command = plugins.commands[argv[1] || config.defaultCommand]
     if (command) Command = command.fetch()
     if (!command) Command = require('./commands/no_command')
     if (!Command._version) {

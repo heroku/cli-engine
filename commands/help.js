@@ -4,7 +4,7 @@ const config = require('../lib/config')
 
 class Help extends Command {
   async run () {
-    const argv0 = config['cli-engine'].bin
+    const argv0 = config.bin
     let cmd = this.args.find(arg => !['help', '-h', '--help'].includes(arg))
     if (!cmd) return this.topics({argv0})
     let topicName = cmd.split(':')[0]
