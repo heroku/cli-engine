@@ -49,7 +49,7 @@
   "keywords": [
     "cli"
   ],
-  "license": "isc",
+  "license": "ISC",
   "main": "cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
