@@ -16,12 +16,13 @@ function onexit (options) {
 process.on('exit', onexit)
 process.on('SIGINT', onexit.bind(null, {exit: true}))
 
-async function main () {
+async function main (c) {
+  Object.assign(config, c)
   let command
   try {
     const Update = require('./commands/update')
     const update = new Update({version})
-    await update.checkIfUpdating()
+    await update.autoupdate()
     let Command
     command = plugins.commands[argv[1] || config.defaultCommand]
     if (command) Command = command.fetch()
@@ -43,4 +44,4 @@ async function main () {
   }
 }
 
-module.exports = main()
+module.exports = main

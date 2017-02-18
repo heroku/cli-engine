@@ -9,8 +9,7 @@ const config = require('../lib/config')
 
 class Update extends Command {
   async run () {
-    this.fs = require('fs-extra')
-    this.action('heroku-cli: Updating CLI')
+    this.action(`${config.name}: Updating CLI`)
     let channel = this.args.channel || currentChannel
     this.manifest = await this.fetchManifest(channel)
     if (!this.flags.force && config.version === this.manifest.version) {
@@ -18,11 +17,11 @@ class Update extends Command {
     } else if (!this.flags.force && config.updateDisabled) {
       this.action.done(`not updating CLI: ${config.updateDisabled}`)
     } else {
-      this.action(`heroku-cli: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
+      this.action(`${config.name}: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
       await this.update(channel)
       this.action.done()
     }
-    this.action('heroku-cli: Updating plugins')
+    this.action(`${config.name}: Updating plugins`)
   }
 
   async fetchManifest (channel) {
@@ -81,14 +80,18 @@ class Update extends Command {
   }
 
   get base () {
-    return `heroku-v${this.manifest.version}-${process.platform}-${process.arch}`
+    return `${config.name}-v${this.manifest.version}-${process.platform}-${process.arch}`
+  }
+
+  get fs () {
+    return require('fs-extra')
   }
 
   async restartCLI () {
     await lock.read(dirs.updatelockfile)
     lock.unreadSync(dirs.updatelockfile)
     const {spawnSync} = require('child_process')
-    const {status} = spawnSync('heroku', process.argv.slice(2), {stdio: 'inherit', shell: true})
+    const {status} = spawnSync(config.bin, process.argv.slice(2), {stdio: 'inherit', shell: true})
     process.exit(status)
   }
 
@@ -107,33 +110,25 @@ class Update extends Command {
   async autoupdate () {
     if (!this.autoupdateNeeded) return
     if (config.updateDisabled) return await this.warnIfUpdateAvailable()
-    const fs = require('fs-extra')
-    fs.writeFileSync(dirs.autoupdatefile, '')
+    await this.checkIfUpdating()
+    this.fs.writeFileSync(dirs.autoupdatefile, '')
     const {spawn} = require('child_process')
-    spawn('heroku', ['update'])
+    spawn(config.bin, ['update'])
   }
 
   async warnIfUpdateAvailable () {
     const manifest = await this.fetchManifest(currentChannel)
     if (config.version !== manifest.version) {
-      console.error(`heroku-cli: update available from ${config.version} to ${manifest.version}`)
+      console.error(`${config.name}: update available from ${config.version} to ${manifest.version}`)
     }
   }
 
-  /**
-   * checks if there is an update running
-   * if there is an update running, it waits for it to complete, then restarts the CLI
-   * if no update running, checks if an update is needed and fires off an autoupdate process
-   */
   async checkIfUpdating () {
     const lock = require('rwlockfile')
     if (await lock.hasWriter(dirs.updatelockfile)) {
-      console.error('heroku-cli: warning: update in process')
+      console.error(`${config.name}: warning: update in process`)
       await this.restartCLI()
-    } else {
-      await lock.read(dirs.updatelockfile)
-      await this.autoupdate()
-    }
+    } else await lock.read(dirs.updatelockfile)
   }
 }
 
