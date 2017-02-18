@@ -17,8 +17,7 @@ dependencies:
 test:
   override:
     - yarn test
-    - HEROKU_DEBUG=1 ./bin/run version && ./bin/run help
-    - cd example && HEROKU_DEBUG=1 ./bin/run version && ./bin/run help
+    - HEROKU_DEBUG=1 ./example/bin/run version && ./example/bin/run help && ./example/bin/run cli:test
     - cd example && npm run build linux-x64 beta
   post:
     - nyc report --reporter=text-lcov > coverage.lcov && bash <(curl -s https://codecov.io/bash)
