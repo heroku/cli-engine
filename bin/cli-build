@@ -45,7 +45,8 @@ if [ ! -f tmp/$NODE_BASE.tar.xz ]; then
   curl -fSLo tmp/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
 fi
 tar -C $WORKSPACE -xf tmp/$NODE_BASE.tar.xz
-mv $WORKSPACE/$NODE_BASE $WORKSPACE/node
+mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
+rm -rf $WORKSPACE/$NODE_BASE
 
 # install packages
 cd $WORKSPACE
@@ -76,7 +77,7 @@ BIN_DIR=\$XDG_DATA_HOME/$NAME/cli/bin
 if [ -x \$BIN_DIR/$NAME ] && [ \$BIN_DIR != \$DIR ]; then
   \$XDG_DATA_HOME/$NAME/cli/bin/$NAME \$*
 else
-  \$DIR/../node/bin/node --harmony-async-await --use_strict \$DIR/$BIN.js \$*
+  \$DIR/node --harmony-async-await --use_strict \$DIR/$BIN.js \$*
 fi
 EOF
 chmod +x bin/$BIN
