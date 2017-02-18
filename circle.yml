@@ -12,7 +12,7 @@ dependencies:
     - curl -SL https://yarnpkg.com/latest.tar.gz | tar xz && rm -rf ~/.yarn && mv dist ~/.yarn
     - yarn
     - cd example && yarn --prefer-offline
-    - cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
+    - cd example && yarn remove cli-engine && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
 
 test:
   override:
