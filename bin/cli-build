@@ -51,7 +51,9 @@ rm -rf $WORKSPACE/$NODE_BASE
 
 # install packages
 cd $WORKSPACE
-yarn install --prefer-offline --no-progress --production --pure-lockfile
+# yarn does not seem to work right with git references
+#yarn install --no-progress --production
+npm install --production
 
 echo $VERSION > VERSION
 echo $CHANNEL > CHANNEL
