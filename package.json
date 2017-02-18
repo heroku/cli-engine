@@ -53,7 +53,7 @@
   "main": "cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "release": "cli-release",
+    "release": "./bin/cli-release",
     "test": "nyc mocha --use_strict && standard"
   },
   "standard": {
