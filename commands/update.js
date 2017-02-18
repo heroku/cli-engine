@@ -9,17 +9,20 @@ const config = require('../lib/config')
 
 class Update extends Command {
   async run () {
-    this.action(`${config.name}: Updating CLI`)
-    let channel = this.args.channel || currentChannel
-    this.manifest = await this.fetchManifest(channel)
-    if (!this.flags.force && config.version === this.manifest.version) {
-      this.action.done(`already on latest version: ${config.version}`)
-    } else if (!this.flags.force && config.updateDisabled) {
-      this.action.done(`not updating CLI: ${config.updateDisabled}`)
-    } else {
-      this.action(`${config.name}: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
-      await this.update(channel)
-      this.action.done()
+    if (config.disableUpdate) this.warn(config.disableUpdate)
+    else {
+      this.action(`${config.name}: Updating CLI`)
+      let channel = this.args.channel || currentChannel
+      this.manifest = await this.fetchManifest(channel)
+      if (config.version === this.manifest.version) {
+        this.action.done(`already on latest version: ${config.version}`)
+      } else if (config.disableUpdate) {
+        this.action.done(`not updating CLI: ${config.disableUpdate}`)
+      } else {
+        this.action(`${config.name}: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
+        await this.update(channel)
+        this.action.done()
+      }
     }
     this.action(`${config.name}: Updating plugins`)
   }
@@ -109,7 +112,7 @@ class Update extends Command {
 
   async autoupdate () {
     if (!this.autoupdateNeeded) return
-    if (config.updateDisabled) return await this.warnIfUpdateAvailable()
+    if (config.disableUpdate) return await this.warnIfUpdateAvailable()
     await this.checkIfUpdating()
     this.fs.writeFileSync(dirs.autoupdatefile, '')
     const {spawn} = require('child_process')
@@ -135,9 +138,6 @@ class Update extends Command {
 Update.topic = 'update'
 Update.args = [
   {name: 'channel', optional: true}
-]
-Update.flags = [
-  {name: 'force', char: 'f', hidden: true}
 ]
 
 module.exports = Update
