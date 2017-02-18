@@ -38,7 +38,7 @@ Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:
     topics.sort(util.compare('topic'))
     let maxlength = max(topics, 'topic.length').topic.length
     for (let topic of topics) {
-      this.log(`  ${argv0} ${S(topic.topic).padRight(maxlength)}${topic.description ? '  # ' + topic.description : ''}`)
+      this.log(`  ${argv0} ${S(topic.topic).padRight(maxlength)}${topic.description ? ' # ' + topic.description : ''}`)
     }
 
     this.log()
