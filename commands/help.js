@@ -31,14 +31,14 @@ class Help extends Command {
 
     this.log(`Usage: ${argv0} COMMAND [--app APP] [command-specific-options]
 
-  Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:
-  `)
+Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:
+`)
     let topics = Object.keys(this.plugins.topics).map(t => this.plugins.topics[t])
     topics = topics.filter(t => !t.hidden)
     topics.sort(util.compare('topic'))
     let maxlength = max(topics, 'topic.length').topic.length
     for (let topic of topics) {
-      this.log(`  ${argv0} ${S(topic.topic).padRight(maxlength)}${topic.description ? ' # ' + topic.description : ''}`)
+      this.log(`  ${argv0} ${S(topic.topic).padRight(maxlength)}${topic.description ? '  # ' + topic.description : ''}`)
     }
 
     this.log()
