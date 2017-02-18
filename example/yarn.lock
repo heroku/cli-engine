@@ -182,7 +182,7 @@ cli-engine-example-plugin@1.0.0:
   dependencies:
     heroku-cli-command "0.1.4"
 
-cli-engine@0.0.18:
+cli-engine@*:
   version "0.0.18"
   resolved "https://registry.yarnpkg.com/cli-engine/-/cli-engine-0.0.18.tgz#d01f9703b1f3487afd98753530e14fa83ba9206e"
   dependencies:
@@ -822,8 +822,8 @@ klaw-sync@1.1.2:
     graceful-fs "^4.1.11"
 
 leven@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/leven/-/leven-2.0.0.tgz#74c45744439550da185801912829f61d22071bc1"
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/leven/-/leven-2.1.0.tgz#c2e7a9f772094dee9d34202ae8acce4687875580"
 
 lodash.maxby@4.6.0:
   version "4.6.0"
@@ -1125,7 +1125,7 @@ regenerator-runtime@^0.10.0:
 
 regex-cache@^0.4.2:
   version "0.4.3"
-  resolved "http://registry.npmjs.org/regex-cache/-/regex-cache-0.4.3.tgz#9b1a6c35d4d0dfcef5711ae651e8e9d3d7114145"
+  resolved "https://registry.yarnpkg.com/regex-cache/-/regex-cache-0.4.3.tgz#9b1a6c35d4d0dfcef5711ae651e8e9d3d7114145"
   dependencies:
     is-equal-shallow "^0.1.3"
     is-primitive "^2.0.0"
