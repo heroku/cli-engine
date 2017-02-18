@@ -116,7 +116,7 @@ class Update extends Command {
       if (config.disableUpdate) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
       const {spawn} = require('child_process')
-      spawn(config.bin, ['update'])
+      spawn(dirs.reexecBin, ['update'], {detached: true})
     } catch (err) {
       this.error('error autoupdating')
       this.error(err)
