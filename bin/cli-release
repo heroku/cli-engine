@@ -31,14 +31,16 @@ fi
 
 CHANNEL=$1
 NAME=`node -p "require('./package.json').name"`
+S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3_bucket"`
 
 function release {
   $DIR/cli-build $PLATFORM $CHANNEL
-  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.xz
-  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-$PLATFORM.tar.xz
-  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.gz
-  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-$PLATFORM.tar.gz
-  aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$PLATFORM
+  remote_base=s3://$S3_BUCKET/$NAME/channels/$CHANNEL
+  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz
+  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-$PLATFORM.tar.xz
+  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz
+  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
+  aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM $remote_base/$PLATFORM
 }
 
 pids=""

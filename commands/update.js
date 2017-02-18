@@ -28,7 +28,7 @@ class Update extends Command {
 
   async fetchManifest (channel) {
     try {
-      let url = `https://cli-assets.heroku.com/${config.name}/channels/${channel}/${process.platform}-${process.arch}`
+      let url = `https://${config.s3.host}/${config.name}/channels/${channel}/${process.platform}-${process.arch}`
       return await this.http.get(url)
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
@@ -37,7 +37,7 @@ class Update extends Command {
   }
 
   async update (channel) {
-    let url = `https://cli-assets.heroku.com/${config.name}/channels/${channel}/${this.base}.tar.gz`
+    let url = `https://${config.s3.host}/${config.name}/channels/${channel}/${this.base}.tar.gz`
     let stream = await this.http.get(url, {raw: true})
     let dir = path.join(dirs.data, 'jscli')
     let tmp = path.join(dirs.data, 'jscli_tmp')
