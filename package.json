@@ -43,7 +43,7 @@
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
     "test": "nyc mocha --use_strict && standard",
-    "version": "VERSION=`node -p \"require('./package.json').version\"` && cd example && npm version \$VERSION"
+    "version": "VERSION=`node -p \"require('./package.json').version\"` && cd example && npm version $VERSION && git add package.json"
   },
   "standard": {
     "ignore": [
