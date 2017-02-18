@@ -39,12 +39,13 @@ class Update extends Command {
   async update (channel) {
     let url = `https://${config.s3.host}/${config.name}/channels/${channel}/${this.base}.tar.gz`
     let stream = await this.http.get(url, {raw: true})
-    let dir = path.join(dirs.data, 'jscli')
-    let tmp = path.join(dirs.data, 'jscli_tmp')
+    let dir = path.join(dirs.data, 'cli')
+    let tmp = path.join(dirs.data, 'cli_tmp')
     await this.extract(stream, tmp)
     await lock.write(dirs.updatelockfile, {skipOwnPid: true})
     this.fs.removeSync(dir)
     this.fs.renameSync(path.join(tmp, this.base), dir)
+    this.fs.removeSync(tmp)
   }
 
   extract (stream, dir) {

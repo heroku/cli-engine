@@ -71,8 +71,8 @@ get_script_dir () {
   echo "\$DIR"
 }
 XDG_DATA_HOME=\${XDG_DATA_HOME:="\$HOME/.local/share"}
-if [ -x \$XDG_DATA_HOME/$NAME/jscli/$NAME ]; then
-  \$XDG_DATA_HOME/$NAME/jscli/$NAME \$*
+if [ -x \$XDG_DATA_HOME/$NAME/cli/bin/$NAME ]; then
+  \$XDG_DATA_HOME/$NAME/cli/bin/$NAME \$*
 else
   DIR=\$(get_script_dir)
   \$DIR/../node/bin/node --harmony-async-await --use_strict \$DIR/$BIN.js \$*
