@@ -31,7 +31,7 @@ fi
 
 CHANNEL=$1
 NAME=`node -p "require('./package.json').name"`
-S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3_bucket"`
+S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3.bucket"`
 
 function release {
   $DIR/cli-build $PLATFORM $CHANNEL
