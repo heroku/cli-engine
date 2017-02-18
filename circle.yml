@@ -12,7 +12,7 @@ dependencies:
     - yarn
     - yarn link
     - cd example && yarn
-    - cd example && yarn link cli-engine
+    - cd example && yarn add heroku/cli-engine#$CIRCLE_SHA1
 
 test:
   override:
