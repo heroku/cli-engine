@@ -13,10 +13,8 @@ class Update extends Command {
       this.action(`${config.name}: Updating CLI`)
       let channel = this.args.channel || config.channel
       this.manifest = await this.fetchManifest(channel)
-      if (config.version === this.manifest.version) {
+      if (config.version === this.manifest.version && channel === config.channel) {
         this.action.done(`already on latest version: ${config.version}`)
-      } else if (config.disableUpdate) {
-        this.action.done(`not updating CLI: ${config.disableUpdate}`)
       } else {
         this.action(`${config.name}: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
         await this.update(channel)
