@@ -9,6 +9,7 @@ dependencies:
   cache_directories:
     - ~/.cache/yarn
   override:
+    - curl -SL https://yarnpkg.com/latest.tar.gz | tar xz && rm -rf ~/.yarn && mv dist ~/.yarn
     - yarn
     - cd example && yarn --prefer-offline
     - cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
