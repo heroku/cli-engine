@@ -17,7 +17,7 @@ dependencies:
       fi &&
       tar xf ~/.cache/yarn/yarn-v0.20.3.tar.gz && rm -rf ~/.yarn && mv dist ~/.yarn &&
       yarn --prefer-offline
-    - cd example && yarn --prefer-offline add heroku/cli-engine#$CIRCLE_SHA1
+    - cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
 
 test:
   override:
