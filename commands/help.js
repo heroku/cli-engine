@@ -3,6 +3,8 @@ const util = require('../lib/util')
 const config = require('../lib/config')
 
 class Help extends Command {
+  get plugins () { return require('../lib/plugins') }
+
   async run () {
     const argv0 = config.bin
     let cmd = this.args.find(arg => !['help', '-h', '--help'].includes(arg))
@@ -13,28 +15,14 @@ class Help extends Command {
     if (!topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
     if (!topic) topic = {name: topicName, fetch: () => { }}
     let Topic = topic.fetch()
-    let commands = this.commandsForTopic(topicName)
-    commands.sort(util.compare('command'))
     if (typeof Topic !== 'function') {
       Topic = class extends require('heroku-cli-command').Topic {}
       Topic.topic = topic.topic
       Topic.description = topic.description
     }
-    topic = new Topic({flags: this.flags})
-    await topic.help({commands, args: this.args, matchedCommand, argv0})
-  }
-
-  get plugins () {
-    return require('../lib/plugins')
-  }
-
-  commandsForTopic (topic) {
-    let plugins = this.plugins.list()
-    let commands = []
-    for (let plugin of plugins) {
-      commands = commands.concat(plugin.commands.filter(c => c.topic === topic))
-    }
-    return commands
+    let commands = this.plugins.commandList.filter(c => c.topic === topicName)
+    topic = new Topic({flags: this.flags, commands})
+    await topic.help({args: this.args, matchedCommand, argv0})
   }
 
   topics ({argv0}) {
