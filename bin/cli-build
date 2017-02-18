@@ -80,15 +80,9 @@ fi
 EOF
 chmod +x bin/$BIN
 
-if [ $BIN = "cli-engine" ]; then
-cat << EOF > bin/$BIN.js
-require('..')()
-EOF
-else
 cat << EOF > bin/$BIN.js
 require('cli-engine')()
 EOF
-fi
 
 # create tarballs
 cd ..
