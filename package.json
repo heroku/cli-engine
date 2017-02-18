@@ -1,7 +1,7 @@
 {
   "name": "cli-engine",
   "description": "Generic CLI Framework",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Jeff Dickey @dickeyxxx",
   "bin": {
     "cli-build": "bin/cli-build",
