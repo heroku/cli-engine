@@ -50,7 +50,7 @@ rm -rf $WORKSPACE/$NODE_BASE
 
 # install packages
 cd $WORKSPACE
-yarn install --prefer-offline --no-progress --production
+yarn install --prefer-offline --no-progress --production --pure-lockfile
 
 echo $VERSION > VERSION
 echo $CHANNEL > CHANNEL
