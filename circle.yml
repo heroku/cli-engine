@@ -11,7 +11,7 @@ dependencies:
     - example/node_modules
   override:
     - yarn --prefer-offline
-    - cd example && yarn --prefer-offline
+    - cd example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn upgrade
 
 test:
   override:
