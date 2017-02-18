@@ -13,10 +13,10 @@ dependencies:
     - |
       if [ ! -f ~/.cache/yarn/yarn-v0.20.3.tar.gz ]; then
         wget -O ~/.cache/yarn/yarn-v0.20.3.tar.gz https://github.com/yarnpkg/yarn/releases/download/v0.20.3/yarn-v0.20.3.tar.gz
-      fi
-      tar xf ~/.cache/yarn/yarn-v0.20.3.tar.gz && rm -rf ~/.yarn && mv dist ~/.yarn
-      yarn --prefer-offline
-      cd example && yarn remove cli-engine && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn upgrade
+      fi &&
+      tar xf ~/.cache/yarn/yarn-v0.20.3.tar.gz && rm -rf ~/.yarn && mv dist ~/.yarn &&
+      yarn --prefer-offline &&
+      cd example && yarn remove cli-engine && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn upgrade &&
       cat example/node_modules/cli-engine/package.json
 
 test:
