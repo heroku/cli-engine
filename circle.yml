@@ -11,7 +11,7 @@ dependencies:
   override:
     - yarn
     - cd example && yarn --prefer-offline
-    - cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
+    - bash -c "cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1"
 
 test:
   override:
