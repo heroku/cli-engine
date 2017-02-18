@@ -11,7 +11,6 @@
   "dependencies": {
     "ansi-escapes": "1.4.0",
     "execa": "0.6.0",
-    "find-up-sync": "1.0.2",
     "fs-extra": "2.0.0",
     "heroku-cli-command": "0.1.5",
     "klaw-sync": "1.1.2",
@@ -22,7 +21,7 @@
     "tar-stream": "1.5.2",
     "yarn": "0.20.3"
   },
-  "devDependencies": {
+  "devdependencies": {
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
     "cli-engine-example-plugin": "1.0.0",
@@ -32,7 +31,7 @@
     "standard": "8.6.0",
     "time-require": "0.1.2"
   },
-  "engineStrict": true,
+  "enginestrict": true,
   "engines": {
     "node": ">= 7.0.0"
   },
@@ -40,7 +39,7 @@
   "keywords": [
     "cli"
   ],
-  "license": "ISC",
+  "license": "isc",
   "main": "cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
@@ -52,6 +51,10 @@
     ]
   },
   "cli-engine": {
+    "s3": {
+      "bucket": "heroku-cli-assets",
+      "host": "cli-assets.heroku.com"
+    },
     "plugins": [
       "cli-engine-example-plugin"
     ]
