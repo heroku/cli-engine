@@ -10,6 +10,9 @@ dependencies:
     - ~/.cache/yarn
   override:
     - yarn
+    - yarn link
+    - cd example && yarn
+    - cd example && yarn link cli-engine
 
 test:
   override:
