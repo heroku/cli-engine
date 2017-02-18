@@ -5,6 +5,7 @@ const path = require('path')
 const dirs = require('../lib/dirs')
 const lock = require('rwlockfile')
 const config = require('../lib/config')
+const errors = require('../lib/errors')
 
 class Update extends Command {
   async run () {
@@ -119,6 +120,7 @@ class Update extends Command {
     } catch (err) {
       this.error('error autoupdating')
       this.error(err)
+      errors.logError(err)
     }
   }
 

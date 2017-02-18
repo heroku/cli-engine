@@ -38,6 +38,7 @@ async function main (c) {
     await command.done()
     process.exit(0)
   } catch (err) {
+    require('./lib/errors').logError(err)
     if (command && command.error) command.error(err)
     else console.error(err)
     process.exit(1)
