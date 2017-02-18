@@ -47,7 +47,8 @@
   },
   "standard": {
     "ignore": [
-      "lib/linewrap.js"
+      "lib/linewrap.js",
+      "example/node_modules"
     ]
   }
 }
