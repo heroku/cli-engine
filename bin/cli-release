@@ -3,16 +3,16 @@
 set -ex
 
 get_script_dir () {
-	SOURCE="${BASH_SOURCE[0]}"
-	# While $SOURCE is a symlink, resolve it
-	while [ -h "$SOURCE" ]; do
-		DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-		SOURCE="$( readlink "$SOURCE" )"
-		# If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-		[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-	done
-	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-	echo "$DIR"
+  SOURCE="${BASH_SOURCE[0]}"
+  # While $SOURCE is a symlink, resolve it
+  while [ -h "$SOURCE" ]; do
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$( readlink "$SOURCE" )"
+    # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  echo "$DIR"
 }
 DIR=$(get_script_dir)
 
@@ -34,17 +34,17 @@ NAME=`node -p "require('./package.json').name"`
 
 function release {
   $DIR/cli-build $PLATFORM $CHANNEL
-  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.xz
-  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-$PLATFORM.tar.xz
-  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.gz
-  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-$PLATFORM.tar.gz
-  aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM s3://heroku-cli-assets/channels/$CHANNEL/$PLATFORM
+  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.xz
+  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-$PLATFORM.tar.xz
+  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.gz
+  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$NAME-$PLATFORM.tar.gz
+  aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM s3://heroku-cli-assets/$NAME/channels/$CHANNEL/$PLATFORM
 }
 
 pids=""
 RESULT=0
 
-for PLATFORM in $PLATFORMS; do
+for PLATFORM in "${PLATFORMS[@]}"; do
   release &
   pids="$pids $!"
   sleep 3
