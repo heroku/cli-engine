@@ -34,6 +34,8 @@ NAME=`node -p "require('./package.json').name"`
 
 function release {
   $DIR/cli-build $PLATFORM $CHANNEL
+  aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.xz
+  aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-$PLATFORM.tar.xz
   aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-v$VERSION-$PLATFORM.tar.gz
   aws s3 cp --quiet --cache-control max-age=300 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz s3://heroku-cli-assets/channels/$CHANNEL/$NAME-$PLATFORM.tar.gz
   aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM s3://heroku-cli-assets/channels/$CHANNEL/$PLATFORM

@@ -3,16 +3,16 @@
 set -ex
 
 get_script_dir () {
-	SOURCE="${BASH_SOURCE[0]}"
-	# While $SOURCE is a symlink, resolve it
-	while [ -h "$SOURCE" ]; do
-		DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-		SOURCE="$( readlink "$SOURCE" )"
-		# If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-		[[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-	done
-	DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-	echo "$DIR"
+  SOURCE="${BASH_SOURCE[0]}"
+  # While $SOURCE is a symlink, resolve it
+  while [ -h "$SOURCE" ]; do
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$( readlink "$SOURCE" )"
+    # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  echo "$DIR"
 }
 DIR=$(get_script_dir)
 
@@ -59,16 +59,16 @@ cat << EOF > bin/$NAME
 #!/usr/bin/env bash
 set -e
 get_script_dir () {
-	SOURCE="\${BASH_SOURCE[0]}"
-	# While \$SOURCE is a symlink, resolve it
-	while [ -h "\$SOURCE" ]; do
-		DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
-		SOURCE="\$( readlink "\$SOURCE" )"
-		# If \$SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-		[[ \$SOURCE != /* ]] && SOURCE="\$DIR/\$SOURCE"
-	done
-	DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
-	echo "\$DIR"
+  SOURCE="\${BASH_SOURCE[0]}"
+  # While \$SOURCE is a symlink, resolve it
+  while [ -h "\$SOURCE" ]; do
+    DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
+    SOURCE="\$( readlink "\$SOURCE" )"
+    # If \$SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+    [[ \$SOURCE != /* ]] && SOURCE="\$DIR/\$SOURCE"
+  done
+  DIR="\$( cd -P "\$( dirname "\$SOURCE" )" && pwd )"
+  echo "\$DIR"
 }
 XDG_DATA_HOME=\${XDG_DATA_HOME:="\$HOME/.local/share"}
 if [ -x \$XDG_DATA_HOME/$NAME/jscli/$NAME ]; then
@@ -84,8 +84,9 @@ cat << EOF > bin/$NAME.js
 require('cli-engine')()
 EOF
 
-# create tarball
+# create tarballs
 cd ..
+tar c $TARBALL_BASE | xz > $TARBALL_BASE.tar.xz
 tar czf $TARBALL_BASE.tar.gz $TARBALL_BASE
 
 SHA256=`shasum -a 256 $TARBALL_BASE.tar.gz | awk {'print \$1'}`
