@@ -1,0 +1,33 @@
+{
+  "name": "cli-engine-example",
+  "description": "example CLI for use with cli-engine",
+  "version": "0.0.0",
+  "author": "Jeff Dickey @dickeyxxx",
+  "bin": {
+    "cli-engine-example": "bin/run"
+  },
+  "bugs": "https://github.com/heroku/cli-engine/issues",
+  "cli-engine": {
+    "node": "7.5.0",
+    "s3": {
+      "bucket": "heroku-cli-assets",
+      "host": "cli-assets.heroku.com"
+    },
+    "plugins": [
+      "cli-engine-example-plugin"
+    ]
+  },
+  "dependencies": {
+    "cli-engine": "0.0.15",
+    "cli-engine-example-plugin": "1.0.0"
+  },
+  "homepage": "https://github.com/heroku/cli-engine",
+  "keywords": [
+    "cli"
+  ],
+  "license": "ISC",
+  "repository": "https://github.com/heroku/cli-engine",
+  "scripts": {
+    "release": "cli-release"
+  }
+}
