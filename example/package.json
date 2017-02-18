@@ -1,7 +1,7 @@
 {
   "name": "cli-engine-example",
   "description": "example CLI for use with cli-engine",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Jeff Dickey @dickeyxxx",
   "bin": {
     "cli-engine-example": "bin/run"
