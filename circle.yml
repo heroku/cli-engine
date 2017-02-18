@@ -10,9 +10,8 @@ dependencies:
     - ~/.cache/yarn
   override:
     - yarn
-    - yarn link
     - cd example && yarn --prefer-offline
-    - cd example && yarn link cli-engine --prefer-offline
+    - cd example && yarn install --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
 
 test:
   override:
