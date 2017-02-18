@@ -3,7 +3,7 @@ machine:
   node:
     version: 7.5.0
   environment:
-    PATH: "${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin"
+    PATH: "${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:${PATH}"
 
 dependencies:
   cache_directories:
