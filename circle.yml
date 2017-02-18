@@ -9,7 +9,6 @@ dependencies:
   cache_directories:
     - ~/.cache/yarn
     - example/node_modules
-    - example/tmp/cache
   override:
     - |
       if [ ! -f ~/.cache/yarn/yarn-v0.20.3.tar.gz ]; then
