@@ -4,17 +4,22 @@ const config = require('./lib/config')
 if (module.parent) config.init(module.parent)
 const version = config.version
 const plugins = require('./lib/plugins')
+const errors = require('./lib/errors')
 let argv = process.argv.slice(2)
 argv.unshift(config.bin)
 
 function onexit (options) {
   const ansi = require('ansi-escapes')
-  process.stderr.write(ansi.cursorShow)
+  if (process.stderr.isTTY) process.stderr.write(ansi.cursorShow)
   if (options.exit) process.exit(1)
 }
 
 process.on('exit', onexit)
 process.on('SIGINT', onexit.bind(null, {exit: true}))
+process.on('uncaughtException', err => {
+  errors.logError(err)
+  onexit({exit: true})
+})
 
 async function main (c) {
   Object.assign(config, c)
@@ -38,7 +43,7 @@ async function main (c) {
     await command.done()
     process.exit(0)
   } catch (err) {
-    require('./lib/errors').logError(err)
+    errors.logError(err)
     if (command && command.error) command.error(err)
     else console.error(err)
     process.exit(1)
