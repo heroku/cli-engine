@@ -28,6 +28,7 @@
   "license": "ISC",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
+    "build": "cli-build",
     "release": "cli-release"
   }
 }
