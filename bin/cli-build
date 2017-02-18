@@ -32,6 +32,7 @@ BIN=`node -p "require('./package.json')['cli-engine'].bin || require('./package.
 TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
 WORKSPACE=tmp/build/$TARBALL_BASE
 rm -rf $WORKSPACE
+mkdir -p tmp/cache
 mkdir -p $WORKSPACE/node_modules
 mkdir -p $WORKSPACE/bin
 if [ -f README.md ]; then cp README.md $WORKSPACE; fi
@@ -41,10 +42,10 @@ cp yarn.lock $WORKSPACE
 
 # install node
 NODE_BASE=node-v$NODE_VERSION-$PLATFORM
-if [ ! -f tmp/$NODE_BASE.tar.xz ]; then
-  curl -fSLo tmp/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
+if [ ! -f tmp/cache/$NODE_BASE.tar.xz ]; then
+  curl -fSLo tmp/cache/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
 fi
-tar -C $WORKSPACE -xf tmp/$NODE_BASE.tar.xz
+tar -C $WORKSPACE -xf tmp/cache/$NODE_BASE.tar.xz
 mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
 rm -rf $WORKSPACE/$NODE_BASE
 
