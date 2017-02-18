@@ -16,9 +16,3 @@ test:
     - yarn test
   post:
     - nyc report --reporter=text-lcov > coverage.lcov && bash <(curl -s https://codecov.io/bash)
-
-deployment:
-  v6:
-    branch: v6
-    commands:
-      - bin/release v6
