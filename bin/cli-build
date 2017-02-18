@@ -27,6 +27,7 @@ fi
 PLATFORM=$1
 CHANNEL=$2
 NAME=`node -p "require('./package.json').name"`
+BIN=`node -p "require('./package.json')['cli-engine'].bin"`
 
 # setup workspace
 TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
@@ -55,7 +56,7 @@ echo $VERSION > VERSION
 echo $CHANNEL > CHANNEL
 
 # create bin runner
-cat << EOF > bin/$NAME
+cat << EOF > bin/$BIN
 #!/usr/bin/env bash
 set -e
 get_script_dir () {
@@ -75,12 +76,12 @@ if [ -x \$XDG_DATA_HOME/$NAME/jscli/$NAME ]; then
   \$XDG_DATA_HOME/$NAME/jscli/$NAME \$*
 else
   DIR=\$(get_script_dir)
-  \$DIR/../node/bin/node --harmony-async-await --use_strict \$DIR/$NAME.js \$*
+  \$DIR/../node/bin/node --harmony-async-await --use_strict \$DIR/$BIN.js \$*
 fi
 EOF
-chmod +x bin/$NAME
+chmod +x bin/$BIN
 
-cat << EOF > bin/$NAME.js
+cat << EOF > bin/$BIN.js
 require('cli-engine')()
 EOF
 
