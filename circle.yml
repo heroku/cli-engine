@@ -16,7 +16,7 @@ test:
     - yarn test
     - HEROKU_DEBUG=1 ./bin/run version
     - HEROKU_DEBUG=1 ./bin/run help
-    - ./bin/cli-build linux-64 beta
+    - ./bin/cli-build linux-x64 beta
   post:
     - nyc report --reporter=text-lcov > coverage.lcov && bash <(curl -s https://codecov.io/bash)
 
