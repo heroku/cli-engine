@@ -10,7 +10,6 @@ dependencies:
     - ~/.cache/yarn
   override:
     - yarn
-    - yarn link
     - cd example && yarn
     - cd example && yarn add heroku/cli-engine#$CIRCLE_SHA1
 
