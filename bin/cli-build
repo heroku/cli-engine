@@ -26,7 +26,7 @@ fi
 
 PLATFORM=$1
 CHANNEL=$2
-NAME=`node -p "require('./package.json')['cli-engine'].bin"`
+NAME=`node -p "require('./package.json').name"`
 
 # setup workspace
 TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
@@ -81,10 +81,7 @@ EOF
 chmod +x bin/$NAME
 
 cat << EOF > bin/$NAME.js
-global['cli-engine'] = {
-  autoupdate: true
-}
-require('cli-engine')
+require('cli-engine')()
 EOF
 
 # create tarball
