@@ -18,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "cli-engine": "*",
+    "cli-engine": "0.0.18",
     "cli-engine-example-plugin": "1.0.0"
   },
   "homepage": "https://github.com/heroku/cli-engine",

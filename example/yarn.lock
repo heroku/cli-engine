@@ -182,14 +182,14 @@ cli-engine-example-plugin@1.0.0:
   dependencies:
     heroku-cli-command "0.1.4"
 
-cli-engine@*:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/cli-engine/-/cli-engine-0.0.17.tgz#ccf8355e7a3e118e8626a353b70a4256c5830d41"
+cli-engine@0.0.18:
+  version "0.0.18"
+  resolved "https://registry.yarnpkg.com/cli-engine/-/cli-engine-0.0.18.tgz#d01f9703b1f3487afd98753530e14fa83ba9206e"
   dependencies:
     ansi-escapes "1.4.0"
     execa "0.6.0"
     fs-extra "2.0.0"
-    heroku-cli-command "1.0.0"
+    heroku-cli-command "1.0.1"
     klaw-sync "1.1.2"
     lodash.maxby "4.6.0"
     moment "2.17.1"
@@ -570,9 +570,9 @@ heroku-cli-command@0.1.4:
     netrc "0.1.4"
     string "3.3.3"
 
-heroku-cli-command@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-1.0.0.tgz#cb2ee81b6d26ddea7a226f85f1257ca3a1b34e3d"
+heroku-cli-command@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-1.0.1.tgz#2764ac63861de9fff3a0ef1a28f81b295770c980"
   dependencies:
     ansi-escapes "1.4.0"
     cardinal "1.0.0"
