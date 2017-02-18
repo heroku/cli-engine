@@ -112,7 +112,7 @@ class Update extends Command {
   async autoupdate () {
     if (!this.autoupdateNeeded) return
     this.fs.writeFileSync(dirs.autoupdatefile, '')
-    if (config.disableUpdate) return await this.warnIfUpdateAvailable()
+    if (config.disableUpdate) await this.warnIfUpdateAvailable()
     await this.checkIfUpdating()
     const {spawn} = require('child_process')
     spawn(config.bin, ['update'])
