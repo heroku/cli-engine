@@ -391,12 +391,6 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-example-plugin@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-example-plugin/-/cli-engine-example-plugin-1.0.0.tgz#f19e3792eecf9f9458d41bab3d33d255b9e038da"
-  dependencies:
-    heroku-cli-command "0.1.4"
-
 cli-width@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.1.0.tgz#b234ca209b29ef66fc518d9b98d5847b00edf00a"
@@ -923,10 +917,6 @@ find-root@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/find-root/-/find-root-1.0.0.tgz#962ff211aab25c6520feeeb8d6287f8f6e95807a"
 
-find-up-sync@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/find-up-sync/-/find-up-sync-1.0.2.tgz#e3ad6b8f7e2524bd051a1068a5b561926b935986"
-
 find-up@^1.0.0, find-up@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/find-up/-/find-up-1.1.2.tgz#6b2e9822b1a2ce0a60ab64d610eccad53cb24d0f"
@@ -1157,23 +1147,9 @@ hawk@~3.1.3:
     hoek "2.x.x"
     sntp "1.x.x"
 
-heroku-cli-command@0.1.4:
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-0.1.4.tgz#d6cd7494dc0d1a56344aafe41f367e9f0cde34ec"
-  dependencies:
-    ansi-escapes "1.4.0"
-    cardinal "1.0.0"
-    chalk "1.1.3"
-    got "6.7.1"
-    heroku-client "3.0.1"
-    http-call "1.0.4"
-    lodash.maxby "4.6.0"
-    netrc "0.1.4"
-    string "3.3.3"
-
-heroku-cli-command@0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-0.1.5.tgz#406ffb03269f0f67076fe86beaaa1f6ffebf8674"
+heroku-cli-command@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-1.0.0.tgz#cb2ee81b6d26ddea7a226f85f1257ca3a1b34e3d"
   dependencies:
     ansi-escapes "1.4.0"
     cardinal "1.0.0"
@@ -1184,6 +1160,7 @@ heroku-cli-command@0.1.5:
     lodash.maxby "4.6.0"
     netrc "0.1.4"
     string "3.3.3"
+    supports-color "3.2.3"
 
 heroku-cli-test@0.0.2:
   version "0.0.2"
@@ -1211,10 +1188,6 @@ home-or-tmp@^2.0.0:
 hosted-git-info@^2.1.4:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-2.2.0.tgz#7a0d097863d886c0fabbdcd37bf1758d8becf8a5"
-
-http-call@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.0.4.tgz#3d72429b15d85712e6883791f0120721cb6f8fa2"
 
 http-call@1.0.7:
   version "1.0.7"
@@ -2512,6 +2485,12 @@ strip-json-comments@~1.0.1:
 supports-color@3.1.2, supports-color@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-3.1.2.tgz#72a262894d9d408b956ca05ff37b2ed8a6e2a2d5"
+  dependencies:
+    has-flag "^1.0.0"
+
+supports-color@3.2.3:
+  version "3.2.3"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-3.2.3.tgz#65ac0504b3954171d8a64946b2ae3cbb8a5f54f6"
   dependencies:
     has-flag "^1.0.0"
 
