@@ -39,7 +39,7 @@ function release {
   aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz
   aws s3 cp --quiet --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-$PLATFORM.tar.xz
   aws s3 cp --quiet --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz
-  aws s3 cp --quiet --cache-control max-age=300 $remote_base/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
+  aws s3 cp --quiet --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
   aws s3 cp --quiet --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM $remote_base/$PLATFORM
 }
 
