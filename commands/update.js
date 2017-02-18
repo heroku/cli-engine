@@ -6,6 +6,7 @@ const dirs = require('../lib/dirs')
 const lock = require('rwlockfile')
 const config = require('../lib/config')
 const errors = require('../lib/errors')
+const fs = require('fs-extra')
 
 class Update extends Command {
   async run () {
@@ -13,6 +14,7 @@ class Update extends Command {
     else {
       this.action(`${config.name}: Updating CLI`)
       let channel = this.args.channel || config.channel
+      this.log(channel)
       this.manifest = await this.fetchManifest(channel)
       if (config.version === this.manifest.version && channel === config.channel) {
         this.action.done(`already on latest version: ${config.version}`)
@@ -42,9 +44,9 @@ class Update extends Command {
     let tmp = path.join(dirs.data, 'cli_tmp')
     await this.extract(stream, tmp)
     await lock.write(dirs.updatelockfile, {skipOwnPid: true})
-    this.fs.removeSync(dir)
-    this.fs.renameSync(path.join(tmp, this.base), dir)
-    this.fs.removeSync(tmp)
+    fs.removeSync(dir)
+    fs.renameSync(path.join(tmp, this.base), dir)
+    fs.removeSync(tmp)
   }
 
   extract (stream, dir) {
@@ -52,18 +54,18 @@ class Update extends Command {
     const tar = require('tar-stream')
 
     return new Promise(resolve => {
-      this.fs.removeSync(dir)
+      fs.removeSync(dir)
       let extract = tar.extract()
       extract.on('entry', (header, stream, next) => {
         let p = path.join(dir, header.name)
         let opts = {mode: header.mode}
         switch (header.type) {
           case 'directory':
-            this.fs.mkdirpSync(p, opts)
+            fs.mkdirpSync(p, opts)
             next()
             break
           case 'file':
-            stream.pipe(this.fs.createWriteStream(p, opts))
+            stream.pipe(fs.createWriteStream(p, opts))
             break
           case 'symlink':
             // ignore symlinks since they will not work on windows
@@ -83,10 +85,6 @@ class Update extends Command {
 
   get base () {
     return `${config.name}-v${this.manifest.version}-${process.platform}-${process.arch}`
-  }
-
-  get fs () {
-    return require('fs-extra')
   }
 
   async restartCLI () {
@@ -112,11 +110,13 @@ class Update extends Command {
   async autoupdate () {
     try {
       if (!this.autoupdateNeeded) return
-      this.fs.writeFileSync(dirs.autoupdatefile, '')
+      fs.writeFileSync(dirs.autoupdatefile, '')
       if (config.disableUpdate) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
+      let fd = fs.openSync(dirs.autoupdatelog, 'a')
       const {spawn} = require('child_process')
-      spawn(dirs.reexecBin, ['update'], {detached: true})
+      spawn(dirs.reexecBin, ['update'], {stdio: [null, fd, fd], detached: true})
+      .on('error', errors.logError)
     } catch (err) {
       this.error('error autoupdating')
       this.error(err)
