@@ -1,9 +1,9 @@
 const klaw = require('klaw-sync')
-const {Topic} = require('heroku-cli-command')
+const config = require('../lib/config')
 
-class Plugins extends Topic {}
-Plugins.topic = 'plugins'
-Plugins.description = 'manage heroku plugins'
-exports.topics = [Plugins]
+exports.topics = [
+  {name: 'plugins', description: `manage ${config.name} plugins`},
+  {name: 'update', description: `update ${config.name}`}
+]
 
 exports.commands = klaw(__dirname, {nodir: true}).map(f => require(f.path))
