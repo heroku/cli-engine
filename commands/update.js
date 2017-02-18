@@ -93,7 +93,7 @@ class Update extends Command {
     await lock.read(dirs.updatelockfile)
     lock.unreadSync(dirs.updatelockfile)
     const {spawnSync} = require('child_process')
-    const {status} = spawnSync(config.bin, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    const {status} = spawnSync(config.reexecBin, process.argv.slice(2), {stdio: 'inherit', shell: true})
     process.exit(status)
   }
 
