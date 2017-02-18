@@ -111,16 +111,18 @@ class Update extends Command {
 
   async autoupdate () {
     if (!this.autoupdateNeeded) return
+    this.fs.writeFileSync(dirs.autoupdatefile, '')
     if (config.disableUpdate) return await this.warnIfUpdateAvailable()
     await this.checkIfUpdating()
-    this.fs.writeFileSync(dirs.autoupdatefile, '')
     const {spawn} = require('child_process')
     spawn(config.bin, ['update'])
   }
 
   async warnIfUpdateAvailable () {
     const manifest = await this.fetchManifest(config.channel)
-    if (config.version !== manifest.version) {
+    let local = config.version.split('.')
+    let remote = manifest.version.split('.')
+    if (local[0] !== remote[0] || local[1] !== remote[1]) {
       console.error(`${config.name}: update available from ${config.version} to ${manifest.version}`)
     }
   }
