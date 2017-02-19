@@ -1,6 +1,7 @@
 const {Command} = require('heroku-cli-command')
 const util = require('../lib/util')
 const config = require('../lib/config')
+const screen = require('../lib/screen')
 
 class Help extends Command {
   get plugins () { return require('../lib/plugins') }
@@ -26,22 +27,40 @@ class Help extends Command {
   }
 
   topics ({argv0}) {
-    const max = require('lodash.maxby')
-    const S = require('string')
-
     this.log(`Usage: ${argv0} COMMAND [--app APP] [command-specific-options]
 
-Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:
-`)
+Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:\n`)
     let topics = Object.keys(this.plugins.topics).map(t => this.plugins.topics[t])
     topics = topics.filter(t => !t.hidden)
     topics.sort(util.compare('topic'))
-    let maxlength = max(topics, 'topic.length').topic.length
-    for (let topic of topics) {
-      this.log(`  ${argv0} ${S(topic.topic).padRight(maxlength)}${topic.description ? ' # ' + topic.description : ''}`)
-    }
-
+    topics = topics.map(t => [t.topic, t.description])
+    this.log(this.renderList(topics))
     this.log()
+  }
+
+  renderList (items) {
+    const S = require('string')
+    const max = require('lodash.maxby')
+
+    let maxLength = max(items, '[0].length')[0].length + 1
+    let lines = items
+      .map(i => [
+        // left side
+        ` ${S(i[0]).padRight(maxLength)}`,
+
+        // right side
+        this.linewrap(maxLength + 4, i[1])
+      ])
+      // join left + right side
+      .map(i => i[1] ? `${i[0]} # ${i[1]}` : i[0])
+    return lines.join('\n')
+  }
+
+  linewrap (length, s) {
+    const linewrap = require('../lib/linewrap')
+    return linewrap(length, screen.stdtermwidth, {
+      skipScheme: 'ansi-color'
+    })(s).trim()
   }
 }
 
