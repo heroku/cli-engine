@@ -35,6 +35,7 @@
     "jest": "18.1.0",
     "mocha": "3.2.0",
     "nock": "9.0.6",
+    "rimraf": "2.6.0",
     "standard": "8.6.0",
     "time-require": "0.1.2"
   },
@@ -56,8 +57,13 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
+    "build": "babel src -d lib --ignore '*.test.js' --source-maps inline",
+    "clean": "rimraf lib",
+    "prepare": "npm run clean && npm run build",
+    "release": "np",
     "test": "jest && flow && standard",
-    "version": "VERSION=`node -p \"require('./package.json').version\"` && cd example && npm version $VERSION --git-tag-version=false && git add package.json && npm publish"
+    "version": "VERSION=`node -p \"require('./package.json').version\"` && cd example && npm version $VERSION --git-tag-version=false && git add package.json && npm publish",
+    "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {
     "parser": "babel-eslint",

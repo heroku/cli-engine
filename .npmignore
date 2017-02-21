@@ -1,2 +1,17 @@
+*.log
+.babelrc
+.envrc
+.flowconfig
+.npmignore
+CONTRIBUTING.md
+appveyor.yml
+bin/run
+bin/run.js
+bin/version
+circle.yml
 example
+flow-typed
+resources
+src
 test
+yarn.lock
