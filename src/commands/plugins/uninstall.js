@@ -1,6 +1,6 @@
 const {Command, mixins} = require('heroku-cli-command')
 const yarn = require('../../mixins/yarn')
-const dirs = require('../../lib/dirs')
+const dirs = require('../../dirs')
 const fs = require('fs-extra')
 
 class PluginsUninstall extends mixins.mix(Command).with(yarn) {

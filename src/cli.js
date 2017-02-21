@@ -1,10 +1,10 @@
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
-const config = require('./lib/config')
+const config = require('./config')
 if (module.parent) config.init(module.parent)
 const version = config.version
-const plugins = require('./lib/plugins')
-const errors = require('./lib/errors')
+const plugins = require('./plugins')
+const errors = require('./errors')
 let argv = process.argv.slice(2)
 argv.unshift(config.bin)
 
