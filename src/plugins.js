@@ -86,6 +86,7 @@ function registerPlugin (type, parent) {
         }
         cacheUpdated = true
       }
+      // if (!Command._version) Command = legacy(Command)
       cache.plugins[plugin].fetch = () => r(plugin)
       for (let t of cache.plugins[plugin].topics) t.fetch = () => (r(plugin).topics || [r(plugin).topic]).find(r => r.topic === t.topic)
       for (let c of cache.plugins[plugin].commands) c.fetch = () => r(plugin).commands.find(r => r.topic === c.topic && r.command === c.command)
@@ -119,8 +120,8 @@ function registerPlugin (type, parent) {
       if (plugin.topics) plugin.topics.forEach(registerTopic)
       plugin.commands.forEach(registerCommand)
     } catch (err) {
-      console.error(`Error reading plugin: ${plugin}`)
-      console.error(err)
+      console.error(`Error reading ${plugin}`)
+      console.error(err.stack)
       errors.logError(err)
     }
   }

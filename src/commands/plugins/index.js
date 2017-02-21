@@ -1,9 +1,16 @@
-const {Command} = require('heroku-cli-command')
-const util = require('../../lib/util')
+// @flow
 
-class Plugins extends Command {
+import Command from 'cli-engine-command'
+import util from '../../util'
+
+export default class Plugins extends Command {
+  static topic = 'plugins'
+  static flags = [
+    {name: 'core', description: 'show core plugins'}
+  ]
+
   async run () {
-    let plugins = require('../../lib/plugins')
+    let plugins = require('../../plugins')
     plugins = plugins.list()
     plugins = plugins.filter(p => p.type !== 'builtin')
     plugins.sort(util.compare('name'))
@@ -16,10 +23,3 @@ class Plugins extends Command {
     }
   }
 }
-
-Plugins.topic = 'plugins'
-Plugins.flags = [
-  {name: 'core', description: 'show core plugins'}
-]
-
-module.exports = Plugins

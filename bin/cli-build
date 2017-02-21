@@ -96,6 +96,7 @@ tar czf $TARBALL_BASE.tar.gz $TARBALL_BASE
 SHA256=`shasum -a 256 $TARBALL_BASE.tar.gz | awk {'print \$1'}`
 cat << EOF > $PLATFORM
 {
+  "channel": "$CHANNEL",
   "version": "$VERSION",
   "sha256": "$SHA256"
 }

@@ -1,23 +1,37 @@
-const {Command, mixins} = require('heroku-cli-command')
-const dirs = require('../../lib/dirs')
-const fs = require('fs-extra')
-const yarn = require('../../mixins/yarn')
-const path = require('path')
-const errors = require('../../lib/errors')
+// @flow
 
-class PluginsInstall extends mixins.mix(Command).with(yarn) {
+import Command from 'cli-engine-command'
+import dirs from '../../dirs'
+import fs from 'fs-extra'
+import yarn from '../../mixins/yarn'
+import path from 'path'
+import errors from '../../errors'
+
+export default class extends yarn(Command) {
+  static topic = 'plugins'
+  static command = 'install'
+  static description = 'Installs a plugin into the CLI'
+  static help = `
+  Example:
+    $ heroku plugins:install heroku-production-status
+  `
+  static args = [
+    {name: 'plugin'}
+  ]
+
   async run () {
-    const plugins = require('../../lib/plugins')
-    if (!this.debugging) this.action(`Installing plugin ${this.args.plugin}`)
+    const plugins = require('../../plugins')
+    if (!this.debugging) this.action.start(`Installing plugin ${this.args.plugin}`)
     await this.setupYarn()
     await this.yarn('add', this.args.plugin)
     try {
+      // flow$ignore
       let plugin = require(dirs.userPlugin(this.args.plugin))
       if (!plugin.commands) throw new Error(`${this.args.plugin} does not appear to be a Heroku CLI plugin`)
       plugins.clearCache(dirs.userPlugin(this.args.plugin))
     } catch (err) {
       errors.logError(err)
-      if (!this.debugging) this.action(`ERROR: uninstalling ${this.args.plugin}`)
+      if (!this.debugging) this.action.start(`ERROR: uninstalling ${this.args.plugin}`)
       this.warn('Run with --debug to see extra information')
       await this.yarn('remove', this.args.plugin)
       throw err
@@ -31,16 +45,3 @@ class PluginsInstall extends mixins.mix(Command).with(yarn) {
     await this.yarn()
   }
 }
-
-PluginsInstall.topic = 'plugins'
-PluginsInstall.command = 'install'
-PluginsInstall.description = 'Installs a plugin into the CLI'
-PluginsInstall.help = `
-Example:
-  $ heroku plugins:install heroku-production-status
-`
-PluginsInstall.args = [
-  {name: 'plugin'}
-]
-
-module.exports = PluginsInstall

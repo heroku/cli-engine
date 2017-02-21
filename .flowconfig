@@ -1,11 +1,13 @@
 [ignore]
-.*/node_modules/nock/.*
 <PROJECT_ROOT>/lib/.*
+<PROJECT_ROOT>/node_modules/.*
 
 [include]
+node_modules/cardinal
 
 [libs]
 
 [options]
 emoji=true
 unsafe.enable_getters_and_setters=true
+suppress_comment= \\(.\\|\n\\)*flow\\$ignore

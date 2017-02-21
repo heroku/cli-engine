@@ -1,9 +1,13 @@
-const {Command} = require('heroku-cli-command')
-const util = require('../util')
-const config = require('../config')
-const screen = require('../screen')
+import Command from 'cli-engine-command'
+import util from '../util'
+import config from '../config'
+import screen from 'cli-engine-command/lib/output/screen'
 
-class Help extends Command {
+export default class extends Command {
+  topic = 'help'
+  description = 'display help'
+  // variableArgs = true
+
   get plugins () { return require('../plugins') }
 
   async run () {
@@ -63,9 +67,3 @@ Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:\n`)
     })(s).trim()
   }
 }
-
-Help.topic = 'help'
-Help.description = 'display help'
-Help.variableArgs = true
-
-module.exports = Help

@@ -1,6 +1,6 @@
 // @flow
 
-import Command from 'heroku-cli-command'
+import Command from 'cli-engine-command'
 import config from '../config'
 
 export default class extends Command {
