@@ -31,6 +31,7 @@
     "flow-typed": "2.0.0",
     "heroku-cli-test": "0.0.2",
     "jest": "18.1.0",
+    "jest-junit": "1.2.0",
     "nock": "9.0.6",
     "rimraf": "2.6.0",
     "standard": "8.6.0",
