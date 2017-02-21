@@ -126,7 +126,7 @@ function registerPlugin (type, parent) {
   }
 }
 
-registerPlugin('builtin')('../commands')
+registerPlugin('builtin')('./commands')
 let core = config.plugins || []
 if (core) core.forEach(registerPlugin('core', config.parent))
 userPlugins().map(p => path.join(dirs.plugins, 'node_modules', p)).forEach(registerPlugin('user'))

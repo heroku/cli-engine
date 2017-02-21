@@ -1,4 +1,2 @@
-.nyc_output
-cli
-dist
-tmp
+coverage
+lib

@@ -1,10 +1,10 @@
 const {Command} = require('heroku-cli-command')
-const util = require('../lib/util')
-const config = require('../lib/config')
-const screen = require('../lib/screen')
+const util = require('../util')
+const config = require('../config')
+const screen = require('../screen')
 
 class Help extends Command {
-  get plugins () { return require('../lib/plugins') }
+  get plugins () { return require('../plugins') }
 
   async run () {
     const argv0 = config.bin

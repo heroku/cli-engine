@@ -1,3 +1,3 @@
-const chai = require('chai')
-chai.use(require('chai-as-promised'))
-chai.should()
+import nock from 'nock'
+
+nock.disableNetConnect()

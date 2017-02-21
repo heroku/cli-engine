@@ -2,10 +2,10 @@
 
 const {Command} = require('heroku-cli-command')
 const path = require('path')
-const dirs = require('../lib/dirs')
+const dirs = require('../dirs')
 const lock = require('rwlockfile')
-const config = require('../lib/config')
-const errors = require('../lib/errors')
+const config = require('../config')
+const errors = require('../errors')
 const fs = require('fs-extra')
 
 class Update extends Command {
