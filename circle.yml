@@ -53,6 +53,7 @@ stages:
       - type: cache-save
         key: cli-engine-{{checksum "package.json"}}
         paths:
+          - /usr/local/share/.cache/yarn
   deploy:
     workDir: ~/cli-engine
     steps:
