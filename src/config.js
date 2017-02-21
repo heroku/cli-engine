@@ -1,3 +1,5 @@
+// @flow
+
 const path = require('path')
 let config = {}
 
@@ -24,6 +26,3 @@ config.init = parent => {
   config.defaultCommand = pjson['cli-engine'].default_command || 'help'
   config.s3 = pjson['cli-engine'].s3 || {}
 }
-config.init()
-
-module.exports = config
