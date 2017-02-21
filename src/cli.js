@@ -7,7 +7,6 @@
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
 import ansi from 'ansi-escapes'
-import legacy from 'cli-engine-command/lib/legacy'
 
 import config from './config'
 import plugins from './plugins'

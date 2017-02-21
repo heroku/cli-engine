@@ -1,11 +1,20 @@
-const {Command, mixins} = require('heroku-cli-command')
-const yarn = require('../../mixins/yarn')
-const dirs = require('../../dirs')
-const fs = require('fs-extra')
+// @flow
 
-class PluginsUninstall extends mixins.mix(Command).with(yarn) {
+import Command from 'cli-engine-command'
+import yarn from '../../mixins/yarn'
+import dirs from '../../dirs'
+import fs from 'fs-extra'
+
+export default class extends yarn(Command) {
+  static topic = 'plugins'
+  static command = 'uninstall'
+  static args = [
+    {name: 'plugin'}
+  ]
+  static aliases = ['plugins:unlink']
+
   async run () {
-    if (!this.debugging) this.action(`Uninstalling plugin ${this.args.plugin}`)
+    if (!this.debugging) this.action.start(`Uninstalling plugin ${this.args.plugin}`)
     if (fs.existsSync(dirs.userPlugin(this.args.plugin))) {
       await this.yarn('remove', this.args.plugin)
     } else {
@@ -14,14 +23,5 @@ class PluginsUninstall extends mixins.mix(Command).with(yarn) {
     this.plugins.clearCache(dirs.userPlugin(this.args.plugin))
   }
 
-  get plugins () { return require('../../lib/plugins') }
+  get plugins () { return require('../../plugins') }
 }
-
-PluginsUninstall.topic = 'plugins'
-PluginsUninstall.command = 'uninstall'
-PluginsUninstall.args = [
-  {name: 'plugin'}
-]
-PluginsUninstall.aliases = ['plugins:unlink']
-
-module.exports = PluginsUninstall
