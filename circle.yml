@@ -61,6 +61,7 @@ stages:
       - type: deploy
         shell: /bin/bash
         command: |
+          set -exu
           if [ "${CIRCLE_BRANCH}" == "master" ];
             cd example && npm run build 
           fi
