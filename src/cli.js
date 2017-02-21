@@ -1,14 +1,10 @@
 // @flow
 
-/* globals
-   $Shape
-*/
-
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
 import ansi from 'ansi-escapes'
 
-import config from './config'
+import ConfigOptions from 'cli-engine-command/config'
 import plugins from './plugins'
 import errors from './errors'
 
@@ -31,8 +27,7 @@ process.on('uncaughtException', err => {
   onexit({exit: true})
 })
 
-export default async function main (c: $Shape<config>) {
-  Object.assign(config, c)
+export default async function main (config: ConfigOptions) {
   let command
   try {
     const update = new Update([], config)
@@ -40,7 +35,7 @@ export default async function main (c: $Shape<config>) {
     let Command
     command = plugins.commands[argv[1] || config.defaultCommand]
     if (command) Command = command.fetch()
-    if (!Command) Command = NoCommand
+    if (!Command) require('./not_found')(config)
     command = new Command(argv, config)
     await command.init()
     await command.run()
