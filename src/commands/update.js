@@ -1,54 +1,63 @@
-'use strict'
+// @flow
+/* globals
+   stream$Readable
+*/
+import Command from 'cli-engine-command'
+import path from 'path'
+import dirs from '../dirs'
+import lock from 'rwlockfile'
+import config from '../config'
+import errors from '../errors'
+import fs from 'fs-extra'
 
-const {Command} = require('heroku-cli-command')
-const path = require('path')
-const dirs = require('../dirs')
-const lock = require('rwlockfile')
-const config = require('../config')
-const errors = require('../errors')
-const fs = require('fs-extra')
+type Manifest = {
+  version: string,
+  channel: string,
+  sha256: string
+}
 
 class Update extends Command {
   async run () {
     if (config.disableUpdate) this.warn(config.disableUpdate)
     else {
-      this.action(`${config.name}: Updating CLI`)
+      this.action.start(`${config.name}: Updating CLI`)
       let channel = this.args.channel || config.channel
-      this.manifest = await this.fetchManifest(channel)
-      if (config.version === this.manifest.version && channel === config.channel) {
-        this.action.done(`already on latest version: ${config.version}`)
+      let manifest = await this.fetchManifest(channel)
+      if (config.version === manifest.version && channel === config.channel) {
+        this.action.stop(`already on latest version: ${config.version}`)
       } else {
-        this.action(`${config.name}: Updating CLI to ${this.color.green(this.manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
-        await this.update(channel)
-        this.action.done()
+        this.action.start(`${config.name}: Updating CLI to ${this.color.green(manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
+        await this.update(manifest)
+        this.action.stop()
       }
     }
-    this.action(`${config.name}: Updating plugins`)
+    this.action.start(`${config.name}: Updating plugins`)
   }
 
-  async fetchManifest (channel) {
+  async fetchManifest (channel: string): Promise<Manifest> {
     try {
       let url = `https://${config.s3.host}/${config.name}/channels/${channel}/${process.platform}-${process.arch}`
-      return await this.http.get(url)
+      let manifest = await this.http.get(url)
+      return ((manifest: any): Promise<Manifest>)
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
     }
   }
 
-  async update (channel) {
-    let url = `https://${config.s3.host}/${config.name}/channels/${channel}/${this.base}.tar.gz`
-    let stream = await this.http.get(url, {raw: true})
+  async update (manifest: Manifest) {
+    let url = `https://${config.s3.host}/${config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
+    let stream = await this.http.stream(url)
     let dir = path.join(dirs.data, 'cli')
     let tmp = path.join(dirs.data, 'cli_tmp')
     await this.extract(stream, tmp)
     await lock.write(dirs.updatelockfile, {skipOwnPid: true})
     fs.removeSync(dir)
-    fs.renameSync(path.join(tmp, this.base), dir)
+    fs.renameSync(path.join(tmp, this.base(manifest)), dir)
     fs.removeSync(tmp)
   }
 
-  extract (stream, dir) {
+  extract (stream: stream$Readable, dir: string) {
     const zlib = require('zlib')
     const tar = require('tar-stream')
 
@@ -82,8 +91,8 @@ class Update extends Command {
     })
   }
 
-  get base () {
-    return `${config.name}-v${this.manifest.version}-${process.platform}-${process.arch}`
+  base (manifest: Manifest): string {
+    return `${config.name}-v${manifest.version}-${process.platform}-${process.arch}`
   }
 
   async restartCLI () {

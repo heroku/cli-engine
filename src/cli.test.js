@@ -1,5 +1,3 @@
-// @flow
-
 /* globals
    test
    beforeEach

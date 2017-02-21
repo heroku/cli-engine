@@ -749,6 +749,13 @@ babel-register@^6.23.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.2"
 
+babel-runtime@6.23.0:
+  version "6.23.0"
+  resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.23.0.tgz#0a9489f144de70efb3ce4300accdb329e2fc543b"
+  dependencies:
+    core-js "^2.4.0"
+    regenerator-runtime "^0.10.0"
+
 babel-runtime@^6.0.0, babel-runtime@^6.18.0, babel-runtime@^6.22.0:
   version "6.22.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.22.0.tgz#1cf8b4ac67c77a4ddb0db2ae1f74de52ac4ca611"
@@ -990,6 +997,22 @@ cli-cursor@^2.1.0:
   resolved "https://registry.yarnpkg.com/cli-cursor/-/cli-cursor-2.1.0.tgz#b35dac376479facc3e94747d41d0d0f5238ffcb5"
   dependencies:
     restore-cursor "^2.0.0"
+
+cli-engine-command@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.0.0.tgz#b97fee5c9d7e71be1b61b619abba97baedf42204"
+  dependencies:
+    ansi-escapes "1.4.0"
+    babel-runtime "6.23.0"
+    cardinal "1.0.0"
+    chalk "1.1.3"
+    got "6.7.1"
+    heroku-client "3.0.1"
+    http-call "1.0.11"
+    lodash.maxby "4.6.0"
+    netrc "0.1.4"
+    string "3.3.3"
+    supports-color "3.2.3"
 
 cli-table@^0.3.1:
   version "0.3.1"
@@ -1864,21 +1887,6 @@ hawk@~3.1.3:
     hoek "2.x.x"
     sntp "1.x.x"
 
-heroku-cli-command@1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/heroku-cli-command/-/heroku-cli-command-1.0.3.tgz#3f6ab995624b155d5d3f92cc11e72c19045f204b"
-  dependencies:
-    ansi-escapes "1.4.0"
-    cardinal "1.0.0"
-    chalk "1.1.3"
-    got "6.7.1"
-    heroku-client "3.0.1"
-    http-call "1.0.7"
-    lodash.maxby "4.6.0"
-    netrc "0.1.4"
-    string "3.3.3"
-    supports-color "3.2.3"
-
 heroku-cli-test@0.0.2:
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/heroku-cli-test/-/heroku-cli-test-0.0.2.tgz#680c6df37f5c54f5eead1535f0999644259baa77"
@@ -1912,9 +1920,11 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.0.7.tgz#1f101dde54cbbb7426c1848fbd410a63f0214e3c"
+http-call@1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.0.11.tgz#5a7c106651ab07c00f0a941d82e2a7fc617ca545"
+  dependencies:
+    babel-runtime "6.23.0"
 
 http-signature@~1.1.0:
   version "1.1.1"
@@ -3393,15 +3403,15 @@ right-align@^0.1.1:
   dependencies:
     align-text "^0.1.1"
 
-rimraf@2, rimraf@^2.2.8, rimraf@^2.4.3, rimraf@^2.4.4, rimraf@^2.5.0, rimraf@~2.5.1, rimraf@~2.5.4:
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.5.4.tgz#96800093cbf1a0c86bd95b4625467535c29dfa04"
+rimraf@2, rimraf@2.6.0, rimraf@^2.2.8, rimraf@^2.4.3, rimraf@^2.4.4, rimraf@^2.5.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.6.0.tgz#89b8a0fe432b9ff9ec9a925a00b6cdb3a91bbada"
   dependencies:
     glob "^7.0.5"
 
-rimraf@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.6.0.tgz#89b8a0fe432b9ff9ec9a925a00b6cdb3a91bbada"
+rimraf@~2.5.1, rimraf@~2.5.4:
+  version "2.5.4"
+  resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.5.4.tgz#96800093cbf1a0c86bd95b4625467535c29dfa04"
   dependencies:
     glob "^7.0.5"
 
@@ -3656,13 +3666,13 @@ strip-json-comments@~2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/strip-json-comments/-/strip-json-comments-2.0.1.tgz#3c531942e908c2697c0ec344858c286c7ca0a60a"
 
-supports-color@3.1.2:
+supports-color@3.1.2, supports-color@^3.1.2:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-3.1.2.tgz#72a262894d9d408b956ca05ff37b2ed8a6e2a2d5"
   dependencies:
     has-flag "^1.0.0"
 
-supports-color@3.2.3, supports-color@^3.1.2:
+supports-color@3.2.3:
   version "3.2.3"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-3.2.3.tgz#65ac0504b3954171d8a64946b2ae3cbb8a5f54f6"
   dependencies:

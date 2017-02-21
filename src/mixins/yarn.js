@@ -1,6 +1,12 @@
-const dirs = require('../lib/dirs')
-const fs = require('fs-extra')
-const path = require('path')
+// @flow
+/* globals
+   Class
+*/
+
+import dirs from '../dirs'
+import fs from 'fs-extra'
+import path from 'path'
+import type Command from 'cli-engine-command'
 
 function deleteYarnRoadrunnerCache () {
   function getDirectory (category) {
@@ -26,9 +32,9 @@ function deleteYarnRoadrunnerCache () {
   } catch (err) {}
 }
 
-module.exports = superclass => {
+export default (superclass: Class<Command>) => {
   return class extends superclass {
-    yarn (...args) {
+    yarn (...args: string[]) {
       const execa = require('execa')
       const cwd = dirs.plugins
       const stdio = this.debugging ? 'inherit' : null
