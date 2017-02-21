@@ -1,41 +1,65 @@
 ---
-machine:
-  node:
-    version: 7.5.0
-  environment:
-    PATH: "${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin:${PATH}"
+version: 2
+executorType: docker
+containerInfo:
+  - image: dickeyxxx/cli-engine:latest
+stages:
+  build:
+    workDir: ~/cli-engine
+    environment:
+      - CIRCLE_PROJECT_USERNAME: heroku
+      - CIRCLE_PROJECT_REPONAME: cli-engine
+      - HEROKU_DEBUG: 1
+    steps:
+      - type: test-results-store
+        path: /tmp/test-results
+      - type: checkout
+      - type: cache-restore
+        key: cli-engine-{{checksum "package.json"}}
+      - type: shell
+        command: |
+          set -exu
 
-dependencies:
-  cache_directories:
-    - ~/.cache/yarn
-    - example/node_modules
-  override:
-    - |
-      if [ ! -f ~/.cache/yarn/yarn-v0.20.3.tar.gz ]; then
-        wget -O ~/.cache/yarn/yarn-v0.20.3.tar.gz https://github.com/yarnpkg/yarn/releases/download/v0.20.3/yarn-v0.20.3.tar.gz
-      fi &&
-      tar xf ~/.cache/yarn/yarn-v0.20.3.tar.gz && rm -rf ~/.yarn && mv dist ~/.yarn &&
-      yarn --prefer-offline
-    - cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
+          # setup yarn
+          yarn --prefer-offline --pure-lockfile
+          cd example
+          yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
+          cd ..
 
-test:
-  override:
-    - jest --coverage
-    - flow
-    - standard
-    - HEROKU_DEBUG=1 ./example/bin/run version && ./example/bin/run help && ./example/bin/run cli:test
-    - cd example && npm run build linux-x64 beta
-  post:
-    - bash <(curl -s https://codecov.io/bash)
+          # test project
+          JEST_JUNIT_OUTPUT=/tmp/test-results/jest.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
+          ./node_modules/.bin/flow check
+          ./node_modules/.bin/standard
+          bash <(curl -s https://codecov.io/bash)
+          ./bin/run version
 
-deployment:
-  beta:
-    branch: master
-    owner: heroku
-    commands:
-      - cd example && npm run release beta
-  stable:
-    tag: /v[0-9]+(\.[0-9]+)*/
-    owner: heroku
-    commands:
-      - cd example && npm run release stable
+          # test/build example project
+          cd example
+          ./bin/run version
+          ./bin/run help
+          ./bin/run cli:test
+          yarn run build linux-x64 beta
+          cd ..
+
+          # show files in npm pack
+          npm pack
+          tar xvzf cli-engine*.tgz
+          rm -rf package
+          mkdir -p /tmp/artifacts
+          mv cli-engine*.tgz /tmp/artifacts/cli-engine.tgz
+      - type: artifacts-store
+        path: /tmp/artifacts
+        destination: build
+      - type: cache-save
+        key: cli-engine-{{checksum "package.json"}}
+        paths:
+  deploy:
+    workDir: ~/cli-engine
+    steps:
+      - /usr/local/share/.cache/yarn
+      - type: deploy
+        shell: /bin/bash
+        command: |
+          if [ "${CIRCLE_BRANCH}" == "master" ];
+            cd example && npm run build 
+          fi
