@@ -11,8 +11,6 @@ stages:
       - CIRCLE_PROJECT_REPONAME: cli-engine
       - HEROKU_DEBUG: 1
     steps:
-      - type: test-results-store
-        path: /tmp/test-results
       - type: checkout
       - type: cache-restore
         key: cli-engine-{{checksum "package.json"}}
@@ -47,6 +45,8 @@ stages:
           rm -rf package
           mkdir -p /tmp/artifacts
           mv cli-engine*.tgz /tmp/artifacts/cli-engine.tgz
+      - type: test-results-store
+        path: /tmp/test-results
       - type: artifacts-store
         path: /tmp/artifacts
         destination: build
