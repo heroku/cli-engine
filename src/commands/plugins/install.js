@@ -1,13 +1,11 @@
 // @flow
 
 import Command from 'cli-engine-command'
-import dirs from '../../dirs'
-import fs from 'fs-extra'
-import yarn from '../../mixins/yarn'
+import Yarn from '../../yarn'
+import Plugins from '../../plugins'
 import path from 'path'
-import errors from '../../errors'
 
-export default class extends yarn(Command) {
+export default class PluginsInstall extends Command {
   static topic = 'plugins'
   static command = 'install'
   static description = 'Installs a plugin into the CLI'
@@ -20,7 +18,7 @@ export default class extends yarn(Command) {
   ]
 
   async run () {
-    const plugins = require('../../plugins')
+    const yarn = new Yarn(this.config)
     if (!this.debugging) this.action.start(`Installing plugin ${this.args.plugin}`)
     await this.setupYarn()
     await this.yarn('add', this.args.plugin)

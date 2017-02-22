@@ -2,49 +2,30 @@
 
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
-import ansi from 'ansi-escapes'
+import Base from 'cli-engine-command'
+import Plugins from './plugins'
 
-import ConfigOptions from 'cli-engine-command/config'
-import plugins from './plugins'
-import errors from './errors'
+import Updater from './updater'
+import NotFound from './not_found'
 
-import NoCommand from './commands/no_command'
-import Update from './commands/update'
+export default class Main extends Base {
+  async run () {
+    process.on('exit', () => this.showCursor())
+    process.on('SIGINT', err => this.error(err))
+    process.on('uncaughtException', err => this.error(err))
+    process.on('unhandledRejection', err => this.error(err))
 
-if (module.parent) config.init(module.parent)
-let argv = process.argv.slice(2)
-argv.unshift(config.bin)
-
-function onexit (options) {
-  if (process.stderr.isTTY) process.stderr.write(ansi.cursorShow)
-  if (options.exit) process.exit(1)
-}
-
-process.on('exit', onexit)
-process.on('SIGINT', onexit.bind(null, {exit: true}))
-process.on('uncaughtException', err => {
-  errors.logError(err)
-  onexit({exit: true})
-})
-
-export default async function main (config: ConfigOptions) {
-  let command
-  try {
-    const update = new Update([], config)
-    await update.autoupdate()
-    let Command
-    command = plugins.commands[argv[1] || config.defaultCommand]
-    if (command) Command = command.fetch()
-    if (!Command) require('./not_found')(config)
-    command = new Command(argv, config)
-    await command.init()
-    await command.run()
-    await command.done()
+    const updater = new Updater(this.config)
+    const plugins = new Plugins(this.config)
+    await updater.autoupdate()
+    let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
+    if (!Command) return new NotFound(this.config).run()
+    let command = new Command(this.config)
+    try {
+      await command.init()
+      await command.run()
+      await command.done()
+    } catch (err) { command.error(err) }
     process.exit(0)
-  } catch (err) {
-    errors.logError(err)
-    if (command && command.error) command.error(err)
-    else console.error(err.stack)
-    process.exit(1)
   }
 }

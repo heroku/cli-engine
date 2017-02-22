@@ -1,11 +1,12 @@
+// @flow
+
 import Command from 'cli-engine-command'
 import util from '../util'
-import config from '../config'
-import screen from 'cli-engine-command/lib/output/screen'
+import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 
-export default class extends Command {
-  topic = 'help'
-  description = 'display help'
+export default class Help extends Command {
+  static topic = 'help'
+  static description = 'display help'
   // variableArgs = true
 
   get plugins () { return require('../plugins') }
@@ -62,7 +63,7 @@ Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:\n`)
 
   linewrap (length, s) {
     const linewrap = require('../lib/linewrap')
-    return linewrap(length, screen.stdtermwidth, {
+    return linewrap(length, stdtermwidth, {
       skipScheme: 'ansi-color'
     })(s).trim()
   }

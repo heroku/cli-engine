@@ -3,7 +3,7 @@
 import Command from 'cli-engine-command'
 import path from 'path'
 
-export default class extends Command {
+export default class PluginsLink extends Command {
   static topic = 'plugins'
   static command = 'link'
   static args = [

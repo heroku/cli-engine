@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -eu
 
 get_script_dir () {
 	SOURCE="${BASH_SOURCE[0]}"
@@ -15,4 +15,4 @@ get_script_dir () {
 }
 DIR=$(get_script_dir)
 
-babel-node $DIR/run.js $*
+BINPATH=$DIR/run babel-node -- $DIR/run.js $*
