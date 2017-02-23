@@ -3,7 +3,7 @@
    Class
 */
 
-import Command, {Config, Base, type Flag, type Arg} from 'cli-engine-command'
+import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
 import klaw from 'klaw-sync'
 
@@ -12,20 +12,28 @@ type PluginType = | "builtin" | "core"
 type CachedCommand = {
   id: string,
   topic: string,
-  command: string,
+  command?: string,
   aliases: string[],
   args: Arg[],
   flags: Flag[],
-  description: string,
-  help: string,
-  usage: string,
+  description?: string,
+  help?: string,
+  usage?: string,
   hidden: boolean,
   fetch: () => Class<Command>
 }
 
+type CachedTopic = {
+  topic: string,
+  description?: string,
+  hidden: boolean,
+  fetch: () => Class<Topic>
+}
+
 type CachedPlugin = {
   name: string,
-  commands: CachedCommand[]
+  commands: CachedCommand[],
+  topics: CachedTopic[]
 }
 
 type CacheData = {
@@ -86,10 +94,23 @@ export class Plugin extends Base {
     if (c) return c.fetch()
   }
 
+  findTopic (name: string): ?Class<Topic> {
+    let t = this.topics.find(t => t.topic === name)
+    if (t) return t.fetch()
+  }
+
   get commands (): CachedCommand[] {
     return this.fetch().commands
     .map(c => {
-      c.fetch = this.fetchCommand(c)
+      c.fetch = this.fetchCommand(c.topic, c.command)
+      return c
+    })
+  }
+
+  get topics (): CachedTopic[] {
+    return this.fetch().topics
+    .map(c => {
+      c.fetch = this.fetchTopic(c.topic, c.hidden, c.description)
       return c
     })
   }
@@ -104,17 +125,33 @@ export class Plugin extends Base {
       this.warn(err)
       return {
         name: this.path,
-        commands: []
+        commands: [],
+        topics: []
       }
     }
   }
 
-  fetchCommand (c: any) {
+  fetchCommand (topic: string, command: ?string) {
     return () => {
       return this.require()
         .commands
         .map(undefault)
-        .find(d => c.topic === d.topic && c.command === d.command)
+        .find(d => topic === d.topic && command === d.command)
+    }
+  }
+
+  fetchTopic (topic: string, hidden: boolean = false, description?: string) {
+    return () => {
+      let t = this.require()
+        .topics
+        .map(undefault)
+        .find(d => topic === d.topic)
+      if (typeof t === 'function') return t
+      return class extends Topic {
+        static topic = t ? (t.topic || t.name) : topic
+        static descrition = t ? t.description : description
+        static hidden = t ? t.hidden : hidden
+      }
     }
   }
 
@@ -133,10 +170,26 @@ export class Plugin extends Base {
       usage: c.usage,
       hidden: c.hidden,
       aliases: c.aliases,
-      fetch: this.fetchCommand(c)
+      fetch: this.fetchCommand(c.topic, c.command)
+    }))
+    const topics = (m.topics || (m.topic ? [m.topic] : []))
+    .map(t => ({
+      topic: t.topic || t.name,
+      description: t.description,
+      hidden: t.hidden || false,
+      fetch: this.fetchTopic(t.topic || t.name, t.description, t.hidden || false)
     }))
 
-    const plugin = {name, commands}
+    for (let command of commands) {
+      if (topics.find(t => t.topic === command.topic)) continue
+      topics.push({
+        topic: command.topic,
+        hidden: true,
+        fetch: this.fetchTopic(command.topic, true)
+      })
+    }
+
+    const plugin = {name, commands, topics}
     this.cache.updatePlugin(this.path, plugin)
     return plugin
   }
@@ -166,6 +219,31 @@ export default class Plugins extends Base {
     }
     this.cache.save()
     return c
+  }
+
+  commandsForTopic (topic: string): Class<Command>[] {
+    let commands = this.plugins.reduce((t, p) => {
+      return t.concat(p.commands.filter(c => c.topic === topic).map(c => c.fetch()))
+    }, [])
+    this.cache.save()
+    return commands
+  }
+
+  findTopic (cmd: string): ?Class<Topic> {
+    let name = cmd.split(':')[0]
+    let t
+    for (let plugin of this.plugins) {
+      t = plugin.findTopic(name)
+      if (t) break
+    }
+    this.cache.save()
+    return t
+  }
+
+  get topics (): CachedTopic[] {
+    let topics = this.plugins.reduce((t, p) => t.concat(p.topics), [])
+    this.cache.save()
+    return topics
   }
 
   // _requirePlugin (plugin) {
