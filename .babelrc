@@ -4,6 +4,8 @@
   ],
   "plugins": [
     "transform-flow-strip-types",
-    "transform-class-properties"
+    "transform-async-to-generator",
+    "transform-class-properties",
+    "transform-runtime"
   ]
 }
