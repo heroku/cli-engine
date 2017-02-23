@@ -11,6 +11,7 @@ stages:
       - CIRCLE_PROJECT_REPONAME: cli-engine
       - HEROKU_DEBUG: 1
     steps:
+      - type: add-ssh-keys
       - type: checkout
       - type: cache-restore
         key: cli-engine-{{checksum "package.json"}}
