@@ -10,7 +10,7 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "1.4.0",
-    "cli-engine-command": "2.0.0",
+    "cli-engine-command": "heroku/cli-engine-command",
     "execa": "0.6.0",
     "klaw-sync": "1.1.2",
     "lodash.maxby": "4.6.0",
