@@ -21,11 +21,7 @@ export default class Main extends Base {
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(this.config).run()
     let command = new Command(this.config)
-    try {
-      await command.init()
-      await command.run()
-      await command.done()
-    } catch (err) { command.error(err) }
-    process.exit(0)
+    try { await command._run() } catch (err) { command.error(err) }
+    this.exit(0)
   }
 }

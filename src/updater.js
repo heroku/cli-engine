@@ -86,7 +86,7 @@ export default class extends Base {
     lock.unreadSync(this.updatelockfile)
     const {spawnSync} = require('child_process')
     const {status} = spawnSync(this.config.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
-    process.exit(status)
+    this.exit(status)
   }
 
   get autoupdateNeeded () {
@@ -109,8 +109,8 @@ export default class extends Base {
       let fd = this.fs.openSync(this.autoupdatelogfile, 'a')
       const {spawn} = require('child_process')
       spawn(this.config.binPath, ['update'], {stdio: [null, fd, fd], detached: true})
-      .on('error', e => this.warn(e))
-    } catch (e) { this.warn(e) }
+      .on('error', e => this.warn(e, 'autoupdate:'))
+    } catch (e) { this.warn(e, 'autoupdate:') }
   }
 
   async warnIfUpdateAvailable () {
@@ -118,14 +118,14 @@ export default class extends Base {
     let local = this.config.version.split('.')
     let remote = manifest.version.split('.')
     if (local[0] !== remote[0] || local[1] !== remote[1]) {
-      console.error(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
+      this.stderr.log(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
     }
   }
 
   async checkIfUpdating () {
     const lock = require('rwlockfile')
     if (await lock.hasWriter(this.updatelockfile)) {
-      console.error(`${this.config.name}: warning: update in process`)
+      this.warn(`${this.config.name}: warning: update in process`)
       await this.restartCLI()
     } else await lock.read(this.updatelockfile)
   }

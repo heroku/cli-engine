@@ -15,4 +15,4 @@ get_script_dir () {
 }
 DIR=$(get_script_dir)
 
-BINPATH=$DIR/run babel-node -- $DIR/run.js $*
+CLI_BINPATH=$DIR/run babel-node -- $DIR/run.js $*
