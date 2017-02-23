@@ -107,6 +107,7 @@ export default class extends Base {
       if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
       let fd = this.fs.openSync(this.autoupdatelogfile, 'a')
+      if (!this.config.binPath) return
       const {spawn} = require('child_process')
       spawn(this.config.binPath, ['update'], {stdio: [null, fd, fd], detached: true})
       .on('error', e => this.warn(e, 'autoupdate:'))

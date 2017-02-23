@@ -1,9 +1,8 @@
 [ignore]
 <PROJECT_ROOT>/lib/.*
-<PROJECT_ROOT>/node_modules/.*
+.*/node_modules/nock.*
 
 [include]
-node_modules/cardinal
 
 [libs]
 
