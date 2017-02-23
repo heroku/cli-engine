@@ -5,7 +5,6 @@
 
 import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
-import klaw from 'klaw-sync'
 
 type PluginType = | "builtin" | "core"
 
@@ -20,18 +19,17 @@ type CachedCommand = {
   help?: string,
   usage?: string,
   hidden: boolean,
-  fetch: () => Class<Command>
 }
 
 type CachedTopic = {
   topic: string,
   description?: string,
   hidden: boolean,
-  fetch: () => Class<Topic>
 }
 
 type CachedPlugin = {
   name: string,
+  version: string,
   commands: CachedCommand[],
   topics: CachedTopic[]
 }
@@ -83,36 +81,47 @@ export class Plugin extends Base {
     this.cache = cache
     this.type = type
     this.path = path
+    let p = this.fetch()
+    this.name = p.name
+    this.version = p.version
+    this.commands = p.commands
+    this.topics = p.topics
   }
 
   type: PluginType
   path: string
   cache: Cache
+  name: string
+  version: string
+  commands: CachedCommand[]
+  topics: CachedTopic[]
 
   findCommand (cmd: string): ?Class<Command> {
     let c = this.commands.find(c => c.id === cmd || c.aliases.includes(cmd))
-    if (c) return c.fetch()
+    if (!c) return
+    let {topic, command} = c
+    return this.require()
+      .commands
+      .map(undefault)
+      .find(d => topic === d.topic && command === d.command)
   }
 
   findTopic (name: string): ?Class<Topic> {
     let t = this.topics.find(t => t.topic === name)
-    if (t) return t.fetch()
+    if (!t) return
+    let Topic = this.require()
+      .topics
+      .find(t => [t.topic, t.name].includes(name))
+    if (typeof Topic === 'function') return Topic
+    return this.buildTopic(t)
   }
 
-  get commands (): CachedCommand[] {
-    return this.fetch().commands
-    .map(c => {
-      c.fetch = this.fetchCommand(c.topic, c.command)
-      return c
-    })
-  }
-
-  get topics (): CachedTopic[] {
-    return this.fetch().topics
-    .map(c => {
-      c.fetch = this.fetchTopic(c.topic, c.hidden, c.description)
-      return c
-    })
+  buildTopic (t: CachedTopic): Class<Topic> {
+    return class extends Topic {
+      static topic = t.topic
+      static descrition = t.description
+      static hidden = t.hidden
+    }
   }
 
   fetch (): CachedPlugin {
@@ -125,38 +134,16 @@ export class Plugin extends Base {
       this.warn(err)
       return {
         name: this.path,
+        version: '',
         commands: [],
         topics: []
       }
     }
   }
 
-  fetchCommand (topic: string, command: ?string) {
-    return () => {
-      return this.require()
-        .commands
-        .map(undefault)
-        .find(d => topic === d.topic && command === d.command)
-    }
-  }
-
-  fetchTopic (topic: string, hidden: boolean = false, description?: string) {
-    return () => {
-      let t = this.require()
-        .topics
-        .map(undefault)
-        .find(d => topic === d.topic)
-      if (typeof t === 'function') return t
-      return class extends Topic {
-        static topic = t ? (t.topic || t.name) : topic
-        static descrition = t ? t.description : description
-        static hidden = t ? t.hidden : hidden
-      }
-    }
-  }
-
   updatePlugin (m: any): CachedPlugin {
     const name = this.type === 'builtin' ? 'builtin' : this.pjson().name
+    const version = this.type === 'builtin' ? this.config.version : this.pjson().version
     const commands = m.commands
     .map(undefault)
     .map(c => ({
@@ -169,27 +156,24 @@ export class Plugin extends Base {
       help: c.help,
       usage: c.usage,
       hidden: c.hidden,
-      aliases: c.aliases,
-      fetch: this.fetchCommand(c.topic, c.command)
+      aliases: c.aliases
     }))
     const topics = (m.topics || (m.topic ? [m.topic] : []))
     .map(t => ({
       topic: t.topic || t.name,
       description: t.description,
-      hidden: t.hidden || false,
-      fetch: this.fetchTopic(t.topic || t.name, t.description, t.hidden || false)
+      hidden: t.hidden || false
     }))
 
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
       topics.push({
         topic: command.topic,
-        hidden: true,
-        fetch: this.fetchTopic(command.topic, true)
+        hidden: true
       })
     }
 
-    const plugin = {name, commands, topics}
+    const plugin = {name, version, commands, topics}
     this.cache.updatePlugin(this.path, plugin)
     return plugin
   }
@@ -197,7 +181,7 @@ export class Plugin extends Base {
   // flow$ignore
   require (): any { return require(this.path) }
   // flow$ignore
-  pjson (): {name: string} { return require(path.join(this.path, 'package.json')) }
+  pjson (): {name: string, version: string} { return require(path.join(this.path, 'package.json')) }
 }
 
 export default class Plugins extends Base {
@@ -206,181 +190,42 @@ export default class Plugins extends Base {
     this.config = config
     this.cache = new Cache(config)
     this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
+    this.cache.save()
   }
 
   plugins: Plugin[]
   cache: Cache
 
+  list () {
+    return this.plugins
+  }
+
   findCommand (cmd: string): ?Class<Command> {
-    let c
     for (let plugin of this.plugins) {
-      c = plugin.findCommand(cmd)
-      if (c) break
+      let c = plugin.findCommand(cmd)
+      if (c) return c
     }
-    this.cache.save()
-    return c
   }
 
   commandsForTopic (topic: string): Class<Command>[] {
-    let commands = this.plugins.reduce((t, p) => {
-      return t.concat(p.commands.filter(c => c.topic === topic).map(c => c.fetch()))
+    return this.plugins.reduce((t, p) => {
+      return t.concat(p.commands
+        .filter(c => c.topic === topic)
+        .map(c => (p.findCommand(c.id): any)))
     }, [])
-    this.cache.save()
-    return commands
   }
 
   findTopic (cmd: string): ?Class<Topic> {
     let name = cmd.split(':')[0]
-    let t
     for (let plugin of this.plugins) {
-      t = plugin.findTopic(name)
-      if (t) break
+      let t = plugin.findTopic(name)
+      if (t) return t
     }
-    this.cache.save()
-    return t
   }
 
   get topics (): CachedTopic[] {
-    let topics = this.plugins.reduce((t, p) => t.concat(p.topics), [])
-    this.cache.save()
-    return topics
+    return this.plugins.reduce((t, p) => t.concat(p.topics), [])
   }
-
-  // _requirePlugin (plugin) {
-  //   if (!cache.plugins[plugin] ||
-  //     (type === 'linked' && linkedPluginOutdated(plugin)) ||
-  //     (process.env.HEROKU_DEV === '1' && ['builtin', 'core'].includes(type))) {
-  //     let info = r(plugin)
-  //     let topics = info.topics ? info.topics : (info.topic ? [info.topic] : [])
-  //     let pjson = type === 'builtin'
-  //       ? {}
-  //       : r(path.join(plugin, 'package.json'))
-  //     cache.plugins[plugin] = {
-  //       plugin,
-  //       version: pjson.version,
-  //       name: pjson.name,
-  //       type,
-  //       updated_at: new Date(),
-  //       topics: topics.map(t => ({
-  //         topic: t.topic || t.name,
-  //         description: t.description,
-  //         hidden: t.hidden
-  //       })),
-  //       commands: info.commands.map(c => ({
-  //         topic: c.topic,
-  //         command: c.command,
-  //         description: c.description,
-  //         args: c.args,
-  //         flags: c.flags,
-  //         help: c.help,
-  //         aliases: c.aliases,
-  //         usage: c.usage,
-  //         hidden: c.hidden
-  //       }))
-  //     }
-  //     cacheUpdated = true
-  //   }
-  //   // if (!Command._version) Command = legacy(Command)
-  //   cache.plugins[plugin].fetch = () => r(plugin)
-  //   for (let t of cache.plugins[plugin].topics) t.fetch = () => (r(plugin).topics || [r(plugin).topic]).find(r => r.topic === t.topic)
-  //   for (let c of cache.plugins[plugin].commands) c.fetch = () => r(plugin).commands.find(r => r.topic === c.topic && r.command === c.command)
-  //   return cache.plugins[plugin]
-  // }
-
-  // _linkedPluginOutdated (plugin) {
-  //   const max = require('lodash.maxby')
-  //   let files = klaw(plugin, {nodir: true, ignore: ['.git', 'node_modules']})
-  //   const cur = new Date(max(files, 'stats.mtime').stats.mtime)
-  //   const last = new Date(cache.plugins[plugin].updated_at)
-  //   return cur > last
-  // }
-
-
-  // _registerTopic (topic) {
-  //   let name = topic.topic || topic.name
-  //   let current = exports.topics[name]
-  //   if (current) {
-  //     current.description = current.description || topic.description
-  //   } else {
-  //     exports.topics[name] = topic
-  //   }
-  // }
-
-  // _registerCommand (command) {
-  //   if (!command.topic) return
-  //   exports.commandList.push(command)
-  //   let names = command.command ? [`${command.topic}:${command.command}`] : [command.topic]
-  //   names = names.concat(command.aliases || [])
-  //   if (command.default) names.push(command.topic)
-  //   for (let name of names) {
-  //     if (exports.commands[name]) console.error(`WARNING: command ${name} is already defined`)
-  //     exports.commands[name] = command
-  //   }
-  // }
 
   config: Config
 }
-
-// function userPlugins () {
-//   try {
-//     let pjson = fs.readJSONSync(path.join(dirs.plugins, 'package.json'))
-//     return Object.keys(pjson.dependencies || {})
-//   } catch (err) {
-//     if (err.code === 'ENOENT') return []
-//     throw err
-//   }
-// }
-
-// exports.commandList = []
-// exports.commands = {}
-// exports.topics = {}
-
-// try {
-//   cache = fs.readJSONSync(cacheFile)
-//   if (cache.version !== config.version) cache = {version: config.version, plugins: {}}
-// } catch (err) {
-//   if (err.code !== 'ENOENT') throw err
-// }
-// function savePluginCache () {
-//   fs.writeJSONSync(cacheFile, cache)
-// }
-
-// let linkedPlugins = {plugins: {}}
-// try {
-//   linkedPlugins = fs.readJSONSync(dirs.linkedPlugins)
-// } catch (err) {
-//   if (err.code !== 'ENOENT') throw err
-// }
-
-
-// let core = config.plugins || []
-// if (core) core.forEach(registerPlugin('core', config.parent))
-// userPlugins().map(p => path.join(dirs.plugins, 'node_modules', p)).forEach(registerPlugin('user'))
-// Object.keys(linkedPlugins.plugins).map(k => linkedPlugins.plugins[k]).forEach(registerPlugin('linked'))
-
-// exports.commandList.sort(util.compare('topic', 'command'))
-// if (cacheUpdated) savePluginCache()
-
-// exports.clearCache = plugin => {
-//   delete cache.plugins[plugin]
-//   savePluginCache()
-// }
-
-// exports.list = () => {
-//   return Object.keys(cache.plugins).map(p => cache.plugins[p])
-// }
-
-// exports.addLinkedPlugin = plugin => {
-//   let p = require(path.join(plugin, 'package.json'))
-//   linkedPlugins.plugins[p.name] = plugin
-//   fs.writeJSONSync(dirs.linkedPlugins, linkedPlugins)
-//   exports.clearCache(plugin)
-// }
-
-// exports.removeLinkedPlugin = plugin => {
-//   let p = linkedPlugins.plugins[plugin]
-//   if (!p) throw new Error(`${plugin} is not installed`)
-//   delete linkedPlugins.plugins[plugin]
-//   fs.writeJSONSync(dirs.linkedPlugins, linkedPlugins)
-//   exports.clearCache(p)
-// }

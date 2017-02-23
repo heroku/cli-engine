@@ -2,15 +2,16 @@
 
 import Command from 'cli-engine-command'
 import util from '../../util'
+import Plugins from '../../plugins'
 
-export default class Plugins extends Command {
+export default class extends Command {
   static topic = 'plugins'
   static flags = [
     {name: 'core', description: 'show core plugins'}
   ]
 
   async run () {
-    let plugins = require('../../plugins')
+    let plugins = new Plugins(this.config)
     plugins = plugins.list()
     plugins = plugins.filter(p => p.type !== 'builtin')
     plugins.sort(util.compare('name'))
