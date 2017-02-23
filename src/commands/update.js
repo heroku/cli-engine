@@ -2,6 +2,7 @@
 
 import Command from 'cli-engine-command'
 import Updater from '../updater'
+import PluginsUpdate from './plugins/update'
 
 export default class Update extends Command {
   static topic = 'update'
@@ -24,6 +25,7 @@ export default class Update extends Command {
         this.action.stop()
       }
     }
-    this.action.start(`${this.config.name}: Updating plugins`)
+    let pluginsUpdate = new PluginsUpdate(this.config)
+    await pluginsUpdate._run()
   }
 }
