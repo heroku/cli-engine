@@ -3,47 +3,38 @@
 import Command from 'cli-engine-command'
 import util from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
+import Plugins from '../plugins'
 
 export default class Help extends Command {
   static topic = 'help'
   static description = 'display help'
-  // variableArgs = true
+  static variableArgs = true
 
-  get plugins () { return require('../plugins') }
+  plugins: Plugins
 
   async run () {
-    const argv0 = config.bin
-    let cmd = this.args.find(arg => !['help', '-h', '--help'].includes(arg))
-    if (!cmd) return this.topics({argv0})
-    let topicName = cmd.split(':')[0]
-    let topic = this.plugins.topics[topicName]
-    let matchedCommand = this.plugins.commands[cmd]
-    if (!topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
-    if (!topic) topic = {name: topicName, fetch: () => { }}
-    let Topic = topic.fetch()
-    if (typeof Topic !== 'function') {
-      Topic = class extends require('heroku-cli-command').Topic {}
-      Topic.topic = topic.topic
-      Topic.description = topic.description
-    }
-    let commands = this.plugins.commandList.filter(c => c.topic === topicName)
-    topic = new Topic({flags: this.flags, commands})
-    await topic.help({args: this.args, matchedCommand, argv0})
+    this.plugins = new Plugins(this.config)
+    let cmd = this.argv.find(arg => !['help', '-h', '--help'].includes(arg))
+    if (!cmd) return this.topics()
+    let Topic = this.plugins.findTopic(cmd)
+    let matchedCommand = this.plugins.findCommand(cmd)
+    if (!Topic) throw new Error(`command ${cmd} not found`)
+    let commands = this.plugins.commandsForTopic(Topic.topic)
+    await new Topic(commands, this.config).help(this.argv, matchedCommand)
   }
 
-  topics ({argv0}) {
-    this.log(`Usage: ${argv0} COMMAND [--app APP] [command-specific-options]
+  topics () {
+    this.log(`Usage: ${this.config.bin} COMMAND [--app APP] [command-specific-options]
 
-Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:\n`)
-    let topics = Object.keys(this.plugins.topics).map(t => this.plugins.topics[t])
-    topics = topics.filter(t => !t.hidden)
+Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
+    let topics = this.plugins.topics.filter(t => !t.hidden)
     topics.sort(util.compare('topic'))
     topics = topics.map(t => [t.topic, t.description])
     this.log(this.renderList(topics))
     this.log()
   }
 
-  renderList (items) {
+  renderList (items: [string, ?string][]): string {
     const S = require('string')
     const max = require('lodash.maxby')
 
@@ -54,15 +45,15 @@ Help topics, type ${this.color.cmd(argv0 + ' help TOPIC')} for more details:\n`)
         ` ${S(i[0]).padRight(maxLength)}`,
 
         // right side
-        this.linewrap(maxLength + 4, i[1])
+        this.linewrap(maxLength + 4, i[1] || '')
       ])
       // join left + right side
       .map(i => i[1] ? `${i[0]} # ${i[1]}` : i[0])
     return lines.join('\n')
   }
 
-  linewrap (length, s) {
-    const linewrap = require('../lib/linewrap')
+  linewrap (length: string, s: string): string {
+    const linewrap = require('../linewrap')
     return linewrap(length, stdtermwidth, {
       skipScheme: 'ansi-color'
     })(s).trim()

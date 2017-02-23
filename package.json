@@ -10,7 +10,8 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "1.4.0",
-    "cli-engine-command": "heroku/cli-engine-command",
+    "cli-engine-command": "2.0.0",
+    "eslint": "3.16.1",
     "execa": "0.6.0",
     "klaw-sync": "1.1.2",
     "lodash.maxby": "4.6.0",
@@ -30,14 +31,17 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-polyfill": "6.23.0",
     "babel-preset-es2015": "6.22.0",
+    "eslint-config-standard": "6.2.1",
+    "eslint-plugin-jest": "19.0.1",
+    "eslint-plugin-promise": "3.4.2",
+    "eslint-plugin-standard": "2.0.1",
     "flow-bin": "0.39.0",
     "flow-typed": "2.0.0",
     "heroku-cli-test": "0.0.2",
-    "jest": "18.1.0",
+    "jest": "19.0.1",
     "jest-junit": "1.2.0",
     "nock": "9.0.6",
     "rimraf": "2.6.0",
-    "standard": "8.6.0",
     "time-require": "0.1.2"
   },
   "engines": {
@@ -62,12 +66,11 @@
     "clean": "rimraf lib",
     "prepare": "npm run clean && npm run build",
     "release": "np",
-    "test": "jest && flow && standard",
+    "test": "jest && flow && eslint .",
     "version": "VERSION=`node -p \"require('./package.json').version\"` && cd example && npm version $VERSION --git-tag-version=false && git add package.json && npm publish",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {
-    "parser": "babel-eslint",
     "ignore": [
       "src/linewrap.js",
       "example/node_modules",
