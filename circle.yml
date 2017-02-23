@@ -20,8 +20,16 @@ stages:
 
           # setup yarn
           yarn --prefer-offline --pure-lockfile
+          cd node_modules/cli-engine-command
+          yarn
+          cd ../..
+          yarn run prepare
           cd example
           yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1
+          cd node_modules/cli-engine-command
+          yarn
+          cd ../..
+          yarn run prepare
           cd ..
 
           # test project
