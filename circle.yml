@@ -20,9 +20,9 @@ stages:
 
           # setup yarn
           yarn --prefer-offline --pure-lockfile
-          cd node_modules/cli-engine-command && yarn && cd ~/cli-engine
+          cd node_modules/cli-engine-command && yarn --prefer-offline --pure-lockfile && cd ~/cli-engine
           cd example && yarn add --prefer-offline heroku/cli-engine#$CIRCLE_SHA1 && cd ~/cli-engine
-          cd example/node_modules/cli-engine-command && yarn && cd ~/cli-engine
+          cd example/node_modules/cli-engine-command && yarn --prefer-offline --pure-lockfile && npm run prepare && cd ~/cli-engine
 
           # test project
           JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
