@@ -14,12 +14,12 @@ export default class Yarn extends Base {
         }
 
         // otherwise use ~/.{category}/yarn
-        return path.join(this.config.home, `.${category}`, 'yarn')
+        return path.join(this.config.dirs.home, `.${category}`, 'yarn')
       }
 
       let getCacheDirectory = () => {
         if (process.platform === 'darwin') {
-          return path.join(this.config.home, 'Library', 'Caches', 'Yarn')
+          return path.join(this.config.dirs.home, 'Library', 'Caches', 'Yarn')
         }
 
         return getDirectory('cache')

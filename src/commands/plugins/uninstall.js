@@ -22,7 +22,7 @@ export default class PluginsUninstall extends Command {
     } else {
       plugins.removeLinkedPlugin(this.args.plugin)
     }
-    plugins.clearCache(dirs.userPlugin(this.args.plugin))
+    plugins.clearCache(this.args.plugin)
   }
 
   get plugins () { return require('../../plugins') }
