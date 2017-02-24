@@ -30,5 +30,8 @@
   "scripts": {
     "build": "../bin/cli-build",
     "release": "../bin/cli-release"
+  },
+  "devDependencies": {
+    "babel-cli": "6.23.0"
   }
 }

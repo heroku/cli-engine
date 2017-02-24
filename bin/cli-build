@@ -24,15 +24,16 @@ DIR=$(get_script_dir)
 PLATFORM=$1
 CHANNEL=$2
 VERSION=`$DIR/version`
-NODE_VERSION=`node -p "require('./package.json')['cli-engine'].node"`
+NODE_VERSION=`node -p "require('./package.json')['cli-engine'].node || process.versions.node"`
 NAME=`node -p "require('./package.json').name"`
 BIN=`node -p "require('./package.json')['cli-engine'].bin || require('./package.json').name"`
+ROOT=`pwd`
 
 # setup workspace
 TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
-WORKSPACE=tmp/build/$TARBALL_BASE
+WORKSPACE=$ROOT/tmp/build/$TARBALL_BASE
 rm -rf $WORKSPACE
-mkdir -p tmp/cache
+mkdir -p $ROOT/tmp/cache
 mkdir -p $WORKSPACE/node_modules
 mkdir -p $WORKSPACE/bin
 if [ -f README.md ]; then cp README.md $WORKSPACE; fi
@@ -41,21 +42,18 @@ cp package.json $WORKSPACE
 # TODO: this breaks yarn with git references for some reason
 #cp yarn.lock $WORKSPACE
 
-# install node
-NODE_BASE=node-v$NODE_VERSION-$PLATFORM
-if [ ! -f tmp/cache/$NODE_BASE.tar.xz ]; then
-  curl -fSLo tmp/cache/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
-fi
-tar -C $WORKSPACE -xf tmp/cache/$NODE_BASE.tar.xz
-mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
-rm -rf $WORKSPACE/$NODE_BASE
-
 # install packages
 cd $WORKSPACE
 yarn install --no-progress --production
 
-echo $VERSION > VERSION
-echo $CHANNEL > CHANNEL
+# install node
+NODE_BASE=node-v$NODE_VERSION-$PLATFORM
+if [ ! -f $ROOT/tmp/cache/$NODE_BASE.tar.xz ]; then
+  curl -fSLo $ROOT/tmp/cache/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
+fi
+tar -C $WORKSPACE -xf $ROOT/tmp/cache/$NODE_BASE.tar.xz
+mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
+rm -rf $WORKSPACE/$NODE_BASE
 
 # create bin runner
 cat << EOF > bin/$BIN
@@ -79,17 +77,24 @@ BIN_DIR=\$XDG_DATA_HOME/$NAME/cli/bin
 if [ -x \$BIN_DIR/$BIN ] && [ \$BIN_DIR != \$DIR ]; then
   \$XDG_DATA_HOME/$NAME/cli/bin/$BIN \$*
 else
-  \$DIR/node --harmony-async-await --use_strict \$DIR/$BIN.js \$*
+  CLI_CHANNEL=$CHANNEL CLI_BINNAME=$DIR/$BIN \$DIR/node \$DIR/$BIN.js \$*
 fi
 EOF
 chmod +x bin/$BIN
 
 cat << EOF > bin/$BIN.js
-require('cli-engine')()
+const path = require('path')
+const CLI = require('cli-engine').default
+const cli = new CLI({
+  root: path.join(__dirname, '..'),
+  argv: process.argv.slice(1)
+})
+cli.run()
 EOF
 
+cd $ROOT/tmp/build
+
 # create tarballs
-cd ..
 tar c $TARBALL_BASE | xz > $TARBALL_BASE.tar.xz
 tar czf $TARBALL_BASE.tar.gz $TARBALL_BASE
 
@@ -102,4 +107,4 @@ cat << EOF > $PLATFORM
 }
 EOF
 
-cd ../..
+cd $ROOT
