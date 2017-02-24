@@ -20,10 +20,10 @@ export default class Main extends Base {
     await updater.autoupdate()
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(this.config).run()
-    let command = new Command(this.config)
+    this.command = new Command(this.config)
     try {
-      await command._run()
-    } catch (err) { command.error(err) }
+      await this.command._run()
+    } catch (err) { this.command.error(err) }
     this.exit(0)
   }
 }
