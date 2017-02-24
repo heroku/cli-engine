@@ -12,13 +12,14 @@ type PluginType = | "builtin" | "core" | "user"
 type LegacyCommand = {
   topic: string,
   command?: string,
-  aliases: string[],
+  aliases?: string[],
   args: Arg[],
   flags: Flag[],
-  description?: string,
-  help?: string,
-  usage?: string,
-  hidden: boolean,
+  description?: ?string,
+  help?: ?string,
+  usage?: ?string,
+  hidden?: ?boolean,
+  default?: ?boolean,
   run: (ctx: LegacyContext) => Promise<any>
 }
 
@@ -26,22 +27,37 @@ type LegacyContext = {
   supportsColor: boolean
 }
 
+type ParsedTopic = | {
+  name?: ?string,
+  topic?: ?string,
+  description?: ?string,
+  hidden?: ?boolean
+} | Class<Topic>
+
+type ParsedCommand = | LegacyCommand | Class<Command>
+
+type ParsedPlugin = {
+  topic?: ParsedTopic,
+  topics?: ParsedTopic[],
+  commands?: (ParsedCommand | {default: ParsedCommand})[]
+}
+
 type CachedCommand = {
   id: string,
   topic: string,
-  command?: string,
-  aliases: string[],
+  command?: ?string,
+  aliases?: string[],
   args: Arg[],
   flags: Flag[],
-  description?: string,
-  help?: string,
-  usage?: string,
+  description: ?string,
+  help?: ?string,
+  usage?: ?string,
   hidden: boolean
 }
 
 type CachedTopic = {
   topic: string,
-  description?: string,
+  description?: ?string,
   hidden: boolean
 }
 
@@ -95,7 +111,15 @@ class Cache extends Base {
   }
 }
 
-const undefault = c => c.default && c.default !== true ? c.default : c
+function undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
+  if (t.default) return (t.default: any)
+  return t
+}
+
+function undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): ParsedCommand {
+  if (c.default && typeof c.default !== 'boolean') return (c.default: any)
+  return (c: any)
+}
 
 export class Plugin extends Base {
   constructor (type: PluginType, path: string, config: Config, cache: Cache) {
@@ -119,21 +143,20 @@ export class Plugin extends Base {
   topics: CachedTopic[]
 
   findCommand (cmd: string): ?Class<Command> {
-    let c = this.commands.find(c => c.id === cmd || c.aliases.includes(cmd))
+    let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
     if (!c) return
     let {topic, command} = c
-    let Command = this.require()
-      .commands
-      .map(undefault)
+    let p = this.require()
+    let Command = (p.commands || [])
+      .map(undefaultCommand)
       .find(d => topic === d.topic && command === d.command)
-    return typeof Command === 'function' ? Command : this.buildCommand(Command)
+    return typeof Command === 'function' ? Command : this.buildCommand((Command: any))
   }
 
   findTopic (name: string): ?Class<Topic> {
     let t = this.topics.find(t => t.topic === name)
     if (!t) return
-    let Topic = this.require()
-      .topics
+    let Topic = (this.require().topics || [])
       .find(t => [t.topic, t.name].includes(name))
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
@@ -141,15 +164,17 @@ export class Plugin extends Base {
   buildTopic (t: CachedTopic): Class<Topic> {
     return class extends Topic {
       static topic = t.topic
-      static descrition = t.description
+      static description = t.description
       static hidden = t.hidden
     }
   }
 
   buildCommand (c: LegacyCommand): Class<Command> {
+    if (!c.topic) throw new Error('command has no topic')
     return class extends Command {
       static topic = c.topic
       static command = c.command
+      static description = c.description
       static hidden = c.hidden
 
       run () {
@@ -177,11 +202,12 @@ export class Plugin extends Base {
     }
   }
 
-  updatePlugin (m: any): CachedPlugin {
+  updatePlugin (plugin: ParsedPlugin): CachedPlugin {
     const name = this.type === 'builtin' ? 'builtin' : this.pjson().name
     const version = this.type === 'builtin' ? this.config.version : this.pjson().version
-    const commands = m.commands
-    .map(undefault)
+    if (!plugin.commands) throw new Error('no commands found')
+    const commands: CachedCommand[] = plugin.commands
+    .map(undefaultCommand)
     .map(c => ({
       id: c.command ? `${c.topic}:${c.command}` : c.topic,
       topic: c.topic,
@@ -191,14 +217,15 @@ export class Plugin extends Base {
       flags: c.flags,
       help: c.help,
       usage: c.usage,
-      hidden: c.hidden,
+      hidden: !!c.hidden,
       aliases: c.aliases
     }))
-    const topics = (m.topics || (m.topic ? [m.topic] : []))
+    const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
+    .map(undefaultTopic)
     .map(t => ({
-      topic: t.topic || t.name,
+      topic: t.topic || t.name || '',
       description: t.description,
-      hidden: t.hidden || false
+      hidden: !!t.hidden
     }))
 
     for (let command of commands) {
@@ -209,13 +236,13 @@ export class Plugin extends Base {
       })
     }
 
-    const plugin = {name, version, commands, topics}
-    this.cache.updatePlugin(this.path, plugin)
-    return plugin
+    const cachedPlugin: CachedPlugin = {name, version, commands, topics}
+    this.cache.updatePlugin(this.path, cachedPlugin)
+    return cachedPlugin
   }
 
   // flow$ignore
-  require (): any { return require(this.path) }
+  require (): ParsedPlugin { return require(this.path) }
   // flow$ignore
   pjson (): {name: string, version: string} { return require(path.join(this.path, 'package.json')) }
 }
@@ -226,6 +253,7 @@ export default class Plugins extends Base {
     this.config = config
     this.cache = new Cache(config)
     this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
+    .concat(this.corePlugins)
     .concat(this.userPlugins)
     this.cache.save()
     this.yarn = new Yarn(this.config)
@@ -234,6 +262,12 @@ export default class Plugins extends Base {
   plugins: Plugin[]
   cache: Cache
   yarn: Yarn
+
+  get corePlugins (): Plugin[] {
+    return (this.config._cli.plugins || []).map(name => {
+      return new Plugin('core', path.join(this.config.root, 'node_modules', name), this.config, this.cache)
+    })
+  }
 
   get userPlugins (): Plugin[] {
     const pjson = this.userPluginsPJSON
@@ -291,7 +325,7 @@ export default class Plugins extends Base {
     this.clearCache(name)
     try {
       // flow$ignore
-      let plugin = require(this.userPluginPath(name))
+      let plugin = (require(this.userPluginPath(name)): ParsedPlugin)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
     } catch (err) {
       this.error(err, false)
