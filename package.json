@@ -58,7 +58,7 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "build": "babel src -d lib --ignore '*.test.js' --source-maps inline",
+    "build": "babel src -d lib --ignore '*.test.js'",
     "clean": "rimraf lib",
     "prepare": "npm run clean && npm run build",
     "release": "np",
