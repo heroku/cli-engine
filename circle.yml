@@ -60,10 +60,6 @@ stages:
           - /usr/local/share/.cache/yarn
           - ~/cli-engine/node_modules
           - ~/cli-engine/example/node_modules
-  deploy:
-    workDir: ~/cli-engine
-    steps:
-      - /usr/local/share/.cache/yarn
       - type: deploy
         shell: /bin/bash
         command: |
