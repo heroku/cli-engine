@@ -18,15 +18,16 @@ stages:
         command: |
           set -exu
 
+          export PATH=./node_modules/.bin:$PATH
           # setup yarn
           yarn
           cd ~/cli-engine/example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn
 
           # test project
           cd ~/cli-engine
-          JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
-          ./node_modules/.bin/flow check
-          ./node_modules/.bin/standard
+          JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml jest --coverage --testResultsProcessor jest-junit
+          flow check
+          standard
           bash <(curl -s https://codecov.io/bash)
           ./bin/run version
 
