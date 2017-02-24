@@ -21,6 +21,9 @@
     "cli-engine": "*",
     "cli-engine-example-plugin": "2.0.4"
   },
+  "devDependencies": {
+    "babel-cli": "6.23.0"
+  },
   "homepage": "https://github.com/heroku/cli-engine",
   "keywords": [
     "cli"
@@ -30,8 +33,5 @@
   "scripts": {
     "build": "../bin/cli-build",
     "release": "../bin/cli-release"
-  },
-  "devDependencies": {
-    "babel-cli": "6.23.0"
   }
 }
