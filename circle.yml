@@ -64,6 +64,6 @@ stages:
         shell: /bin/bash
         command: |
           set -exu
-          if [ "${CIRCLE_BRANCH}" == "master" ];
+          if [ "${CIRCLE_BRANCH}" == "master" ]; then
             cd example && npm run release beta
           fi
