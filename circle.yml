@@ -21,7 +21,12 @@ stages:
           export PATH=./node_modules/.bin:$PATH
           # setup yarn
           yarn
-          cd ~/cli-engine/example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn
+          cd ~/cli-engine/example
+          yarn
+          yarn add heroku/cli-engine#$CIRCLE_SHA1
+          cd ~/cli-engine/example/node_modules/cli-engine
+          yarn
+          npm run prepare
 
           # test project
           cd ~/cli-engine
