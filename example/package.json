@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "cli-engine": "*",
-    "cli-engine-example-plugin": "^1.0.1"
+    "cli-engine-example-plugin": "2.0.3"
   },
   "homepage": "https://github.com/heroku/cli-engine",
   "keywords": [
