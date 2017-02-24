@@ -896,9 +896,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.0.7.tgz#87c1a6c8ea29ab57201a968f566920cc9a0b528a"
+cli-engine-command@2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.0.8.tgz#7803750aa61b818b9e08aefda6c41268a43baa00"
   dependencies:
     ansi-escapes "1.4.0"
     babel-runtime "6.23.0"
