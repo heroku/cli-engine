@@ -20,9 +20,10 @@ stages:
 
           # setup yarn
           yarn
-          cd example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && cd ~/cli-engine
+          cd ~/cli-engine/example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && yarn
 
           # test project
+          cd ~/cli-engine
           JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
           ./node_modules/.bin/flow check
           ./node_modules/.bin/standard
@@ -30,14 +31,14 @@ stages:
           ./bin/run version
 
           # test/build example project
-          cd example
+          cd ~/cli-engine/example
           ./bin/run version
           ./bin/run help
           ./bin/run cli:test
           yarn run build linux-x64 beta
-          cd ..
 
           # show files in npm pack
+          cd ~/cli-engine
           npm pack
           tar xvzf cli-engine*.tgz
           rm -rf package

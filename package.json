@@ -37,7 +37,7 @@
     "jest": "19.0.2",
     "jest-junit": "1.2.0",
     "nock": "9.0.7",
-    "rimraf": "2.6.0",
+    "rimraf": "2.6.1",
     "standard": "8.6.0",
     "time-require": "0.1.2"
   },
