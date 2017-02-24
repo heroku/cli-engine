@@ -21,8 +21,6 @@ stages:
           # setup yarn
           yarn
           cd example && yarn add heroku/cli-engine#$CIRCLE_SHA1 && cd ~/cli-engine
-          cd node_modules/cli-engine-command && yarn && npm run prepare && cd ~/cli-engine
-          cd example/node_modules/cli-engine-command && yarn && npm run prepare && cd ~/cli-engine
 
           # test project
           JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
