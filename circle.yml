@@ -13,7 +13,7 @@ stages:
     steps:
       - type: checkout
       - type: cache-restore
-        key: cli-engine-{{checksum "package.json"}}
+        key: cli-engine-{{checksum "package.json"}}-{{checksum "example/package.json"}}
       - type: shell
         command: |
           set -exu
@@ -56,7 +56,7 @@ stages:
         path: /tmp/artifacts
         destination: build
       - type: cache-save
-        key: cli-engine-{{checksum "package.json"}}
+        key: cli-engine-{{checksum "package.json"}}-{{checksum "example/package.json"}}
         paths:
           - /usr/local/share/.cache/yarn
           - ~/cli-engine/node_modules
