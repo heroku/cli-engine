@@ -59,6 +59,8 @@ stages:
         key: cli-engine-{{checksum "package.json"}}
         paths:
           - /usr/local/share/.cache/yarn
+          - ~/cli-engine/node_modules
+          - ~/cli-engine/example/node_modules
   deploy:
     workDir: ~/cli-engine
     steps:
