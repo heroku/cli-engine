@@ -17,6 +17,7 @@ export default class extends Base {
   get autoupdatefile (): string { return path.join(this.config.dirs.cache, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.dirs.cache, 'autoupdate.log') }
   get updatelockfile (): string { return path.join(this.config.dirs.cache, 'update.lock') }
+  get binPath (): ?string { return process.env.CLI_BINPATH }
 
   async fetchManifest (channel: string): Promise<Manifest> {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
@@ -85,7 +86,8 @@ export default class extends Base {
     await lock.read(this.updatelockfile)
     lock.unreadSync(this.updatelockfile)
     const {spawnSync} = require('child_process')
-    const {status} = spawnSync(this.config.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    if (!this.binPath) return
+    const {status} = spawnSync(this.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
     this.exit(status)
   }
 
@@ -107,9 +109,9 @@ export default class extends Base {
       if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
       let fd = this.fs.openSync(this.autoupdatelogfile, 'a')
-      if (!this.config.binPath) return
+      if (!this.binPath) return
       const {spawn} = require('child_process')
-      spawn(this.config.binPath, ['update'], {stdio: [null, fd, fd], detached: true})
+      spawn(this.binPath, ['update'], {stdio: [null, fd, fd], detached: true})
       .on('error', e => this.warn(e, 'autoupdate:'))
     } catch (e) { this.warn(e, 'autoupdate:') }
   }

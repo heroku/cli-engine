@@ -24,6 +24,4 @@ export default class PluginsUninstall extends Command {
     }
     plugins.clearCache(this.args.plugin)
   }
-
-  get plugins () { return require('../../plugins') }
 }

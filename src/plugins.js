@@ -5,8 +5,26 @@
 
 import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
+import Yarn from './yarn'
 
-type PluginType = | "builtin" | "core"
+type PluginType = | "builtin" | "core" | "user"
+
+type LegacyCommand = {
+  topic: string,
+  command?: string,
+  aliases: string[],
+  args: Arg[],
+  flags: Flag[],
+  description?: string,
+  help?: string,
+  usage?: string,
+  hidden: boolean,
+  run: (ctx: LegacyContext) => Promise<any>
+}
+
+type LegacyContext = {
+  supportsColor: boolean
+}
 
 type CachedCommand = {
   id: string,
@@ -18,13 +36,13 @@ type CachedCommand = {
   description?: string,
   help?: string,
   usage?: string,
-  hidden: boolean,
+  hidden: boolean
 }
 
 type CachedTopic = {
   topic: string,
   description?: string,
-  hidden: boolean,
+  hidden: boolean
 }
 
 type CachedPlugin = {
@@ -37,6 +55,10 @@ type CachedPlugin = {
 type CacheData = {
   version: string,
   plugins: {[path: string]: CachedPlugin}
+}
+
+type PJSON = {
+  dependencies?: { [name: string]: string }
 }
 
 class Cache extends Base {
@@ -100,10 +122,11 @@ export class Plugin extends Base {
     let c = this.commands.find(c => c.id === cmd || c.aliases.includes(cmd))
     if (!c) return
     let {topic, command} = c
-    return this.require()
+    let Command = this.require()
       .commands
       .map(undefault)
       .find(d => topic === d.topic && command === d.command)
+    return typeof Command === 'function' ? Command : this.buildCommand(Command)
   }
 
   findTopic (name: string): ?Class<Topic> {
@@ -112,8 +135,7 @@ export class Plugin extends Base {
     let Topic = this.require()
       .topics
       .find(t => [t.topic, t.name].includes(name))
-    if (typeof Topic === 'function') return Topic
-    return this.buildTopic(t)
+    return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
 
   buildTopic (t: CachedTopic): Class<Topic> {
@@ -121,6 +143,20 @@ export class Plugin extends Base {
       static topic = t.topic
       static descrition = t.description
       static hidden = t.hidden
+    }
+  }
+
+  buildCommand (c: LegacyCommand): Class<Command> {
+    return class extends Command {
+      static topic = c.topic
+      static command = c.command
+      static hidden = c.hidden
+
+      run () {
+        return c.run({
+          supportsColor: this.color.enabled
+        })
+      }
     }
   }
 
@@ -190,11 +226,29 @@ export default class Plugins extends Base {
     this.config = config
     this.cache = new Cache(config)
     this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
+    .concat(this.userPlugins)
     this.cache.save()
+    this.yarn = new Yarn(this.config)
   }
 
   plugins: Plugin[]
   cache: Cache
+  yarn: Yarn
+
+  get userPlugins (): Plugin[] {
+    const pjson = this.userPluginsPJSON
+    return Object.keys(pjson.dependencies || {}).map(name => {
+      return new Plugin('user', this.userPluginPath(name), this.config, this.cache)
+    })
+  }
+
+  get userPluginsPJSON (): PJSON {
+    try {
+      return this.fs.readJSONSync(path.join(this.userPluginsDir, 'package.json'))
+    } catch (err) {
+      return { dependencies: {} }
+    }
+  }
 
   list () {
     return this.plugins
@@ -222,6 +276,45 @@ export default class Plugins extends Base {
       if (t) return t
     }
   }
+
+  async setupUserPlugins () {
+    const pjson = path.join(this.userPluginsDir, 'package.json')
+    this.fs.mkdirpSync(this.userPluginsDir)
+    if (!this.fs.existsSync(pjson)) this.fs.writeFileSync(pjson, JSON.stringify({private: true}))
+    await this.yarn.exec()
+  }
+
+  async install (name: string) {
+    await this.setupUserPlugins()
+    if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
+    await this.yarn.exec('add', name)
+    this.clearCache(name)
+    try {
+      // flow$ignore
+      let plugin = require(this.userPluginPath(name))
+      if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
+    } catch (err) {
+      this.error(err, false)
+      await this.uninstall(name)
+      this.exit(1)
+    }
+    this.action.stop()
+  }
+
+  async uninstall (name: string) {
+    if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
+    await this.yarn.exec('remove', name)
+  }
+
+  clearCache (name: string) {
+    for (let k of Object.keys(this.cache.cache.plugins)) {
+      if (this.cache.cache.plugins[k].name === name) delete this.cache.cache[k]
+    }
+    this.cache.save()
+  }
+
+  get userPluginsDir (): string { return path.join(this.config.dirs.data, 'plugins') }
+  userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
 
   get topics (): CachedTopic[] {
     return this.plugins.reduce((t, p) => t.concat(p.topics), [])

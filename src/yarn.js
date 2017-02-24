@@ -5,7 +5,8 @@ import {Base} from 'cli-engine-command'
 
 export default class Yarn extends Base {
   get bin (): string { return path.join(__dirname, '..', 'node_modules', '.bin', 'yarn') }
-  exec (...args: string[]) {
+
+  async exec (...args: string[]) {
     let deleteYarnRoadrunnerCache = () => {
       let getDirectory = (category) => {
         // use %LOCALAPPDATA%/Yarn on Windows
@@ -35,6 +36,6 @@ export default class Yarn extends Base {
     const stdio = this.config.debug ? 'inherit' : null
     this.debug(`${cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
-    return execa(this.bin, args, {cwd, stdio})
+    await execa(this.bin, args, {cwd, stdio})
   }
 }
