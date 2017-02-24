@@ -25,7 +25,7 @@ stages:
           # test project
           JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
           ./node_modules/.bin/flow check
-          ./node_modules/.bin/eslint .
+          ./node_modules/.bin/standard
           bash <(curl -s https://codecov.io/bash)
           ./bin/run version
 
