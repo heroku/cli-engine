@@ -182,9 +182,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.0.3.tgz#8edd3f53d67e862f957dde33a3f5a313766285f4"
+cli-engine-command@2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.0.5.tgz#311ec2add88bf1f917b36a233815d58d41dbc76f"
   dependencies:
     ansi-escapes "1.4.0"
     babel-runtime "6.23.0"
@@ -201,12 +201,12 @@ cli-engine-command@2.0.3:
     string "3.3.3"
     supports-color "3.2.3"
 
-cli-engine-example-plugin@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-example-plugin/-/cli-engine-example-plugin-2.0.3.tgz#eb6ea445388b2f9e93dba76eea3b5ff8e22c2ac0"
+cli-engine-example-plugin@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-example-plugin/-/cli-engine-example-plugin-2.0.4.tgz#9fb9f29b5d2b502d4a61f7ec2f4294fd0a40fa87"
   dependencies:
     babel-runtime "6.23.0"
-    cli-engine-command "2.0.3"
+    cli-engine-command "2.0.5"
 
 cli-engine@*:
   version "1.0.4"
