@@ -8,8 +8,11 @@ RUN echo "deb http://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list
 RUN apt-get -y update && \
   apt-get install -y --no-install-recommends \
   yarn \
-  ocaml \
-  libelf-dev \
+  ocaml libelf-dev \
+  python-pip python-dev build-essential \
   && apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
+RUN pip install --upgrade pip && \
+      pip install --upgrade virtualenv && \
+      pip install --upgrade awscli
