@@ -15,3 +15,5 @@ resources
 src
 test
 yarn.lock
+coverage
+Dockerfile
