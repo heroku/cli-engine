@@ -3,7 +3,7 @@
    Class
 */
 
-import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
+import Command, {Config, Base, Topic, mixins, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
 import Yarn from './yarn'
 
@@ -18,6 +18,8 @@ type LegacyCommand = {
   description?: ?string,
   help?: ?string,
   usage?: ?string,
+  needsApp?: ?boolean,
+  needsAuth?: ?boolean,
   hidden?: ?boolean,
   default?: ?boolean,
   run: (ctx: LegacyContext) => Promise<any>
@@ -171,16 +173,37 @@ export class Plugin extends Base {
 
   buildCommand (c: LegacyCommand): Class<Command> {
     if (!c.topic) throw new Error('command has no topic')
-    return class extends Command {
+    let Base = (c.needsApp || c.wantsApp)
+    ? mixins.app(Command, {required: !!c.needsApp})
+    : Command
+    return class extends Base {
       static topic = c.topic
       static command = c.command
       static description = c.description
       static hidden = c.hidden
+      static args = c.args || []
+      static flags = c.flags || []
 
       run () {
-        return c.run({
-          supportsColor: this.color.enabled
-        })
+        const ctx = {
+          supportsColor: this.color.enabled,
+          auth: {},
+          debug: this.config.debug,
+          flags: this.flags,
+          args: this.args,
+          // flow$ignore
+          app: this.app
+        }
+        if (c.needsAuth) {
+          ctx.auth.password = process.env.HEROKU_API_KEY
+          if (!ctx.auth.password) {
+            const netrc = require('netrc')()
+            const host = netrc['api.heroku.com']
+            if (host) ctx.auth.password = host.password
+          }
+          if (!ctx.auth.password) throw new Error('Not logged in')
+        }
+        return c.run(ctx)
       }
     }
   }
