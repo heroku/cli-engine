@@ -20,7 +20,7 @@ export default class Help extends Command {
     let matchedCommand = this.plugins.findCommand(cmd)
     if (!Topic) throw new Error(`command ${cmd} not found`)
     let commands = this.plugins.commandsForTopic(Topic.topic)
-    await new Topic(commands, this.config).help(this.argv, matchedCommand)
+    await new Topic(commands, this).help(this.argv, matchedCommand)
   }
 
   topics () {

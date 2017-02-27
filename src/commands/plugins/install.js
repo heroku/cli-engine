@@ -6,7 +6,7 @@ import Plugins from '../../plugins'
 export default class PluginsInstall extends Command {
   static topic = 'plugins'
   static command = 'install'
-  static description = 'Installs a plugin into the CLI'
+  static description = 'installs a plugin into the CLI'
   static help = `
   Example:
     $ heroku plugins:install heroku-production-status

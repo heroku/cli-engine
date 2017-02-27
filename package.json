@@ -47,6 +47,9 @@
   "homepage": "https://github.com/heroku/cli-engine",
   "jest": {
     "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      "src/linewrap.js"
+    ],
     "setupFiles": [
       "./test/init.js"
     ]
