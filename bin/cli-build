@@ -87,7 +87,6 @@ const path = require('path')
 const CLI = require('cli-engine').default
 const cli = new CLI({
   root: path.join(__dirname, '..'),
-  binPath: process.env.CLI_BINNAME,
   channel: '$CHANNEL',
   version: '$VERSION',
   argv: process.argv.slice(1)
