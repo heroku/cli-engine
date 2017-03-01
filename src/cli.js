@@ -13,7 +13,7 @@ const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 export default class Main extends Base {
   async run () {
     process.on('exit', () => this.showCursor())
-    process.on('SIGINT', err => this.error(err))
+    process.on('SIGINT', () => this.exit(1))
     process.on('uncaughtException', err => this.error(err))
     process.on('unhandledRejection', err => this.error(err))
     process.stdout.on('error', handleEPIPE)
