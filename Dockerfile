@@ -11,3 +11,5 @@ RUN apt-get -y update && \
 RUN pip install --upgrade pip && \
       pip install --upgrade virtualenv && \
       pip install --upgrade awscli
+
+CMD bash
