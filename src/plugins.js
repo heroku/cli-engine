@@ -9,6 +9,10 @@ import Yarn from './yarn'
 
 type PluginType = | "builtin" | "core" | "user"
 
+type LegacyContext = {
+  supportsColor: boolean
+}
+
 type LegacyCommand = {
   topic: string,
   command?: string,
@@ -23,10 +27,6 @@ type LegacyCommand = {
   hidden?: ?boolean,
   default?: ?boolean,
   run: (ctx: LegacyContext) => Promise<any>
-}
-
-type LegacyContext = {
-  supportsColor: boolean
 }
 
 type ParsedTopic = | {
