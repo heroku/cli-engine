@@ -336,8 +336,10 @@ export default class Plugins extends Base {
 
   async setupUserPlugins () {
     const pjson = path.join(this.userPluginsDir, 'package.json')
+    const yarnrc = path.join(this.userPluginsDir, '.yarnrc')
     this.fs.mkdirpSync(this.userPluginsDir)
     if (!this.fs.existsSync(pjson)) this.fs.writeFileSync(pjson, JSON.stringify({private: true}))
+    if (!this.fs.existsSync(yarnrc)) this.fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
     await this.yarn.exec()
   }
 
