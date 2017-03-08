@@ -311,6 +311,10 @@ export default class Plugins extends Base {
     return this.plugins
   }
 
+  isPluginInstalled (name: string): boolean {
+    return !!this.plugins.find(p => p.name === name)
+  }
+
   findCommand (cmd: string): ?Class<Command> {
     for (let plugin of this.plugins) {
       let c = plugin.findCommand(cmd)
@@ -361,8 +365,11 @@ export default class Plugins extends Base {
   }
 
   async uninstall (name: string) {
+    if (!this.isPluginInstalled(name)) throw new Error(`${name} is not installed`)
     if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
     await this.yarn.exec('remove', name)
+    this.clearCache(name)
+    this.action.stop()
   }
 
   clearCache (name: string) {
