@@ -9,7 +9,6 @@ stages:
     environment:
       - CIRCLE_PROJECT_USERNAME: heroku
       - CIRCLE_PROJECT_REPONAME: cli-engine
-      - HEROKU_DEBUG: 1
     steps:
       - type: checkout
       - type: cache-restore
