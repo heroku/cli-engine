@@ -38,10 +38,11 @@ export default class extends Base {
     let dir = path.join(this.config.dirs.data, 'cli')
     let tmp = path.join(this.config.dirs.data, 'cli_tmp')
     await this.extract(stream, tmp)
-    await lock.write(this.updatelockfile, {skipOwnPid: true})
+    let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
     this.fs.removeSync(dir)
     this.fs.renameSync(path.join(tmp, this.base(manifest)), dir)
     this.fs.removeSync(tmp)
+    unlock()
   }
 
   extract (stream: stream$Readable, dir: string) {
