@@ -2,12 +2,14 @@
 /* globals
    test
    expect
+   jasmine
 */
 
 import Install from './install'
 import Index from './index'
 
-test.only('installs heroku-debug', async () => {
+test('installs heroku-debug', async () => {
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
   const install = new Install({mock: true, argv: ['cli-engine', 'install', 'heroku-debug']})
   await install._run()
   const index = new Index({mock: true})
