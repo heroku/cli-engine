@@ -6,6 +6,7 @@
 import Command, {Config, Base, Topic, mixins, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
 import Yarn from './yarn'
+import lock from 'rwlockfile'
 
 type PluginType = | "builtin" | "core" | "user"
 
@@ -348,6 +349,7 @@ export default class Plugins extends Base {
   }
 
   async install (name: string) {
+    await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
     if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
     await this.yarn.exec('add', name)
@@ -365,6 +367,7 @@ export default class Plugins extends Base {
   }
 
   async uninstall (name: string) {
+    await lock.write(this.lockfile, {skipOwnPid: true})
     if (!this.isPluginInstalled(name)) throw new Error(`${name} is not installed`)
     if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
     await this.yarn.exec('remove', name)
@@ -385,6 +388,8 @@ export default class Plugins extends Base {
   get topics (): CachedTopic[] {
     return this.plugins.reduce((t, p) => t.concat(p.topics), [])
   }
+
+  get lockfile (): string { return path.join(this.config.dirs.cache, 'update.lock') }
 
   config: Config
 }

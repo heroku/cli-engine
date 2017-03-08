@@ -126,7 +126,6 @@ export default class extends Base {
   }
 
   async checkIfUpdating () {
-    const lock = require('rwlockfile')
     if (await lock.hasWriter(this.updatelockfile)) {
       this.warn(`${this.config.name}: warning: update in process`)
       await this.restartCLI()
