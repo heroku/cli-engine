@@ -10,7 +10,7 @@ import Install from './install'
 import Index from './index'
 
 beforeEach(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 })
 
 test('installs heroku-debug', async () => {

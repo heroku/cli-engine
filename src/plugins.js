@@ -349,7 +349,7 @@ export default class Plugins extends Base {
   }
 
   async install (name: string) {
-    await lock.write(this.lockfile, {skipOwnPid: true})
+    let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
     if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
     await this.yarn.exec('add', name)
@@ -359,20 +359,23 @@ export default class Plugins extends Base {
       let plugin = (require(this.userPluginPath(name)): ParsedPlugin)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
     } catch (err) {
+      await unlock()
       this.error(err, false)
       await this.uninstall(name)
       this.exit(1)
     }
     this.action.stop()
+    await unlock()
   }
 
   async uninstall (name: string) {
-    await lock.write(this.lockfile, {skipOwnPid: true})
+    let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     if (!this.isPluginInstalled(name)) throw new Error(`${name} is not installed`)
     if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
     await this.yarn.exec('remove', name)
     this.clearCache(name)
     this.action.stop()
+    await unlock()
   }
 
   clearCache (name: string) {
@@ -389,7 +392,7 @@ export default class Plugins extends Base {
     return this.plugins.reduce((t, p) => t.concat(p.topics), [])
   }
 
-  get lockfile (): string { return path.join(this.config.dirs.cache, 'update.lock') }
+  get lockfile (): string { return path.join(this.config.dirs.cache, 'plugins.lock') }
 
   config: Config
 }

@@ -3341,9 +3341,9 @@ run-parallel@^1.1.2:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.1.6.tgz#29003c9a2163e01e2d2dfc90575f2c6c1d61a039"
 
-rwlockfile@1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.3.3.tgz#7fd478ba96bcfac7bcc16a103dcffbb21d0f31c6"
+rwlockfile@1.3.4:
+  version "1.3.4"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.3.4.tgz#68a08ca5451e22728fc655327357786d035cd62a"
   dependencies:
     graceful-fs ">= 4.0.0"
     ps-node "0.1.4"
