@@ -47,6 +47,7 @@ cd $WORKSPACE
 yarn install --no-progress --production
 if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
   cd $WORKSPACE/node_modules/cli-engine
+  yarn
   yarn run prepare
 fi
 
