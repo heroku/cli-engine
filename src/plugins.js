@@ -5,6 +5,7 @@ import path from 'path'
 import Yarn from './yarn'
 import lock from 'rwlockfile'
 import LinkedPlugins from './linked_plugins'
+import uniqby from 'lodash.uniqby'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -344,11 +345,12 @@ export default class Plugins extends Base {
   }
 
   commandsForTopic (topic: string): Class<Command>[] {
-    return this.plugins.reduce((t, p) => {
+    let commands = this.plugins.reduce((t, p) => {
       return t.concat(p.commands
         .filter(c => c.topic === topic)
         .map(c => (p.findCommand(c.id): any)))
     }, [])
+    return uniqby(commands, 'id')
   }
 
   findTopic (cmd: string): ?Class<Topic> {
@@ -426,7 +428,6 @@ export default class Plugins extends Base {
   userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
 
   get topics (): CachedTopic[] {
-    const uniqby = require('lodash.uniqby')
     return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
 
