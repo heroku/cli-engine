@@ -75,6 +75,7 @@
       "src/linewrap.js",
       "example/node_modules",
       "example/tmp",
+      "example-plugin",
       "flow-typed"
     ]
   }
