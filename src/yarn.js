@@ -1,8 +1,16 @@
 // @flow
 
 import path from 'path'
-import {Base, type Config} from 'cli-engine-command'
+import {Base} from 'cli-engine-command'
 import lock from 'rwlockfile'
+
+type Info = {
+  name: string,
+  description: string,
+  'dist-tags': {
+    [tag: string]: string
+  }
+}
 
 export default class Yarn extends Base {
   get lockfile (): string { return path.join(this.config.dirs.cache, 'yarn.lock') }
@@ -11,25 +19,7 @@ export default class Yarn extends Base {
   get yarnDir (): ?string { return this.nodeModulesDirs.map(d => path.join(d, 'yarn')).find(f => this.fs.existsSync(f)) }
   get bin (): ?string { return this.yarnDir ? path.join(this.yarnDir, 'bin', 'yarn') : 'yarn' }
 
-  constructor (config: Config) {
-    super(config)
-    this.options = {
-      cwd: path.join(this.config.dirs.data, 'plugins'),
-      stdio: this.config.debug ? 'inherit' : null
-    }
-  }
-
-  options: {
-    cwd: string,
-    preferLocal?: boolean,
-    stripEof?: boolean,
-    input?: any,
-    reject?: boolean,
-    cleanup?: boolean,
-    stdio: null | 'inherit' | [number, number, number]
-  }
-
-  async exec (...args: string[]) {
+  async exec (args: string[] = [], options: {} = {}): Promise<string> {
     let deleteYarnRoadrunnerCache = () => {
       let getDirectory = (category) => {
         // use %LOCALAPPDATA%/Yarn on Windows
@@ -53,14 +43,26 @@ export default class Yarn extends Base {
         this.fs.unlinkSync(path.join(getCacheDirectory(), '.roadrunner.json'))
       } catch (err) {}
     }
-    if (!this.bin) throw new Error('yarn not found')
 
+    options = Object.assign({
+      cwd: path.join(this.config.dirs.data, 'plugins'),
+      stdio: this.config.debug ? 'inherit' : null
+    }, options)
+
+    if (!this.bin) throw new Error('yarn not found')
     const execa = require('execa')
-    this.debug(`${this.options.cwd}: ${this.bin} ${args.join(' ')}`)
+    this.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
     let unlock = await lock.write(this.lockfile)
-    await execa(this.bin, args, this.options)
+    let output = await execa(this.bin, args, options)
     await unlock()
     deleteYarnRoadrunnerCache()
+    return output.stdout
+  }
+
+  async info (name: string): Promise<Info> {
+    let output = await this.exec(['info', name, '--json'], {stdio: null})
+    let info: Info = JSON.parse(output)['data']
+    return info
   }
 }

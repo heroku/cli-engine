@@ -104,8 +104,7 @@ Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}
     this.plugins.clearCache(pjson.name)
     if (!pjson.scripts || !pjson.scripts.prepare) return
     if (!this.config.debug) this.action.start(`Running prepare script for ${p}`)
-    this.yarn.options.cwd = p
-    await this.yarn.exec('run', 'prepare')
+    await this.yarn.exec(['run', 'prepare'], {cwd: p})
     this.fs.utimesSync(main, new Date(), new Date())
     this.action.stop()
   }
@@ -135,8 +134,7 @@ Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}
   async _install (p: string) {
     if (!this._needsInstall(p)) return
     if (!this.config.debug) this.action.start(`Installing dependencies for ${p}`)
-    this.yarn.options.cwd = p
-    await this.yarn.exec()
+    await this.yarn.exec([], {cwd: p})
     this.fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
     this.plugins.clearCache(this._pjson(p).name)
     this.action.stop()
