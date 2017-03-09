@@ -31,7 +31,7 @@ stages:
 
           # test project
           cd ~/cli-engine
-          JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
+          ./node_modules/.bin/jest --coverage
           ./node_modules/.bin/flow check
           ./node_modules/.bin/standard
           bash <(curl -s https://codecov.io/bash)
@@ -51,8 +51,6 @@ stages:
           rm -rf package
           mkdir -p /tmp/artifacts
           mv cli-engine*.tgz /tmp/artifacts/cli-engine.tgz
-      - type: test-results-store
-        path: /tmp/test-results
       - type: artifacts-store
         path: /tmp/artifacts
         destination: build
