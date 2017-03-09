@@ -45,6 +45,10 @@ cp package.json $WORKSPACE
 # install packages
 cd $WORKSPACE
 yarn install --no-progress --production
+if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
+  cd $WORKSPACE/node_modules/cli-engine
+  yarn run prepare
+fi
 
 # install node
 NODE_BASE=node-v$NODE_VERSION-$PLATFORM
