@@ -9,19 +9,16 @@ beforeEach(() => {
 })
 
 async function plugins (): Promise<string> {
-  let index = new Index({mock: true})
-  await index._run()
+  const index = await Index.run([], {mock: true})
   return index.stdout.output
 }
 
 async function install (plugin: string) {
-  const install = new Install({mock: true, argv: ['cli-engine', 'install', plugin]})
-  await install._run()
+  await Install.run([plugin], {mock: true})
 }
 
 async function uninstall (plugin: string) {
-  const uninstall = new Uninstall({mock: true, argv: ['cli-engine', 'uninstall', plugin]})
-  await uninstall._run()
+  await Uninstall.run([plugin], {mock: true})
 }
 
 test('installs and uninstalls heroku-debug', async () => {

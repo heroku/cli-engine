@@ -25,7 +25,6 @@ export default class Update extends Command {
         this.action.stop()
       }
     }
-    let pluginsUpdate = new PluginsUpdate(this.config)
-    await pluginsUpdate._run()
+    await PluginsUpdate.run([], {config: this.config})
   }
 }

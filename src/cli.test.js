@@ -13,12 +13,11 @@ test('runs the version command', async function () {
 })
 
 test('errors with invalid arguments', async function () {
-  expect.assertions(2)
+  expect.assertions(1)
   let cli = new CLI({argv: ['heroku', 'version', '--invalid-flag'], mock: true})
   try {
     await cli.run()
   } catch (err) {
-    expect(err.code).toBe(1)
-    expect(cli.command.stderr.output).toContain('Unexpected argument --invalid-flag')
+    expect(err.message).toContain('Unexpected argument --invalid-flag')
   }
 })
