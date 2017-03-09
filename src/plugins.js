@@ -380,7 +380,7 @@ export default class Plugins extends Base {
     await this.setupUserPlugins()
     if (this.plugins.find(p => p.name === name)) throw new Error(`Plugin ${name} is already installed`)
     if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
-    await this.yarn.exec('add', name)
+    await this.yarn.exec(['add', name])
     this.clearCache(name)
     try {
       // flow$ignore
@@ -396,6 +396,25 @@ export default class Plugins extends Base {
     await unlock()
   }
 
+  /**
+   * check if a plugin needs an update
+   * @param {string} name - plugin name to check
+   * @returns {string} - latest version if needs update, undefined otherwise
+   */
+  async needsUpdate (name: string): Promise<?string> {
+    let info = await this.yarn.info(name)
+    let plugin = this.plugins.find(p => p.name === name)
+    if (!plugin) throw new Error(`${name} not installed`)
+    let latest = info['dist-tags'].latest
+    if (latest === plugin.version) return
+    return latest
+  }
+
+  async update (name: string, version: string) {
+    await this.yarn.exec(['upgrade', `${name}@${version}`])
+    this.clearCache(name)
+  }
+
   async uninstall (name: string) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     let plugin = this.plugins.filter(p => !['core', 'builtin'].includes(p.type)).find(p => p.name === name)
@@ -403,7 +422,7 @@ export default class Plugins extends Base {
     switch (plugin.type) {
       case 'user': {
         if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
-        await this.yarn.exec('remove', name)
+        await this.yarn.exec(['remove', name])
         break
       }
       case 'link': {
