@@ -2,8 +2,10 @@
 
 import path from 'path'
 import {Base, type Config} from 'cli-engine-command'
+import lock from 'rwlockfile'
 
 export default class Yarn extends Base {
+  get lockfile (): string { return path.join(this.config.dirs.cache, 'yarn.lock') }
   get bin (): string { return path.join(__dirname, '..', 'node_modules', '.bin', 'yarn') }
 
   constructor (config: Config) {
@@ -52,6 +54,8 @@ export default class Yarn extends Base {
     const execa = require('execa')
     this.debug(`${this.options.cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
+    let unlock = await lock.write(this.lockfile)
     await execa(this.bin, args, this.options)
+    await unlock()
   }
 }
