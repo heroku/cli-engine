@@ -170,6 +170,7 @@ export class Plugin extends Base {
     let Command = (p.commands || [])
       .map(undefaultCommand)
       .find(d => topic === d.topic && command === d.command)
+    if (!Command) return
     return typeof Command === 'function' ? Command : this.buildCommand((Command: any))
   }
 
@@ -178,6 +179,7 @@ export class Plugin extends Base {
     if (!t) return
     let Topic = (this.require().topics || [])
       .find(t => [t.topic, t.name].includes(name))
+    if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
 
