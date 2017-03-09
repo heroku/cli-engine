@@ -3,7 +3,6 @@
 import Command from './version'
 
 test('shows the version', async function () {
-  let cmd = new Command({argv: ['cli-engine', 'version'], mock: true})
-  await cmd._run()
+  let cmd = await Command.run([], {mock: true})
   expect(cmd.stdout.output).toMatch(/^cli-engine/)
 })

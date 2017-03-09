@@ -9,15 +9,11 @@ beforeEach(() => {
 })
 
 test('links example plugin', async () => {
-  let index = new Index({mock: true})
-  await index._run()
+  let index = await Index.run([], {mock: true})
   if (index.stdout.output.includes('cli-engine-example-plugin')) {
-    let uninstall = new Uninstall({mock: true, argv: ['cli-engine', 'uninstall', 'cli-engine-example-plugin']})
-    await uninstall._run()
+    await Uninstall.run(['cli-engine-example-plugin'], {mock: true})
   }
-  let link = new Link({mock: true, argv: ['cli-engine', 'link', './example-plugin']})
-  await link._run()
-  index = new Index({mock: true})
-  await index._run()
+  await Link.run(['./example-plugin'], {mock: true})
+  index = await Index.run([], {mock: true})
   expect(index.stdout.output).toContain('cli-engine-example-plugin')
 })
