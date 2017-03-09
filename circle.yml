@@ -17,6 +17,7 @@ stages:
         command: |
           set -exu
 
+          git submodule init --recursive --remote
           git submodule update --recursive --remote
           ls example-plugin
 
