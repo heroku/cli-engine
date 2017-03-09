@@ -1,8 +1,4 @@
 // @flow
-/* globals
-   test
-   expect
- */
 
 import CLI from './cli'
 

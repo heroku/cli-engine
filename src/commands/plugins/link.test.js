@@ -1,10 +1,4 @@
 // @flow
-/* globals
-   test
-   expect
-   jasmine
-   beforeEach
-*/
 
 import Link from './link'
 import Index from './index'

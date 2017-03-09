@@ -38,34 +38,49 @@ export default class LinkedPlugins extends Base {
     plugins: string[]
   }
 
+  /**
+   * adds a linked plugin
+   * @param {string} p - path of plugin
+   */
   async add (p: string) {
     if (!this.config.debug) this.action.start(`Running prepare script for ${p}`)
     // flow$ignore
     let pjson: PJSON = require(path.join(p, 'package.json'))
     await this.prepare(p)
-    // flow$ignore
-    let m = require(p)
-    if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
     const name = pjson.name
     if (this.plugins.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.
 Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
     if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
+    // flow$ignore
+    let m = require(p)
+    if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
     this._data.plugins.push(p)
     this._save()
     this.action.stop()
   }
 
+  /**
+   * removes a linked plugin
+   * @param {string} p - path of plugin
+   */
   remove (p: string) {
     this._data.plugins = this._data.plugins.filter(q => q !== p)
     this._save()
   }
 
+  /**
+   * list linked plugins
+   * @returns {Plugin[]}
+   */
   list (): Plugin[] {
     return this._data.plugins.map(p => new Plugin('link', p, this.config, this.plugins.cache))
   }
 
+  /**
+   * runs prepare() on all linked plugins
+   */
   async refresh () {
     for (let plugin of this._data.plugins) {
       try {
@@ -77,14 +92,17 @@ Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}
     }
   }
 
+  /**
+   * installs plugin dependencies and runs npm prepare if needed
+   */
   async prepare (p: string) {
+    let pjson = this._pjson(p)
     await this._install(p)
-    // flow$ignore
-    let pjson: PJSON = require(path.join(p, 'package.json'))
     if (!pjson.main) throw new Error(`No main script specified in ${path.join(p, 'package.json')}`)
-    if (!pjson.scripts || !pjson.scripts.prepare) return
     let main = path.join(p, pjson.main)
     if (!this._needsPrepare(p, main)) return
+    this.plugins.clearCache(pjson.name)
+    if (!pjson.scripts || !pjson.scripts.prepare) return
     if (!this.config.debug) this.action.start(`Running prepare script for ${p}`)
     this.yarn.options.cwd = p
     await this.yarn.exec('run', 'prepare')
@@ -120,8 +138,12 @@ Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}
     this.yarn.options.cwd = p
     await this.yarn.exec()
     this.fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
+    this.plugins.clearCache(this._pjson(p).name)
     this.action.stop()
   }
+
+  // flow$ignore
+  _pjson (p: string): PJSON { return require(path.join(p, 'package.json')) }
 
   get file (): string { return path.join(this.config.dirs.data, 'linked_plugins.json') }
 }
