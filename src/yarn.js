@@ -6,7 +6,10 @@ import lock from 'rwlockfile'
 
 export default class Yarn extends Base {
   get lockfile (): string { return path.join(this.config.dirs.cache, 'yarn.lock') }
-  get bin (): string { return path.join(__dirname, '..', 'node_modules', '.bin', 'yarn') }
+
+  get nodeModulesDirs (): string[] { return require('find-node-modules')({cwd: __dirname, relative: false}) }
+  get yarnDir (): ?string { return this.nodeModulesDirs.map(d => path.join(d, 'yarn')).find(f => this.fs.existsSync(f)) }
+  get bin (): ?string { return this.yarnDir ? path.join(this.yarnDir, 'bin', 'yarn') : 'yarn' }
 
   constructor (config: Config) {
     super(config)
@@ -50,6 +53,7 @@ export default class Yarn extends Base {
         this.fs.unlinkSync(path.join(getCacheDirectory(), '.roadrunner.json'))
       } catch (err) {}
     }
+    if (!this.bin) throw new Error('yarn not found')
 
     const execa = require('execa')
     this.debug(`${this.options.cwd}: ${this.bin} ${args.join(' ')}`)
@@ -57,5 +61,6 @@ export default class Yarn extends Base {
     let unlock = await lock.write(this.lockfile)
     await execa(this.bin, args, this.options)
     await unlock()
+    deleteYarnRoadrunnerCache()
   }
 }

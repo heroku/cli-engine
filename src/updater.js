@@ -119,7 +119,7 @@ export default class extends Base {
     let local = this.config.version.split('.')
     let remote = manifest.version.split('.')
     if (local[0] !== remote[0] || local[1] !== remote[1]) {
-      this.stderr.log(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
+      this.warn(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
     }
   }
 
