@@ -17,6 +17,8 @@ stages:
         command: |
           set -exu
 
+          git submodule update --recursive --remote
+
           # setup yarn
           yarn
           cd ~/cli-engine/example
