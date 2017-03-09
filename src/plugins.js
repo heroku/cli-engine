@@ -17,6 +17,7 @@ type LegacyCommand = {
   topic: string,
   command?: string,
   aliases?: string[],
+  variableArgs?: boolean,
   args: Arg[],
   flags: Flag[],
   description?: ?string,
@@ -200,6 +201,7 @@ export class Plugin extends Base {
       static hidden = c.hidden
       static args = c.args || []
       static flags = c.flags || []
+      static variableArgs = c.variableArgs
 
       run () {
         const ctx = {
@@ -207,7 +209,7 @@ export class Plugin extends Base {
           auth: {},
           debug: this.config.debug,
           flags: this.flags,
-          args: this.args,
+          args: c.variableArgs ? this.argv : this.args,
           // flow$ignore
           app: this.app
         }
@@ -256,6 +258,7 @@ export class Plugin extends Base {
       command: c.command,
       description: c.description,
       args: c.args,
+      variableArgs: c.variableArgs,
       flags: c.flags,
       help: c.help,
       usage: c.usage,
