@@ -22,6 +22,7 @@ export default class Main extends Base {
     const updater = new Updater(this.config)
     const plugins = new Plugins(this.config)
     await updater.autoupdate()
+    await plugins.refreshLinkedPlugins()
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(this.config).run()
     this.command = new Command(this.config)

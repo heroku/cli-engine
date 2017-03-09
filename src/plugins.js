@@ -67,6 +67,7 @@ type CachedTopic = {
 
 type CachedPlugin = {
   name: string,
+  path: string,
   version: string,
   commands: CachedCommand[],
   topics: CachedTopic[]
@@ -220,6 +221,7 @@ export class Plugin extends Base {
       this.warn(err)
       return {
         name: this.path,
+        path: this.path,
         version: '',
         commands: [],
         topics: []
@@ -261,7 +263,7 @@ export class Plugin extends Base {
       })
     }
 
-    const cachedPlugin: CachedPlugin = {name, version, commands, topics}
+    const cachedPlugin: CachedPlugin = {name, path: this.path, version, commands, topics}
     this.cache.updatePlugin(this.path, cachedPlugin)
     return cachedPlugin
   }
@@ -279,9 +281,9 @@ export default class Plugins extends Base {
     this.cache = new Cache(config)
     this.linkedPlugins = new LinkedPlugins(config, this)
     this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
-    .concat(this.corePlugins)
-    .concat(this.userPlugins)
     .concat(this.linkedPlugins.list())
+    .concat(this.userPlugins)
+    .concat(this.corePlugins)
     this.cache.save()
     this.yarn = new Yarn(this.config)
   }
@@ -355,6 +357,7 @@ export default class Plugins extends Base {
   async install (name: string) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
+    if (this.plugins.find(p => p.name === name)) throw new Error(`Plugin ${name} is already installed`)
     if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
     await this.yarn.exec('add', name)
     this.clearCache(name)
@@ -374,16 +377,31 @@ export default class Plugins extends Base {
 
   async uninstall (name: string) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
-    if (!this.isPluginInstalled(name)) throw new Error(`${name} is not installed`)
-    if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
-    await this.yarn.exec('remove', name)
+    let plugin = this.plugins.filter(p => !['core', 'builtin'].includes(p.type)).find(p => p.name === name)
+    if (!plugin) throw new Error(`${name} is not installed`)
+    switch (plugin.type) {
+      case 'user': {
+        if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
+        await this.yarn.exec('remove', name)
+        break
+      }
+      case 'link': {
+        if (!this.config.debug) this.action.start(`Unlinking plugin ${name}`)
+        this.linkedPlugins.remove(plugin.path)
+        break
+      }
+    }
     this.clearCache(name)
-    this.action.stop()
     await unlock()
+    this.action.stop()
   }
 
   async addLinkedPlugin (p: string) {
     await this.linkedPlugins.add(p)
+  }
+
+  async refreshLinkedPlugins () {
+    await this.linkedPlugins.refresh()
   }
 
   clearCache (name: string) {
