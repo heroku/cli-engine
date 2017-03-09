@@ -98,6 +98,7 @@ class Cache extends Base {
   }
 
   plugin (path: string): ?CachedPlugin { return this.cache.plugins[path] }
+
   updatePlugin (path: string, plugin: CachedPlugin) {
     this.constructor.updated = true
     this.cache.plugins[path] = plugin
@@ -425,7 +426,8 @@ export default class Plugins extends Base {
   userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
 
   get topics (): CachedTopic[] {
-    return this.plugins.reduce((t, p) => t.concat(p.topics), [])
+    const uniqby = require('lodash.uniqby')
+    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
 
   get lockfile (): string { return path.join(this.config.dirs.cache, 'plugins.lock') }
