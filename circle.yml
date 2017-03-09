@@ -19,7 +19,6 @@ stages:
 
           git submodule sync
           git submodule update --init --recursive --remote
-          ls example-plugin
 
           # setup yarn
           yarn
@@ -32,7 +31,7 @@ stages:
 
           # test project
           cd ~/cli-engine
-          JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit
+          JEST_JUNIT_OUTPUT=/tmp/test-results/jest/junit.xml ./node_modules/.bin/jest --coverage --testResultsProcessor jest-junit --runInBand
           ./node_modules/.bin/flow check
           ./node_modules/.bin/standard
           bash <(curl -s https://codecov.io/bash)
