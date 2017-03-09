@@ -109,7 +109,7 @@ export default class extends Base {
       let fd = this.fs.openSync(this.autoupdatelogfile, 'a')
       if (!this.binPath) return
       const {spawn} = require('child_process')
-      spawn(this.binPath, ['update'], {stdio: [null, fd, fd], detached: true})
+      spawn(this.binPath, ['update'], {stdio: [null, fd, fd]})
       .on('error', e => this.warn(e, 'autoupdate:'))
     } catch (e) { this.warn(e, 'autoupdate:') }
   }
