@@ -11,7 +11,7 @@ import Index from './index'
 import Uninstall from './uninstall'
 
 beforeEach(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 })
 
 test('links example plugin', async () => {
