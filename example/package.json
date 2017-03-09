@@ -18,8 +18,8 @@
     ]
   },
   "dependencies": {
-    "cli-engine": "1.0.7",
-    "cli-engine-example-plugin": "2.0.4"
+    "cli-engine": "^1.0.8",
+    "cli-engine-example-plugin": "^2.0.5"
   },
   "devDependencies": {
     "babel-cli": "6.23.0"
