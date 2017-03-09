@@ -66,6 +66,17 @@ Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}
     return this._data.plugins.map(p => new Plugin('link', p, this.config, this.plugins.cache))
   }
 
+  async refresh () {
+    for (let plugin of this._data.plugins) {
+      try {
+        await this.prepare(plugin)
+      } catch (err) {
+        this.warn(`Error refreshing ${plugin}`)
+        this.warn(err)
+      }
+    }
+  }
+
   async prepare (p: string) {
     await this._install(p)
     // flow$ignore
