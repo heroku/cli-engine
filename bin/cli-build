@@ -61,7 +61,7 @@ mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
 rm -rf $WORKSPACE/$NODE_BASE
 
 # create bin runner
-cat << EOF > bin/$BIN
+cat << EOF > $WORKSPACE/bin/$BIN
 #!/usr/bin/env bash
 set -e
 get_script_dir () {
@@ -85,9 +85,9 @@ else
   CLI_BINNAME=\$DIR/$BIN \$DIR/node \$DIR/$BIN.js \$*
 fi
 EOF
-chmod +x bin/$BIN
+chmod +x $WORKSPACE/bin/$BIN
 
-cat << EOF > bin/$BIN.js
+cat << EOF > $WORKSPACE/bin/$BIN.js
 const path = require('path')
 const CLI = require('cli-engine').default
 const cli = new CLI({
