@@ -7,8 +7,9 @@ import Command, {Config, Base, Topic, mixins, type Flag, type Arg} from 'cli-eng
 import path from 'path'
 import Yarn from './yarn'
 import lock from 'rwlockfile'
+import LinkedPlugins from './linked_plugins'
 
-type PluginType = | "builtin" | "core" | "user"
+type PluginType = | "builtin" | "core" | "user" | "link"
 
 type LegacyContext = {
   supportsColor: boolean
@@ -112,47 +113,6 @@ class Cache extends Base {
       this.warn(err)
     }
   }
-}
-
-class LinkedPlugins extends Base {
-  constructor (config: Config) {
-    super(config)
-    try {
-      this._data = this.fs.readJSONSync(this.file)
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-      this._data = {
-        version: '1',
-        plugins: []
-      }
-    }
-  }
-
-  config: Config
-  _data: {
-    version: string,
-    plugins: string[]
-  }
-
-  add (p: string) {
-    this._data.plugins.push(p)
-    this._save()
-  }
-
-  remove (p: string) {
-    this._data.plugins = this._data.plugins.filter(q => q !== p)
-    this._save()
-  }
-
-  list (): string[] {
-    return this._data.plugins
-  }
-
-  _save () {
-    this.fs.writeJSONSync(this.file, this._data)
-  }
-
-  get file (): string { return path.join(this.config.dirs.data, 'linked_plugins.json') }
 }
 
 function undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
@@ -317,11 +277,11 @@ export default class Plugins extends Base {
     super(config)
     this.config = config
     this.cache = new Cache(config)
-    this.linkedPlugins = new LinkedPlugins(config)
+    this.linkedPlugins = new LinkedPlugins(config, this)
     this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
     .concat(this.corePlugins)
     .concat(this.userPlugins)
-    .concat(this.linkedPlugins)
+    .concat(this.linkedPlugins.list())
     this.cache.save()
     this.yarn = new Yarn(this.config)
   }
@@ -423,18 +383,7 @@ export default class Plugins extends Base {
   }
 
   async addLinkedPlugin (p: string) {
-    // flow$ignore
-    let m = require(p)
-    // flow$ignore
-    let pjson: {name: string} = require(path.join(p, 'package.json'))
-    if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
-    const name = pjson.name
-    if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
-      throw new Error(`${name} is already installed.
-Uninstall with ${this.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
-    }
-    if (this.linkedPlugins.list().find(q => q === p)) throw new Error(`${name} is already linked`)
-    this.linkedPlugins.add(p)
+    await this.linkedPlugins.add(p)
   }
 
   clearCache (name: string) {

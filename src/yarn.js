@@ -1,10 +1,28 @@
 // @flow
 
 import path from 'path'
-import {Base} from 'cli-engine-command'
+import {Base, type Config} from 'cli-engine-command'
 
 export default class Yarn extends Base {
   get bin (): string { return path.join(__dirname, '..', 'node_modules', '.bin', 'yarn') }
+
+  constructor (config: Config) {
+    super(config)
+    this.options = {
+      cwd: path.join(this.config.dirs.data, 'plugins'),
+      stdio: this.config.debug ? 'inherit' : null
+    }
+  }
+
+  options: {
+    cwd: string,
+    preferLocal?: boolean,
+    stripEof?: boolean,
+    input?: any,
+    reject?: boolean,
+    cleanup?: boolean,
+    stdio: null | 'inherit' | [number, number, number]
+  }
 
   async exec (...args: string[]) {
     let deleteYarnRoadrunnerCache = () => {
@@ -32,10 +50,8 @@ export default class Yarn extends Base {
     }
 
     const execa = require('execa')
-    const cwd = path.join(this.config.dirs.data, 'plugins')
-    const stdio = this.config.debug ? 'inherit' : null
-    this.debug(`${cwd}: ${this.bin} ${args.join(' ')}`)
+    this.debug(`${this.options.cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
-    await execa(this.bin, args, {cwd, stdio})
+    await execa(this.bin, args, this.options)
   }
 }
