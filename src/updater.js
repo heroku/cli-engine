@@ -1,7 +1,4 @@
 // @flow
-/* globals
-   stream$Readable
-*/
 
 import {Base} from 'cli-engine-command'
 import path from 'path'

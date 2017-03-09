@@ -1,7 +1,4 @@
 // @flow
-/* globals
-   Class
-*/
 
 import Command, {Config, Base, Topic, mixins, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
@@ -106,6 +103,17 @@ class Cache extends Base {
     this.cache.plugins[path] = plugin
   }
 
+  deletePlugin (name: string) {
+    for (let k of Object.keys(this.cache.plugins)) {
+      if (this.cache.plugins[k].name === name) {
+        this.debug(`Clearing cache for ${k}`)
+        this.constructor.updated = true
+        delete this.cache.plugins[k]
+      }
+    }
+    this.save()
+  }
+
   save () {
     if (!this.constructor.updated) return
     try {
@@ -135,8 +143,6 @@ export class Plugin extends Base {
     let p = this.fetch()
     this.name = p.name
     this.version = p.version
-    this.commands = p.commands
-    this.topics = p.topics
   }
 
   type: PluginType
@@ -144,8 +150,14 @@ export class Plugin extends Base {
   cache: Cache
   name: string
   version: string
-  commands: CachedCommand[]
-  topics: CachedTopic[]
+
+  get commands (): CachedCommand[] {
+    return this.fetch().commands
+  }
+
+  get topics (): CachedTopic[] {
+    return this.fetch().topics
+  }
 
   findCommand (cmd: string): ?Class<Command> {
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
@@ -215,6 +227,7 @@ export class Plugin extends Base {
     let c = this.cache.plugin(this.path)
     if (c) return c
     try {
+      this.debug('updating cache for ' + this.path)
       return this.updatePlugin(this.require())
     } catch (err) {
       if (this.type === 'builtin') throw err
@@ -405,10 +418,7 @@ export default class Plugins extends Base {
   }
 
   clearCache (name: string) {
-    for (let k of Object.keys(this.cache.cache.plugins)) {
-      if (this.cache.cache.plugins[k].name === name) delete this.cache.cache[k]
-    }
-    this.cache.save()
+    this.cache.deletePlugin(name)
   }
 
   get userPluginsDir (): string { return path.join(this.config.dirs.data, 'plugins') }
