@@ -18,6 +18,7 @@ stages:
           set -exu
 
           git submodule update --recursive --remote
+          ls example-plugin
 
           # setup yarn
           yarn
