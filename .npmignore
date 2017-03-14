@@ -2,6 +2,7 @@
 .babelrc
 .envrc
 .flowconfig
+.gitmodules
 .npmignore
 CONTRIBUTING.md
 Dockerfile
