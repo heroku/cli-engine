@@ -5,6 +5,7 @@ RUN apt-get -y update && \
   apt-get install -y --no-install-recommends \
   ocaml libelf-dev \
   python-pip python-dev build-essential \
+  p7zip-full \
   && apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
