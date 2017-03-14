@@ -7,7 +7,7 @@ import lock from 'rwlockfile'
 type Manifest = {
   version: string,
   channel: string,
-  sha256: string
+  sha256gz: string
 }
 
 export default class extends Base {
@@ -30,6 +30,7 @@ export default class extends Base {
 
   async update (manifest: Manifest) {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
+    // TODO: read sha256
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
     let stream = await this.http.stream(url)
     let dir = path.join(this.config.dirs.data, 'cli')
