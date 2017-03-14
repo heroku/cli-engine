@@ -57,7 +57,7 @@ if [ $OS == win32 ]; then
     curl -fSLo $ROOT/tmp/cache/$NODE_BASE.7z $URL
   fi
   cd $WORKSPACE
-  7z x -bb0 -bd -y $ROOT/tmp/cache/$NODE_BASE.7z
+  7z x -bd -y $ROOT/tmp/cache/$NODE_BASE.7z > /dev/null
   mv $WORKSPACE/$NODE_BASE/node.exe $WORKSPACE/bin/node.exe
   rm -rf $WORKSPACE/$NODE_BASE
 else
