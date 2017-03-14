@@ -335,6 +335,18 @@ export default class Plugins extends Base {
     }
   }
 
+  get commands (): CachedCommand[] {
+    let commands = []
+    for (let plugin of this.plugins) {
+      try {
+        commands = commands.concat(plugin.commands)
+      } catch (err) {
+        this.warn(err, `error reading plugin ${plugin.name}`)
+      }
+    }
+    return commands
+  }
+
   list () {
     return this.plugins
   }
