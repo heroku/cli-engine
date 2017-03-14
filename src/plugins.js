@@ -204,6 +204,7 @@ export class Plugin extends Base {
       static args = c.args || []
       static flags = c.flags || []
       static variableArgs = c.variableArgs
+      static help = c.help
 
       run () {
         const ctx = {
