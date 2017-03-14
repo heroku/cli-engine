@@ -1,6 +1,6 @@
 // @flow
 
-import Command from 'cli-engine-command'
+import Command, {Topic as TopicBase} from 'cli-engine-command'
 import util from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
@@ -18,7 +18,8 @@ export default class Help extends Command {
     if (!cmd) return this.topics()
     let Topic = this.plugins.findTopic(cmd)
     let matchedCommand = this.plugins.findCommand(cmd)
-    if (!Topic) throw new Error(`command ${cmd} not found`)
+    if (!Topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
+    if (!Topic) Topic = TopicBase
     let commands = this.plugins.commandsForTopic(Topic.topic)
     await new Topic(commands, this).help(this.argv, matchedCommand)
   }
