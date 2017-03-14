@@ -31,7 +31,7 @@ stages:
 
           # test project
           cd ~/cli-engine
-          ./node_modules/.bin/jest --coverage
+          ./node_modules/.bin/jest --coverage --runInBand
           ./node_modules/.bin/flow check
           ./node_modules/.bin/standard
           bash <(curl -s https://codecov.io/bash)
