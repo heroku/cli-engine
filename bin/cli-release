@@ -19,6 +19,7 @@ DIR=$(get_script_dir)
 VERSION=`$DIR/version`
 
 PLATFORMS=(
+  windows-x86
   darwin-x64
   linux-x86
   linux-x64

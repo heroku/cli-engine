@@ -29,6 +29,10 @@ NAME=`node -p "require('./package.json').name"`
 BIN=`node -p "require('./package.json')['cli-engine'].bin || require('./package.json').name"`
 ROOT=`pwd`
 
+IFS='-' read -ra INFO <<< "$PLATFORM"
+OS=${INFO[0]}
+ARCH=${INFO[1]}
+
 # setup workspace
 TARBALL_BASE=$NAME-v$VERSION-$PLATFORM
 WORKSPACE=$ROOT/tmp/build/$TARBALL_BASE
@@ -44,6 +48,29 @@ cp package.json $WORKSPACE
 
 # install packages
 cd $WORKSPACE
+
+# install node
+if [ $OS == windows ]; then
+  NODE_BASE=node-v$NODE_VERSION-win-$ARCH
+  if [ ! -f $ROOT/tmp/cache/$NODE_BASE.7z ]; then
+    URL=https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-win-$ARCH.7z
+    curl -fSLo $ROOT/tmp/cache/$NODE_BASE.7z $URL
+  fi
+  cd $WORKSPACE
+  7z x $ROOT/tmp/cache/$NODE_BASE.7z
+  mv $WORKSPACE/$NODE_BASE/node.exe $WORKSPACE/bin/node.exe
+  rm -rf $WORKSPACE/$NODE_BASE
+else
+  NODE_BASE=node-v$NODE_VERSION-$PLATFORM
+  if [ ! -f $ROOT/tmp/cache/$NODE_BASE.tar.xz ]; then
+    URL=https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
+    curl -fSLo $ROOT/tmp/cache/$NODE_BASE.tar.xz $URL
+  fi
+  tar -C $WORKSPACE -xf $ROOT/tmp/cache/$NODE_BASE.tar.xz
+  mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
+  rm -rf $WORKSPACE/$NODE_BASE
+fi
+
 yarn install --no-progress --production
 if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
   cd $WORKSPACE/node_modules/cli-engine
@@ -51,17 +78,14 @@ if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
   yarn run prepare
 fi
 
-# install node
-NODE_BASE=node-v$NODE_VERSION-$PLATFORM
-if [ ! -f $ROOT/tmp/cache/$NODE_BASE.tar.xz ]; then
-  curl -fSLo $ROOT/tmp/cache/$NODE_BASE.tar.xz https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
-fi
-tar -C $WORKSPACE -xf $ROOT/tmp/cache/$NODE_BASE.tar.xz
-mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
-rm -rf $WORKSPACE/$NODE_BASE
-
 # create bin runner
-cat << EOF > $WORKSPACE/bin/$BIN
+if [ $OS == "windows" ]; then
+  cat << EOF > $WORKSPACE/bin/$BIN.cmd
+@echo off
+"%~dp0\\node.exe" "%~dp0\\$BIN.js" %*
+EOF
+else
+  cat << EOF > $WORKSPACE/bin/$BIN
 #!/usr/bin/env bash
 set -e
 get_script_dir () {
@@ -86,6 +110,7 @@ else
 fi
 EOF
 chmod +x $WORKSPACE/bin/$BIN
+fi
 
 cat << EOF > $WORKSPACE/bin/$BIN.js
 const path = require('path')
