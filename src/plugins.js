@@ -351,9 +351,14 @@ export default class Plugins extends Base {
 
   commandsForTopic (topic: string): Class<Command>[] {
     let commands = this.plugins.reduce((t, p) => {
-      return t.concat(p.commands
-        .filter(c => c.topic === topic)
-        .map(c => (p.findCommand(c.id): any)))
+      try {
+        return t.concat(p.commands
+          .filter(c => c.topic === topic)
+          .map(c => (p.findCommand(c.id): any)))
+      } catch (err) {
+        this.warn(err, `error reading plugin ${p.name}`)
+        return t
+      }
     }, [])
     return uniqby(commands, 'id')
   }
