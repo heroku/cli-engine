@@ -21,3 +21,13 @@ test('errors with invalid arguments', async function () {
     expect(err.message).toContain('Unexpected argument --invalid-flag')
   }
 })
+
+test('errors when command not found', async function () {
+  expect.assertions(1)
+  let cli = new CLI({argv: ['heroku', 'foobar12345'], mock: true})
+  try {
+    await cli.run()
+  } catch (err) {
+    expect(err.code).toEqual(127)
+  }
+})
