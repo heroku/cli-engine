@@ -34,6 +34,7 @@ export default class Main {
     await plugins.refreshLinkedPlugins()
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(this.out).run()
+    await this.out.done()
     await Command.run(this.config.argv.slice(2), {config: this.config})
     this.out.exit(0)
   }
