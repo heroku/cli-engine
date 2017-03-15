@@ -16,10 +16,10 @@ export default class Main extends Base {
   }
 
   async run () {
-    process.on('exit', () => this.showCursor())
-    process.on('SIGINT', () => this.exit(1))
-    process.on('uncaughtException', err => this.error(err))
-    process.on('unhandledRejection', err => this.error(err))
+    process.once('exit', () => this.showCursor())
+    process.once('SIGINT', () => this.exit(1))
+    process.once('uncaughtException', err => this.error(err))
+    process.once('unhandledRejection', err => this.error(err))
     process.stdout.on('error', handleEPIPE)
     process.stderr.on('error', handleEPIPE)
 
