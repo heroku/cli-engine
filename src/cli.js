@@ -4,10 +4,13 @@ if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
 import Command, {Config, type ConfigOptions} from 'cli-engine-command'
 import Output from 'cli-engine-command/lib/output'
+import HelpError from 'cli-engine-command/lib/help-error'
 import Plugins from './plugins'
 
 import Updater from './updater'
 import NotFound from './not_found'
+
+import Help from './commands/help'
 
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
@@ -40,7 +43,12 @@ export default class Main {
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(out).run()
     await out.done()
-    this.cmd = await Command.run(this.config.argv.slice(2), this.config)
+    try {
+      this.cmd = await Command.run(this.config.argv.slice(2), this.config)
+    } catch (e) {
+      if (e instanceof HelpError) this.cmd = await Help.run([this.config.argv[1]], {config: this.config})
+      else throw e
+    }
     out.exit(0)
   }
 }
