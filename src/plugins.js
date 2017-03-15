@@ -1,34 +1,14 @@
 // @flow
 
-import Command, {Config, Base, Topic, mixins, type Flag, type Arg} from 'cli-engine-command'
+import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
 import path from 'path'
 import Yarn from './yarn'
 import lock from 'rwlockfile'
 import LinkedPlugins from './linked_plugins'
 import uniqby from 'lodash.uniqby'
+import {convertFromV5, type LegacyCommand} from './legacy'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
-
-type LegacyContext = {
-  supportsColor: boolean
-}
-
-type LegacyCommand = {
-  topic: string,
-  command?: string,
-  aliases?: string[],
-  variableArgs?: boolean,
-  args: Arg[],
-  flags: Flag[],
-  description?: ?string,
-  help?: ?string,
-  usage?: ?string,
-  needsApp?: ?boolean,
-  needsAuth?: ?boolean,
-  hidden?: ?boolean,
-  default?: ?boolean,
-  run: (ctx: LegacyContext) => Promise<any>
-}
 
 type ParsedTopic = | {
   name?: ?string,
@@ -171,7 +151,7 @@ export class Plugin extends Base {
       .map(undefaultCommand)
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
-    return typeof Command === 'function' ? Command : this.buildCommand((Command: any))
+    return typeof Command === 'function' ? Command : convertFromV5((Command: any))
   }
 
   findTopic (name: string): ?Class<Topic> {
@@ -188,45 +168,6 @@ export class Plugin extends Base {
       static topic = t.topic
       static description = t.description
       static hidden = t.hidden
-    }
-  }
-
-  buildCommand (c: LegacyCommand): Class<Command> {
-    if (!c.topic) throw new Error('command has no topic')
-    let Base = (c.needsApp || c.wantsApp)
-    ? mixins.app(Command, {required: !!c.needsApp})
-    : Command
-    return class extends Base {
-      static topic = c.topic
-      static command = c.command
-      static description = c.description
-      static hidden = c.hidden
-      static args = c.args || []
-      static flags = c.flags || []
-      static variableArgs = c.variableArgs
-      static help = c.help
-
-      run () {
-        const ctx = {
-          supportsColor: this.color.enabled,
-          auth: {},
-          debug: this.config.debug,
-          flags: this.flags,
-          args: c.variableArgs ? this.argv : this.args,
-          // flow$ignore
-          app: this.app
-        }
-        if (c.needsAuth) {
-          ctx.auth.password = process.env.HEROKU_API_KEY
-          if (!ctx.auth.password) {
-            const netrc = require('netrc')()
-            const host = netrc['api.heroku.com']
-            if (host) ctx.auth.password = host.password
-          }
-          if (!ctx.auth.password) throw new Error('Not logged in')
-        }
-        return c.run(ctx)
-      }
     }
   }
 
