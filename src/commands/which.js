@@ -9,9 +9,10 @@ export default class extends Command {
     {name: 'command'}
   ]
 
+  plugins = new Plugins(this)
+
   findPlugin (cmd: string) {
-    const plugins = new Plugins(this.config)
-    for (let plugin of plugins.list()) {
+    for (let plugin of this.plugins.list()) {
       if (plugin.findCommand(this.args['command'])) {
         return plugin
       }

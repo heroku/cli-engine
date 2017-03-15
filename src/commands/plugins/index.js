@@ -10,9 +10,10 @@ export default class extends Command {
     {name: 'core', description: 'show core plugins'}
   ]
 
+  plugins = new Plugins(this)
+
   async run () {
-    let plugins = new Plugins(this.config)
-    plugins = plugins.list()
+    let plugins = this.plugins.list()
     plugins = plugins.filter(p => p.type !== 'builtin')
     plugins.sort(util.compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')

@@ -1,8 +1,10 @@
 // @flow
 
+import type Output from 'cli-engine-command/lib/output'
+import type Config from 'cli-engine-command/lib/config'
 import path from 'path'
-import {Base} from 'cli-engine-command'
 import lock from 'rwlockfile'
+import fs from 'fs-extra'
 
 type Info = {
   name: string,
@@ -12,11 +14,18 @@ type Info = {
   }
 }
 
-export default class Yarn extends Base {
-  get lockfile (): string { return path.join(this.config.dirs.cache, 'yarn.lock') }
+export default class Yarn {
+  config: Config
+  out: Output
 
+  constructor (output: Output) {
+    this.out = output
+    this.config = output.config
+  }
+
+  get lockfile (): string { return path.join(this.config.dirs.cache, 'yarn.lock') }
   get nodeModulesDirs (): string[] { return require('find-node-modules')({cwd: __dirname, relative: false}) }
-  get yarnDir (): ?string { return this.nodeModulesDirs.map(d => path.join(d, 'yarn')).find(f => this.fs.existsSync(f)) }
+  get yarnDir (): ?string { return this.nodeModulesDirs.map(d => path.join(d, 'yarn')).find(f => fs.existsSync(f)) }
   get bin (): ?string { return this.yarnDir ? path.join(this.yarnDir, 'bin', 'yarn') : 'yarn' }
 
   async exec (args: string[] = [], options: {} = {}): Promise<string> {
@@ -40,7 +49,7 @@ export default class Yarn extends Base {
       }
 
       try {
-        this.fs.unlinkSync(path.join(getCacheDirectory(), '.roadrunner.json'))
+        fs.unlinkSync(path.join(getCacheDirectory(), '.roadrunner.json'))
       } catch (err) {}
     }
 
@@ -51,7 +60,7 @@ export default class Yarn extends Base {
 
     if (!this.bin) throw new Error('yarn not found')
     const execa = require('execa')
-    this.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
+    this.out.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
     let unlock = await lock.write(this.lockfile)
     let output = await execa(this.bin, args, options)
