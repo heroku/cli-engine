@@ -252,6 +252,7 @@ export default class Plugins {
   constructor (output: Output) {
     this.out = output
     this.config = output.config
+    this.yarn = new Yarn(output)
     this.cache = new Cache(output.config, output)
     this.linkedPlugins = new LinkedPlugins(this)
     this.plugins = [new Plugin('builtin', './commands', this)]
@@ -259,7 +260,6 @@ export default class Plugins {
     .concat(this.userPlugins)
     .concat(this.corePlugins)
     this.cache.save()
-    this.yarn = new Yarn(output)
   }
 
   linkedPlugins: LinkedPlugins
