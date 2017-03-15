@@ -616,9 +616,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.1.1.tgz#1c2b7c9cd432c8eff11cce4315f473174624e2b0"
+cli-engine-command@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-2.1.2.tgz#e3c27e3df7d9c4d14b5005310129f815ce6cd36e"
   dependencies:
     ansi-escapes "1.4.0"
     cardinal "1.0.0"
