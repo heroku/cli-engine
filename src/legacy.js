@@ -2,6 +2,7 @@
 
 import Command, {type Flag, type Arg} from 'cli-engine-command'
 import App, {AppFlag, RemoteFlag} from 'cli-engine-command/lib/mixins/app'
+import Org, {OrgFlag} from 'cli-engine-command/lib/mixins/org'
 import Heroku from 'cli-engine-command/lib/mixins/heroku'
 
 export type LegacyContext = {
@@ -20,6 +21,7 @@ export type LegacyCommand = {
   usage?: ?string,
   needsApp?: ?boolean,
   needsAuth?: ?boolean,
+  needsOrg?: ?boolean,
   hidden?: ?boolean,
   default?: ?boolean,
   run: (ctx: LegacyContext) => Promise<any>
@@ -39,6 +41,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
 
     heroku = new Heroku(this, {required: false})
     app = new App(this, {required: c.needsApp})
+    org = new Org(this, {required: c.needsOrg})
 
     run () {
       const ctx = {
@@ -47,12 +50,15 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
         debug: this.config.debug,
         flags: this.flags,
         args: c.variableArgs ? this.argv : this.args,
-        app: this.app.name
+        app: this.app.name,
+        org: this.org.name
       }
       ctx.auth.password = this.heroku.auth
       return c.run(ctx)
     }
   }
+
   if (c.needsApp || c.wantsApp) V5.flags.push(AppFlag, RemoteFlag)
+  if (c.needsOrg || c.wantsOrg) V5.flags.push(OrgFlag)
   return V5
 }
