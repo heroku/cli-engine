@@ -11,8 +11,9 @@ export default class PluginsLink extends Command {
     {name: 'path', optional: true}
   ]
 
+  plugins = new Plugins(this)
+
   async run () {
-    const plugins = new Plugins(this.config)
-    await plugins.addLinkedPlugin(path.resolve(this.args.path || process.cwd()))
+    await this.plugins.addLinkedPlugin(path.resolve(this.args.path || process.cwd()))
   }
 }
