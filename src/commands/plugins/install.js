@@ -14,9 +14,9 @@ export default class PluginsInstall extends Command {
   static args = [
     {name: 'plugin'}
   ]
+  plugins = new Plugins(this)
 
   async run () {
-    const plugins = new Plugins(this.config)
-    await plugins.install(this.args.plugin)
+    await this.plugins.install(this.args.plugin)
   }
 }

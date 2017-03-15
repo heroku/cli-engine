@@ -11,7 +11,7 @@ export default class Update extends Command {
   ]
 
   async run () {
-    let updater = new Updater(this.config)
+    let updater = new Updater(this)
     if (this.config.updateDisabled) this.warn(this.config.updateDisabled)
     else {
       this.action.start(`${this.config.name}: Updating CLI`)

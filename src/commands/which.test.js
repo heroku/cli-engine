@@ -2,10 +2,13 @@
 
 import Which from './which'
 import Plugins from '../plugins'
-import {Config} from 'cli-engine-command'
+import Config from 'cli-engine-command/lib/config'
+import Output from 'cli-engine-command/lib/output'
 
 function plugins () {
-  return new Plugins(new Config({mock: true}))
+  let config = new Config({mock: true})
+  let output = new Output(config)
+  return new Plugins(output)
 }
 
 async function install (plugin) {
