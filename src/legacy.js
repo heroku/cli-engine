@@ -2,6 +2,7 @@
 
 import Command, {type Flag, type Arg} from 'cli-engine-command'
 import App, {AppFlag} from 'cli-engine-command/lib/mixins/app'
+import Heroku from 'cli-engine-command/lib/mixins/heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
@@ -36,6 +37,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
     static variableArgs = c.variableArgs
     static help = c.help
 
+    heroku = new Heroku(this, {required: false})
     app = new App(this, {required: c.needsApp})
 
     run () {
@@ -47,15 +49,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
         args: c.variableArgs ? this.argv : this.args,
         app: this.app.name
       }
-      if (c.needsAuth) {
-        ctx.auth.password = process.env.HEROKU_API_KEY
-        if (!ctx.auth.password) {
-          const netrc = require('netrc')()
-          const host = netrc['api.heroku.com']
-          if (host) ctx.auth.password = host.password
-        }
-        if (!ctx.auth.password) throw new Error('Not logged in')
-      }
+      ctx.auth.password = this.heroku.auth
       return c.run(ctx)
     }
   }

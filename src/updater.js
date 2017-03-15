@@ -1,8 +1,11 @@
 // @flow
 
-import {Base} from 'cli-engine-command'
+import type Config from 'cli-engine-command/lib/config'
+import type Output from 'cli-engine-command/lib/output'
+import HTTP from 'cli-engine-command/lib/http'
 import path from 'path'
 import lock from 'rwlockfile'
+import fs from 'fs-extra'
 
 type Manifest = {
   version: string,
@@ -10,7 +13,17 @@ type Manifest = {
   sha256gz: string
 }
 
-export default class extends Base {
+export default class Updater {
+  config: Config
+  out: Output
+  http: HTTP
+
+  constructor (output: Output) {
+    this.out = output
+    this.config = output.config
+    this.http = new HTTP(output)
+  }
+
   get autoupdatefile (): string { return path.join(this.config.dirs.cache, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.dirs.cache, 'autoupdate.log') }
   get updatelockfile (): string { return path.join(this.config.dirs.cache, 'update.lock') }
@@ -37,9 +50,9 @@ export default class extends Base {
     let tmp = path.join(this.config.dirs.data, 'cli_tmp')
     await this.extract(stream, tmp)
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
-    this.fs.removeSync(dir)
-    this.fs.renameSync(path.join(tmp, this.base(manifest)), dir)
-    this.fs.removeSync(tmp)
+    fs.removeSync(dir)
+    fs.renameSync(path.join(tmp, this.base(manifest)), dir)
+    fs.removeSync(tmp)
     unlock()
   }
 
@@ -48,18 +61,18 @@ export default class extends Base {
     const tar = require('tar-stream')
 
     return new Promise(resolve => {
-      this.fs.removeSync(dir)
+      fs.removeSync(dir)
       let extract = tar.extract()
       extract.on('entry', (header, stream, next) => {
         let p = path.join(dir, header.name)
         let opts = {mode: header.mode}
         switch (header.type) {
           case 'directory':
-            this.fs.mkdirpSync(p, opts)
+            fs.mkdirpSync(p, opts)
             next()
             break
           case 'file':
-            stream.pipe(this.fs.createWriteStream(p, opts))
+            stream.pipe(fs.createWriteStream(p, opts))
             break
           case 'symlink':
             // ignore symlinks since they will not work on windows
@@ -87,13 +100,13 @@ export default class extends Base {
     const {spawnSync} = require('child_process')
     if (!this.binPath) return
     const {status} = spawnSync(this.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
-    this.exit(status)
+    this.out.exit(status)
   }
 
   get autoupdateNeeded () {
     try {
       const moment = require('moment')
-      const stat = this.fs.statSync(this.autoupdatefile)
+      const stat = fs.statSync(this.autoupdatefile)
       return moment(stat.mtime).isBefore(moment().subtract(4, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
@@ -104,15 +117,15 @@ export default class extends Base {
   async autoupdate () {
     try {
       if (!this.autoupdateNeeded) return
-      this.fs.writeFileSync(this.autoupdatefile, '')
+      fs.writeFileSync(this.autoupdatefile, '')
       if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
-      let fd = this.fs.openSync(this.autoupdatelogfile, 'a')
+      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       if (!this.binPath) return
       const {spawn} = require('child_process')
       spawn(this.binPath, ['update'], {stdio: [null, fd, fd]})
-      .on('error', e => this.warn(e, 'autoupdate:'))
-    } catch (e) { this.warn(e, 'autoupdate:') }
+      .on('error', e => this.out.warn(e, 'autoupdate:'))
+    } catch (e) { this.out.warn(e, 'autoupdate:') }
   }
 
   async warnIfUpdateAvailable () {
@@ -120,13 +133,13 @@ export default class extends Base {
     let local = this.config.version.split('.')
     let remote = manifest.version.split('.')
     if (local[0] !== remote[0] || local[1] !== remote[1]) {
-      this.warn(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
+      this.out.warn(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
     }
   }
 
   async checkIfUpdating () {
     if (await lock.hasWriter(this.updatelockfile)) {
-      this.warn(`${this.config.name}: warning: update in process`)
+      this.out.warn(`${this.config.name}: warning: update in process`)
       await this.restartCLI()
     } else await lock.read(this.updatelockfile)
   }

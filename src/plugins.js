@@ -1,12 +1,14 @@
 // @flow
 
-import Command, {Config, Base, Topic, type Flag, type Arg} from 'cli-engine-command'
+import Command, {Config, Topic, type Flag, type Arg} from 'cli-engine-command'
+import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Yarn from './yarn'
 import lock from 'rwlockfile'
 import LinkedPlugins from './linked_plugins'
 import uniqby from 'lodash.uniqby'
 import {convertFromV5, type LegacyCommand} from './legacy'
+import fs from 'fs-extra'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -61,16 +63,23 @@ type PJSON = {
   dependencies?: { [name: string]: string }
 }
 
-class Cache extends Base {
+class Cache {
   static updated = false
+  config: Config
+  out: Output
   _cache: CacheData
+
+  constructor (config: Config, output: Output) {
+    this.config = config
+    this.out = output
+  }
 
   get file (): string { return path.join(this.config.dirs.cache, 'plugins.json') }
   get cache (): CacheData {
     if (this._cache) return this._cache
     let initial = {version: this.config.version, plugins: {}}
     try {
-      this._cache = this.fs.readJSONSync(this.file)
+      this._cache = fs.readJSONSync(this.file)
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
       this._cache = initial
@@ -89,7 +98,7 @@ class Cache extends Base {
   deletePlugin (name: string) {
     for (let k of Object.keys(this.cache.plugins)) {
       if (this.cache.plugins[k].name === name) {
-        this.debug(`Clearing cache for ${k}`)
+        this.out.debug(`Clearing cache for ${k}`)
         this.constructor.updated = true
         delete this.cache.plugins[k]
       }
@@ -100,9 +109,9 @@ class Cache extends Base {
   save () {
     if (!this.constructor.updated) return
     try {
-      this.fs.writeJSONSync(this.file, this.cache)
+      fs.writeJSONSync(this.file, this.cache)
     } catch (err) {
-      this.warn(err)
+      this.out.warn(err)
     }
   }
 }
@@ -117,10 +126,11 @@ function undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): Parse
   return (c: any)
 }
 
-export class Plugin extends Base {
-  constructor (type: PluginType, path: string, config: Config, cache: Cache) {
-    super(config)
-    this.cache = cache
+export class Plugin {
+  constructor (type: PluginType, path: string, plugins: Plugins) {
+    this.config = plugins.config
+    this.out = plugins.out
+    this.cache = plugins.cache
     this.type = type
     this.path = path
     let p = this.fetch()
@@ -128,11 +138,13 @@ export class Plugin extends Base {
     this.version = p.version
   }
 
+  config: Config
   type: PluginType
   path: string
   cache: Cache
   name: string
   version: string
+  out: Output
 
   get commands (): CachedCommand[] {
     return this.fetch().commands
@@ -175,11 +187,11 @@ export class Plugin extends Base {
     let c = this.cache.plugin(this.path)
     if (c) return c
     try {
-      this.debug('updating cache for ' + this.path)
+      this.out.debug('updating cache for ' + this.path)
       return this.updatePlugin(this.require())
     } catch (err) {
       if (this.type === 'builtin') throw err
-      this.warn(err)
+      this.out.warn(err)
       return {
         name: this.path,
         path: this.path,
@@ -236,41 +248,42 @@ export class Plugin extends Base {
   pjson (): {name: string, version: string} { return require(path.join(this.path, 'package.json')) }
 }
 
-export default class Plugins extends Base {
-  constructor (config: Config) {
-    super(config)
-    this.config = config
-    this.cache = new Cache(config)
-    this.linkedPlugins = new LinkedPlugins(config, this)
-    this.plugins = [new Plugin('builtin', './commands', config, this.cache)]
+export default class Plugins {
+  constructor (output: Output) {
+    this.out = output
+    this.config = output.config
+    this.yarn = new Yarn(output)
+    this.cache = new Cache(output.config, output)
+    this.linkedPlugins = new LinkedPlugins(this)
+    this.plugins = [new Plugin('builtin', './commands', this)]
     .concat(this.linkedPlugins.list())
     .concat(this.userPlugins)
     .concat(this.corePlugins)
     this.cache.save()
-    this.yarn = new Yarn(this.config)
   }
 
   linkedPlugins: LinkedPlugins
   plugins: Plugin[]
   cache: Cache
   yarn: Yarn
+  out: Output
 
   get corePlugins (): Plugin[] {
     return (this.config._cli.plugins || []).map(name => {
-      return new Plugin('core', path.join(this.config.root, 'node_modules', name), this.config, this.cache)
+      return new Plugin('core', path.join(this.config.root, 'node_modules', name), this)
     })
   }
 
   get userPlugins (): Plugin[] {
     const pjson = this.userPluginsPJSON
     return Object.keys(pjson.dependencies || {}).map(name => {
-      return new Plugin('user', this.userPluginPath(name), this.config, this.cache)
+      return new Plugin('user', this.userPluginPath(name), this)
     })
   }
 
   get userPluginsPJSON (): PJSON {
     try {
-      return this.fs.readJSONSync(path.join(this.userPluginsDir, 'package.json'))
+      return fs.readJSONSync(path.join(this.userPluginsDir, 'package.json'))
     } catch (err) {
       return { dependencies: {} }
     }
@@ -282,7 +295,7 @@ export default class Plugins extends Base {
       try {
         commands = commands.concat(plugin.commands)
       } catch (err) {
-        this.warn(err, `error reading plugin ${plugin.name}`)
+        this.out.warn(err, `error reading plugin ${plugin.name}`)
       }
     }
     return commands
@@ -310,7 +323,7 @@ export default class Plugins extends Base {
           .filter(c => c.topic === topic)
           .map(c => (p.findCommand(c.id): any)))
       } catch (err) {
-        this.warn(err, `error reading plugin ${p.name}`)
+        this.out.warn(err, `error reading plugin ${p.name}`)
         return t
       }
     }, [])
@@ -328,9 +341,9 @@ export default class Plugins extends Base {
   async setupUserPlugins () {
     const pjson = path.join(this.userPluginsDir, 'package.json')
     const yarnrc = path.join(this.userPluginsDir, '.yarnrc')
-    this.fs.mkdirpSync(this.userPluginsDir)
-    if (!this.fs.existsSync(pjson)) this.fs.writeFileSync(pjson, JSON.stringify({private: true}))
-    if (!this.fs.existsSync(yarnrc)) this.fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
+    fs.mkdirpSync(this.userPluginsDir)
+    if (!fs.existsSync(pjson)) fs.writeFileSync(pjson, JSON.stringify({private: true}))
+    if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
     await this.yarn.exec()
   }
 
@@ -338,7 +351,7 @@ export default class Plugins extends Base {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
     if (this.plugins.find(p => p.name === name)) throw new Error(`Plugin ${name} is already installed`)
-    if (!this.config.debug) this.action.start(`Installing plugin ${name}`)
+    if (!this.config.debug) this.out.action.start(`Installing plugin ${name}`)
     await this.yarn.exec(['add', name])
     this.clearCache(name)
     try {
@@ -347,11 +360,11 @@ export default class Plugins extends Base {
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
     } catch (err) {
       await unlock()
-      this.error(err, false)
+      this.out.error(err, false)
       await this.uninstall(name)
-      this.exit(1)
+      this.out.exit(1)
     }
-    this.action.stop()
+    this.out.action.stop()
     await unlock()
   }
 
@@ -380,19 +393,19 @@ export default class Plugins extends Base {
     if (!plugin) throw new Error(`${name} is not installed`)
     switch (plugin.type) {
       case 'user': {
-        if (!this.config.debug) this.action.start(`Uninstalling plugin ${name}`)
+        if (!this.config.debug) this.out.action.start(`Uninstalling plugin ${name}`)
         await this.yarn.exec(['remove', name])
         break
       }
       case 'link': {
-        if (!this.config.debug) this.action.start(`Unlinking plugin ${name}`)
+        if (!this.config.debug) this.out.action.start(`Unlinking plugin ${name}`)
         this.linkedPlugins.remove(plugin.path)
         break
       }
     }
     this.clearCache(name)
     await unlock()
-    this.action.stop()
+    this.out.action.stop()
   }
 
   async addLinkedPlugin (p: string) {
