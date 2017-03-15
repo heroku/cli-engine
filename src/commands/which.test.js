@@ -15,8 +15,9 @@ async function install (plugin) {
   await plugins().install(plugin)
 }
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
 test('finds a plugin command', async () => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
   await install('heroku-debug')
   let cmd = await Which.run(['debug'], {mock: true})
   expect(cmd.stdout.output).toContain('heroku-debug')
