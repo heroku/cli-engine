@@ -11,31 +11,35 @@ import NotFound from './not_found'
 
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
+let out: Output
+process.once('exit', () => out ? out.showCursor() : null)
+process.once('SIGINT', () => out ? out.exit(1) : process.exit(1))
+let handleErr = err => {
+  if (!out) throw err
+  out.error(err)
+}
+process.once('uncaughtException', handleErr)
+process.once('unhandledRejection', handleErr)
+process.stdout.on('error', handleEPIPE)
+process.stderr.on('error', handleEPIPE)
+
 export default class Main {
   config: Config
-  out: Output
 
   constructor (options: ConfigOptions) {
     this.config = new Config(options)
-    this.out = new Output(this.config)
+    out = new Output(this.config)
   }
 
   async run () {
-    process.once('exit', () => this.out.showCursor())
-    process.once('SIGINT', () => this.out.exit(1))
-    process.once('uncaughtException', err => this.out.error(err))
-    process.once('unhandledRejection', err => this.out.error(err))
-    process.stdout.on('error', handleEPIPE)
-    process.stderr.on('error', handleEPIPE)
-
-    const updater = new Updater(this.out)
-    const plugins = new Plugins(this.out)
+    const updater = new Updater(out)
+    const plugins = new Plugins(out)
     await updater.autoupdate()
     await plugins.refreshLinkedPlugins()
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
-    if (!Command) return new NotFound(this.out).run()
-    await this.out.done()
+    if (!Command) return new NotFound(out).run()
+    await out.done()
     await Command.run(this.config.argv.slice(2), {config: this.config})
-    this.out.exit(0)
+    out.exit(0)
   }
 }
