@@ -39,7 +39,7 @@ export default class Main {
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(out).run()
     await out.done()
-    await Command.run(this.config.argv.slice(2), {config: this.config})
+    await Command.run(this.config.argv.slice(2), this.config)
     out.exit(0)
   }
 }
