@@ -1,7 +1,7 @@
 // @flow
 
 import Command, {type Flag, type Arg} from 'cli-engine-command'
-import App, {AppFlag} from 'cli-engine-command/lib/mixins/app'
+import App, {AppFlag, RemoteFlag} from 'cli-engine-command/lib/mixins/app'
 import Heroku from 'cli-engine-command/lib/mixins/heroku'
 
 export type LegacyContext = {
@@ -53,6 +53,6 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
       return c.run(ctx)
     }
   }
-  if (c.needsApp || c.wantsApp) V5.flags.push(AppFlag)
+  if (c.needsApp || c.wantsApp) V5.flags.push(AppFlag, RemoteFlag)
   return V5
 }
