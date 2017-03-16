@@ -3,10 +3,13 @@
 import Install from './install'
 import Uninstall from './uninstall'
 import Index from './index'
+import {integrationLock} from '../../../test/helpers'
 
-beforeEach(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
-})
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
+
+let unlock
+beforeEach(async () => { unlock = await integrationLock() })
+afterEach(() => unlock())
 
 async function plugins (): Promise<string> {
   const index = await Index.run([], {mock: true})

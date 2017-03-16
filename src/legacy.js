@@ -34,7 +34,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command> {
     static hidden = c.hidden
     static args = c.args || []
     static flags = c.flags || []
-    static variableArgs = c.variableArgs
+    static variableArgs = !!c.variableArgs
     static help = c.help
 
     heroku = new Heroku(this, {required: false})
