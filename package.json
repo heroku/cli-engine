@@ -44,6 +44,10 @@
     "node": ">= 7.0.0"
   },
   "enginestrict": true,
+  "files": [
+    "lib",
+    "bin"
+  ],
   "homepage": "https://github.com/heroku/cli-engine",
   "jest": {
     "testEnvironment": "node",
