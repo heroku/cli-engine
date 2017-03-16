@@ -3,10 +3,13 @@
 import Link from './link'
 import Index from './index'
 import Uninstall from './uninstall'
+import {integrationLock} from '../../../test/helpers'
 
-beforeEach(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
-})
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+
+let unlock
+beforeEach(async () => { unlock = await integrationLock() })
+afterEach(() => unlock())
 
 test('links example plugin', async () => {
   let index = await Index.run([], {mock: true})

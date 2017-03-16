@@ -2,28 +2,48 @@
 
 import Which from './which'
 import Plugins from '../plugins'
-import Config from 'cli-engine-command/lib/config'
-import Output from 'cli-engine-command/lib/output'
 
-function plugins () {
-  let config = new Config({mock: true})
-  let output = new Output(config)
-  return new Plugins(output)
+jest.mock('../plugins')
+
+const herokuApps = {
+  type: 'user',
+  name: 'heroku-apps',
+  findCommand (cmd: string) {
+    return cmd === 'apps:info'
+  }
 }
 
-async function install (plugin) {
-  await plugins().install(plugin)
+const builtin = {
+  type: 'builtin',
+  findCommand (cmd: string) {
+    return cmd === 'plugins:install'
+  }
 }
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+// flow$ignore
+Plugins.mockImplementation(() => {
+  return {
+    list () {
+      return [herokuApps, builtin]
+    }
+  }
+})
 
-test('finds a plugin command', async () => {
-  await install('heroku-debug')
-  let cmd = await Which.run(['debug'], {mock: true})
-  expect(cmd.stdout.output).toContain('heroku-debug')
+test('errors if not found', async () => {
+  expect.assertions(1)
+  try {
+    await Which.run(['notfoundcommand'], {mock: true})
+  } catch (err) {
+    expect(err.message).toEqual('not found')
+  }
+})
+
+test('finds a user plugin', async () => {
+  let cmd = await Which.run(['apps:info'], {mock: true})
+  expect(cmd.stdout.output).toEqual('Command from user plugin heroku-apps\n')
 })
 
 test('finds a builtin command', async () => {
-  let cmd = await Which.run(['update'], {mock: true})
-  expect(cmd.stdout.output).toContain('builtin')
+  let cmd = await Which.run(['plugins:install'], {mock: true})
+  expect(cmd.stdout.output).toEqual('builtin command\n')
 })

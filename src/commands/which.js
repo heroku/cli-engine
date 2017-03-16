@@ -11,28 +11,14 @@ export default class extends Command {
 
   plugins = new Plugins(this)
 
-  findPlugin (cmd: string) {
-    for (let plugin of this.plugins.list()) {
-      if (plugin.findCommand(this.args['command'])) {
-        return plugin
-      }
-    }
-  }
-
   async run () {
-    const plugin = this.findPlugin(this.args['command'])
+    const {command} = this.args
+    const plugin = this.plugins.list().find(p => p.findCommand(command))
     if (!plugin) throw new Error('not found')
-    switch (plugin.type) {
-      case 'builtin':
-        this.log('builtin command')
-        break
-      case 'link':
-      case 'core':
-      case 'user':
-        this.log(`Command from ${plugin.type} plugin ${plugin.name}`)
-        break
-      default:
-        throw new Error('not found')
+    if (plugin.type === 'builtin') {
+      this.log('builtin command')
+    } else {
+      this.log(`Command from ${plugin.type} plugin ${plugin.name}`)
     }
   }
 }
