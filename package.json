@@ -38,6 +38,7 @@
     "nock": "9.0.9",
     "rimraf": "2.6.1",
     "standard": "9.0.1",
+    "std-mocks": "^1.0.1",
     "time-require": "0.1.2"
   },
   "engines": {

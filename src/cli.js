@@ -2,7 +2,7 @@
 
 if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
-import {Config, type ConfigOptions} from 'cli-engine-command'
+import Command, {Config, type ConfigOptions} from 'cli-engine-command'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 
@@ -25,6 +25,7 @@ process.stderr.on('error', handleEPIPE)
 
 export default class Main {
   config: Config
+  cmd: Command
 
   constructor (options: ConfigOptions) {
     this.config = new Config(options)
@@ -39,7 +40,7 @@ export default class Main {
     let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
     if (!Command) return new NotFound(out).run()
     await out.done()
-    await Command.run(this.config.argv.slice(2), this.config)
+    this.cmd = await Command.run(this.config.argv.slice(2), this.config)
     out.exit(0)
   }
 }
