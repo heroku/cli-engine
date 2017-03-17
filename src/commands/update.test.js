@@ -23,7 +23,7 @@ jest.mock('../updater', () => {
   }
 })
 
-describe.skip('with no update available', () => {
+describe('with no update available', () => {
   test('updates plugins only', async () => {
     mockManifest.version = '1.0.0'
     const cmd = await Update.run([], {mock: true, version, channel})
@@ -35,7 +35,7 @@ cli-engine-command: Updating CLI... already on latest version: 1.0.0
   })
 })
 
-describe.skip('with update available', () => {
+describe('with update available', () => {
   test('updates CLI and plugins', async () => {
     mockManifest.version = '1.0.1'
     const cmd = await Update.run([], {mock: true, version, channel})
