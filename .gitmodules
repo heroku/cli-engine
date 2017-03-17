@@ -4,3 +4,6 @@
 [submodule "engine"]
 	path = engine
 	url = git@github.com:heroku/cli-engine-example.git
+[submodule "example"]
+	path = example
+	url = git@github.com:heroku/cli-engine-example.git
