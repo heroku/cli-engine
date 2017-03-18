@@ -1,12 +1,18 @@
 // @flow
 
 import Command, {type Flag, type Arg} from 'cli-engine-command'
-import App, {AppFlag, RemoteFlag} from 'cli-engine-command/lib/mixins/app'
-import Org, {OrgFlag} from 'cli-engine-command/lib/mixins/org'
-import Heroku from 'cli-engine-command/lib/mixins/heroku'
+import {AppFlag, RemoteFlag} from 'cli-engine-command/lib/flags/app'
+import OrgFlag from 'cli-engine-command/lib/flags/org'
+import Heroku from 'cli-engine-command/lib/heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
+}
+
+export type LegacyFlag = {
+  name: string,
+  description?: string,
+  char?: string
 }
 
 export type LegacyCommand = {
@@ -15,7 +21,7 @@ export type LegacyCommand = {
   aliases?: string[],
   variableArgs?: boolean,
   args: Arg[],
-  flags: Flag[],
+  flags: LegacyFlag[],
   description?: ?string,
   help?: ?string,
   usage?: ?string,
