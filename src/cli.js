@@ -25,7 +25,7 @@ process.stderr.on('error', handleEPIPE)
 
 export default class Main {
   config: Config
-  cmd: Command
+  cmd: Command<*>
 
   constructor (options: ConfigOptions) {
     this.config = new Config(options)

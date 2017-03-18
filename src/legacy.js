@@ -1,6 +1,6 @@
 // @flow
 
-import Command, {type Arg, BooleanFlag, StringFlag} from 'cli-engine-command'
+import Command, {type Arg, type Flag, BooleanFlag, StringFlag} from 'cli-engine-command'
 import {AppFlag, RemoteFlag} from 'cli-engine-command/lib/flags/app'
 import OrgFlag from 'cli-engine-command/lib/flags/org'
 import Heroku from 'cli-engine-command/lib/heroku'
@@ -45,17 +45,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     static description = c.description
     static hidden = c.hidden
     static args = c.args || []
-    static flags = (c.flags || []).reduce((flags, flag) => {
-      let opts = {
-        char: (flag.char: any),
-        description: flag.description,
-        hidden: flag.hidden,
-        required: flag.required,
-        optional: flag.optional
-      }
-      flags[flag.name] = flag.hasValue ? StringFlag(opts) : BooleanFlag(opts)
-      return flags
-    }, {})
+    static flags = convertFlagsFromV5(c.flags)
     static variableArgs = !!c.variableArgs
     static help = c.help
 
@@ -91,4 +81,20 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
   }
   if (c.needsOrg || c.wantsOrg) V5.flags.org = OrgFlag({required: !!c.needsOrg})
   return V5
+}
+
+export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Flag<*>})): {[name: string]: Flag<*>} {
+  if (!flags) return {}
+  if (!Array.isArray(flags)) return flags
+  return flags.reduce((flags, flag) => {
+    let opts = {
+      char: (flag.char: any),
+      description: flag.description,
+      hidden: flag.hidden,
+      required: flag.required,
+      optional: flag.optional
+    }
+    flags[flag.name] = flag.hasValue ? StringFlag(opts) : BooleanFlag(opts)
+    return flags
+  }, {})
 }

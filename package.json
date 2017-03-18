@@ -10,7 +10,7 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "1.4.0",
-    "cli-engine-command": "^2.2.3",
+    "cli-engine-command": "2.2.4",
     "eslint": "3.18.0",
     "execa": "^0.6.1",
     "find-node-modules": "^1.0.4",
