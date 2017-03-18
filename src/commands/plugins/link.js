@@ -14,6 +14,6 @@ export default class PluginsLink extends Command {
   plugins = new Plugins(this)
 
   async run () {
-    await this.plugins.addLinkedPlugin(path.resolve(this.args.path || process.cwd()))
+    await this.plugins.addLinkedPlugin(path.resolve(this.argv[0] || process.cwd()))
   }
 }
