@@ -15,7 +15,7 @@ export default class Update extends Command {
     if (this.config.updateDisabled) this.warn(this.config.updateDisabled)
     else {
       this.action.start(`${this.config.name}: Updating CLI`)
-      let channel = this.args.channel || this.config.channel
+      let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         this.action.stop(`already on latest version: ${this.config.version}`)
