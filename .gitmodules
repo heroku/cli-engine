@@ -1,3 +1,6 @@
 [submodule "example-plugin"]
 	path = example-plugin
 	url = https://github.com/heroku/cli-engine-example-plugin
+[submodule "example"]
+	path = example
+	url = https://github.com/heroku/cli-engine-example
