@@ -7,7 +7,7 @@ import Yarn from './yarn'
 import lock from 'rwlockfile'
 import LinkedPlugins from './linked_plugins'
 import uniqby from 'lodash.uniqby'
-import {convertFromV5, type LegacyCommand} from './legacy'
+import {convertFromV5, convertFlagsFromV5, type LegacyCommand} from './legacy'
 import fs from 'fs-extra'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
@@ -19,7 +19,7 @@ type ParsedTopic = | {
   hidden?: ?boolean
 } | Class<Topic>
 
-type ParsedCommand = | LegacyCommand | Class<Command>
+type ParsedCommand = | LegacyCommand | Class<Command<*>>
 
 type ParsedPlugin = {
   topic?: ParsedTopic,
@@ -33,7 +33,7 @@ type CachedCommand = {
   command?: ?string,
   aliases?: string[],
   args: Arg[],
-  flags: Flag[],
+  flags: {[name: string]: Flag<*>},
   description: ?string,
   help?: ?string,
   usage?: ?string,
@@ -154,7 +154,7 @@ export class Plugin {
     return this.fetch().topics
   }
 
-  findCommand (cmd: string): ?Class<Command> {
+  findCommand (cmd: string): ?Class<Command<*>> {
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
     if (!c) return
     let {topic, command} = c
@@ -215,11 +215,11 @@ export class Plugin {
       description: c.description,
       args: c.args,
       variableArgs: c.variableArgs,
-      flags: c.flags,
       help: c.help,
       usage: c.usage,
       hidden: !!c.hidden,
-      aliases: c.aliases
+      aliases: c.aliases,
+      flags: convertFlagsFromV5(c.flags)
     }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
     .map(undefaultTopic)
@@ -309,14 +309,14 @@ export default class Plugins {
     return !!this.plugins.find(p => p.name === name)
   }
 
-  findCommand (cmd: string): ?Class<Command> {
+  findCommand (cmd: string): ?Class<Command<*>> {
     for (let plugin of this.plugins) {
       let c = plugin.findCommand(cmd)
       if (c) return c
     }
   }
 
-  commandsForTopic (topic: string): Class<Command>[] {
+  commandsForTopic (topic: string): Class<Command<*>>[] {
     let commands = this.plugins.reduce((t, p) => {
       try {
         return t.concat(p.commands

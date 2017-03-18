@@ -1,14 +1,12 @@
 // @flow
 
-import Command from 'cli-engine-command'
+import Command, {BooleanFlag} from 'cli-engine-command'
 import util from '../../util'
 import Plugins from '../../plugins'
 
 export default class extends Command {
   static topic = 'plugins'
-  static flags = [
-    {name: 'core', description: 'show core plugins'}
-  ]
+  static flags = {core: BooleanFlag()}
 
   plugins = new Plugins(this)
 
