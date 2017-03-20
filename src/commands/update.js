@@ -3,6 +3,7 @@
 import Command from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
+import Analytics from '../analytics'
 
 export default class Update extends Command {
   static topic = 'update'
@@ -26,5 +27,6 @@ export default class Update extends Command {
       }
     }
     await PluginsUpdate.run([], {config: this.config})
+    await Analytics.submitAnalytics({config: this.config })
   }
 }
