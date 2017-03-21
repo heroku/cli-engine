@@ -361,7 +361,7 @@ export default class Plugins {
     } catch (err) {
       await unlock()
       this.out.error(err, false)
-      await this.uninstall(name)
+      await this.uninstall(name, true)
       this.out.exit(1)
     }
     this.out.action.stop()
@@ -387,9 +387,16 @@ export default class Plugins {
     this.clearCache(name)
   }
 
-  async uninstall (name: string) {
+  async uninstall (name: string, forceSilently: boolean = false) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     let plugin = this.plugins.filter(p => !['core', 'builtin'].includes(p.type)).find(p => p.name === name)
+    if (!plugin && forceSilently) {
+      await this.yarn.exec(['remove', name])
+      this.clearCache(name)
+      await unlock()
+      this.out.action.stop()
+      return
+    }
     if (!plugin) throw new Error(`${name} is not installed`)
     switch (plugin.type) {
       case 'user': {
