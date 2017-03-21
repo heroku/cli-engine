@@ -42,7 +42,8 @@ stages:
           ./bin/run version
           ./bin/run help
           ./bin/run cli:test
-          yarn run build linux-x64 beta
+          # run build below when example project matures
+          # yarn run build linux-x64 beta
 
           # show files in npm pack
           cd ~/cli-engine
