@@ -68,7 +68,8 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         flags,
         args,
         app: flags.app,
-        org: flags.org
+        org: flags.org,
+        config: this.config
       }
       ctx.auth.password = this.heroku.auth
       return c.run(ctx)
