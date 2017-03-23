@@ -60,4 +60,3 @@ stages:
         paths:
           - /usr/local/share/.cache/yarn
           - ~/cli-engine/node_modules
-          - ~/cli-engine/example/node_modules

@@ -3,7 +3,7 @@
 import Command, {type Arg, type Flag, BooleanFlag, StringFlag} from 'cli-engine-command'
 import {AppFlag, RemoteFlag} from 'cli-engine-command/lib/flags/app'
 import OrgFlag from 'cli-engine-command/lib/flags/org'
-import Heroku from 'cli-engine-command/lib/heroku'
+import Heroku, {vars} from 'cli-engine-command/lib/heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
@@ -61,6 +61,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
           args[this.constructor.args[i].name] = this.argv[i]
         }
       }
+      let apiUrl = vars.apiUrl.startsWith('http') ? vars.apiUrl : `https://${vars.apiUrl}`
       const ctx = {
         supportsColor: this.color.enabled,
         auth: {},
@@ -69,7 +70,9 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         args,
         app: flags.app,
         org: flags.org,
-        config: this.config
+        config: this.config,
+        apiUrl: apiUrl,
+        herokuDir: this.config.dirs.cache
       }
       ctx.auth.password = this.heroku.auth
       return c.run(ctx)
