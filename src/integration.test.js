@@ -37,3 +37,19 @@ test('links example plugin', async () => {
   let cmd = await run('cli:test')
   expect(cmd.stdout.output).toEqual('ran cli:test\n')
 })
+
+describe('help flag', () => {
+  describe('--help', () => {
+    test('shows help for plugins', async function () {
+      let cmd = await run('plugins', '--help')
+      expect(cmd.stdout.output).toMatch(/^ +plugins:install PLUGIN +# installs a plugin into the CLI$/m)
+    })
+  })
+
+  describe('-h', () => {
+    test('shows help for plugins', async function () {
+      let cmd = await run('plugins', '-h')
+      expect(cmd.stdout.output).toMatch(/^ +plugins:install PLUGIN +# installs a plugin into the CLI$/m)
+    })
+  })
+})

@@ -46,7 +46,7 @@ export default class Main {
     try {
       this.cmd = await Command.run(this.config.argv.slice(2), this.config)
     } catch (e) {
-      if (e instanceof HelpError) this.cmd = await Help.run([this.config.argv[1]], {config: this.config})
+      if (e instanceof HelpError) this.cmd = await Help.run([this.config.argv[1]], this.config)
       else throw e
     }
     out.exit(0)
