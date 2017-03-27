@@ -4,7 +4,6 @@ if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
 
 import Command, {Config, type ConfigOptions} from 'cli-engine-command'
 import Output from 'cli-engine-command/lib/output'
-import HelpError from 'cli-engine-command/lib/help-error'
 import Plugins from './plugins'
 
 import Updater from './updater'
@@ -40,15 +39,33 @@ export default class Main {
     const plugins = new Plugins(out)
     await updater.autoupdate()
     await plugins.refreshLinkedPlugins()
-    let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
-    if (!Command) return new NotFound(out).run()
-    await out.done()
-    try {
+    if (this.cmdAskingForHelp) {
+      this.cmd = await Help.run(this.config.argv.slice(1), this.config)
+    } else {
+      let Command = plugins.findCommand(this.config.argv[1] || this.config.defaultCommand)
+      if (!Command) return new NotFound(out).run()
+      await out.done()
       this.cmd = await Command.run(this.config.argv.slice(2), this.config)
-    } catch (e) {
-      if (e instanceof HelpError) this.cmd = await Help.run([this.config.argv[1]], this.config)
-      else throw e
     }
     out.exit(0)
+  }
+
+  get cmdAskingForHelp (): boolean {
+    if (this.isCmdEdgeCase) return false
+    if (this.config.argv.find(arg => ['--help', '-h'].includes(arg))) {
+      return true
+    }
+    return false
+  }
+
+  get isCmdEdgeCase (): boolean {
+    let j = this.config.argv.indexOf('--')
+    if (j !== -1) {
+      for (var i = 0; i < j; i++) {
+        if (['--help', '-h'].includes(this.config.argv[i])) return false
+      }
+      return true
+    }
+    return false
   }
 }
