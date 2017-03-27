@@ -27,6 +27,7 @@ export default class Update extends Command {
       }
     }
     await PluginsUpdate.run([], {config: this.config})
+    console.log(`updating the cli - in the routine`)
     await Analytics.submitAnalytics({config: this.config })
   }
 }
