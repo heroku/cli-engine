@@ -1,18 +1,24 @@
 // @flow
 
-let AnalyticsCommand = require('./analytics').AnalyticsCommand
+import AnalyticsCommand from './analytics'
 import HTTP from 'cli-engine-command/lib/http'
 import Config from 'cli-engine-command'
 let FS = require('fs')
 import nock from 'nock'
 import { default as OS } from 'os'
-import Netrc from 'netrc-parser'
+import plugins from './plugins'
 
 let sampleConfig
 
 describe('AnalyticsCommand', () => {
   describe('class scope', () => {
-    describe.only('.netrcLogin', () => {
+    describe('.analyticsPath', () => {
+     it('uses the Cache and appends the file name', () => {
+       let c = plugins.Cache
+       const receivedPath = AnalyticsCommand.analyticsPath()
+     })
+    })
+    describe('.netrcLogin', () => {
       it('returns false, doing nothing, if HEROKU_API_KEY is available', async () => {
         process.env['HEROKU_API_KEY'] = 'secure-key'
         let returnval = await AnalyticsCommand.netrcLogin()
@@ -21,20 +27,18 @@ describe('AnalyticsCommand', () => {
       it('returns false when the netrc login does not exist')
     })
     describe('.submitAnalytics', () => {
-      let expectedOptions, originalSkipAnalytics
+      let expectedOptions, originalSkipAnalytics, sampleConfig, requestBody
       beforeAll(() => {
         originalSkipAnalytics = AnalyticsCommand.skipAnalytics
       })
       beforeEach(() => {
         sampleConfig = new Config({name: 'analytics', platform: OS.platform(), version: '6.0'})
+        requestBody = "{\"schema\":1,\"commands\":[{\"command\":\"run\",\"version\":\"6.0\",\"platform\":\"linux\"},{\"command\":\"run\",\"version\":\"6.0\",\"platform\":\"linux\"}]}"
         expectedOptions = {
           path: '/record', port: 433, method: 'POST', hostname: 'foo.host',
           headers: {'User-Agent': sampleConfig.version}
-          //TODO: put some body stuff here
-          // body: /* put some stuff here */
-
         }
-        process.env['HEROKU_ANALYTICS_HOST'] = expectedOptions.hostname
+        AnalyticsCommand.analyticsPath = `./analytics.json`
       })
       afterEach(() => {
         AnalyticsCommand.skipAnalytics = originalSkipAnalytics
@@ -46,24 +50,19 @@ describe('AnalyticsCommand', () => {
         await AnalyticsCommand.submitAnalytics()
         expect(HTTP.request).not.toHaveBeenCalled()
       })
-      test.skip('pushes data to the "record" endpoint', async () => {
-        let postAnalytics = nock(`http://${expectedOptions.hostname}`).post('/record').reply(200)
+      test('pushes data to the "record" endpoint', async () => {
+        let postAnalytics = nock(`'https://cli-analytics.heroku.com`).post('/record', requestBody).reply(200, {response: 'ok'})
+        let sampleData = `{"schema":1,"commands":[{"command":"run","version":"6.0","platform":"linux"},{"command":"run","version":"6.0","platform":"linux"}]}`
+        FS.readFileSync = jest.fn(() => { return sampleData })
         AnalyticsCommand.skipAnalytics = jest.fn(() => { return false })
-        await AnalyticsCommand.submitAnalytics()
-        expect(postAnalytics.isDone()).toBe(true)
+        await AnalyticsCommand.submitAnalytics(sampleConfig)
       })
       test('falls back to default URL when HEROKU_ANALYTICS_HOST is not defined', async () => {
+        let postAnalytics = nock(`'https://cli-analytics.heroku.com`).post('/record', requestBody).reply(200, {response: 'ok'})
         process.env['TESTING'] = ''
-        AnalyticsCommand.config = new Config({skipAnalytics: false})
-        HTTP.request = jest.fn()
-        expectedOptions.hostname = 'https://cli-analytics.heroku.com'
         delete process.env.HEROKU_ANALYTICS_HOST
-        await AnalyticsCommand.submitAnalytics()
-        expect(HTTP.request).toHaveBeenCalledWith(expectedOptions)
+        await AnalyticsCommand.submitAnalytics(sampleConfig)
       })
-      test('includes the cli version')
-      test('uses netrc when available')
-      test('it uses the CLI version dynamically')
     })
     describe('skipAnalytics', () => {
       beforeAll(() => {
@@ -82,13 +81,11 @@ describe('AnalyticsCommand', () => {
         AnalyticsCommand.config = Config
         expect(AnalyticsCommand.skipAnalytics()).not.toBeTruthy()
       })
-
-      it('returns true when there is no netrc login')
     })
   })
 
   describe('instance scope', () => {
-    let analyticsCommand
+    let analyticsCommand, sampleConfig
     beforeEach(() => {
       sampleConfig = new Config({name: 'analytics', platform: OS.platform(), version: '6.0'})
       analyticsCommand = new AnalyticsCommand('run', 'foo-plugin', '3.5', sampleConfig)
@@ -119,7 +116,6 @@ describe('AnalyticsCommand', () => {
         test('the architecture', () => {
           expect(analyticsCommand).toHaveProperty('arch', OS.arch())
         })
-        test('the analyticsPath')
       })
     })
     describe('.recordStart', () => {
@@ -128,18 +124,18 @@ describe('AnalyticsCommand', () => {
       })
     })
     describe('.recordEnd', () => {
-      describe('records to the file', () => {
-        it('writes to whatever #analyticsPath is', async () => {
-          if (FS.existsSync('../analytics.json'))
-            FS.unlinkSync('../analytics.json')
-          await analyticsCommand.recordEnd()
-          let analyticsData = FS.readFileSync('../analytics.json', 'utf8')
-          let analyticsJSON = JSON.parse(analyticsData)
-          let sampleCommand = analyticsJSON['commands'][0]
-          expect(sampleCommand).toHaveProperty('command', 'run')
-          expect(sampleCommand).toHaveProperty('version', '6.0')
-          expect(sampleCommand).toHaveProperty('platform', OS.platform())
-        })
+      it('writes out the command data', async () => {
+        let location = './analytics.json'
+        if (FS.existsSync(location))
+          FS.unlinkSync(location)
+        analyticsCommand.analyticsPath = location
+        await analyticsCommand.recordEnd()
+        let analyticsData = FS.readFileSync(location, 'utf8')
+        let analyticsJSON = JSON.parse(analyticsData)
+        let sampleCommand = analyticsJSON['commands'][0]
+        expect(sampleCommand).toHaveProperty('command', 'run')
+        expect(sampleCommand).toHaveProperty('version', '6.0')
+        expect(sampleCommand).toHaveProperty('platform', OS.platform())
       })
     })
   })
