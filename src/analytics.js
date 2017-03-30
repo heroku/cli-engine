@@ -15,7 +15,6 @@ export default class AnalyticsCommand {
   platform: string
   arch: string
   start: any
-  analyticsPath: string //= Path.join(CacheHome, "analytics.json")
   config: Config
 
   constructor (command: string, plugin: string, pluginVersion: string, config: Config) {
@@ -26,7 +25,6 @@ export default class AnalyticsCommand {
     this.version = this.config.config.version
     this.platform = OS.platform()
     this.arch = OS.arch()
-    this.analyticsPath = '~/.local/share/heroku/analytics.json'
   }
 
   async recordEnd () {
@@ -34,26 +32,29 @@ export default class AnalyticsCommand {
       return
     }
     let analyticsJSON
-    if (FS.existsSync(this.analyticsPath)) {
-      let analyticsData = FS.readFileSync(this.analyticsPath, 'utf8')
+    if (FS.existsSync(AnalyticsCommand.analyticsPath(this.config.config))) {
+      let analyticsData = FS.readFileSync(AnalyticsCommand.analyticsPath(this.config.config), 'utf8')
       analyticsJSON = JSON.parse(analyticsData)
     } else {
       analyticsJSON = {
         'schema': 1,
-        'commands': []
+        'commands': [],
+        'user': 'not specified'
       }
+      const netrcuser = await AnalyticsCommand.netrcLogin()
+      if(netrcuser) analyticsJSON['user'] = netrcuser
     }
     analyticsJSON['commands'].push({
       command: this.command,
       version: this.config.config.version,
       platform: this.platform
     })
-    FS.writeFileSync(this.analyticsPath, JSON.stringify(analyticsJSON), 'utf8')
+    FS.writeFileSync(AnalyticsCommand.analyticsPath(this.config), JSON.stringify(analyticsJSON), 'utf8')
   }
 
   static async submitAnalytics (config: Config) {
     if (AnalyticsCommand.skipAnalytics()) return
-    const analyticsData = FS.readFileSync(this.analyticsPath, 'utf8')
+    const analyticsData = FS.readFileSync(this.analyticsPath(config), 'utf8')
     let host = process.env['HEROKU_ANALYTICS_HOST']
     host = host || 'https://cli-analytics.heroku.com/record'
     let options = {
@@ -81,12 +82,12 @@ export default class AnalyticsCommand {
     return false
   }
 
-  static analyticsPath(){
-
+  static analyticsPath(config: Config){
+    return config.dirs.cache + '/analytics.json'
   }
 
   static async netrcLogin () {
-    if (process.env['HEROKU_API_KEY'] !== undefined || process.env['HEROKU_API_KEY'].length > 0) return false
+    if (process.env['HEROKU_API_KEY'] !== undefined && process.env['HEROKU_API_KEY'].length > 0) return false
     let netrc = new Netrc()
     return await netrc.machines['api.heroku.com'].login
   }

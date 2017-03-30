@@ -12,19 +12,12 @@ let sampleConfig
 
 describe('AnalyticsCommand', () => {
   describe('class scope', () => {
-    describe('.analyticsPath', () => {
-     it('uses the Cache and appends the file name', () => {
-       let c = plugins.Cache
-       const receivedPath = AnalyticsCommand.analyticsPath()
-     })
-    })
     describe('.netrcLogin', () => {
       it('returns false, doing nothing, if HEROKU_API_KEY is available', async () => {
         process.env['HEROKU_API_KEY'] = 'secure-key'
         let returnval = await AnalyticsCommand.netrcLogin()
         expect(returnval).toBe(false)
       })
-      it('returns false when the netrc login does not exist')
     })
     describe('.submitAnalytics', () => {
       let expectedOptions, originalSkipAnalytics, sampleConfig, requestBody
@@ -32,13 +25,13 @@ describe('AnalyticsCommand', () => {
         originalSkipAnalytics = AnalyticsCommand.skipAnalytics
       })
       beforeEach(() => {
-        sampleConfig = new Config({name: 'analytics', platform: OS.platform(), version: '6.0'})
+        sampleConfig = new Config({name: 'analytics', platform: OS.platform(), version: '6.0', dirs: { cache: "." }})
         requestBody = "{\"schema\":1,\"commands\":[{\"command\":\"run\",\"version\":\"6.0\",\"platform\":\"linux\"},{\"command\":\"run\",\"version\":\"6.0\",\"platform\":\"linux\"}]}"
         expectedOptions = {
           path: '/record', port: 433, method: 'POST', hostname: 'foo.host',
           headers: {'User-Agent': sampleConfig.version}
         }
-        AnalyticsCommand.analyticsPath = `./analytics.json`
+        AnalyticsCommand.analyticsPath = jest.fn((conf) => { return './analytics.json' })
       })
       afterEach(() => {
         AnalyticsCommand.skipAnalytics = originalSkipAnalytics
@@ -96,7 +89,6 @@ describe('AnalyticsCommand', () => {
       expect(analyticsCommand).toHaveProperty('pluginVersion', '3.5')
       expect(analyticsCommand).toHaveProperty('version', '6.0')
       expect(analyticsCommand).toHaveProperty('start', undefined)
-      expect(analyticsCommand).toHaveProperty('analyticsPath')
     })
     describe('constructor', () => {
       describe('assigns', () => {
@@ -128,7 +120,8 @@ describe('AnalyticsCommand', () => {
         let location = './analytics.json'
         if (FS.existsSync(location))
           FS.unlinkSync(location)
-        analyticsCommand.analyticsPath = location
+        AnalyticsCommand.analyticsPath = jest.fn((conf) => { return './analytics.json'})
+        AnalyticsCommand.skipAnalytics = jest.fn(() => { return false })
         await analyticsCommand.recordEnd()
         let analyticsData = FS.readFileSync(location, 'utf8')
         let analyticsJSON = JSON.parse(analyticsData)
@@ -136,6 +129,7 @@ describe('AnalyticsCommand', () => {
         expect(sampleCommand).toHaveProperty('command', 'run')
         expect(sampleCommand).toHaveProperty('version', '6.0')
         expect(sampleCommand).toHaveProperty('platform', OS.platform())
+        expect(analyticsJSON).toHaveProperty('user')
       })
     })
   })
