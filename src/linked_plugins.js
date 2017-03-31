@@ -5,6 +5,7 @@ import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Plugins from './plugins'
 import Plugin from './plugin'
+import PluginsList from './plugins_list'
 import Yarn from './yarn'
 import klaw from 'klaw-sync'
 import fs from 'fs-extra'
@@ -17,8 +18,13 @@ type PJSON = {
   }
 }
 
-export default class LinkedPlugins {
+class LinkedPlugin extends Plugin {
+
+}
+
+export default class LinkedPlugins extends PluginsList {
   constructor (plugins: Plugins) {
+    super()
     this.yarn = plugins.yarn
     this.plugins = plugins
     this.config = plugins.config
@@ -32,12 +38,14 @@ export default class LinkedPlugins {
         plugins: []
       }
     }
+    this._list = this._data.plugins.map(p => this.plugin(p))
   }
 
   yarn: Yarn
   plugins: Plugins
   config: Config
   out: Output
+  _list: Plugin[]
   _data: {
     version: string,
     plugins: string[]
@@ -64,6 +72,7 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
     this._data.plugins.push(p)
     this._save()
     this.out.action.stop()
+    this.plugin(p)
   }
 
   /**
@@ -80,7 +89,11 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
    * @returns {Plugin[]}
    */
   list (): Plugin[] {
-    return this._data.plugins.map(p => new Plugin('link', p, this.plugins))
+    return this._list
+  }
+
+  plugin (p: string): Plugin {
+    return new Plugin('link', p, this.plugins)
   }
 
   /**
@@ -148,5 +161,7 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
   // flow$ignore
   _pjson (p: string): PJSON { return require(path.join(p, 'package.json')) }
 
-  get file (): string { return path.join(this.config.dirs.data, 'linked_plugins.json') }
+  get file (): string {
+    return path.join(this.config.dirs.data, 'linked_plugins.json')
+  }
 }

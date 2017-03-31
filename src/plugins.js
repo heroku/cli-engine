@@ -142,6 +142,12 @@ export default class Plugins {
     return new UserPlugins(this).list()
   }
 
+  /*
+  get linkedPlugins (): Plugin[] {
+
+  }
+  */
+
   get userPluginsPJSON (): PJSON {
     try {
       return fs.readJSONSync(path.join(this.userPluginsDir, 'package.json'))
@@ -278,6 +284,7 @@ export default class Plugins {
 
   async addLinkedPlugin (p: string) {
     await this.linkedPlugins.add(p)
+    this.cache.save()
   }
 
   async refreshLinkedPlugins () {

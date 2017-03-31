@@ -1,0 +1,11 @@
+{
+  "name": "test-cli",
+  "cli-engine": {
+    "bin": "heroku",
+    "node": "7.7.2",
+    "defaultCommand": "foo",
+    "plugins": [
+      "test-foo"
+    ]
+  },
+}
