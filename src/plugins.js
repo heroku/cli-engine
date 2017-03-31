@@ -94,6 +94,7 @@ class Cache {
   updatePlugin (path: string, plugin: CachedPlugin) {
     this.constructor.updated = true
     this.cache.plugins[path] = plugin
+    this.save()
   }
 
   deletePlugin (name: string) {
