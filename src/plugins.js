@@ -126,28 +126,20 @@ export default class Plugins {
     this.linkedPlugins = new LinkedPlugins(this)
     this.plugins = [new Plugin('builtin', './commands', this)]
     .concat(this.linkedPlugins.list())
-    .concat(new UserPlugins(this).list())
+    .concat(this.userPlugins)
     .concat(new CorePlugins(this).list())
     this.cache.save()
   }
 
   linkedPlugins: LinkedPlugins
+  _userPluginsList: Plugin[]
   plugins: Plugin[]
   cache: Cache
   yarn: Yarn
   out: Output
 
-  get corePlugins (): Plugin[] {
-    return (this.config._cli.plugins || []).map(name => {
-      return new Plugin('core', path.join(this.config.root, 'node_modules', name), this)
-    })
-  }
-
   get userPlugins (): Plugin[] {
-    const pjson = this.userPluginsPJSON
-    return Object.keys(pjson.dependencies || {}).map(name => {
-      return new Plugin('user', this.userPluginPath(name), this)
-    })
+    return new UserPlugins(this).list()
   }
 
   get userPluginsPJSON (): PJSON {
