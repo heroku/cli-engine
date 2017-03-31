@@ -97,7 +97,7 @@ test('linked plugin should be cached', async () => {
   console.log(pluginsJson)
 
   expect(pluginsJson['plugins'][linkPath]).toBeDefined()
-  // expect(pluginsJson['plugins'][linkPath]['mtime']).toBeDefined()
+  expect(pluginsJson['plugins'][linkPath]['mtime']).toBeDefined()
 
   // let fooPath = path.normalize(path.join(root, 'node_modules', 'test-foo'))
   // expect(pluginsJson['plugins'][fooPath]).toBeDefined()
