@@ -6,6 +6,8 @@ import path from 'path'
 import Yarn from './yarn'
 import Plugin from './plugin'
 import lock from 'rwlockfile'
+import UserPlugins from './user_plugins'
+import CorePlugins from './core_plugins'
 import LinkedPlugins from './linked_plugins'
 import uniqby from 'lodash.uniqby'
 import {type LegacyCommand} from './legacy'
@@ -124,8 +126,8 @@ export default class Plugins {
     this.linkedPlugins = new LinkedPlugins(this)
     this.plugins = [new Plugin('builtin', './commands', this)]
     .concat(this.linkedPlugins.list())
-    .concat(this.userPlugins)
-    .concat(this.corePlugins)
+    .concat(new UserPlugins(this).list())
+    .concat(new CorePlugins(this).list())
     this.cache.save()
   }
 
