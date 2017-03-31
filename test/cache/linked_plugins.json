@@ -1,0 +1,6 @@
+{
+  "version": "1",
+  "plugins": [
+    "/Users/rbriggs/src/github.com/heroku/cli-engine/test/links/test-foo"
+  ]
+}

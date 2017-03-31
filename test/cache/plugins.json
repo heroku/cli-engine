@@ -1,0 +1,167 @@
+{
+  "plugins": {
+    "./commands": {
+      "name": "builtin",
+      "path": "./commands",
+      "commands": [
+        {
+          "id": "help",
+          "topic": "help",
+          "description": "display help",
+          "variableArgs": true,
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        },
+        {
+          "id": "plugins",
+          "topic": "plugins",
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [],
+          "flags": {
+            "core": {}
+          }
+        },
+        {
+          "id": "plugins:install",
+          "topic": "plugins",
+          "command": "install",
+          "description": "installs a plugin into the CLI",
+          "args": [
+            {
+              "name": "plugin"
+            }
+          ],
+          "variableArgs": false,
+          "help": "\n  Example:\n    $ heroku plugins:install heroku-production-status\n  ",
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        },
+        {
+          "id": "plugins:link",
+          "topic": "plugins",
+          "command": "link",
+          "args": [
+            {
+              "name": "path",
+              "optional": true
+            }
+          ],
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        },
+        {
+          "id": "plugins:uninstall",
+          "topic": "plugins",
+          "command": "uninstall",
+          "args": [
+            {
+              "name": "plugin"
+            }
+          ],
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [
+            "plugins:unlink"
+          ],
+          "flags": {}
+        },
+        {
+          "id": "plugins:update",
+          "topic": "plugins",
+          "command": "update",
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        },
+        {
+          "id": "update",
+          "topic": "update",
+          "args": [
+            {
+              "name": "channel",
+              "optional": true
+            }
+          ],
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        },
+        {
+          "id": "version",
+          "topic": "version",
+          "description": "show CLI version",
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [
+            "-v",
+            "v",
+            "--version"
+          ],
+          "flags": {}
+        },
+        {
+          "id": "which",
+          "topic": "which",
+          "args": [
+            {
+              "name": "command"
+            }
+          ],
+          "variableArgs": false,
+          "hidden": false,
+          "aliases": [],
+          "flags": {}
+        }
+      ],
+      "topics": [
+        {
+          "topic": "plugins",
+          "description": "manage plugins",
+          "hidden": false
+        },
+        {
+          "topic": "help",
+          "hidden": true
+        },
+        {
+          "topic": "update",
+          "hidden": true
+        },
+        {
+          "topic": "version",
+          "hidden": true
+        },
+        {
+          "topic": "which",
+          "hidden": true
+        }
+      ]
+    },
+    "/Users/rbriggs/src/github.com/heroku/cli-engine/test/links/test-foo": {
+      "name": "test-foo",
+      "path": "/Users/rbriggs/src/github.com/heroku/cli-engine/test/links/test-foo",
+      "version": "0.0.0",
+      "commands": [
+        {
+          "id": "foo",
+          "topic": "foo",
+          "hidden": false,
+          "flags": {}
+        }
+      ],
+      "topics": [
+        {
+          "topic": "foo",
+          "hidden": false
+        }
+      ]
+    }
+  }
+}
