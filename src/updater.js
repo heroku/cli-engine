@@ -128,7 +128,7 @@ export default class Updater {
       .on('error', e => this.out.warn(e, 'autoupdate:'))
     } catch (e) { this.out.warn(e, 'autoupdate:') }
     try {
-      await logChopper.chop(path.join(this.config.dirs.cache, 'error.log'))
+      await logChopper.chop(this.out.errlog)
     } catch (e) { this.out.debug(e.message) }
   }
 
