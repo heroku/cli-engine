@@ -6,6 +6,7 @@ import HTTP from 'cli-engine-command/lib/http'
 import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
+import logChopper from 'log-chopper'
 
 type Manifest = {
   version: string,
@@ -117,6 +118,7 @@ export default class Updater {
   async autoupdate () {
     try {
       if (!this.autoupdateNeeded) return
+      logChopper.chop(path.join(this.config.dirs.cache, 'error.log'))
       fs.writeFileSync(this.autoupdatefile, '')
       if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
       await this.checkIfUpdating()
