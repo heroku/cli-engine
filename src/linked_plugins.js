@@ -164,4 +164,10 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
   get file (): string {
     return path.join(this.config.dirs.data, 'linked_plugins.json')
   }
+
+  pluginsUpdate () {
+    for (let plugin of this.list()) {
+      this.warn(`Not updating linked plugin ${plugin.name}. Update manually with git.`)
+    }
+  }
 }

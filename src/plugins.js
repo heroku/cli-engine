@@ -124,30 +124,28 @@ export default class Plugins {
     this.config = output.config
     this.yarn = new Yarn(output)
     this.cache = new Cache(output.config, output)
-    this.linkedPlugins = new LinkedPlugins(this)
+    this._linkedPlugins = new LinkedPlugins(this)
+    this._userPlugins = new UserPlugins(this)
     this.plugins = [new Plugin('builtin', './commands', this)]
-    .concat(this.linkedPlugins.list())
-    .concat(this.userPlugins)
+    .concat(this._linkedPlugins.list())
+    .concat(this._userPlugins.list())
     .concat(new CorePlugins(this).list())
     this.cache.save()
   }
 
-  linkedPlugins: LinkedPlugins
-  _userPluginsList: Plugin[]
+  _linkedPlugins: LinkedPlugins
+  _userPlugins: UserPlugins
   plugins: Plugin[]
   cache: Cache
   yarn: Yarn
   out: Output
 
-  get userPlugins (): Plugin[] {
-    return new UserPlugins(this).list()
+  pluginsUpdate () {
+    this.out.action.start(`${this.config.name}: Updating plugins`)
+    this._linkedPlugins.pluginsUpdate()
+    this._userPlugins.pluginsUpdate()
+    // TODO FIXME this.out.action.start(`${this.config.name}: Updating plugins`)
   }
-
-  /*
-  get linkedPlugins (): Plugin[] {
-
-  }
-  */
 
   get userPluginsPJSON (): PJSON {
     try {
@@ -274,7 +272,7 @@ export default class Plugins {
       }
       case 'link': {
         if (!this.config.debug) this.out.action.start(`Unlinking plugin ${name}`)
-        this.linkedPlugins.remove(plugin.path)
+        this._linkedPlugins.remove(plugin.path)
         break
       }
     }
@@ -284,12 +282,12 @@ export default class Plugins {
   }
 
   async addLinkedPlugin (p: string) {
-    await this.linkedPlugins.add(p)
+    await this._linkedPlugins.add(p)
     this.cache.save()
   }
 
   async refreshLinkedPlugins () {
-    await this.linkedPlugins.refresh()
+    await this._linkedPlugins.refresh()
   }
 
   clearCache (name: string) {
