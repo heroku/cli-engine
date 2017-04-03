@@ -117,9 +117,6 @@ export default class Updater {
 
   async autoupdate () {
     try {
-      await logChopper.chop(path.join(this.config.dirs.cache, 'error.log'))
-    } catch (e) { this.out.debug(e.message) }
-    try {
       if (!this.autoupdateNeeded) return
       fs.writeFileSync(this.autoupdatefile, '')
       if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
@@ -130,6 +127,9 @@ export default class Updater {
       spawn(this.binPath, ['update'], {stdio: [null, fd, fd]})
       .on('error', e => this.out.warn(e, 'autoupdate:'))
     } catch (e) { this.out.warn(e, 'autoupdate:') }
+    try {
+      await logChopper.chop(path.join(this.config.dirs.cache, 'error.log'))
+    } catch (e) { this.out.debug(e.message) }
   }
 
   async warnIfUpdateAvailable () {
