@@ -1393,6 +1393,13 @@ fs-exists-sync@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/fs-exists-sync/-/fs-exists-sync-0.1.0.tgz#982d6893af918e72d08dec9e8673ff2b5a8d6add"
 
+fs-extra@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-2.1.1.tgz#f8a34cc890522fc233896f34944ff2e35948959f"
+  dependencies:
+    graceful-fs "^4.1.2"
+    jsonfile "^2.1.0"
+
 fs-extra@2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-2.1.2.tgz#046c70163cef9aad46b0e4a7fa467fb22d71de35"
@@ -2342,6 +2349,10 @@ lex@^1.7.9:
   version "1.7.9"
   resolved "https://registry.yarnpkg.com/lex/-/lex-1.7.9.tgz#5d5636ccef574348362938b79a47f0eed8ed0d43"
 
+line-by-line@0.1.4:
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/line-by-line/-/line-by-line-0.1.4.tgz#7afbf8d6b975b31d4f9af21db8ff57939e9fa403"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -2387,6 +2398,13 @@ lodash.uniqby@^4.7.0:
 lodash@^4.0.0, lodash@^4.11.2, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.2.0, lodash@^4.3.0, lodash@~4.17.2:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
+
+log-chopper@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/log-chopper/-/log-chopper-0.1.1.tgz#a2d3ab3e45e498d8780cc686756c57cbc7f7aee1"
+  dependencies:
+    fs-extra "2.1.1"
+    line-by-line "0.1.4"
 
 longest@^1.0.1:
   version "1.0.1"
