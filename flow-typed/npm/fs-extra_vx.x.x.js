@@ -35,6 +35,8 @@ declare module 'fs-extra' {
     close(): void
   }
 
+  declare function ensureFileSync(path: string): any;
+  declare function outputFileSync(path: string): any;
   declare function readJSONSync(path: string): any;
   declare function writeJSONSync(path: string, data: any): void;
   declare function remove(path: string, callback?: (err: ?ErrnoError) => void): void;
