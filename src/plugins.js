@@ -203,6 +203,12 @@ export class Plugin {
   }
 
   updatePlugin (plugin: ParsedPlugin): CachedPlugin {
+    const getAliases = (c: any) => {
+      let aliases = c.aliases || []
+      if (c.default) aliases.push(c.topic)
+      return aliases
+    }
+
     const name = this.type === 'builtin' ? 'builtin' : this.pjson().name
     const version = this.type === 'builtin' ? this.config.version : this.pjson().version
     if (!plugin.commands) throw new Error('no commands found')
@@ -218,7 +224,7 @@ export class Plugin {
       help: c.help,
       usage: c.usage,
       hidden: !!c.hidden,
-      aliases: c.aliases,
+      aliases: getAliases(c),
       flags: convertFlagsFromV5(c.flags)
     }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
