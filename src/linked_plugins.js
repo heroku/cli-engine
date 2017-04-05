@@ -24,6 +24,7 @@ export default class LinkedPlugins {
     this.out = plugins.out
     try {
       this._data = fs.readJSONSync(this.file)
+      this._data.plugins = this._data.plugins.filter(p => fs.existsSync(p))
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
       this._data = {
