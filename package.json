@@ -10,9 +10,8 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "1.4.0",
-    "cli-engine-command": "2.2.8",
-    "eslint": "3.18.0",
-    "execa": "^0.6.1",
+    "cli-engine-command": "2.3.1",
+    "execa": "0.6.3",
     "find-node-modules": "^1.0.4",
     "fs-extra": "2.1.2",
     "klaw-sync": "1.1.2",
@@ -20,28 +19,27 @@
     "lodash.maxby": "4.6.0",
     "lodash.uniqby": "^4.7.0",
     "log-chopper": "0.1.1",
-    "moment": "2.17.1",
+    "moment": "2.18.1",
     "rwlockfile": "^1.3.6",
     "string": "3.3.3",
     "tar-stream": "1.5.2",
-    "yarn": "0.21.3"
+    "yarn": "0.22.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.0",
-    "babel-eslint": "7.1.1",
+    "babel-cli": "6.24.1",
+    "babel-eslint": "7.2.1",
     "babel-jest": "19.0.0",
-    "babel-plugin-transform-class-properties": "6.23.0",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.24.0",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-es2015-modules-commonjs": "6.24.1",
     "babel-plugin-transform-flow-strip-types": "6.22.0",
-    "eslint-plugin-flowtype": "2.30.3",
-    "flow-bin": "0.42.0",
+    "eslint-plugin-flowtype": "2.30.4",
+    "flow-bin": "0.43.1",
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.0.0",
     "jest": "19.0.2",
-    "nock": "9.0.9",
+    "nock": "9.0.11",
     "rimraf": "2.6.1",
-    "standard": "9.0.2",
-    "time-require": "0.1.2"
+    "standard": "10.0.1"
   },
   "engines": {
     "node": ">= 7.0.0"

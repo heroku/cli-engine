@@ -1,7 +1,5 @@
 // @flow
 
-if (process.env.HEROKU_TIME_REQUIRE) require('time-require')
-
 import Command, {Config, type ConfigOptions} from 'cli-engine-command'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
