@@ -1,11 +1,8 @@
 /* globals test expect beforeEach */
 
-import {Config} from 'cli-engine-command'
+import { Config } from 'cli-engine-command'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
-import Help from './commands/help'
-import PluginsLink from './commands/plugins/link'
-import klaw from 'klaw-sync'
 
 const path = require('path')
 const fs = require('fs-extra')
