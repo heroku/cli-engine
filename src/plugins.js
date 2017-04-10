@@ -63,6 +63,10 @@ type PJSON = {
   dependencies?: { [name: string]: string }
 }
 
+type PluginOptions = {
+  tag?: string
+}
+
 class Cache {
   static updated = false
   config: Config
@@ -95,9 +99,9 @@ class Cache {
     this.cache.plugins[path] = plugin
   }
 
-  deletePlugin (name: string) {
+  deletePlugin (...names: string[]) {
     for (let k of Object.keys(this.cache.plugins)) {
-      if (this.cache.plugins[k].name === name) {
+      if (names.includes(this.cache.plugins[k].name)) {
         this.out.debug(`Clearing cache for ${k}`)
         this.constructor.updated = true
         delete this.cache.plugins[k]
@@ -127,8 +131,9 @@ function undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): Parse
 }
 
 export class Plugin {
-  constructor (type: PluginType, path: string, plugins: Plugins) {
+  constructor (type: PluginType, path: string, plugins: Plugins, options: PluginOptions = {}) {
     this.config = plugins.config
+    this.options = options
     this.out = plugins.out
     this.cache = plugins.cache
     this.type = type
@@ -139,6 +144,7 @@ export class Plugin {
   }
 
   config: Config
+  options: PluginOptions
   type: PluginType
   path: string
   cache: Cache
@@ -276,17 +282,21 @@ export default class Plugins {
 
   get userPlugins (): Plugin[] {
     const pjson = this.userPluginsPJSON
-    return Object.keys(pjson.dependencies || {}).map(name => {
-      return new Plugin('user', this.userPluginPath(name), this)
+    return entries(pjson.dependencies || {}).map(([name, tag]) => {
+      return new Plugin('user', this.userPluginPath(name), this, {tag})
     })
   }
 
   get userPluginsPJSON (): PJSON {
     try {
-      return fs.readJSONSync(path.join(this.userPluginsDir, 'package.json'))
+      return fs.readJSONSync(this.userPluginsPJSONPath)
     } catch (err) {
       return { dependencies: {} }
     }
+  }
+
+  saveUserPluginsPJSON (pjson: PJSON) {
+    fs.writeJSONSync(path.join(this.userPluginsPJSONPath), pjson)
   }
 
   get commands (): CachedCommand[] {
@@ -347,12 +357,12 @@ export default class Plugins {
     await this.yarn.exec()
   }
 
-  async install (name: string) {
+  async install (name: string, tag: string = 'latest') {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
-    if (this.plugins.find(p => p.name === name)) throw new Error(`Plugin ${name} is already installed`)
-    if (!this.config.debug) this.out.action.start(`Installing plugin ${name}`)
-    await this.yarn.exec(['add', name])
+    if (this.plugins.find(p => p.name === name && p.options.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
+    this.addPackageToPJSON(name, tag)
+    await this.yarn.exec()
     this.clearCache(name)
     try {
       // flow$ignore
@@ -361,30 +371,15 @@ export default class Plugins {
     } catch (err) {
       await unlock()
       this.out.error(err, false)
-      await this.uninstall(name, true)
+      this.removePackageFromPJSON(name)
       this.out.exit(1)
     }
-    this.out.action.stop()
     await unlock()
   }
 
-  /**
-   * check if a plugin needs an update
-   * @param {string} name - plugin name to check
-   * @returns {string} - latest version if needs update, undefined otherwise
-   */
-  async needsUpdate (name: string): Promise<?string> {
-    let info = await this.yarn.info(name)
-    let plugin = this.plugins.find(p => p.name === name)
-    if (!plugin) throw new Error(`${name} not installed`)
-    let latest = info['dist-tags'].latest
-    if (latest === plugin.version) return
-    return latest
-  }
-
-  async update (name: string, version: string) {
-    await this.yarn.exec(['upgrade', `${name}@${version}`])
-    this.clearCache(name)
+  async update () {
+    await this.yarn.exec(['upgrade'])
+    this.clearCache(...this.userPlugins.map(p => p.name))
   }
 
   async uninstall (name: string, forceSilently: boolean = false) {
@@ -415,6 +410,20 @@ export default class Plugins {
     this.out.action.stop()
   }
 
+  addPackageToPJSON (name: string, version: string = '*') {
+    let pjson = this.userPluginsPJSON
+    if (!pjson.dependencies) pjson.dependencies = {}
+    pjson.dependencies[name] = version
+    this.saveUserPluginsPJSON(pjson)
+  }
+
+  removePackageFromPJSON (name: string) {
+    let pjson = this.userPluginsPJSON
+    if (!pjson.dependencies) pjson.dependencies = {}
+    delete pjson.dependencies[name]
+    this.saveUserPluginsPJSON(pjson)
+  }
+
   async addLinkedPlugin (p: string) {
     await this.linkedPlugins.add(p)
   }
@@ -423,11 +432,12 @@ export default class Plugins {
     await this.linkedPlugins.refresh()
   }
 
-  clearCache (name: string) {
-    this.cache.deletePlugin(name)
+  clearCache (...names: string[]) {
+    this.cache.deletePlugin(...names)
   }
 
   get userPluginsDir (): string { return path.join(this.config.dirs.data, 'plugins') }
+  get userPluginsPJSONPath (): string { return path.join(this.userPluginsDir, 'package.json') }
   userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
 
   get topics (): CachedTopic[] {
@@ -438,3 +448,5 @@ export default class Plugins {
 
   config: Config
 }
+
+const entries = <T> (o: {[k: string]: T}): [string, T][] => Object.keys(o).map(k => [k, o[k]])
