@@ -8,7 +8,7 @@ export default class extends Command {
   static topic = 'plugins'
   static flags = {core: BooleanFlag()}
 
-  plugins = new Plugins(this)
+  plugins: Plugins = new Plugins(this)
 
   async run () {
     let plugins = this.plugins.list()
@@ -19,6 +19,7 @@ export default class extends Command {
     for (let plugin of plugins) {
       let output = `${plugin.name} ${plugin.version}`
       if (plugin.type !== 'user') output += ` (${plugin.type})`
+      else if (plugin.options.tag !== 'latest') output += ` (${plugin.options.tag})`
       this.log(output)
     }
   }
