@@ -61,7 +61,6 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
           args[this.constructor.args[i].name] = this.argv[i]
         }
       }
-      let apiUrl = vars.apiUrl.startsWith('http') ? vars.apiUrl : `https://${vars.apiUrl}`
       const ctx = {
         supportsColor: this.color.enabled,
         auth: {},
@@ -71,10 +70,14 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         app: flags.app,
         org: flags.org,
         config: this.config,
-        apiUrl: apiUrl,
-        herokuDir: this.config.dirs.cache
+        apiUrl: vars.apiUrl,
+        herokuDir: this.config.dirs.cache,
+        apiToken: this.heroku.auth,
+        apiHost: vars.apiHost,
+        gitHost: vars.gitHost,
+        httpGitHost: vars.httpGitHost
       }
-      ctx.auth.password = this.heroku.auth
+      ctx.auth.password = ctx.apiToken
       return c.run(ctx)
     }
   }
