@@ -1,5 +1,4 @@
 // @flow
-/* globals test expect describe beforeEach afterEach */
 
 import CLI from './cli'
 import {integrationLock} from '../test/helpers'
