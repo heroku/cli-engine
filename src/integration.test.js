@@ -32,13 +32,6 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
   await run('plugins:uninstall', 'heroku-debug')
 })
 
-test('installs, runs, and uninstalls heroku-debug@alpha', async () => {
-  if ((await plugins()).includes('heroku-debug (alpha)')) await run('plugins:uninstall', 'heroku-debug')
-  await run('plugins:install', 'heroku-debug@alpha')
-  await run('debug')
-  await run('plugins:uninstall', 'heroku-debug')
-})
-
 test('links example plugin', async () => {
   if ((await plugins()).includes('cli-engine-example-plugin')) await run('plugins:uninstall', 'cli-engine-example-plugin')
   await run('plugins:link', './example-plugin')
