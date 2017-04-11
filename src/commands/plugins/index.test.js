@@ -17,7 +17,7 @@ jest.mock('../../plugins', () => {
 
 test('updates plugins', async () => {
   let cmd = await PluginsIndex.mock()
-  expect(cmd.stdout.output).toEqual(`heroku-apps 1.0.0 (link)
+  expect(cmd.out.stdout.output).toEqual(`heroku-apps 1.0.0 (link)
 heroku-debug 1.0.0 (alpha)
 heroku-pg 1.0.1
 `)

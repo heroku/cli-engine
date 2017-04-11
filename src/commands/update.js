@@ -9,22 +9,23 @@ export default class Update extends Command {
   static args = [
     {name: 'channel', optional: true}
   ]
-  updater = new Updater(this)
+  updater: Updater
 
   async run () {
-    if (this.config.updateDisabled) this.warn(this.config.updateDisabled)
+    this.updater = new Updater(this.out)
+    if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
     else {
-      this.action.start(`${this.config.name}: Updating CLI`)
+      this.out.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
-        this.action.stop(`already on latest version: ${this.config.version}`)
+        this.out.action.stop(`already on latest version: ${this.config.version}`)
       } else {
-        this.action.start(`${this.config.name}: Updating CLI to ${this.color.green(manifest.version)}${channel === 'stable' ? '' : ' (' + this.color.yellow(channel) + ')'}`)
+        this.out.action.start(`${this.config.name}: Updating CLI to ${this.out.color.green(manifest.version)}${channel === 'stable' ? '' : ' (' + this.out.color.yellow(channel) + ')'}`)
         await this.updater.update(manifest)
-        this.action.stop()
+        this.out.action.stop()
       }
     }
-    await PluginsUpdate.run([], this.config)
+    await PluginsUpdate.run({config: this.config})
   }
 }

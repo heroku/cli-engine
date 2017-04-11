@@ -1,6 +1,7 @@
 // @flow
 
-import Command, {Config, Topic} from 'cli-engine-command'
+import {type Config} from 'cli-engine-config'
+import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Yarn from './yarn'
@@ -191,7 +192,9 @@ export default class Plugins {
   out: Output
 
   get corePlugins (): Plugin[] {
-    return (this.config._cli.plugins || []).map(name => {
+    let cli = this.config.pjson['cli-engine']
+    if (!cli) return []
+    return (cli.plugins || []).map(name => {
       return new Plugin('core', path.join(this.config.root, 'node_modules', name), this)
     })
   }
@@ -352,7 +355,7 @@ export default class Plugins {
     this.cache.deletePlugin(...names)
   }
 
-  get userPluginsDir (): string { return path.join(this.config.dirs.data, 'plugins') }
+  get userPluginsDir (): string { return path.join(this.config.dataDir, 'plugins') }
   get userPluginsPJSONPath (): string { return path.join(this.userPluginsDir, 'package.json') }
   userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
 
@@ -360,7 +363,7 @@ export default class Plugins {
     return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
 
-  get lockfile (): string { return path.join(this.config.dirs.cache, 'plugins.lock') }
+  get lockfile (): string { return path.join(this.config.cacheDir, 'plugins.lock') }
 
   config: Config
 }

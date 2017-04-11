@@ -1,6 +1,6 @@
 // @flow
 
-import type Config from 'cli-engine-command/lib/config'
+import type {Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Plugins, {Plugin} from './plugins'
@@ -147,5 +147,5 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
   // flow$ignore
   _pjson (p: string): PJSON { return require(path.join(p, 'package.json')) }
 
-  get file (): string { return path.join(this.config.dirs.data, 'linked_plugins.json') }
+  get file (): string { return path.join(this.config.dataDir, 'linked_plugins.json') }
 }

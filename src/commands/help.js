@@ -13,7 +13,7 @@ export default class Help extends Command {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this)
+    this.plugins = new Plugins(this.out)
     let cmd = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!cmd) return this.topics()
     let Topic = this.plugins.findTopic(cmd)
@@ -21,18 +21,18 @@ export default class Help extends Command {
     if (!Topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
     if (!Topic) Topic = TopicBase
     let commands = this.plugins.commandsForTopic(Topic.topic)
-    await new Topic(commands, this).help(this.argv, matchedCommand)
+    await new Topic(commands, this.out).help(this.argv, matchedCommand)
   }
 
   topics () {
-    this.log(`Usage: ${this.config.bin} COMMAND [--app APP] [command-specific-options]
+    this.out.log(`Usage: ${this.config.bin} COMMAND [--app APP] [command-specific-options]
 
-Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
+Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
     let topics = this.plugins.topics.filter(t => !t.hidden)
     topics.sort(util.compare('topic'))
     topics = topics.map(t => [t.topic, t.description])
-    this.log(this.renderList(topics))
-    this.log()
+    this.out.log(this.renderList(topics))
+    this.out.log()
   }
 
   renderList (items: [string, ?string][]): string {

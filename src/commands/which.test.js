@@ -32,18 +32,18 @@ Plugins.mockImplementation(() => {
 test('errors if not found', async () => {
   expect.assertions(1)
   try {
-    await Which.run(['notfoundcommand'], {mock: true})
+    await Which.mock('notfoundcommand')
   } catch (err) {
     expect(err.message).toEqual('not found')
   }
 })
 
 test('finds a user plugin', async () => {
-  let cmd = await Which.run(['apps:info'], {mock: true})
-  expect(cmd.stdout.output).toEqual('Command from user plugin heroku-apps\n')
+  let cmd = await Which.mock('apps:info')
+  expect(cmd.out.stdout.output).toEqual('Command from user plugin heroku-apps\n')
 })
 
 test('finds a builtin command', async () => {
-  let cmd = await Which.run(['plugins:install'], {mock: true})
-  expect(cmd.stdout.output).toEqual('builtin command\n')
+  let cmd = await Which.mock('plugins:install')
+  expect(cmd.out.stdout.output).toEqual('builtin command\n')
 })

@@ -11,9 +11,10 @@ export default class PluginsUninstall extends Command {
   ]
   static aliases = ['plugins:unlink']
 
-  plugins = new Plugins(this)
+  plugins: Plugins
 
   async run () {
+    this.plugins = new Plugins(this.out)
     const [plugin] = this.argv
     await this.plugins.uninstall(plugin)
   }

@@ -49,9 +49,10 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     static variableArgs = !!c.variableArgs
     static help = c.help
 
-    heroku = new Heroku(this, {required: false})
+    heroku: Heroku
 
     run () {
+      this.heroku = new Heroku(this.out, {required: false})
       let flags: any = this.flags
       let args: (string[] | {[k: string]: string}) = this.argv
       if (!c.variableArgs) {
@@ -62,7 +63,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         }
       }
       const ctx = {
-        supportsColor: this.color.enabled,
+        supportsColor: this.out.color.enabled,
         auth: {},
         debug: this.config.debug,
         flags,
@@ -71,7 +72,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         org: flags.org,
         config: this.config,
         apiUrl: vars.apiUrl,
-        herokuDir: this.config.dirs.cache,
+        herokuDir: this.config.cacheDir,
         apiToken: this.heroku.auth,
         apiHost: vars.apiHost,
         gitHost: vars.gitHost,
