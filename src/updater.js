@@ -1,6 +1,6 @@
 // @flow
 
-import type Config from 'cli-engine-command/lib/config'
+import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import HTTP from 'cli-engine-command/lib/http'
 import path from 'path'
@@ -25,9 +25,9 @@ export default class Updater {
     this.http = new HTTP(output)
   }
 
-  get autoupdatefile (): string { return path.join(this.config.dirs.cache, 'autoupdate') }
-  get autoupdatelogfile (): string { return path.join(this.config.dirs.cache, 'autoupdate.log') }
-  get updatelockfile (): string { return path.join(this.config.dirs.cache, 'update.lock') }
+  get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
+  get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
+  get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
   get binPath (): ?string { return process.env.CLI_BINPATH }
 
   async fetchManifest (channel: string): Promise<Manifest> {
@@ -47,8 +47,8 @@ export default class Updater {
     // TODO: read sha256
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
     let stream = await this.http.stream(url)
-    let dir = path.join(this.config.dirs.data, 'cli')
-    let tmp = path.join(this.config.dirs.data, 'cli_tmp')
+    let dir = path.join(this.config.dataDir, 'cli')
+    let tmp = path.join(this.config.dataDir, 'cli_tmp')
     await this.extract(stream, tmp)
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
     fs.removeSync(dir)

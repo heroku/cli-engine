@@ -7,10 +7,11 @@ export default class PluginsUpdate extends Command {
   static topic = 'plugins'
   static command = 'update'
 
-  plugins: Plugins = new Plugins(this)
+  plugins: Plugins
 
   async run () {
-    this.action.start(`${this.config.name}: Updating plugins`)
+    this.plugins = new Plugins(this.out)
+    this.out.action.start(`${this.config.name}: Updating plugins`)
     await this.plugins.update()
   }
 }

@@ -9,6 +9,6 @@ export default class Version extends Command {
 
   async run () {
     let channel = this.config.channel === 'stable' ? '' : ` ${this.config.channel}`
-    this.log(`${this.config.name}/${this.config.version}${channel} (${process.platform}-${process.arch}) node-${process.version}`)
+    this.out.log(`${this.config.name}/${this.config.version}${channel} (${process.platform}-${process.arch}) node-${process.version}`)
   }
 }

@@ -1,16 +1,14 @@
 // @flow
 
 import Cache from './plugins_cache'
-import Config from 'cli-engine-command/lib/config'
 import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import fs from 'fs-extra'
 
 const cacheDir = path.join(__dirname, '..', 'tmp', 'cache')
 const pluginsCachePath = path.join(cacheDir, 'plugins.json')
-const config = new Config()
+const config = {cacheDir}
 const output = new Output(config)
-config.dirs = {cache: cacheDir}
 beforeEach(() => {
   fs.mkdirpSync(cacheDir)
   fs.removeSync(pluginsCachePath)

@@ -1,14 +1,16 @@
 // @flow
 
-import type Config from 'cli-engine-command/lib/config'
+import type {Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 
 export default class NotFound {
+  argv: string[]
   config: Config
   out: Output
 
-  constructor (output: Output) {
+  constructor (output: Output, argv: string[]) {
+    this.argv = argv
     this.out = output
     this.config = output.config
   }
@@ -32,10 +34,10 @@ export default class NotFound {
   }
 
   async run () {
-    let closest = this.closest(this.config.argv[1])
+    let closest = this.closest(this.argv[1])
 
     let perhaps = closest ? `Perhaps you meant ${this.out.color.yellow(closest)}\n` : ''
-    this.out.error(`${this.out.color.yellow(this.config.argv[1])} is not a heroku command.
+    this.out.error(`${this.out.color.yellow(this.argv[1])} is not a heroku command.
 ${perhaps}Run ${this.out.color.cmd('heroku help')} for a list of available commands.`, 127)
   }
 }

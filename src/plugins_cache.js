@@ -1,6 +1,7 @@
 // @flow
 
-import {Config, type Flag, type Arg} from 'cli-engine-command'
+import {type Flag, type Arg} from 'cli-engine-command'
+import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import fs from 'fs-extra'
@@ -48,7 +49,7 @@ export default class Cache {
     this.config = output.config
   }
 
-  get file (): string { return path.join(this.config.dirs.cache, 'plugins.json') }
+  get file (): string { return path.join(this.config.cacheDir, 'plugins.json') }
   get cache (): CacheData {
     if (this._cache) return this._cache
     let initial = {version: this.config.version, plugins: {}}

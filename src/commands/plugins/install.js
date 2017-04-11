@@ -14,11 +14,12 @@ export default class PluginsInstall extends Command {
   static args = [
     {name: 'plugin'}
   ]
-  plugins = new Plugins(this)
+  plugins: Plugins
 
   async run () {
+    this.plugins = new Plugins(this.out)
     const [plugin, tag = 'latest'] = this.argv[0].split('@')
-    if (!this.config.debug) this.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
+    if (!this.config.debug) this.out.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
     await this.plugins.install(plugin, tag)
   }
 }

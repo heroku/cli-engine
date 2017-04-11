@@ -1,7 +1,6 @@
 // @flow
 
 import {type LegacyCommand, convertFromV5} from './legacy'
-import Config from 'cli-engine-command/lib/config'
 
 jest.mock('cli-engine-command/lib/heroku', function () {
   let def = function () {
@@ -18,21 +17,6 @@ jest.mock('cli-engine-command/lib/heroku', function () {
   return def
 })
 
-jest.mock('cli-engine-command/lib/config', function () {
-  return function () {
-    return {
-      debug: 0,
-      dirs: {
-        cache: '/Users/foo/.cache/heroku'
-      }
-    }
-  }
-})
-
-// I would have preferred to mock out Config here but it
-// is awkward crossing the cli-engine-command boundary
-// and it gets reinstantiated in Command as well making
-// mocking out somewhat problematic
 test('exports a context', async function () {
   let ctx = {}
   let l: LegacyCommand = {
@@ -47,11 +31,11 @@ test('exports a context', async function () {
   }
 
   let V5 = convertFromV5(l)
-  let cmd = new V5(new Config())
+  let cmd = new V5({config: {cacheDir: '/Users/foo/.cache/heroku'}})
   cmd.argv = []
   await cmd.run()
 
-  expect(ctx.supportsColor).toEqual(cmd.color.enabled)
+  expect(ctx.supportsColor).toEqual(cmd.out.color.enabled)
   expect(ctx.debug).toEqual(0)
   expect(ctx.apiToken).toEqual('1234')
   expect(ctx.apiHost).toEqual('api.foo.com')
