@@ -1,6 +1,6 @@
 // @flow
 
-import Command, {Config, Topic, type Flag, type Arg} from 'cli-engine-command'
+import Command, {Config, Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Yarn from './yarn'
@@ -9,6 +9,7 @@ import LinkedPlugins from './linked_plugins'
 import uniqby from 'lodash.uniqby'
 import {convertFromV5, convertFlagsFromV5, type LegacyCommand} from './legacy'
 import fs from 'fs-extra'
+import Cache, {type CachedCommand, type CachedPlugin, type CachedTopic} from './plugins_cache'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -27,97 +28,12 @@ type ParsedPlugin = {
   commands?: (ParsedCommand | {default: ParsedCommand})[]
 }
 
-type CachedCommand = {
-  id: string,
-  topic: string,
-  command?: ?string,
-  aliases?: string[],
-  args: Arg[],
-  flags: {[name: string]: Flag<*>},
-  description: ?string,
-  help?: ?string,
-  usage?: ?string,
-  hidden: boolean
-}
-
-type CachedTopic = {
-  topic: string,
-  description?: ?string,
-  hidden: boolean
-}
-
-type CachedPlugin = {
-  name: string,
-  path: string,
-  version: string,
-  commands: CachedCommand[],
-  topics: CachedTopic[]
-}
-
-type CacheData = {
-  version: string,
-  plugins: {[path: string]: CachedPlugin}
-}
-
 type PJSON = {
   dependencies?: { [name: string]: string }
 }
 
 type PluginOptions = {
   tag?: string
-}
-
-class Cache {
-  static updated = false
-  config: Config
-  out: Output
-  _cache: CacheData
-
-  constructor (config: Config, output: Output) {
-    this.config = config
-    this.out = output
-  }
-
-  get file (): string { return path.join(this.config.dirs.cache, 'plugins.json') }
-  get cache (): CacheData {
-    if (this._cache) return this._cache
-    let initial = {version: this.config.version, plugins: {}}
-    try {
-      this._cache = fs.readJSONSync(this.file)
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-      this._cache = initial
-    }
-    if (this._cache.version !== this.config.version) this._cache = initial
-    return this._cache
-  }
-
-  plugin (path: string): ?CachedPlugin { return this.cache.plugins[path] }
-
-  updatePlugin (path: string, plugin: CachedPlugin) {
-    this.constructor.updated = true
-    this.cache.plugins[path] = plugin
-  }
-
-  deletePlugin (...names: string[]) {
-    for (let k of Object.keys(this.cache.plugins)) {
-      if (names.includes(this.cache.plugins[k].name)) {
-        this.out.debug(`Clearing cache for ${k}`)
-        this.constructor.updated = true
-        delete this.cache.plugins[k]
-      }
-    }
-    this.save()
-  }
-
-  save () {
-    if (!this.constructor.updated) return
-    try {
-      fs.writeJSONSync(this.file, this.cache)
-    } catch (err) {
-      this.out.warn(err)
-    }
-  }
 }
 
 function undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
@@ -259,7 +175,7 @@ export default class Plugins {
     this.out = output
     this.config = output.config
     this.yarn = new Yarn(output)
-    this.cache = new Cache(output.config, output)
+    this.cache = new Cache(output)
     this.linkedPlugins = new LinkedPlugins(this)
     this.plugins = [new Plugin('builtin', './commands', this)]
     .concat(this.linkedPlugins.list())

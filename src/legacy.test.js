@@ -1,5 +1,4 @@
 // @flow
-/* globals test expect jest */
 
 import {type LegacyCommand, convertFromV5} from './legacy'
 import Config from 'cli-engine-command/lib/config'
