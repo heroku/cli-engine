@@ -7,6 +7,8 @@ import Plugins from './plugins'
 import Updater from './updater'
 import NotFound from './not_found'
 
+import MigrateV5Plugins from './migrator'
+
 import Help from './commands/help'
 
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
@@ -35,6 +37,7 @@ export default class Main {
   async run () {
     const updater = new Updater(out)
     const plugins = new Plugins(out)
+    await MigrateV5Plugins.run([], this.config)
     await updater.autoupdate()
     await plugins.refreshLinkedPlugins()
     if (this.cmdAskingForHelp) {
