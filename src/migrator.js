@@ -16,7 +16,7 @@ export default class extends Command {
     this.out.debug('Migrating V5 plugins...')
     for (let p of pljson) {
       if (this.plugins.isPluginInstalled(p.name)) {
-        this.out.debug('Skipping already installed plugin: ', p.name)
+        this.out.debug(`Skipping already installed plugin: ${p.name}`)
       } else {
         await this.installPlugin(p.name, p.tag)
       }
@@ -45,13 +45,13 @@ export default class extends Command {
   }
 
   async reinstallViaSymlink (name: string) {
-    this.out.debug('Installing via symlink: ', name)
+    this.out.debug(`Installing via symlink: ${name}`)
     let pluginPath = fs.realpathSync(path.join(this.config.dataDir, 'plugins', 'node_modules', name))
     await this.plugins.addLinkedPlugin(pluginPath)
   }
 
   async addToPJSON (name: string, tag: string) {
-    this.out.debug('Adding to plugins pjson: ', name)
+    this.out.debug(`Adding to plugins pjson: ${name}`)
     this.plugins.addPackageToPJSON(name, tag)
   }
 }
