@@ -8,11 +8,8 @@ export default class extends Command {
   static topic = 'plugins'
   static flags = {core: BooleanFlag()}
 
-  plugins: Plugins
-
   async run () {
-    this.plugins = new Plugins(this.out)
-    let plugins = this.plugins.list()
+    let plugins = new Plugins(this.out).list()
     plugins = plugins.filter(p => p.type !== 'builtin')
     plugins.sort(util.compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
