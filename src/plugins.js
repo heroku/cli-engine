@@ -259,6 +259,7 @@ export default class Plugins {
   }
 
   async update () {
+    if (this.userPlugins.list.length === 0) return
     await this.userPlugins.update()
     this.clearCache(...this.userPlugins.list.map(p => p.name))
   }
