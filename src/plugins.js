@@ -178,7 +178,9 @@ export default class Plugins {
     this.yarn = new Yarn(output)
     this.cache = new Cache(output)
     this.linkedPlugins = new LinkedPlugins(this)
-    this.plugins = [new Plugin('builtin', './commands', this)]
+
+    let commandsPath = path.resolve(path.join(__dirname, 'commands'))
+    this.plugins = [new Plugin('builtin', commandsPath, this)]
     .concat(this.linkedPlugins.list())
     .concat(this.userPlugins)
     .concat(this.corePlugins)
