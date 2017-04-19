@@ -308,16 +308,9 @@ export default class Plugins {
     this.clearCache(...this.userPlugins.map(p => p.name))
   }
 
-  async uninstall (name: string, forceSilently: boolean = false) {
+  async uninstall (name: string) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     let plugin = this.plugins.filter(p => !['core', 'builtin'].includes(p.type)).find(p => p.name === name)
-    if (!plugin && forceSilently) {
-      await this.yarn.exec(['remove', name])
-      this.clearCache(name)
-      await unlock()
-      this.out.action.stop()
-      return
-    }
     if (!plugin) throw new Error(`${name} is not installed`)
     switch (plugin.type) {
       case 'user': {
