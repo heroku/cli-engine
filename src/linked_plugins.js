@@ -18,10 +18,10 @@ type PJSON = {
 
 export default class LinkedPlugins {
   constructor (plugins: Plugins) {
-    this.yarn = plugins.yarn
     this.plugins = plugins
     this.config = plugins.config
     this.out = plugins.out
+    this.yarn = new Yarn(this.out)
     try {
       this._data = fs.readJSONSync(this.file)
     } catch (err) {
@@ -78,7 +78,7 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
    * list linked plugins
    * @returns {Plugin[]}
    */
-  list (): Plugin[] {
+  get list (): Plugin[] {
     return this._data.plugins.map(p => new Plugin('link', p, this.plugins))
   }
 
