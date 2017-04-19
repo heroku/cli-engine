@@ -26,7 +26,7 @@ type ParsedCommand = | LegacyCommand | Class<Command<*>>
 type ParsedPlugin = {
   topic?: ParsedTopic,
   topics?: ParsedTopic[],
-  commands?: (ParsedCommand | {default: ParsedCommand})[]
+  commands?: ParsedCommand[]
 }
 
 type PJSON = {
@@ -35,16 +35,6 @@ type PJSON = {
 
 type PluginOptions = {
   tag?: string
-}
-
-function undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
-  if (t.default) return (t.default: any)
-  return t
-}
-
-function undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): ParsedCommand {
-  if (c.default && typeof c.default !== 'boolean') return (c.default: any)
-  return (c: any)
 }
 
 export class Plugin {
@@ -83,7 +73,6 @@ export class Plugin {
     let {topic, command} = c
     let p = this.require()
     let Command = (p.commands || [])
-      .map(undefaultCommand)
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
     return typeof Command === 'function' ? Command : convertFromV5((Command: any))
@@ -130,7 +119,6 @@ export class Plugin {
     const version = this.type === 'builtin' ? this.config.version : this.pjson().version
     if (!plugin.commands) throw new Error('no commands found')
     const commands: CachedCommand[] = plugin.commands
-    .map(undefaultCommand)
     .map(c => ({
       id: c.command ? `${c.topic}:${c.command}` : c.topic,
       topic: c.topic,
@@ -145,7 +133,6 @@ export class Plugin {
       flags: convertFlagsFromV5(c.flags)
     }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
-    .map(undefaultTopic)
     .map(t => ({
       topic: t.topic || t.name || '',
       description: t.description,
@@ -165,8 +152,26 @@ export class Plugin {
     return cachedPlugin
   }
 
-  // flow$ignore
-  require (): ParsedPlugin { return require(this.path) }
+  undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
+    if (t.default) return (t.default: any)
+    return t
+  }
+
+  undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): ParsedCommand {
+    if (c.default && typeof c.default !== 'boolean') return (c.default: any)
+    return (c: any)
+  }
+
+  require (): ParsedPlugin {
+    // flow$ignore
+    let required = require(this.path)
+    return {
+      topic: required.topic && this.undefaultTopic(required.topic),
+      topics: required.topics && required.topics.map(this.undefaultTopic),
+      commands: required.commands && required.commands.map(this.undefaultCommand)
+    }
+  }
+
   // flow$ignore
   pjson (): {name: string, version: string} { return require(path.join(this.path, 'package.json')) }
 }
