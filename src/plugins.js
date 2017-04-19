@@ -115,8 +115,6 @@ export class Plugin {
   }
 
   updatePlugin (plugin: ParsedPlugin): CachedPlugin {
-    const name = this.type === 'builtin' ? 'builtin' : this.pjson().name
-    const version = this.type === 'builtin' ? this.config.version : this.pjson().version
     if (!plugin.commands) throw new Error('no commands found')
     const commands: CachedCommand[] = plugin.commands
     .map(c => ({
@@ -147,6 +145,7 @@ export class Plugin {
       })
     }
 
+    const {name, version} = this.pjson()
     const cachedPlugin: CachedPlugin = {name, path: this.path, version, commands, topics}
     this.cache.updatePlugin(this.path, cachedPlugin)
     return cachedPlugin
@@ -172,8 +171,14 @@ export class Plugin {
     }
   }
 
-  // flow$ignore
-  pjson (): {name: string, version: string} { return require(path.join(this.path, 'package.json')) }
+  pjson (): {name: string, version: string} {
+    if (this.type === 'builtin') {
+      return {name: 'builtin', version: this.config.version}
+    }
+
+    // flow$ignore
+    return require(path.join(this.path, 'package.json'))
+  }
 }
 
 export default class Plugins {
