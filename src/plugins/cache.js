@@ -58,7 +58,7 @@ export default class Cache {
     try {
       this._cache = fs.readJSONSync(this.file)
     } catch (err) {
-      if (err.code !== 'ENOENT') throw err
+      if (err.code !== 'ENOENT') this.out.debug(err)
       this._cache = initial
     }
     if (this._cache.version !== this.config.version) this._cache = initial
