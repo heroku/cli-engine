@@ -66,9 +66,12 @@ export default class UserPlugins {
     await this.setupUserPlugins()
     this.addPackageToPJSON(name, tag)
     await this.yarn.exec()
+
+    let path = this.userPluginPath(name)
+
     try {
       // flow$ignore
-      let plugin = (require(this.userPluginPath(name)): ParsedPlugin)
+      let plugin = (require(path): ParsedPlugin)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
     } catch (err) {
       await unlock()
@@ -77,6 +80,8 @@ export default class UserPlugins {
       this.out.exit(1)
     }
     await unlock()
+
+    return path
   }
 
   async update () {

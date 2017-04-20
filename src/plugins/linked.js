@@ -106,7 +106,7 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
     if (!pjson.main) throw new Error(`No main script specified in ${path.join(p, 'package.json')}`)
     let main = path.join(p, pjson.main)
     if (!this._needsPrepare(p, main)) return
-    this.plugins.clearCache(pjson.name)
+    this.plugins.clearCache(p)
     if (!pjson.scripts || !pjson.scripts.prepare) return
     if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
     await this.yarn.exec(['run', 'prepare'], {cwd: p})
@@ -141,7 +141,7 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     await this.yarn.exec([], {cwd: p})
     fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
-    this.plugins.clearCache(this._pjson(p).name)
+    this.plugins.clearCache(p)
     this.out.action.stop()
   }
 

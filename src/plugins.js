@@ -88,14 +88,14 @@ export default class Plugins {
 
   async install (name: string, tag: string = 'latest') {
     if (this.plugins.find(p => p.name === name && p.options.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
-    await this.userPlugins.install(name, tag)
-    this.clearCache(name)
+    let path = await this.userPlugins.install(name, tag)
+    this.clearCache(path)
   }
 
   async update () {
     if (this.userPlugins.list.length === 0) return
     await this.userPlugins.update()
-    this.clearCache(...this.userPlugins.list.map(p => p.name))
+    this.clearCache(...this.userPlugins.list.map(p => p.path))
   }
 
   async uninstall (name: string) {
@@ -113,7 +113,7 @@ export default class Plugins {
         break
       }
     }
-    this.clearCache(name)
+    this.clearCache(plugin.path)
     this.out.action.stop()
   }
 
@@ -129,8 +129,8 @@ export default class Plugins {
     await this.linkedPlugins.refresh()
   }
 
-  clearCache (...names: string[]) {
-    this.cache.deletePlugin(...names)
+  clearCache (...paths: string[]) {
+    this.cache.deletePlugin(...paths)
   }
 
   get topics (): CachedTopic[] {

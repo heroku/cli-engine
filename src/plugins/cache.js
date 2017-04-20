@@ -70,13 +70,11 @@ export default class Cache {
     this.cache.plugins[path] = plugin
   }
 
-  deletePlugin (...names: string[]) {
-    for (let k of Object.keys(this.cache.plugins)) {
-      if (names.includes(this.cache.plugins[k].name)) {
-        this.out.debug(`Clearing cache for ${k}`)
-        this.constructor.updated = true
-        delete this.cache.plugins[k]
-      }
+  deletePlugin (...paths: string[]) {
+    for (let path of paths) {
+      this.out.debug(`Clearing cache for ${path}`)
+      this.constructor.updated = true
+      delete this.cache.plugins[path]
     }
     this.save()
   }
