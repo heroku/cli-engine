@@ -109,6 +109,14 @@ export default class Plugin {
   }
 
   updatePlugin (plugin: ParsedPlugin): CachedPlugin {
+    const getAliases = (c: ParsedCommand) => {
+      let aliases = c.aliases || []
+      if (c.default) {
+        this.out.warn(`default setting on ${c.topic} is deprecated`)
+        aliases.push(c.topic)
+      }
+      return aliases
+    }
     if (!plugin.commands) throw new Error('no commands found')
     const commands: CachedCommand[] = plugin.commands
     .map(c => ({
@@ -121,7 +129,7 @@ export default class Plugin {
       help: c.help,
       usage: c.usage,
       hidden: !!c.hidden,
-      aliases: c.aliases,
+      aliases: getAliases(c),
       flags: convertFlagsFromV5(c.flags)
     }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
