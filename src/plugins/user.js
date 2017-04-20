@@ -7,8 +7,7 @@ import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
-import Plugins from '../plugins'
-import Plugin, {type ParsedPlugin} from './plugin'
+import {IPluginManager, PluginPath} from './plugin_manager'
 
 import Yarn from './yarn'
 
@@ -16,27 +15,25 @@ type PJSON = {
   dependencies?: { [name: string]: string }
 }
 
-export default class UserPlugins {
-  constructor (plugins: Plugins) {
-    this.plugins = plugins
-    this.out = plugins.out
-    this.config = plugins.config
-    this.yarn = new Yarn(plugins.out)
+export default class UserPlugins implements IPluginManager {
+  constructor (out: Output) {
+    this.out = out
+    this.config = this.out.config
+    this.yarn = new Yarn(this.out)
   }
 
-  plugins: Plugins
   out: Output
   config: Config
   yarn: Yarn
 
   /**
    * list user plugins
-   * @returns {Plugin[]}
+   * @returns {PluginPath[]}
    */
-  get list (): Plugin[] {
+  list (): PluginPath[] {
     const pjson = this.userPluginsPJSON
     return entries(pjson.dependencies || {}).map(([name, tag]) => {
-      return new Plugin('user', this.userPluginPath(name), this.plugins, {tag})
+      return new PluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag})
     })
   }
 
@@ -71,7 +68,7 @@ export default class UserPlugins {
 
     try {
       // flow$ignore
-      let plugin = (require(path): ParsedPlugin)
+      let plugin = require(path)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
     } catch (err) {
       await unlock()

@@ -3,6 +3,8 @@
 import {type Flag, type Arg} from 'cli-engine-command'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
+import Plugin from './plugin'
+import {IPluginManager, type PluginPath} from './plugin_manager'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -77,6 +79,42 @@ export default class Cache {
       delete this.cache.plugins[path]
     }
     this.save()
+  }
+
+  fetch (pluginPath: PluginPath): CachedPlugin {
+    let c = this.plugin(pluginPath.path)
+    if (c) return c
+    try {
+      this.out.debug('updating cache for ' + pluginPath.path)
+      let cachedPlugin = pluginPath.convertToCached()
+      this.updatePlugin(pluginPath.path, cachedPlugin)
+      return cachedPlugin
+    } catch (err) {
+      if (this.type === 'builtin') throw err
+      this.out.warn(err)
+      return {
+        name: pluginPath.path,
+        path: pluginPath.path,
+        version: '',
+        commands: [],
+        topics: []
+      }
+    }
+  }
+
+  fetchManagers (...managers: IPluginManager[]) : Plugin[] {
+    let plugins = []
+
+    for (let manager of managers) {
+      let paths = manager.list()
+      plugins = plugins.concat(paths.map(function (pluginPath) : Plugin {
+        return new Plugin(this.out, pluginPath, this.fetch(pluginPath))
+      }, this))
+    }
+
+    this.save()
+
+    return plugins
   }
 
   save () {
