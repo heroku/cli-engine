@@ -634,9 +634,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-3.0.2.tgz#997f59f7b020cb86f164b6c2764080621466e000"
+cli-engine-command@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-3.0.3.tgz#18c3570a61c8cde0fc6d712bb015c02d2206e0f8"
   dependencies:
     ansi-escapes "^1.4.0"
     cardinal "^1.0.0"
@@ -644,7 +644,7 @@ cli-engine-command@3.0.2:
     cli-engine-config "1.0.3"
     fs-extra "2.1.2"
     got "^6.7.1"
-    http-call "^1.1.0"
+    http-call "^1.1.1"
     jest-validate "^19.0.2"
     lodash.maxby "^4.6.0"
     netrc-parser "^2.0.1"
@@ -1711,9 +1711,11 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.1.0.tgz#e0a43f408876632019cb9a041ee7fa0a43365cc6"
+http-call@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.1.1.tgz#9cbbda6f2c0dfdb140e2a626a21c2c7247d95679"
+  dependencies:
+    tunnel-agent "^0.6.0"
 
 http-signature@~1.1.0:
   version "1.1.1"
