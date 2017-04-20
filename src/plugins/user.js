@@ -7,7 +7,9 @@ import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
-import Plugins, {Plugin, type ParsedPlugin} from './plugins'
+import Plugins from '../plugins'
+import Plugin, {type ParsedPlugin} from './plugin'
+
 import Yarn from './yarn'
 
 type PJSON = {

@@ -1,6 +1,6 @@
 // @flow
 
-import Cache from './plugins_cache'
+import Cache from './cache'
 import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import fs from 'fs-extra'
