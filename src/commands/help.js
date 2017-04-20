@@ -21,7 +21,7 @@ export default class Help extends Command {
     if (!Topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
     if (!Topic) Topic = TopicHelpPresenter
     let commands = this.plugins.commandsForTopic(Topic.topic)
-    await new Topic(commands, this.out).help(this.argv, matchedCommand)
+    await new TopicHelpPresenter(commands, this.out, Topic.topic).help(this.argv, matchedCommand)
   }
 
   topics () {
@@ -62,9 +62,13 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
 }
 
 class TopicHelpPresenter extends TopicBase {
+  constructor (commands: Class<Command<*>>[], out: any, topic: ?string) {
+    super(commands, out)
+    if (topic) this.constructor.topic = topic
+  }
+
   async help (args: string[], matchedCommand?: ?Class<Command<*>>) {
     if (matchedCommand) this.commandHelp(matchedCommand)
-    console.log(this.constructor, args)
     if (args.slice(0, 2).includes(this.constructor.topic)) this.listCommandsHelp()
   }
 
