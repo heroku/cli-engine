@@ -1,6 +1,7 @@
 // @flow
 
-import Plugins, {Plugin} from './plugins'
+import Plugins from '../plugins'
+import Plugin from './plugin'
 import path from 'path'
 
 export default class BuiltinPlugins {
@@ -15,7 +16,7 @@ export default class BuiltinPlugins {
    * @returns {Plugin[]}
    */
   get list (): Plugin[] {
-    let commandsPath = path.join(__dirname, 'commands')
+    let commandsPath = path.resolve(path.join(__dirname, '..', 'commands'))
     return [new Plugin('builtin', commandsPath, this.plugins)]
   }
 }

@@ -1,7 +1,8 @@
 // @flow
 
 import {type Config} from 'cli-engine-config'
-import Plugins, {Plugin} from './plugins'
+import Plugins from '../plugins'
+import Plugin from './plugin'
 import path from 'path'
 
 export default class CorePlugins {

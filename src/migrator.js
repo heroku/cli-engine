@@ -3,7 +3,7 @@
 import {type Config} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
-import UserPlugins from './user_plugins'
+import UserPlugins from './plugins/user'
 import path from 'path'
 import fs from 'fs-extra'
 
