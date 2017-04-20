@@ -17,16 +17,17 @@ export default class Plugins {
     this.config = output.config
     this.cache = new Cache(output)
 
-    this.builtinPlugins = new BuiltinPlugins(this)
-    this.linkedPlugins = new LinkedPlugins(this)
-    this.userPlugins = new UserPlugins(this)
-    this.corePlugins = new CorePlugins(this)
+    this.builtinPlugins = new BuiltinPlugins(this.out)
+    this.linkedPlugins = new LinkedPlugins(this.out)
+    this.userPlugins = new UserPlugins(this.out)
+    this.corePlugins = new CorePlugins(this.out)
 
-    this.plugins = this.builtinPlugins.list
-    .concat(this.linkedPlugins.list)
-    .concat(this.userPlugins.list)
-    .concat(this.corePlugins.list)
-    this.cache.save()
+    this.plugins = this.cache.fetchManagers(
+      this.builtinPlugins,
+      this.linkedPlugins,
+      this.userPlugins,
+      this.corePlugins
+    )
   }
 
   builtinPlugins: BuiltinPlugins
@@ -87,15 +88,15 @@ export default class Plugins {
   }
 
   async install (name: string, tag: string = 'latest') {
-    if (this.plugins.find(p => p.name === name && p.options.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
+    if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
     let path = await this.userPlugins.install(name, tag)
     this.clearCache(path)
   }
 
   async update () {
-    if (this.userPlugins.list.length === 0) return
+    if (this.userPlugins.list().length === 0) return
     await this.userPlugins.update()
-    this.clearCache(...this.userPlugins.list.map(p => p.path))
+    this.clearCache(...this.userPlugins.list().map(p => p.path))
   }
 
   async uninstall (name: string) {
@@ -122,11 +123,18 @@ export default class Plugins {
   }
 
   async addLinkedPlugin (p: string) {
+    let name = this.linkedPlugins.checkLinked(p)
+    if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
+      throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
+    }
+
     await this.linkedPlugins.add(p)
+    this.clearCache(p)
   }
 
   async refreshLinkedPlugins () {
-    await this.linkedPlugins.refresh()
+    let paths: string[] = await this.linkedPlugins.refresh()
+    this.clearCache(...paths)
   }
 
   clearCache (...paths: string[]) {

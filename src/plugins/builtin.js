@@ -1,22 +1,22 @@
 // @flow
 
-import Plugins from '../plugins'
-import Plugin from './plugin'
+import type Output from 'cli-engine-command/lib/output'
+import {IPluginManager, PluginPath} from './plugin_manager'
 import path from 'path'
 
-export default class BuiltinPlugins {
-  constructor (plugins: Plugins) {
-    this.plugins = plugins
+export default class BuiltinPlugins implements IPluginManager {
+  constructor (out: Output) {
+    this.out = out
   }
 
-  plugins: Plugins
+  out: Output
 
   /**
    * list builtin plugins
-   * @returns {Plugin[]}
+   * @returns {PluginPath[]}
    */
-  get list (): Plugin[] {
+  list (): PluginPath[] {
     let commandsPath = path.resolve(path.join(__dirname, '..', 'commands'))
-    return [new Plugin('builtin', commandsPath, this.plugins)]
+    return [new PluginPath({output: this.out, type: 'builtin', path: commandsPath})]
   }
 }

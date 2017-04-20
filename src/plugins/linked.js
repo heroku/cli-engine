@@ -1,13 +1,12 @@
 // @flow
 
-import type {Config} from 'cli-engine-config'
+import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
-import Plugins from '../plugins'
-import Plugin from './plugin'
 import Yarn from './yarn'
 import klaw from 'klaw-sync'
 import fs from 'fs-extra'
+import {IPluginManager, PluginPath} from './plugin_manager'
 
 type PJSON = {
   name: string,
@@ -17,11 +16,10 @@ type PJSON = {
   }
 }
 
-export default class LinkedPlugins {
-  constructor (plugins: Plugins) {
-    this.plugins = plugins
-    this.config = plugins.config
-    this.out = plugins.out
+export default class LinkedPlugins implements IPluginManager {
+  constructor (out: Output) {
+    this.out = out
+    this.config = this.out.config
     this.yarn = new Yarn(this.out)
     try {
       this._data = fs.readJSONSync(this.file)
@@ -35,7 +33,6 @@ export default class LinkedPlugins {
   }
 
   yarn: Yarn
-  plugins: Plugins
   config: Config
   out: Output
   _data: {
@@ -49,20 +46,16 @@ export default class LinkedPlugins {
    */
   async add (p: string) {
     if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
-    // flow$ignore
-    let pjson: PJSON = require(path.join(p, 'package.json'))
+
     await this.prepare(p)
-    const name = pjson.name
-    if (this.plugins.plugins.find(p => p.type === 'user' && p.name === name)) {
-      throw new Error(`${name} is already installed.
-Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
-    }
-    if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
+
     // flow$ignore
     let m = require(p)
     if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
+
     this._data.plugins.push(p)
     this._save()
+
     this.out.action.stop()
   }
 
@@ -77,41 +70,51 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
 
   /**
    * list linked plugins
-   * @returns {Plugin[]}
+   * @returns {PluginPath[]}
    */
-  get list (): Plugin[] {
-    return this._data.plugins.map(p => new Plugin('link', p, this.plugins))
+  list (): PluginPath[] {
+    return this._data.plugins.map(p => {
+      return new PluginPath({output: this.out, type: 'link', path: p})
+    })
   }
 
   /**
    * runs prepare() on all linked plugins
    */
-  async refresh () {
+  async refresh () : Promise<string[]> {
+    let paths : string[] = []
     for (let plugin of this._data.plugins) {
       try {
-        await this.prepare(plugin)
+        if (await this.prepare(plugin)) {
+          paths.push(plugin)
+        }
       } catch (err) {
         this.out.warn(`Error refreshing ${plugin}`)
         this.out.warn(err)
       }
     }
+    return paths
   }
 
   /**
    * installs plugin dependencies and runs npm prepare if needed
    */
-  async prepare (p: string) {
+  async prepare (p: string) : Promise<boolean> {
     let pjson = this._pjson(p)
     await this._install(p)
     if (!pjson.main) throw new Error(`No main script specified in ${path.join(p, 'package.json')}`)
     let main = path.join(p, pjson.main)
-    if (!this._needsPrepare(p, main)) return
-    this.plugins.clearCache(p)
-    if (!pjson.scripts || !pjson.scripts.prepare) return
-    if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
-    await this.yarn.exec(['run', 'prepare'], {cwd: p})
-    fs.utimesSync(main, new Date(), new Date())
-    this.out.action.stop()
+
+    if (!this._needsPrepare(p, main)) return false
+
+    if (pjson.scripts && pjson.scripts.prepare) {
+      if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
+      await this.yarn.exec(['run', 'prepare'], {cwd: p})
+      fs.utimesSync(main, new Date(), new Date())
+      this.out.action.stop()
+    }
+
+    return true
   }
 
   _save () {
@@ -141,8 +144,12 @@ Uninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + na
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     await this.yarn.exec([], {cwd: p})
     fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
-    this.plugins.clearCache(p)
     this.out.action.stop()
+  }
+
+  checkLinked (p: string) {
+    if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
+    return this._pjson(p).name
   }
 
   // flow$ignore

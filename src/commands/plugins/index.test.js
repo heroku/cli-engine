@@ -7,9 +7,9 @@ jest.mock('../../plugins', () => {
     list () {
       return [
         { name: 'heroku-foo', type: 'core', options: {} },
-        { name: 'heroku-pg', type: 'user', options: { tag: 'latest' }, version: '1.0.1' },
-        { name: 'heroku-debug', type: 'user', options: { tag: 'alpha' }, version: '1.0.0' },
-        { name: 'heroku-apps', type: 'link', options: {}, version: '1.0.0' }
+        { name: 'heroku-pg', type: 'user', tag: 'latest', version: '1.0.1' },
+        { name: 'heroku-debug', type: 'user', tag: 'alpha', version: '1.0.0' },
+        { name: 'heroku-apps', type: 'link', version: '1.0.0' }
       ]
     }
   }
