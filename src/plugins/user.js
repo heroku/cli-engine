@@ -82,6 +82,7 @@ export default class UserPlugins implements IPluginManager {
   }
 
   async update () {
+    await this.setupUserPlugins()
     await this.yarn.exec(['upgrade'])
   }
 
