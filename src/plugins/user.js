@@ -62,23 +62,21 @@ export default class UserPlugins implements IPluginManager {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
     this.addPackageToPJSON(name, tag)
-    await this.yarn.exec()
-
-    let path = this.userPluginPath(name)
-
     try {
+      await this.yarn.exec()
+      let path = this.userPluginPath(name)
       // flow$ignore
       let plugin = require(path)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
+      await unlock()
+      return path
     } catch (err) {
       await unlock()
       this.out.error(err, false)
       this.removePackageFromPJSON(name)
       this.out.exit(1)
+      throw new Error('unreachable')
     }
-    await unlock()
-
-    return path
   }
 
   async update () {
