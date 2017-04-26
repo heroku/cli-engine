@@ -1,7 +1,6 @@
 // @flow
 
 import PluginsUpdate from './update'
-
 let mockUpdate
 
 jest.mock('../../plugins', () => {
