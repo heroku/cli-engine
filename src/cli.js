@@ -5,6 +5,7 @@ import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 
+import Analytics from './analytics'
 import Updater from './updater'
 import NotFound from './not_found'
 
@@ -52,6 +53,8 @@ export default class Main {
       let Command = plugins.findCommand(this.argv[1] || this.config.defaultCommand)
       if (!Command) return new NotFound(out, this.argv).run()
       await out.done()
+      let analytics = new Analytics({config: this.config, out, plugins})
+      analytics.record(Command)
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
     }
     out.exit(0)
