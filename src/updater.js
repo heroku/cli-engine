@@ -59,32 +59,26 @@ export default class Updater {
 
   extract (stream: stream$Readable, dir: string) {
     const zlib = require('zlib')
-    const tar = require('tar-stream')
+    const tar = require('tar-fs')
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       fs.removeSync(dir)
-      let extract = tar.extract()
-      extract.on('entry', (header, stream, next) => {
-        let p = path.join(dir, header.name)
-        let opts = {mode: header.mode}
+
+      let ignore = function (_, header) {
         switch (header.type) {
           case 'directory':
-            fs.mkdirpSync(p, opts)
-            next()
-            break
           case 'file':
-            stream.pipe(fs.createWriteStream(p, opts))
-            break
+            return false
           case 'symlink':
-            // ignore symlinks since they will not work on windows
-            next()
-            break
+            return true
           default: throw new Error(header.type)
         }
-        stream.resume()
-        stream.on('end', next)
-      })
+      }
+
+      let extract = tar.extract(dir, {ignore})
+      extract.on('error', reject)
       extract.on('finish', resolve)
+
       stream
       .pipe(zlib.createGunzip())
       .pipe(extract)
