@@ -3552,7 +3552,7 @@ table@^3.7.8:
     tv4 "^1.2.7"
     xregexp "^3.0.0"
 
-tar-fs@^1.15.1:
+tar-fs@1.15.2, tar-fs@^1.15.1:
   version "1.15.2"
   resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-1.15.2.tgz#761f5b32932c7b39461a60d537faea0d8084830c"
   dependencies:
@@ -3574,7 +3574,7 @@ tar-pack@~3.3.0:
     tar "~2.2.1"
     uid-number "~0.0.6"
 
-tar-stream@1.5.2, tar-stream@^1.1.2, tar-stream@^1.5.2:
+tar-stream@^1.1.2, tar-stream@^1.5.2:
   version "1.5.2"
   resolved "https://registry.yarnpkg.com/tar-stream/-/tar-stream-1.5.2.tgz#fbc6c6e83c1a19d4cb48c7d96171fc248effc7bf"
   dependencies:
