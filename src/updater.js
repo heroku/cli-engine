@@ -47,8 +47,8 @@ export default class Updater {
     // TODO: read sha256
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
     let stream = await this.http.stream(url)
-    let dir = path.join(this.config.dataDir, 'cli')
-    let tmp = path.join(this.config.dataDir, 'cli_tmp')
+    let dir = path.join(this.config.dataDir, 'client')
+    let tmp = path.join(this.config.dataDir, 'client_tmp')
     await this.extract(stream, tmp)
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
     fs.removeSync(dir)
