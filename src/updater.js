@@ -97,6 +97,7 @@ export default class Updater {
     // on windows the delete would error on node.exe so we explicitly rename
     let rename = (this.config.windows) ? fs.renameSync : fs.moveSync
 
+    fs.mkdirpSync(path.dirname((this.clientDelete)))
     rename(dir, this.clientDelete)
 
     rename(path.join(tmp, this.base(manifest)), dir)
