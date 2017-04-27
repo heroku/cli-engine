@@ -82,6 +82,7 @@ fi
 if [ $OS == "win32" ]; then
   cat << EOF > $WORKSPACE/bin/$BIN.cmd
 @echo off
+set CLI_BINPATH=%~dp0\\$BIN.cmd
 "%~dp0\\node.exe" "%~dp0\\$BIN.js" %*
 EOF
 else
