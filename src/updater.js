@@ -29,6 +29,8 @@ export default class Updater {
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
   get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
   get binPath (): ?string { return process.env.CLI_BINPATH }
+  get clientDelete (): string { return path.join(this.config.dataDir, 'tmp', 'client.DELETE') }
+  get nodeDelete (): string { return path.join(this.config.dataDir, 'tmp', 'node.DELETE') }
 
   async fetchManifest (channel: string): Promise<Manifest> {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
@@ -42,18 +44,78 @@ export default class Updater {
     }
   }
 
+  _catch (fn: Function) {
+    try {
+      fn()
+    } catch (err) {
+      this.out.debug(err)
+    }
+  }
+
+  _cleanup () {
+    this._catch(() => {
+      // if the previous update failed we may have cruft left over
+      // which will cause the new update to fail on rename
+      if (fs.existsSync(this.clientDelete)) {
+        fs.removeSync(this.clientDelete)
+      }
+    })
+
+    this._catch(() => {
+      // remove the node executables we left behind to prevent
+      // windows from crashing, but do not error out because
+      // they may still be in use
+      if (fs.existsSync(this.nodeDelete)) {
+        fs.readdirSync(this.nodeDelete).forEach(dir => {
+          this._catch(() => {
+            fs.removeSync(path.join(this.nodeDelete, dir))
+          })
+        })
+
+        if (fs.readdirSync(this.nodeDelete).length === 0) {
+          fs.removeSync(this.nodeDelete)
+        }
+      }
+    })
+  }
+
   async update (manifest: Manifest) {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
     // TODO: read sha256
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
     let stream = await this.http.stream(url)
+
     let dir = path.join(this.config.dataDir, 'client')
     let tmp = path.join(this.config.dataDir, 'client_tmp')
+
     await this.extract(stream, tmp)
+
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
-    fs.removeSync(dir)
-    fs.renameSync(path.join(tmp, this.base(manifest)), dir)
-    fs.removeSync(tmp)
+    this._cleanup()
+
+    // moveSync tries to do a rename first then falls back to copy & delete
+    // on windows the delete would error on node.exe so we explicitly rename
+    let rename = (this.config.windows) ? fs.renameSync : fs.moveSync
+
+    rename(dir, this.clientDelete)
+
+    rename(path.join(tmp, this.base(manifest)), dir)
+    this._catch(() => {
+      fs.removeSync(tmp)
+    })
+
+    // move the node executable before trying to delete the old client
+    // because it is still in use and will cause the update to fail on windows
+    let dirDeleteNode = path.join(this.clientDelete, 'bin', 'node.exe')
+    if (fs.existsSync(dirDeleteNode)) {
+      fs.mkdirpSync(this.nodeDelete)
+      let nodeTmpDeleteDir = require('tmp').dirSync({dir: this.nodeDelete}).name
+      rename(dirDeleteNode, path.join(nodeTmpDeleteDir, 'node.exe'))
+    }
+
+    this._catch(() => {
+      fs.removeSync(this.clientDelete)
+    })
     unlock()
   }
 
