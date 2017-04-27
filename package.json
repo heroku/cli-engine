@@ -74,7 +74,7 @@
     "clean": "rimraf lib",
     "prepare": "npm run clean && npm run build",
     "release": "np",
-    "test": "jest && flow && standard",
+    "test": "jest -i && flow && standard",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {

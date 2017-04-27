@@ -9,7 +9,7 @@ install:
   - git submodule sync
   - git submodule update --init --recursive --remote
 test_script:
-  - ./node_modules/.bin/jest
+  - ./node_modules/.bin/jest -i
   - ./node_modules/.bin/flow check
   - ./node_modules/.bin/standard
 
