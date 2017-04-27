@@ -22,6 +22,7 @@ export default class {
 
   async run () {
     if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return
+    if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return
     let pljson = await this._readPluginsJSON()
     if (!pljson) return
     this.out.debug('Migrating V5 plugins...')
