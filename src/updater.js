@@ -118,6 +118,7 @@ export default class Updater {
       fs.removeSync(this.clientDelete)
     })
     unlock()
+    await this.restartCLI()
   }
 
   extract (stream: stream$Readable, dir: string) {
@@ -156,8 +157,15 @@ export default class Updater {
     await lock.read(this.updatelockfile)
     lock.unreadSync(this.updatelockfile)
     const {spawnSync} = require('child_process')
+    let env = process.env
+    let restartCount = (parseInt(env.CLI_RESTART_COUNT) || 0) + 1
+    if (restartCount > 10) {
+      this.out.warn('CLI seems to be in a restart loop')
+      return
+    }
+    env.CLI_RESTART_COUNT = restartCount.toString()
     if (!this.binPath) return
-    const {status} = spawnSync(this.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    const {status} = spawnSync(this.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true, env})
     this.out.exit(status)
   }
 
