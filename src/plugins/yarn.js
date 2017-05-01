@@ -6,21 +6,15 @@ import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
-type Info = {
-  name: string,
-  description: string,
-  'dist-tags': {
-    [tag: string]: string
-  }
-}
-
 export default class Yarn {
   config: Config
   out: Output
+  cwd: string
 
-  constructor (output: Output) {
+  constructor (output: Output, cwd: string) {
     this.out = output
     this.config = output.config
+    this.cwd = cwd
   }
 
   get lockfile (): string { return path.join(this.config.cacheDir, 'yarn.lock') }
@@ -28,7 +22,7 @@ export default class Yarn {
   get yarnDir (): ?string { return this.nodeModulesDirs.map(d => path.join(d, 'yarn')).find(f => fs.existsSync(f)) }
   get bin (): ?string { return this.yarnDir ? path.join(this.yarnDir, 'bin', 'yarn') : 'yarn' }
 
-  async exec (args: string[] = [], options: {} = {}): Promise<string> {
+  async exec (args: string[] = []): Promise<void> {
     let deleteYarnRoadrunnerCache = () => {
       let getDirectory = (category) => {
         // use %LOCALAPPDATA%/Yarn on Windows
@@ -53,25 +47,18 @@ export default class Yarn {
       } catch (err) {}
     }
 
-    options = Object.assign({
-      cwd: path.join(this.config.dataDir, 'plugins'),
+    let options = {
+      cwd: this.cwd,
       stdio: this.config.debug ? 'inherit' : null
-    }, options)
+    }
 
     if (!this.bin) throw new Error('yarn not found')
     const execa = require('execa')
     this.out.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
     deleteYarnRoadrunnerCache()
     let unlock = await lock.write(this.lockfile)
-    let output = await execa(this.bin, args, options)
+    await execa(this.bin, args, options)
     await unlock()
     deleteYarnRoadrunnerCache()
-    return output.stdout
-  }
-
-  async info (name: string): Promise<Info> {
-    let output = await this.exec(['info', name, '--json'], {stdio: null})
-    let info: Info = JSON.parse(output)['data']
-    return info
   }
 }
