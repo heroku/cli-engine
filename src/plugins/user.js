@@ -19,7 +19,7 @@ export default class UserPlugins implements IPluginManager {
   constructor (out: Output) {
     this.out = out
     this.config = this.out.config
-    this.yarn = new Yarn(this.out)
+    this.yarn = new Yarn(this.out, this.userPluginsDir)
   }
 
   out: Output

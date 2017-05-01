@@ -20,7 +20,6 @@ export default class LinkedPlugins implements IPluginManager {
   constructor (out: Output) {
     this.out = out
     this.config = this.out.config
-    this.yarn = new Yarn(this.out)
     try {
       this._data = fs.readJSONSync(this.file)
     } catch (err) {
@@ -32,7 +31,6 @@ export default class LinkedPlugins implements IPluginManager {
     }
   }
 
-  yarn: Yarn
   config: Config
   out: Output
   _data: {
@@ -109,7 +107,8 @@ export default class LinkedPlugins implements IPluginManager {
 
     if (pjson.scripts && pjson.scripts.prepare) {
       if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
-      await this.yarn.exec(['run', 'prepare'], {cwd: p})
+      let yarn = new Yarn(this.out, p)
+      await yarn.exec(['run', 'prepare'])
       fs.utimesSync(main, new Date(), new Date())
       this.out.action.stop()
     }
@@ -142,7 +141,8 @@ export default class LinkedPlugins implements IPluginManager {
   async _install (p: string) {
     if (!this._needsInstall(p)) return
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
-    await this.yarn.exec([], {cwd: p})
+    let yarn = new Yarn(this.out, p)
+    await yarn.exec([])
     fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
     this.out.action.stop()
   }
