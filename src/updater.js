@@ -7,11 +7,19 @@ import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
 import logChopper from 'log-chopper'
+import moment from 'moment'
 
 type Manifest = {
   version: string,
   channel: string,
   sha256gz: string
+}
+
+type TmpDirs = {
+  dir: string,
+  node: string,
+  client: string,
+  extract: string
 }
 
 export default class Updater {
@@ -29,8 +37,7 @@ export default class Updater {
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
   get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
   get binPath (): ?string { return process.env.CLI_BINPATH }
-  get clientDelete (): string { return path.join(this.config.dataDir, 'tmp', 'client.DELETE') }
-  get nodeDelete (): string { return path.join(this.config.dataDir, 'tmp', 'node.DELETE') }
+  get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
 
   async fetchManifest (channel: string): Promise<Manifest> {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
@@ -52,73 +59,31 @@ export default class Updater {
     }
   }
 
-  _cleanup () {
-    this._catch(() => {
-      // if the previous update failed we may have cruft left over
-      // which will cause the new update to fail on rename
-      if (fs.existsSync(this.clientDelete)) {
-        fs.removeSync(this.clientDelete)
-      }
-    })
-
-    this._catch(() => {
-      // remove the node executables we left behind to prevent
-      // windows from crashing, but do not error out because
-      // they may still be in use
-      if (fs.existsSync(this.nodeDelete)) {
-        fs.readdirSync(this.nodeDelete).forEach(dir => {
-          this._catch(() => {
-            fs.removeSync(path.join(this.nodeDelete, dir))
-          })
-        })
-
-        if (fs.readdirSync(this.nodeDelete).length === 0) {
-          fs.removeSync(this.nodeDelete)
-        }
-      }
-    })
-  }
-
   async update (manifest: Manifest) {
+    let base = this.base(manifest)
+
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
-    let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
+    let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let stream = await this.http.stream(url)
 
+    fs.mkdirpSync(this.updateDir)
+    let dirs = this._dirs(require('tmp').dirSync({dir: this.updateDir}).name)
+
     let dir = path.join(this.config.dataDir, 'client')
-    let tmp = path.join(this.config.dataDir, 'client_tmp')
+    let tmp = dirs.extract
 
     await this.extract(stream, tmp, manifest.sha256gz)
-
-    let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
+    let extracted = path.join(dirs.extract, base)
 
     this._cleanup()
 
-    // moveSync tries to do a rename first then falls back to copy & delete
-    // on windows the delete would error on node.exe so we explicitly rename
-    let rename = (this.config.windows) ? fs.renameSync : fs.moveSync
-
-    fs.mkdirpSync(path.dirname((this.clientDelete)))
-    rename(dir, this.clientDelete)
-
-    rename(path.join(tmp, this.base(manifest)), dir)
-    this._catch(() => {
-      fs.removeSync(tmp)
-    })
-
-    // move the node executable before trying to delete the old client
-    // because it is still in use and will cause the update to fail on windows
-    let dirDeleteNode = path.join(this.clientDelete, 'bin', 'node.exe')
-    if (fs.existsSync(dirDeleteNode)) {
-      fs.mkdirpSync(this.nodeDelete)
-      let nodeTmpDeleteDir = require('tmp').dirSync({dir: this.nodeDelete}).name
-      rename(dirDeleteNode, path.join(nodeTmpDeleteDir, 'node.exe'))
-    }
-
-    this._catch(() => {
-      fs.removeSync(this.clientDelete)
-    })
+    let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
+    this._rename(dir, dirs.client)
+    this._rename(extracted, dir)
     unlock()
+
+    this._cleanupDirs(dirs)
   }
 
   extract (stream: stream$Readable, dir: string, sha: string) {
@@ -127,8 +92,6 @@ export default class Updater {
     const crypto = require('crypto')
 
     return new Promise((resolve, reject) => {
-      fs.removeSync(dir)
-
       let shaValidated = false
       let extracted = false
 
@@ -186,6 +149,75 @@ export default class Updater {
     })
   }
 
+  _cleanup () {
+    let dir = this.updateDir
+    this._catch(() => {
+      if (fs.existsSync(dir)) {
+        fs.readdirSync(dir).forEach(d => {
+          let dirs = this._dirs(path.join(dir, d))
+
+          this._remove(dirs.node)
+
+          if (moment(fs.statSync(dirs.dir).mtime).isBefore(moment().subtract(24, 'hours'))) {
+            this._cleanupDirs(dirs)
+          } else {
+            this._removeIfEmpty(dirs)
+          }
+        })
+      }
+    })
+  }
+
+  _cleanupDirs (dirs: TmpDirs) {
+    this._moveNode(dirs)
+
+    this._remove(dirs.client)
+    this._remove(dirs.extract)
+    this._removeIfEmpty(dirs)
+  }
+
+  _removeIfEmpty (dirs: TmpDirs) {
+    this._catch(() => {
+      if (fs.readdirSync(dirs.dir).length === 0) {
+        this._remove(dirs.dir)
+      }
+    })
+  }
+
+  _dirs (dir: string) {
+    let client = path.join(dir, 'client')
+    let extract = path.join(dir, 'extract')
+    let node = path.join(dir, 'node.exe')
+
+    return {dir, client, extract, node}
+  }
+
+  _rename (src : string, dst : string) {
+    this.out.debug(`rename ${src} to ${dst}`)
+    // moveSync tries to do a rename first then falls back to copy & delete
+    // on windows the delete would error on node.exe so we explicitly rename
+    let rename = (this.config.windows) ? fs.renameSync : fs.moveSync
+    rename(src, dst)
+  }
+
+  _remove (dir : string) {
+    this._catch(() => {
+      if (fs.existsSync(dir)) {
+        this.out.debug(`remove ${dir}`)
+        fs.removeSync(dir)
+      }
+    })
+  }
+
+  _moveNode (dirs: TmpDirs) {
+    this._catch(() => {
+      let dirDeleteNode = path.join(dirs.client, 'bin', 'node.exe')
+      if (fs.existsSync(dirDeleteNode)) {
+        this._rename(dirDeleteNode, dirs.node)
+      }
+    })
+  }
+
   base (manifest: Manifest): string {
     return `${this.config.name}-v${manifest.version}-${process.platform}-${process.arch}`
   }
@@ -199,9 +231,8 @@ export default class Updater {
     this.out.exit(status)
   }
 
-  get autoupdateNeeded () {
+  get autoupdateNeeded () : boolean {
     try {
-      const moment = require('moment')
       const stat = fs.statSync(this.autoupdatefile)
       return moment(stat.mtime).isBefore(moment().subtract(4, 'hours'))
     } catch (err) {
