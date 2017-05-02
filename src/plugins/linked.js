@@ -16,16 +16,22 @@ type PJSON = {
   }
 }
 
+function touch (f: string) {
+  fs.utimesSync(f, new Date(), new Date())
+}
+
 export default class LinkedPlugins implements IPluginManager {
   constructor (out: Output) {
     this.out = out
     this.config = this.out.config
     try {
       this._data = fs.readJSONSync(this.file)
+      this._data.updated_at = new Date(this._data.updated_at || 0)
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
       this._data = {
         version: '1',
+        updated_at: new Date(),
         plugins: []
       }
     }
@@ -35,6 +41,7 @@ export default class LinkedPlugins implements IPluginManager {
   out: Output
   _data: {
     version: string,
+    updated_at: Date,
     plugins: string[]
   }
 
@@ -81,6 +88,7 @@ export default class LinkedPlugins implements IPluginManager {
    */
   async refresh () : Promise<string[]> {
     let paths : string[] = []
+    let updatedAt = new Date()
     for (let plugin of this._data.plugins) {
       try {
         if (await this.prepare(plugin)) {
@@ -90,6 +98,10 @@ export default class LinkedPlugins implements IPluginManager {
         this.out.warn(`Error refreshing ${plugin}`)
         this.out.warn(err)
       }
+    }
+    if (paths.length > 0) {
+      this._data.updated_at = updatedAt
+      this._save()
     }
     return paths
   }
@@ -109,7 +121,6 @@ export default class LinkedPlugins implements IPluginManager {
       if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
       let yarn = new Yarn(this.out, p)
       await yarn.exec(['run', 'prepare'])
-      fs.utimesSync(main, new Date(), new Date())
       this.out.action.stop()
     }
 
@@ -130,12 +141,9 @@ export default class LinkedPlugins implements IPluginManager {
 
   _needsPrepare (p: string, main: string): boolean {
     if (!fs.existsSync(main)) return true
-    let mainInfo = fs.statSync(main)
-    let modulesInfo = fs.statSync(path.join(p, 'node_modules'))
-    if (mainInfo.mtime < modulesInfo.mtime) return true
     return !!klaw(p, {nodir: true, ignore: '{node_modules,.git}'})
     .filter(f => f.path.endsWith('.js'))
-    .find(f => f.stats.mtime > mainInfo.mtime)
+    .find(f => f.stats.mtime > this._data.updated_at)
   }
 
   async _install (p: string) {
@@ -143,7 +151,7 @@ export default class LinkedPlugins implements IPluginManager {
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     let yarn = new Yarn(this.out, p)
     await yarn.exec([])
-    fs.utimesSync(path.join(p, 'node_modules'), new Date(), new Date())
+    touch(path.join(p, 'node_modules'))
     this.out.action.stop()
   }
 
