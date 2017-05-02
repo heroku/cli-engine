@@ -8,12 +8,12 @@
     "cli-release": "bin/cli-release"
   },
   "bugs": "https://github.com/heroku/cli-engine/issues",
+  "cli-engine": {
+    "yarnDependency": "0.23.3"
+  },
   "dependencies": {
-    "ansi-escapes": "2.0.0",
     "cli-engine-command": "3.1.1",
     "cli-engine-config": "1.1.2",
-    "execa": "0.6.3",
-    "find-node-modules": "^1.0.4",
     "fs-extra": "3.0.0",
     "klaw-sync": "2.1.0",
     "levenshtein": "^1.0.5",
@@ -25,8 +25,7 @@
     "rwlockfile": "^1.3.6",
     "string": "3.3.3",
     "tar-fs": "1.15.2",
-    "tmp": "0.0.31",
-    "yarn": "0.23.2"
+    "tmp": "0.0.31"
   },
   "devDependencies": {
     "babel-cli": "6.24.1",
@@ -35,6 +34,7 @@
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "6.24.1",
     "babel-plugin-transform-flow-strip-types": "6.22.0",
+    "download": "5.0.3",
     "eslint-plugin-flowtype": "2.32.1",
     "flow-bin": "0.45.0",
     "flow-copy-source": "1.1.0",
@@ -42,15 +42,17 @@
     "jest": "19.0.2",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
-    "standard": "10.0.2"
+    "standard": "10.0.2",
+    "uglify-js": "github:mishoo/UglifyJS2#harmony"
   },
   "engines": {
-    "node": ">= 7.0.0"
+    "node": ">= 7.6.0"
   },
   "enginestrict": true,
   "files": [
     "lib",
-    "bin"
+    "bin",
+    "yarn"
   ],
   "homepage": "https://github.com/heroku/cli-engine",
   "jest": {
@@ -72,9 +74,10 @@
   "scripts": {
     "build": "babel src -d lib --ignore '*.test.js'",
     "clean": "rimraf lib",
-    "prepare": "npm run clean && npm run build",
+    "download": "node ./bin/download-yarn",
+    "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
-    "test": "jest -i && flow && standard",
+    "test": "npm run download && jest -i && flow && standard",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {
