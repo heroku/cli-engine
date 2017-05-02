@@ -50,6 +50,7 @@ export default class Plugin {
   }
 
   findCommand (cmd: string): ?Class<Command<*>> {
+    if (!cmd) return
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
     if (!c) return
     let {topic, command} = c
