@@ -81,16 +81,17 @@ export default class Updater {
 
   async update (manifest: Manifest) {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
-    // TODO: read sha256
+
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${this.base(manifest)}.tar.gz`
     let stream = await this.http.stream(url)
 
     let dir = path.join(this.config.dataDir, 'client')
     let tmp = path.join(this.config.dataDir, 'client_tmp')
 
-    await this.extract(stream, tmp)
+    await this.extract(stream, tmp, manifest.sha256gz)
 
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
+
     this._cleanup()
 
     // moveSync tries to do a rename first then falls back to copy & delete
@@ -120,12 +121,44 @@ export default class Updater {
     unlock()
   }
 
-  extract (stream: stream$Readable, dir: string) {
+  extract (stream: stream$Readable, dir: string, sha: string) {
     const zlib = require('zlib')
     const tar = require('tar-fs')
+    const crypto = require('crypto')
 
     return new Promise((resolve, reject) => {
       fs.removeSync(dir)
+
+      let shaValidated = false
+      let extracted = false
+
+      let check = () => {
+        if (shaValidated && extracted) {
+          resolve()
+        }
+      }
+
+      let fail = (err) => {
+        this._catch(() => {
+          if (fs.existsSync(dir)) {
+            fs.removeSync(dir)
+          }
+        })
+        reject(err)
+      }
+
+      let hasher = crypto.createHash('sha256')
+      stream.on('error', fail)
+      stream.on('data', d => hasher.update(d))
+      stream.on('end', () => {
+        let shasum = hasher.digest('hex')
+        if (sha === shasum) {
+          shaValidated = true
+          check()
+        } else {
+          reject(new Error(`SHA mismatch: expected ${shasum} to be ${sha}`))
+        }
+      })
 
       let ignore = function (_, header) {
         switch (header.type) {
@@ -137,13 +170,18 @@ export default class Updater {
           default: throw new Error(header.type)
         }
       }
-
       let extract = tar.extract(dir, {ignore})
-      extract.on('error', reject)
-      extract.on('finish', resolve)
+      extract.on('error', fail)
+      extract.on('finish', () => {
+        extracted = true
+        check()
+      })
+
+      let gunzip = zlib.createGunzip()
+      gunzip.on('error', fail)
 
       stream
-      .pipe(zlib.createGunzip())
+      .pipe(gunzip)
       .pipe(extract)
     })
   }
