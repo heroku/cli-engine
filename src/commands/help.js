@@ -82,7 +82,7 @@ class TopicHelpPresenter extends TopicBase {
       let topic : CachedTopic = plugin.topics[0]
       let namespace = topic.topic.split(':')[0]
       this.out.log(`Usage: ${this.out.config.bin} ${namespace}:TOPIC\n`)
-      this.out.log(this.renderList(plugin.topics.map(t => [t.topic, t.description])))
+      this.out.log(this.renderList(plugin.topics.filter(t => !t.hidden).map(t => [t.topic, t.description])))
     }
   }
 
