@@ -2,6 +2,8 @@
 
 import CLI from './cli'
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
+
 async function run (...argv: string[]) {
   let cli = new CLI({argv: ['heroku'].concat(argv), mock: true})
   try {
