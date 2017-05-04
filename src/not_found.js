@@ -37,7 +37,7 @@ export default class NotFound {
     let closest = this.closest(this.argv[1])
 
     let perhaps = closest ? `Perhaps you meant ${this.out.color.yellow(closest)}\n` : ''
-    this.out.error(`${this.out.color.yellow(this.argv[1])} is not a heroku command.
+    this.out.error(`${this.out.color.yellow(this.argv[1])} is not a ${this.config.bin} command.
 ${perhaps}Run ${this.out.color.cmd(`${this.config.bin} help`)} for a list of available commands.`, 127)
   }
 }
