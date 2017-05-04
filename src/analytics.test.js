@@ -10,6 +10,8 @@ import AnalyticsCommand from './analytics'
 function analyticsJson () {
   return {
     schema: 1,
+    install: '5a8ef179-1129-4f81-877c-662c89f83f1f',
+    cli: 'cli-engine',
     commands: [
       {
         command: 'foo',
@@ -25,7 +27,10 @@ function analyticsJson () {
 function build (options = {}) {
   let config = options.config || buildConfig({
     version: '1.2.3',
-    platform: 'windows'
+    platform: 'windows',
+    skipAnalytics: false,
+    install: '5a8ef179-1129-4f81-877c-662c89f83f1f',
+    name: 'cli-engine'
   })
   let out = options.out || new Output({config, mock: true})
   let plugins = options.plugins || new Plugins(out)

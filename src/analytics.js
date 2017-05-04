@@ -106,7 +106,9 @@ export default class AnalyticsCommand {
       const body: AnalyticsJSONPost = {
         schema: local.schema,
         commands: local.commands,
-        user: user
+        user: user,
+        install: this.config.install,
+        cli: this.config.name
       }
 
       await this.http.post(this.url, {body})
