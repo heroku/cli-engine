@@ -64,8 +64,10 @@ export default class Plugin {
   findTopic (name: string): ?Class<Topic> {
     let t = this.topics.find(t => t.topic === name)
     if (!t) return
-    let Topic = (this.pluginPath.require().topics || [])
+    let plugin = this.pluginPath.require()
+    let Topic = (plugin.topics || [])
       .find(t => [t.topic, t.name].includes(name))
+    if (!Topic && plugin.topic) Topic = plugin.topic.topic === name ? plugin.topic : ''
     if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }

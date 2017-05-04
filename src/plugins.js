@@ -10,6 +10,7 @@ import BuiltinPlugins from './plugins/builtin'
 import CorePlugins from './plugins/core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './plugins/cache'
+import Namespaces from './namespaces'
 
 export default class Plugins {
   constructor (output: Output) {
@@ -85,6 +86,16 @@ export default class Plugins {
       let t = plugin.findTopic(name)
       if (t) return t
     }
+    name = cmd.split(':').slice(0, 2).join(':')
+    for (let plugin of this.plugins) {
+      let t = plugin.findTopic(name)
+      if (t) return t
+    }
+  }
+
+  findNamespace (cmd:string) : ?Plugin {
+    let ns = cmd.split(':')[0]
+    return this.plugins.find(p => p.topics.find(t => t.topic.split(':')[0] === ns))
   }
 
   async install (name: string, tag: string = 'latest') {
@@ -127,6 +138,7 @@ export default class Plugins {
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
+    if (!Namespaces.namespacePermitted(p, this.config)) throw Namespaces.notPermittedError
 
     await this.linkedPlugins.add(p)
     this.clearCache(p)

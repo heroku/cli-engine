@@ -26,7 +26,7 @@ async function plugins (): Promise<string> {
 
 test('installs, runs, and uninstalls heroku-debug', async () => {
   if ((await plugins()).includes('heroku-debug')) await run('plugins:uninstall', 'heroku-debug')
-  await run('plugins:install', 'heroku-debug')
+  await run('plugins:install', 'heroku-debug@alpha')
   await run('debug')
   await run('plugins:uninstall', 'heroku-debug')
 })
