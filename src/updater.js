@@ -234,7 +234,7 @@ export default class Updater {
   get autoupdateNeeded () : boolean {
     try {
       const stat = fs.statSync(this.autoupdatefile)
-      return moment(stat.mtime).isBefore(moment().subtract(4, 'hours'))
+      return moment(stat.mtime).isBefore(moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       return true

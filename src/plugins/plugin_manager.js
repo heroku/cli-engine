@@ -5,6 +5,7 @@ import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
 import {type CachedPlugin, type CachedCommand, type CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyCommand} from './legacy'
+import Namespaces from '../namespaces'
 import path from 'path'
 
 type PluginType = | "builtin" | "core" | "user" | "link"
@@ -107,11 +108,13 @@ export class PluginPath {
   require (): ParsedPlugin {
     // flow$ignore
     let required = require(this.path)
-    return {
+    let plugin = {
       topic: required.topic && this.undefaultTopic(required.topic),
       topics: required.topics && required.topics.map(this.undefaultTopic),
       commands: required.commands && required.commands.map(this.undefaultCommand)
     }
+    if (required.type === 'builtin' || /(\\|\/)src(\\|\/)commands$/.test(this.path)) return plugin
+    return Namespaces.namespacePlugin(plugin, this.path, this.config)
   }
 
   pjson (): {name: string, version: string} {

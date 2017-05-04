@@ -8,6 +8,7 @@ import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
 import {IPluginManager, PluginPath} from './plugin_manager'
+import Namespaces from '../namespaces'
 
 import Yarn from './yarn'
 
@@ -65,6 +66,7 @@ export default class UserPlugins implements IPluginManager {
     try {
       await this.yarn.exec()
       let path = this.userPluginPath(name)
+      if (!Namespaces.namespacePermitted(path, this.config)) throw Namespaces.notPermittedError
       // flow$ignore
       let plugin = require(path)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
@@ -72,9 +74,8 @@ export default class UserPlugins implements IPluginManager {
       return path
     } catch (err) {
       await unlock()
-      this.out.error(err, false)
       this.removePackageFromPJSON(name)
-      this.out.exit(1)
+      this.out.error(err)
       throw new Error('unreachable')
     }
   }

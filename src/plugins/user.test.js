@@ -43,7 +43,7 @@ test('user plugin should be cached', async () => {
 
   let userPath = path.normalize(path.join(dataDir, 'plugins', 'node_modules', 'heroku-debug'))
 
-  await plugins.install('heroku-debug')
+  await plugins.install('heroku-debug', 'alpha')
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()

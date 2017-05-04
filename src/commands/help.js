@@ -4,6 +4,9 @@ import Command, {type Arg, type Flag, Topic as TopicBase} from 'cli-engine-comma
 import util from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
+import type Plugin from '../plugins/plugin'
+import type Output from 'cli-engine-command/lib/output'
+import {type CachedTopic} from '../plugins/cache'
 
 export default class Help extends Command {
   static topic = 'help'
@@ -18,10 +21,11 @@ export default class Help extends Command {
     if (!cmd) return this.topics()
     let Topic = this.plugins.findTopic(cmd)
     let matchedCommand = this.plugins.findCommand(cmd)
-    if (!Topic && !matchedCommand) throw new Error(`command ${cmd} not found`)
+    let matchedNamespace = this.plugins.findNamespace(cmd)
+    if (!Topic && !matchedCommand && !matchedNamespace) throw new Error(`command ${cmd} not found`)
     if (!Topic) Topic = TopicHelpPresenter
     let commands = this.plugins.commandsForTopic(Topic.topic)
-    await new TopicHelpPresenter(commands, this.out, Topic.topic).help(this.argv, matchedCommand)
+    await new TopicHelpPresenter(commands, this.out, Topic.topic).help(this.argv, matchedCommand, matchedNamespace)
   }
 
   topics () {
@@ -62,14 +66,24 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
 }
 
 class TopicHelpPresenter extends TopicBase {
-  constructor (commands: Class<Command<*>>[], out: any, topic: ?string) {
+  constructor (commands: Class<Command<*>>[], out: Output, topic: ?string) {
     super(commands, out)
     if (topic) this.constructor.topic = topic
   }
 
-  async help (args: string[], matchedCommand?: ?Class<Command<*>>) {
+  async help (args: string[], matchedCommand?: ?Class<Command<*>>, matchedNamespace: ?Plugin) {
     if (matchedCommand) this.commandHelp(matchedCommand)
     if (args.slice(0, 2).includes(this.constructor.topic)) this.listCommandsHelp()
+    if (!matchedCommand && matchedNamespace) this.listNamespaceHelp(matchedNamespace)
+  }
+
+  listNamespaceHelp (plugin: Plugin) {
+    if (plugin.topics) {
+      let topic : CachedTopic = plugin.topics[0]
+      let namespace = topic.topic.split(':')[0]
+      this.out.log(`Usage: ${this.out.config.bin} ${namespace}:TOPIC\n`)
+      this.out.log(this.renderList(plugin.topics.map(t => [t.topic, t.description])))
+    }
   }
 
   listCommandsHelp () {
