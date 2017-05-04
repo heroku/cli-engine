@@ -69,7 +69,7 @@ export default class UserPlugins implements IPluginManager {
       if (!Namespaces.namespacePermitted(path, this.config)) throw Namespaces.notPermittedError
       // flow$ignore
       let plugin = require(path)
-      if (!plugin.commands) throw new Error(`${name} does not appear to be a Heroku CLI plugin`)
+      if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)
       await unlock()
       return path
     } catch (err) {
