@@ -42,7 +42,7 @@ export default class {
       return this._namespacePlugin(namespace, plugin)
     }
     // should not get to here
-    throw new Error('Plugin namespace not permitted and may be installed incorrectly')
+    throw new Error(`Plugin ${pluginPath} namespace not permitted and may be installed incorrectly`)
   }
 
   static _namespacePlugin (namespace: ?string, plugin: Object) : Object {
@@ -64,11 +64,11 @@ export default class {
       }
     }
     if (plugin.topics) {
-      nplugin.topics = plugin.topics.map(plugin => {
+      nplugin.topics = plugin.topics.map(topic => {
         return {
-          topic: `${namespace}:${plugin.topic.topic}`,
-          description: plugin.topic.description,
-          hidden: plugin.topic.hidden
+          topic: `${namespace}:${topic.name}`,
+          description: topic.description,
+          hidden: topic.hidden
         }
       })
     }

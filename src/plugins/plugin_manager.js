@@ -113,7 +113,7 @@ export class PluginPath {
       topics: required.topics && required.topics.map(this.undefaultTopic),
       commands: required.commands && required.commands.map(this.undefaultCommand)
     }
-    if (required.type === 'builtin' || /(\\|\/)src(\\|\/)commands$/.test(this.path)) return plugin
+    if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
     return Namespaces.namespacePlugin(plugin, this.path, this.config)
   }
 
