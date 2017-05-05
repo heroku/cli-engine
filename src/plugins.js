@@ -95,7 +95,7 @@ export default class Plugins {
 
   findNamespace (cmd:string) : ?Plugin {
     let ns = cmd.split(':')[0]
-    return this.plugins.find(p => p.topics.find(t => t.topic.split(':')[0] === ns))
+    return this.plugins.find(p => p.topics.filter(t => t.topic).find(t => t.topic.split(':')[0] === ns))
   }
 
   async install (name: string, tag: string = 'latest') {
