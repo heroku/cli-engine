@@ -1,5 +1,6 @@
 // @flow
 
+import './fs'
 import Command from 'cli-engine-command'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
