@@ -79,7 +79,7 @@ export default class Updater {
     this._cleanup()
 
     let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
-    this._rename(dir, dirs.client)
+    if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     unlock()
 
