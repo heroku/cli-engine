@@ -85,35 +85,54 @@ describe('cli help', () => {
   })
 
   describe('--help & -h flags', () => {
-    let pluginsHelpOutput = /^Usage: \S+ plugins\n\s+--core\n\s+\S+ plugins commands: \(\S+ help plugins:COMMAND for details\)$/m
-    let pluginsInstallHelpOutput = /^Usage: \S+ plugins:install PLUGIN\n\s+installs a plugin into the CLI\n\s+Example:$/m
+    let pluginsHelpOutput = `Usage: cli-engine plugins
+
+ --core
+
+cli-engine plugins commands: (cli-engine help plugins:COMMAND for details)
+
+ plugins
+ plugins:install PLUGIN   # installs a plugin into the CLI
+ plugins:link [PATH]
+ plugins:uninstall PLUGIN
+ plugins:update
+
+`
+    let pluginsInstallHelpOutput = `Usage: cli-engine plugins:install PLUGIN
+
+installs a plugin into the CLI
+
+Example:
+    $ heroku plugins:install heroku-production-status
+
+`
 
     test('shows help for plugins', async function () {
       let cli = await run('plugins', '--help')
       let clid = await run('plugins', '-h')
-      expect(cli.cmd.out.stdout.output).toMatch(pluginsHelpOutput)
-      expect(clid.cmd.out.stdout.output).toMatch(pluginsHelpOutput)
+      expect(cli.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
+      expect(clid.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
     })
 
     test('shows help for plugins (prefixed)', async function () {
       let cli = await run('--help', 'plugins')
       let clid = await run('-h', 'plugins')
-      expect(cli.cmd.out.stdout.output).toMatch(pluginsHelpOutput)
-      expect(clid.cmd.out.stdout.output).toMatch(pluginsHelpOutput)
+      expect(cli.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
+      expect(clid.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
     })
 
     test('shows help for plugins:install', async function () {
       let cli = await run('plugins:install', 'heroku-sudo', '--help')
       let clid = await run('plugins:install', 'heroku-sudo', '-h')
-      expect(cli.cmd.out.stdout.output).toMatch(pluginsInstallHelpOutput)
-      expect(clid.cmd.out.stdout.output).toMatch(pluginsInstallHelpOutput)
+      expect(cli.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
+      expect(clid.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
     })
 
     test('shows help for plugins:install (prefixed)', async function () {
       let cli = await run('--help', 'plugins:install', 'heroku-sudo')
       let clid = await run('-h', 'plugins:install', 'heroku-sudo')
-      expect(cli.cmd.out.stdout.output).toMatch(pluginsInstallHelpOutput)
-      expect(clid.cmd.out.stdout.output).toMatch(pluginsInstallHelpOutput)
+      expect(cli.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
+      expect(clid.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
     })
   })
 })
