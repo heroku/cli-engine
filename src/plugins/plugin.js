@@ -49,6 +49,10 @@ export default class Plugin {
     return this.cachedPlugin.topics
   }
 
+  get namespace (): ?string {
+    return this.cachedPlugin.namespace
+  }
+
   findCommand (cmd: string): ?Class<Command<*>> {
     if (!cmd) return
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
@@ -67,7 +71,7 @@ export default class Plugin {
     let plugin = this.pluginPath.require()
     let Topic = (plugin.topics || [])
       .find(t => [t.topic, t.name].includes(name))
-    if (!Topic && plugin.topic) Topic = plugin.topic.topic === name ? plugin.topic : ''
+    if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === name ? plugin.topic : ''
     if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }

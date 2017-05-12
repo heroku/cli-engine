@@ -6,7 +6,6 @@ import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
 import type Plugin from '../plugins/plugin'
 import type Output from 'cli-engine-command/lib/output'
-import {type CachedTopic} from '../plugins/cache'
 
 export default class Help extends Command {
   static topic = 'help'
@@ -21,8 +20,8 @@ export default class Help extends Command {
     if (!cmd) return this.topics()
     let Topic = this.plugins.findTopic(cmd)
     let matchedCommand = this.plugins.findCommand(cmd)
-    let matchedNamespace = this.plugins.findNamespace(cmd)
-    if (!Topic && !matchedCommand && !matchedNamespace) throw new Error(`command ${cmd} not found`)
+    let matchedNamespace = this.plugins.findNamespaced(cmd)
+    if (!Topic && !matchedCommand && !matchedNamespace.length) throw new Error(`command ${cmd} not found`)
     if (!Topic) Topic = TopicHelpPresenter
     let commands = this.plugins.commandsForTopic(Topic.topic)
     await new TopicHelpPresenter(commands, this.out, Topic.topic).help(this.argv, matchedCommand, matchedNamespace)
@@ -71,18 +70,19 @@ class TopicHelpPresenter extends TopicBase {
     if (topic) this.constructor.topic = topic
   }
 
-  async help (args: string[], matchedCommand?: ?Class<Command<*>>, matchedNamespace: ?Plugin) {
+  async help (args: string[], matchedCommand?: ?Class<Command<*>>, matchedNamespace: Array<Plugin>) {
     if (matchedCommand) this.commandHelp(matchedCommand)
     if (args.slice(0, 2).includes(this.constructor.topic)) this.listCommandsHelp()
-    if (!matchedCommand && matchedNamespace) this.listNamespaceHelp(matchedNamespace)
+    let numNamespaced = matchedNamespace.length
+    if (!matchedCommand && numNamespaced) this.listNamespaceHelp(matchedNamespace)
   }
 
-  listNamespaceHelp (plugin: Plugin) {
-    if (plugin.topics) {
-      let topic : CachedTopic = plugin.topics[0]
-      let namespace = topic.topic.split(':')[0]
-      this.out.log(`Usage: ${this.out.config.bin} ${namespace}:TOPIC\n`)
-      this.out.log(this.renderList(plugin.topics.filter(t => !t.hidden).map(t => [t.topic, t.description])))
+  listNamespaceHelp (plugins: Plugin[]) {
+    let namespace = plugins[0].namespace || ''
+    this.out.log(`Usage: ${this.out.config.bin} ${namespace}:TOPIC\n`)
+    for (var i = 0; i < plugins.length; i++) {
+      let plugin = plugins[i]
+      if (plugin.topics) this.out.log(this.renderList(plugin.topics.filter(t => !t.hidden).map(t => [t.topic, t.description])))
     }
   }
 

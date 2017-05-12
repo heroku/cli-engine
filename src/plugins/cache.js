@@ -29,6 +29,7 @@ export type CachedTopic = {
 
 export type CachedPlugin = {
   name: string,
+  namespace?: ?string,
   path: string,
   version: string,
   commands: CachedCommand[],
