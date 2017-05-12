@@ -81,21 +81,17 @@ export default class Plugins {
   }
 
   findTopic (cmd: string): ?Class<Topic> {
-    let name = cmd.split(':')[0]
+    if (!cmd) return
     for (let plugin of this.plugins) {
-      let t = plugin.findTopic(name)
+      let t = plugin.findTopic(cmd)
       if (t) return t
     }
-    name = cmd.split(':').slice(0, 2).join(':')
-    for (let plugin of this.plugins) {
-      let t = plugin.findTopic(name)
-      if (t) return t
-    }
+    let name = cmd.split(':').slice(0, cmd.split(':').length - 1).join(':')
+    return this.findTopic(name)
   }
 
-  findNamespace (cmd:string) : ?Plugin {
-    let ns = cmd.split(':')[0]
-    return this.plugins.find(p => p.topics.filter(t => t.topic).find(t => t.topic.split(':')[0] === ns))
+  findNamespaced (namespace:string) : Array<Plugin> {
+    return this.plugins.filter(p => p.namespace === namespace)
   }
 
   async install (name: string, tag: string = 'latest') {

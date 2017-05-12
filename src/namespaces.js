@@ -47,7 +47,7 @@ export default class {
 
   static _namespacePlugin (namespace: ?string, plugin: Object) : Object {
     if (!namespace) return plugin
-    let nplugin = {}
+    let nplugin = {namespace}
     nplugin.commands = plugin.commands.map(cmd => {
       return {
         topic: `${namespace}:${cmd.topic}`,

@@ -22,7 +22,8 @@ type ParsedCommand = | LegacyCommand | Class<Command<*>>
 type ParsedPlugin = {
   topic?: ParsedTopic,
   topics?: ParsedTopic[],
-  commands?: ParsedCommand[]
+  commands?: ParsedCommand[],
+  namespace?: string
 }
 
 type PluginPathOptions = {
@@ -92,7 +93,7 @@ export class PluginPath {
     }
 
     const {name, version} = this.pjson()
-    return {name, path: this.path, version, commands, topics}
+    return {name, path: this.path, version, namespace: plugin.namespace, commands, topics}
   }
 
   undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
