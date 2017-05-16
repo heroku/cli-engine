@@ -92,7 +92,27 @@ export default class Cache {
       return cachedPlugin
     } catch (err) {
       if (this.type === 'builtin') throw err
-      this.out.warn(err)
+
+      // if we are updating we may cause the node version to bump requiring
+      // binary packages to error here with a NODE_MODULE_VERSION error like
+      // ▸    The module '/Users/rbriggs/.local/share/heroku/plugins/node_modules/snappy/build/Release/binding.node'
+      // ▸    was compiled against a different Node.js version using
+      // ▸    NODE_MODULE_VERSION 48. This version of Node.js requires
+      // ▸    NODE_MODULE_VERSION 51. Please try re-compiling or re-installing
+      // ▸    the module (for instance, using `npm rebuild` or`npm install`).
+
+      // this will resolve itself in the plugins update so do not freak out
+      // users with an error message here, but let it display for non-update
+      // commands so that they know something is broken
+
+      // this match is pretty hacky, but I do not think I can make this much
+      // better since err just has a backtrace and message to match on
+      if (err.message && err.message.includes('NODE_MODULE_VERSION') && process.argv[2] === 'update') {
+        this.out.debug(err)
+      } else {
+        this.out.warn(err)
+      }
+
       return {
         name: pluginPath.path,
         path: pluginPath.path,
