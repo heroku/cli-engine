@@ -16,7 +16,7 @@ test('it adds --non-interactive', async () => {
 
   let yarnjs = path.resolve(yarn.bin)
 
-  expect(mock.mock.calls).toEqual([[yarnjs, ['--non-interactive', 'foo', 'bar'], {
+  expect(mock.mock.calls).toEqual([[yarnjs, ['foo', 'bar', '--non-interactive'], {
     'cwd': '/foo/bar',
     'stdio': [
       null,
