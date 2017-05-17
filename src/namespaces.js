@@ -4,7 +4,7 @@ import {type Config} from 'cli-engine-config'
 
 export default class {
   static get notPermittedError () {
-    return new Error('Plugin\'s namespace not included in permittted namespaces')
+    return new Error('Plugin\'s namespace not included in permitted namespaces')
   }
 
   static namespacePermitted (pluginPath: string, config: Config) : boolean {
