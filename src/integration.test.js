@@ -29,6 +29,7 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
   await run('plugins:install', 'heroku-debug@alpha')
   await run('debug')
   await run('plugins:uninstall', 'heroku-debug')
+  expect(await plugins()).not.toContain('heroku-debug')
 })
 
 test('tries to install a non-existant tag', async () => {
