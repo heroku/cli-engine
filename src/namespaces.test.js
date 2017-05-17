@@ -79,7 +79,7 @@ describe('CLI bin \'cli-engine\'', () => {
         } catch (err) {
           msg = err.message
         } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permittted namespaces')
+          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
         }
       })
     })
@@ -120,7 +120,7 @@ describe('CLI bin \'cli-engine\'', () => {
         } catch (err) {
           msg = err.message
         } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permittted namespaces')
+          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
         }
       })
 
@@ -132,7 +132,7 @@ describe('CLI bin \'cli-engine\'', () => {
         } catch (err) {
           msg = err.message
         } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permittted namespaces')
+          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
         }
       })
     })
@@ -145,7 +145,7 @@ describe('CLI bin \'cli-engine\'', () => {
         } catch (err) {
           msg = err.message
         } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permittted namespaces')
+          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
         }
       })
     })
