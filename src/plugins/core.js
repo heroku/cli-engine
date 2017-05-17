@@ -1,19 +1,9 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
-import {IPluginManager, PluginPath} from './plugin_manager'
+import {Manager, PluginPath} from './manager'
 import path from 'path'
 
-export default class CorePlugins implements IPluginManager {
-  constructor (out: Output) {
-    this.out = out
-    this.config = this.out.config
-  }
-
-  out: Output
-  config: Config
-
+export default class CorePlugins extends Manager {
   /**
    * list core plugins
    * @returns {PluginPath[]}

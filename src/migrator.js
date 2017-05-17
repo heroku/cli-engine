@@ -16,7 +16,7 @@ export default class {
   constructor (plugins: Plugins, config: Config) {
     this.plugins = plugins
     this.config = config
-    this.userPlugins = plugins.userPlugins
+    this.userPlugins = plugins.user
     this.out = plugins.out
   }
 

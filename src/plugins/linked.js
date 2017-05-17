@@ -6,7 +6,7 @@ import path from 'path'
 import Yarn from './yarn'
 import klaw from 'klaw-sync'
 import fs from 'fs-extra'
-import {IPluginManager, PluginPath} from './plugin_manager'
+import {Manager, PluginPath} from './manager'
 
 type PJSON = {
   name: string,
@@ -20,10 +20,9 @@ function touch (f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
 
-export default class LinkedPlugins implements IPluginManager {
-  constructor (out: Output) {
-    this.out = out
-    this.config = this.out.config
+export default class LinkedPlugins extends Manager {
+  constructor ({out, config}: {out: Output, config: Config}) {
+    super({out, config})
     try {
       this._data = fs.readJSONSync(this.file)
       this._data.updated_at = new Date(this._data.updated_at || 0)
@@ -37,8 +36,6 @@ export default class LinkedPlugins implements IPluginManager {
     }
   }
 
-  config: Config
-  out: Output
   _data: {
     version: string,
     updated_at: Date,

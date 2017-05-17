@@ -1,16 +1,9 @@
 // @flow
 
-import type Output from 'cli-engine-command/lib/output'
-import {IPluginManager, PluginPath} from './plugin_manager'
+import {Manager, PluginPath} from './manager'
 import path from 'path'
 
-export default class BuiltinPlugins implements IPluginManager {
-  constructor (out: Output) {
-    this.out = out
-  }
-
-  out: Output
-
+export default class BuiltinPlugins extends Manager {
   /**
    * list builtin plugins
    * @returns {PluginPath[]}

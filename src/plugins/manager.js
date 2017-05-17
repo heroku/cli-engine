@@ -128,6 +128,16 @@ export class PluginPath {
   }
 }
 
-export interface IPluginManager {
-  list(): PluginPath[]
+export class Manager {
+  out: Output
+  config: Config
+
+  constructor ({out, config}: {out: Output, config: Config}) {
+    this.out = out
+    this.config = config
+  }
+
+  list (): PluginPath[] {
+    throw new Error('abstract method Manager.list')
+  }
 }

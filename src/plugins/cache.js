@@ -4,7 +4,7 @@ import {type Flag, type Arg} from 'cli-engine-command'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import Plugin from './plugin'
-import {IPluginManager, type PluginPath} from './plugin_manager'
+import {Manager, type PluginPath} from './manager'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -103,7 +103,7 @@ export default class Cache {
     }
   }
 
-  fetchManagers (...managers: IPluginManager[]) : Plugin[] {
+  fetchManagers (...managers: Manager[]) : Plugin[] {
     let plugins = []
 
     for (let manager of managers) {
