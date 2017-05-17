@@ -178,6 +178,14 @@ describe('AnalyticsCommand', () => {
       let command = build({json})
 
       await command.submit()
+
+      let expected = {
+        schema: 1,
+        commands: []
+      }
+
+      expect(command._writeJSON.mock.calls).toEqual([[expected]])
+
       api.done()
     })
   })
