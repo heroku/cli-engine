@@ -82,7 +82,7 @@
   },
   "standard": {
     "parser": "babel-eslint",
-    "envs": [
+    "env": [
       "jest"
     ],
     "plugins": [

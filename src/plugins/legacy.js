@@ -48,6 +48,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     static flags = convertFlagsFromV5(c.flags)
     static variableArgs = !!c.variableArgs
     static help = c.help
+    static usage = c.usage
 
     heroku: Heroku
 
