@@ -85,7 +85,6 @@ export default class UserPlugins extends Manager {
   async remove (name: string) {
     let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.yarn.exec(['remove', name])
-    this.removePackageFromPJSON(name)
     await unlock()
   }
 

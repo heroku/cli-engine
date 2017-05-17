@@ -30,7 +30,7 @@ export default class Yarn {
   }
 
   async exec (args: string[] = []): Promise<void> {
-    args = ['--non-interactive'].concat(args)
+    args = args.concat(['--non-interactive'])
 
     let options = {
       cwd: this.cwd,
