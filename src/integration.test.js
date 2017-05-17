@@ -31,6 +31,11 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
   await run('plugins:uninstall', 'heroku-debug')
 })
 
+test('tries to install a non-existant tag', async () => {
+  if ((await plugins()).includes('heroku-debug')) await run('plugins:uninstall', 'heroku-debug')
+  await run('plugins:install', 'heroku-debug@not-found')
+})
+
 test('links example plugin', async () => {
   if ((await plugins()).includes('cli-engine-example-plugin')) await run('plugins:uninstall', 'cli-engine-example-plugin')
   await run('plugins:link', './example-plugin')
