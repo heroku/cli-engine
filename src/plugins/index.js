@@ -3,14 +3,14 @@
 import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
-import Plugin from './plugins/plugin'
-import LinkedPlugins from './plugins/linked'
-import UserPlugins from './plugins/user'
-import BuiltinPlugins from './plugins/builtin'
-import CorePlugins from './plugins/core'
+import Plugin from './plugin'
+import LinkedPlugins from './linked'
+import UserPlugins from './user'
+import BuiltinPlugins from './builtin'
+import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
-import Cache, {type CachedCommand, type CachedTopic} from './plugins/cache'
-import Namespaces from './namespaces'
+import Cache, {type CachedCommand, type CachedTopic} from './cache'
+import Namespaces from '../namespaces'
 
 export default class Plugins {
   constructor (output: Output) {
@@ -18,23 +18,23 @@ export default class Plugins {
     this.config = output.config
     this.cache = new Cache(output)
 
-    this.builtinPlugins = new BuiltinPlugins(this.out)
-    this.linkedPlugins = new LinkedPlugins(this.out)
-    this.userPlugins = new UserPlugins(this.out)
-    this.corePlugins = new CorePlugins(this.out)
+    this.builtin = new BuiltinPlugins(this)
+    this.linked = new LinkedPlugins(this)
+    this.user = new UserPlugins(this)
+    this.core = new CorePlugins(this)
 
     this.plugins = this.cache.fetchManagers(
-      this.builtinPlugins,
-      this.linkedPlugins,
-      this.userPlugins,
-      this.corePlugins
+      this.builtin,
+      this.linked,
+      this.user,
+      this.core
     )
   }
 
-  builtinPlugins: BuiltinPlugins
-  linkedPlugins: LinkedPlugins
-  userPlugins: UserPlugins
-  corePlugins: CorePlugins
+  builtin: BuiltinPlugins
+  linked: LinkedPlugins
+  user: UserPlugins
+  core: CorePlugins
   plugins: Plugin[]
   cache: Cache
   out: Output
@@ -96,14 +96,14 @@ export default class Plugins {
 
   async install (name: string, tag: string = 'latest') {
     if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
-    let path = await this.userPlugins.install(name, tag)
+    let path = await this.user.install(name, tag)
     this.clearCache(path)
   }
 
   async update () {
-    if (this.userPlugins.list().length === 0) return
-    await this.userPlugins.update()
-    this.clearCache(...this.userPlugins.list().map(p => p.path))
+    if (this.user.list().length === 0) return
+    await this.user.update()
+    this.clearCache(...this.user.list().map(p => p.path))
   }
 
   async uninstall (name: string) {
@@ -112,12 +112,12 @@ export default class Plugins {
     switch (plugin.type) {
       case 'user': {
         if (!this.config.debug) this.out.action.start(`Uninstalling plugin ${name}`)
-        await this.userPlugins.remove(name)
+        await this.user.remove(name)
         break
       }
       case 'link': {
         if (!this.config.debug) this.out.action.start(`Unlinking plugin ${name}`)
-        this.linkedPlugins.remove(plugin.path)
+        this.linked.remove(plugin.path)
         break
       }
     }
@@ -126,22 +126,22 @@ export default class Plugins {
   }
 
   addPackageToPJSON (name: string, version: string = '*') {
-    this.userPlugins.addPackageToPJSON(name, version)
+    this.user.addPackageToPJSON(name, version)
   }
 
   async addLinkedPlugin (p: string) {
-    let name = this.linkedPlugins.checkLinked(p)
+    let name = this.linked.checkLinked(p)
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
     if (!Namespaces.namespacePermitted(p, this.config)) throw Namespaces.notPermittedError
 
-    await this.linkedPlugins.add(p)
+    await this.linked.add(p)
     this.clearCache(p)
   }
 
   async refreshLinkedPlugins () {
-    let paths: string[] = await this.linkedPlugins.refresh()
+    let paths: string[] = await this.linked.refresh()
     this.clearCache(...paths)
   }
 

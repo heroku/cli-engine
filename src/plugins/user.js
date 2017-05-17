@@ -7,7 +7,7 @@ import path from 'path'
 import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
-import {IPluginManager, PluginPath} from './plugin_manager'
+import {Manager, PluginPath} from './manager'
 import Namespaces from '../namespaces'
 
 import Yarn from './yarn'
@@ -16,15 +16,12 @@ type PJSON = {
   dependencies?: { [name: string]: string }
 }
 
-export default class UserPlugins implements IPluginManager {
-  constructor (out: Output) {
-    this.out = out
-    this.config = this.out.config
+export default class UserPlugins extends Manager {
+  constructor ({out, config}: {out: Output, config: Config}) {
+    super({out, config})
     this.yarn = new Yarn(this.out, this.userPluginsDir)
   }
 
-  out: Output
-  config: Config
   yarn: Yarn
 
   /**

@@ -3,7 +3,7 @@
 import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
-import {PluginPath} from './plugin_manager'
+import {PluginPath} from './manager'
 
 import {convertFromV5} from './legacy'
 import {type CachedCommand, type CachedPlugin, type CachedTopic} from './cache'
