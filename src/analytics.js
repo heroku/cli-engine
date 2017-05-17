@@ -117,6 +117,7 @@ export default class AnalyticsCommand {
       this._writeJSON(local)
     } catch (err) {
       this.out.debug(err)
+      this._writeJSON(this._initialAnalyticsJSON())
     }
   }
 
