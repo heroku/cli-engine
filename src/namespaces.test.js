@@ -3,7 +3,7 @@
 import CLI from './cli'
 import {integrationLock} from '../test/helpers'
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000
 
 let unlock
 beforeEach(async () => {
