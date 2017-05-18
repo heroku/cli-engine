@@ -1,8 +1,6 @@
 // @flow
 
-import Command, {type Arg, type Flag, BooleanFlag, StringFlag} from 'cli-engine-command'
-import {AppFlag, RemoteFlag} from 'cli-engine-command/lib/flags/app'
-import OrgFlag from 'cli-engine-command/lib/flags/org'
+import Command, {type Arg, type Flag, flags as Flags} from 'cli-engine-command'
 import Heroku, {vars} from 'cli-engine-command/lib/heroku'
 
 export type LegacyContext = {
@@ -85,10 +83,10 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
   }
 
   if (c.needsApp || c.wantsApp) {
-    V5.flags.app = AppFlag({required: !!c.needsApp})
-    V5.flags.remote = RemoteFlag()
+    V5.flags.app = Flags.app({required: !!c.needsApp})
+    V5.flags.remote = Flags.remote()
   }
-  if (c.needsOrg || c.wantsOrg) V5.flags.org = OrgFlag({required: !!c.needsOrg})
+  if (c.needsOrg || c.wantsOrg) V5.flags.org = Flags.org({required: !!c.needsOrg})
   return V5
 }
 
@@ -103,7 +101,7 @@ export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Fla
       required: flag.required,
       optional: flag.optional
     }
-    flags[flag.name] = flag.hasValue ? StringFlag(opts) : BooleanFlag(opts)
+    flags[flag.name] = flag.hasValue ? Flags.string(opts) : Flags.boolean(opts)
     return flags
   }, {})
 }
