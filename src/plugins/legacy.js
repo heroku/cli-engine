@@ -66,6 +66,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         supportsColor: this.out.color.enabled,
         auth: {},
         debug: this.config.debug,
+        debugHeaders: this.config.debug > 1 || ['1', 'true'].includes(process.env.HEROKU_DEBUG_HEADERS),
         flags,
         args,
         app: flags.app,
