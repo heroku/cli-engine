@@ -668,6 +668,12 @@ cli-engine-config@1.1.4:
   dependencies:
     uuid "3.0.1"
 
+cli-engine-heroku@0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-0.1.0.tgz#e594cf9a3010b4015c248100830573f175e09ed3"
+  dependencies:
+    cli-engine-command "4.0.0"
+
 cli-width@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.1.0.tgz#b234ca209b29ef66fc518d9b98d5847b00edf00a"

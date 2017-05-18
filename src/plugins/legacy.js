@@ -2,6 +2,7 @@
 
 import Command, {type Arg, type Flag, flags as Flags} from 'cli-engine-command'
 import Heroku, {vars} from 'cli-engine-command/lib/heroku'
+import {flags as HerokuFlags} from 'cli-engine-heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
@@ -86,7 +87,10 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     V5.flags.app = Flags.app({required: !!c.needsApp})
     V5.flags.remote = Flags.remote()
   }
-  if (c.needsOrg || c.wantsOrg) V5.flags.org = Flags.org({required: !!c.needsOrg})
+  if (c.needsOrg || c.wantsOrg) {
+    V5.flags.org = Flags.org() || HerokuFlags.team({required: !!c.needsOrg})
+    V5.flags.team = V5.flags.org
+  }
   return V5
 }
 
