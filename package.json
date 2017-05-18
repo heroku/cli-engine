@@ -12,7 +12,7 @@
     "yarnDependency": "0.23.3"
   },
   "dependencies": {
-    "cli-engine-command": "3.2.1",
+    "cli-engine-command": "4.0.0",
     "cli-engine-config": "1.1.4",
     "fs-extra": "3.0.1",
     "klaw-sync": "2.1.0",
