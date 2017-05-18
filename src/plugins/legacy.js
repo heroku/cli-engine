@@ -82,6 +82,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         httpGitHost: vars.httpGitHost
       }
       ctx.auth.password = ctx.apiToken
+      if (this.flags.org) this.out.warn(`Flag --org in ${this.argv[1]} is deprecated`)
       return c.run(ctx)
     }
   }
@@ -91,6 +92,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     V5.flags.remote = Flags.remote()
   }
   if (c.needsOrg || c.wantsOrg) {
+    this.out.warn('needsOrg/wantsOrg is deprecated')
     V5.flags.org = Flags.org() || HerokuFlags.team({required: !!c.needsOrg})
     V5.flags.team = V5.flags.org
   }
