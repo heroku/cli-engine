@@ -26,7 +26,7 @@ jobs:
       - run: ./bin/run version && cd example && ./bin/run version
       - run: cd example && ./bin/run help
       - run: cd example && ./bin/run cli:test
-      - run: ./node_modules/.bin/jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash)
+      - run: ./node_modules/.bin/jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash) -s coverage
       - run: ./node_modules/.bin/flow check
       - run: ./node_modules/.bin/standard
       - run: cd example && ./node_modules/.bin/cli-build linux-x86 beta
