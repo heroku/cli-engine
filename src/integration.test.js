@@ -34,7 +34,11 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
 
 test('tries to install a non-existant tag', async () => {
   if ((await plugins()).includes('heroku-debug')) await run('plugins:uninstall', 'heroku-debug')
-  await run('plugins:install', 'heroku-debug@not-found')
+
+  expect.assertions(1)
+  await expect(run('plugins:install', 'heroku-debug@not-found')).rejects.toEqual(
+    new Error('yarn --non-interactive exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n')
+  )
 })
 
 test('links example plugin', async () => {
