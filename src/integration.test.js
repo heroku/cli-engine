@@ -1,16 +1,23 @@
 // @flow
 
 import CLI from './cli'
-import {integrationLock} from '../test/helpers'
+
+import {tmpDirs} from '../test/helpers'
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
-let unlock
-beforeEach(async () => { unlock = await integrationLock() })
-afterEach(() => unlock())
+let tmpDir
+
+beforeEach(async () => {
+  tmpDir = tmpDirs()
+})
+
+afterEach(async () => {
+  tmpDir.clean()
+})
 
 async function run (...argv: string[]) {
-  let cli = new CLI({argv: ['cli'].concat(argv), mock: true})
+  let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: tmpDir.config})
   try {
     await cli.run()
   } catch (err) {
@@ -25,24 +32,20 @@ async function plugins (): Promise<string> {
 }
 
 test('installs, runs, and uninstalls heroku-debug', async () => {
-  if ((await plugins()).includes('heroku-debug')) await run('plugins:uninstall', 'heroku-debug')
-  await run('plugins:install', 'heroku-debug@alpha')
+  await run('plugins:install', 'heroku-debug@4.0.0')
   await run('debug')
   await run('plugins:uninstall', 'heroku-debug')
   expect(await plugins()).not.toContain('heroku-debug')
 })
 
 test('tries to install a non-existant tag', async () => {
-  if ((await plugins()).includes('heroku-debug')) await run('plugins:uninstall', 'heroku-debug')
-
   expect.assertions(1)
   await expect(run('plugins:install', 'heroku-debug@not-found')).rejects.toEqual(
-    new Error('yarn --non-interactive exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n')
+    new Error('yarn --non-interactive --prefer-offline exited with code 1\nerror Couldn\'t find package "heroku-debug" on the "npm" registry.\n')
   )
 })
 
 test('links example plugin', async () => {
-  if ((await plugins()).includes('cli-engine-example-plugin')) await run('plugins:uninstall', 'cli-engine-example-plugin')
   await run('plugins:link', './example-plugin')
   let cmd = await run('cli:test')
   expect(cmd.out.stdout.output).toEqual('ran cli:test\n')

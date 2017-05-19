@@ -40,6 +40,9 @@
     "flow-bin": "0.46.0",
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.1.2",
+    "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",
+    "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
+    "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
     "jest": "20.0.3",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
@@ -78,7 +81,7 @@
     "download": "node ./bin/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
-    "test": "npm run download && jest -i && flow && standard",
+    "test": "npm run download && jest && flow && standard",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {

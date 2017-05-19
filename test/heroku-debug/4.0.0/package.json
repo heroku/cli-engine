@@ -1,0 +1,8 @@
+{
+  "name": "heroku-debug-alpha",
+  "version": "0.0.0",
+  "dependencies": {
+    "heroku-debug": "4.0.0"
+  }
+}
+
