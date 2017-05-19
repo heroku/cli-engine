@@ -6,23 +6,33 @@ import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
 import type Plugin from '../plugins/plugin'
 
+function trimToMaxLeft (n: number) : number {
+  let max = parseInt(stdtermwidth * 0.6)
+  return n > max ? max : n
+}
+
+function trimCmd (s: string, max: number) : string {
+  if (s.length <= max) return s
+  return `${s.slice(0, max - 1)}\u2026`
+}
+
 function renderList (items: [string, ?string][]): string {
   const S = require('string')
   const max = require('lodash.maxby')
 
-  let maxLength = max(items, '[0].length')[0].length + 1
+  let maxLeftLength = trimToMaxLeft(max(items, '[0].length')[0].length + 1)
   return items
       .map(i => {
         let left = ` ${i[0]}`
         let right = i[1]
         if (!right) return left
-        left = `${S(left).padRight(maxLength)}`
-        right = linewrap(maxLength + 4, right)
+        left = `${S(trimCmd(left, maxLeftLength)).padRight(maxLeftLength)}`
+        right = linewrap(maxLeftLength, right)
         return `${left} # ${right}`
       }).join('\n')
 }
 
-function linewrap (length: string, s: string): string {
+function linewrap (length: number, s: string): string {
   const linewrap = require('../linewrap')
   return linewrap(length, stdtermwidth, {
     skipScheme: 'ansi-color'
