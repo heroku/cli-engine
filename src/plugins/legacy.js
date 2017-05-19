@@ -15,7 +15,8 @@ export type LegacyFlag = {
   hasValue?: boolean,
   hidden?: boolean,
   required?: boolean,
-  optional?: boolean
+  optional?: boolean,
+  parse?: any
 }
 
 export type LegacyCommand = {
@@ -71,6 +72,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         args,
         app: flags.app,
         org: flags.org,
+        team: flags.team,
         config: this.config,
         apiUrl: vars.apiUrl,
         herokuDir: this.config.cacheDir,
@@ -104,7 +106,8 @@ export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Fla
       description: flag.description,
       hidden: flag.hidden,
       required: flag.required,
-      optional: flag.optional
+      optional: flag.optional,
+      parse: flag.parse
     }
     flags[flag.name] = flag.hasValue ? Flags.string(opts) : Flags.boolean(opts)
     return flags
