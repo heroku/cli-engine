@@ -20,12 +20,34 @@ export default class Yarn {
   get lockfile (): string { return path.join(this.config.cacheDir, 'yarn.lock') }
   get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn-${this.version}.js`) }
 
-  fork (modulePath: string, args: string[], options: any) {
+  fork (modulePath: string, args: string[] = [], options: any = {}) {
     const {fork} = require('child_process')
     return new Promise((resolve, reject) => {
-      fork(modulePath, args, options)
-      .on('error', reject)
-      .on('exit', code => resolve({code}))
+      let forked = fork(modulePath, args, options)
+      let error = ''
+
+      forked.stdout.on('data', (data) => {
+        if (this.config.debug) {
+          process.stdout.write(data)
+        }
+      })
+
+      forked.stderr.on('data', (data) => {
+        if (this.config.debug) {
+          process.stderr.write(data)
+        }
+
+        error += data
+      })
+
+      forked.on('error', reject)
+      forked.on('exit', code => {
+        if (code === 0) {
+          resolve()
+        } else {
+          reject(new Error(`yarn ${args.join(' ')} exited with code ${code}\n${error}`))
+        }
+      })
     })
   }
 
@@ -34,12 +56,16 @@ export default class Yarn {
 
     let options = {
       cwd: this.cwd,
-      stdio: this.config.debug ? [0, 1, 2, 'ipc'] : [null, null, null, 'ipc']
+      stdio: [null, null, null, 'ipc']
     }
 
     this.out.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
     let unlock = await lock.write(this.lockfile)
     await this.fork(this.bin, args, options)
-    await unlock()
+    .catch((err) => {
+      unlock()
+      throw err
+    })
+    .then(unlock)
   }
 }
