@@ -81,7 +81,7 @@
     "download": "node ./bin/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
-    "test": "npm run download && jest && flow && standard",
+    "test": "npm run download && jest -i && flow && standard",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
   },
   "standard": {
