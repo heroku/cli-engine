@@ -14,8 +14,14 @@ export function tmpDirs (cfg: any = {}) {
   Yarn.extraOpts = ['--prefer-offline']
 
   let testDir = path.join(path.dirname(__filename))
-  let dataDir = tmp.dirSync().name
-  let cacheDir = tmp.dirSync().name
+
+  let tmpDir = path.resolve(path.join(__dirname, '..', 'tmp'))
+  fs.mkdirsSync(tmpDir)
+
+  let template = path.join(tmpDir, 'tmp-XXXXXX')
+
+  let dataDir = tmp.dirSync({template}).name
+  let cacheDir = tmp.dirSync({template}).name
 
   fs.mkdirs(path.join(dataDir, 'plugins'))
 
@@ -26,8 +32,12 @@ export function tmpDirs (cfg: any = {}) {
   let plugins = new Plugins(output)
 
   let clean = function () {
-    fs.removeSync(cacheDir)
-    fs.removeSync(dataDir)
+    try {
+      fs.removeSync(cacheDir)
+      fs.removeSync(dataDir)
+    } catch (err) {
+      console.warn('Unable to clean up tmp - ignore on appveyor')
+    }
   }
 
   return { clean, plugins, output, config, cacheDir, dataDir }
