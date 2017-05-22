@@ -140,4 +140,8 @@ export class Manager {
   list (): PluginPath[] {
     throw new Error('abstract method Manager.list')
   }
+
+  async handleNodeVersionChange () {
+    // user & linked will override
+  }
 }

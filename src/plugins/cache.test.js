@@ -8,13 +8,18 @@ import fs from 'fs-extra'
 const cacheDir = path.join(__dirname, '..', 'tmp', 'cache')
 const pluginsCachePath = path.join(cacheDir, 'plugins.json')
 const config = {cacheDir}
-const output = new Output(config)
+const output = new Output({config})
 beforeEach(() => {
   fs.mkdirpSync(cacheDir)
   fs.removeSync(pluginsCachePath)
 })
 
 const myplugin = {name: 'myplugin', path: 'myplugin', version: '1.0.0', topics: [], commands: []}
+
+test('new Cache(output)', () => {
+  let cache = new Cache(output)
+  expect(cache.cache.node_version).toBeNull()
+})
 
 test('updatePlugin', () => {
   let cache = new Cache(output)

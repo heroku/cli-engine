@@ -11,6 +11,7 @@ import {Manager, PluginPath} from './manager'
 import Namespaces from '../namespaces'
 
 import Yarn from './yarn'
+import NPM from './npm'
 
 type PJSON = {
   dependencies?: { [name: string]: string }
@@ -54,6 +55,15 @@ export default class UserPlugins extends Manager {
     if (!fs.existsSync(pjson)) fs.writeFileSync(pjson, JSON.stringify({private: true}))
     if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
     await this.yarn.exec()
+  }
+
+  async handleNodeVersionChange () {
+    // very important, if the node_modules does not exist, it runs back
+    // up the directory tree looking for node_modules to build
+    if (fs.existsSync(path.join(this.userPluginsDir, 'node_modules'))) {
+      let npm = new NPM(this.out, this.userPluginsDir)
+      await npm.exec(['rebuild'])
+    }
   }
 
   async install (name: string, tag: string = 'latest') {

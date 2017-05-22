@@ -18,10 +18,11 @@ export async function tmpDirs (cfg: any = {}) {
   let tmpDir = path.resolve(path.join(__dirname, '..', 'tmp'))
   fs.mkdirsSync(tmpDir)
 
-  let template = path.join(tmpDir, 'tmp-XXXXXX')
+  let dataTemplate = path.join(tmpDir, 'tmp-data-XXXXXX')
+  let cacheTemplate = path.join(tmpDir, 'tmp-cache-XXXXXX')
 
-  let dataDir = tmp.dirSync({template}).name
-  let cacheDir = tmp.dirSync({template}).name
+  let dataDir = tmp.dirSync({template: dataTemplate}).name
+  let cacheDir = tmp.dirSync({template: cacheTemplate}).name
 
   fs.mkdirs(path.join(dataDir, 'plugins'))
 
