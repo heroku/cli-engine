@@ -162,11 +162,21 @@ export default class LinkedPlugins extends Manager {
 
   async _install (p: string) {
     if (!this._needsInstall(p)) return
+    await this._forceInstall(p)
+  }
+
+  async _forceInstall (p: string) {
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     let yarn = new Yarn(this.out, p)
     await yarn.exec()
     touch(path.join(p, 'node_modules'))
     this.out.action.stop()
+  }
+
+  async handleNodeVersionChange () {
+    for (let p of this._data.plugins) {
+      await this._forceInstall(p)
+    }
   }
 
   checkLinked (p: string) {

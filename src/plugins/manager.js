@@ -158,4 +158,8 @@ export class Manager {
   async list (): Promise<PluginPath[]> {
     throw new Error('abstract method Manager.list')
   }
+
+  async handleNodeVersionChange () {
+    // user will override
+  }
 }
