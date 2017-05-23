@@ -39,39 +39,27 @@ export default class {
     if (pluginsLocation === 'root') return plugin
     if (pluginsLocation === 'namespace') {
       let namespace = this.pluginNamespace(pluginPath)
-      return this._namespacePlugin(namespace, plugin)
+      // prevents `foo:foo:command` on multiple `require()` calls
+      let topic = plugin.topic || plugin.topics[0]
+      if ((topic.name || topic.topic).split(':')[0] === namespace) return plugin
+      return this._prependNamespace(namespace, plugin)
     }
     // should not get to here
     throw new Error(`Plugin ${pluginPath} namespace not permitted and may be installed incorrectly`)
   }
 
-  static _namespacePlugin (namespace: ?string, plugin: Object) : Object {
-    if (!namespace) return plugin
-    let nplugin = {namespace}
-    nplugin.commands = plugin.commands.map(cmd => {
-      return {
-        topic: `${namespace}:${cmd.topic}`,
-        command: cmd.command,
-        description: cmd.description,
-        run: cmd.run
-      }
-    })
-    if (plugin.topic) {
-      nplugin.topic = {
-        topic: `${namespace}:${plugin.topic.name}`,
-        description: plugin.topic.description,
-        hidden: plugin.topic.hidden
-      }
-    }
-    if (plugin.topics) {
-      nplugin.topics = plugin.topics.map(topic => {
-        return {
-          topic: `${namespace}:${topic.name}`,
-          description: topic.description,
-          hidden: topic.hidden
-        }
+  static _prependNamespace (namespace: string, plugin: Object) : Object {
+    if (plugin.topic && !plugin.topics) plugin.topics = [plugin.topic]
+    let namespaced = {
+      namespace,
+      commands: plugin.commands.map(cmd => {
+        return Object.assign(cmd, {topic: `${namespace}:${cmd.topic}`})
+      }),
+      topics: plugin.topics.map(topic => {
+        let name = `${namespace}:${topic.name || topic.topic}`
+        return Object.assign(topic, {name, topic: name})
       })
     }
-    return nplugin
+    return namespaced
   }
 }
