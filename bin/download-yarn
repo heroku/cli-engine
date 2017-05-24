@@ -41,7 +41,12 @@ function download () {
   })
   .on('finish', () => {
     console.log(`Minifying ${tmpFile} to ${YARN_PATH}`)
-    let {code} = uglify.minify(tmpFile)
+    let {error, code} = uglify.minify(tmpFile)
+
+    if (error) {
+      throw error
+    }
+
     fs.writeFileSync(YARN_PATH, code)
   })
 }

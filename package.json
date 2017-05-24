@@ -43,7 +43,7 @@
     "nock": "9.0.13",
     "rimraf": "2.6.1",
     "standard": "10.0.2",
-    "uglify-js": "github:mishoo/UglifyJS2#harmony"
+    "uglify-js": "github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d"
   },
   "engines": {
     "node": ">= 7.6.0"
