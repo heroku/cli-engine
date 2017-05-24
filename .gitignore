@@ -2,5 +2,6 @@ coverage
 lib
 /node_modules
 /test/links/test-foo/node_modules
+/npm-packages-offline-cache
 tmp
 yarn

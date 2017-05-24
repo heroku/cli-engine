@@ -1,19 +1,14 @@
 // @flow
 
 import CLI from './cli'
-import {integrationLock} from '../test/helpers'
+import {tmpDirs} from '../test/helpers'
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000
 
-let unlock
-beforeEach(async () => {
-  unlock = await integrationLock()
-})
-afterEach(() => unlock())
-
 function runClosure (namespaces: ?(?string)[]) {
-  return async function (...argv: string[]) {
-    let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: {namespaces: namespaces}})
+  let tmpDir = tmpDirs({namespaces})
+  let fn = async function (...argv: string[]) {
+    let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: tmpDir.config})
     try {
       await cli.run()
     } catch (err) {
@@ -21,11 +16,8 @@ function runClosure (namespaces: ?(?string)[]) {
     }
     return cli.cmd
   }
-}
-
-async function plugins (): Promise<string> {
-  const index = await runClosure()('plugins')
-  return index.out.stdout.output
+  fn.clean = tmpDir.clean
+  return fn
 }
 
 // bin 'cli-engine'
@@ -54,16 +46,19 @@ describe('CLI bin \'cli-engine\'', () => {
       run = runClosure()
     })
 
+    afterEach(() => {
+      run.clean()
+    })
+
     describe('installs undefined namespaced', () => {
       test('user plugin heroku-debug', async () => {
-        await run('plugins:install', 'heroku-debug@alpha')
+        await run('plugins:install', 'heroku-debug@4.0.0')
         await run('debug')
         await run('help', 'debug')
         await run('plugins:uninstall', 'heroku-debug')
       })
 
       test('linked plugin cli-engine-example-plugin', async () => {
-        if ((await plugins()).includes('cli-engine-example-plugin')) await run('plugins:uninstall', 'cli-engine-example-plugin')
         await run('plugins:link', './example-plugin')
         await run('cli:test')
         await run('help', 'cli')
@@ -91,9 +86,13 @@ describe('CLI bin \'cli-engine\'', () => {
       run = runClosure(['heroku'])
     })
 
+    afterEach(() => {
+      run.clean()
+    })
+
     describe('installs permitted namespaced', () => {
       test('user plugin heroku-debug with namespace \'heroku\'', async () => {
-        await run('plugins:install', 'heroku-debug')
+        await run('plugins:install', 'heroku-debug@5.0.2')
         await run('heroku:debug')
         try {
           await run('debug')
@@ -116,7 +115,7 @@ describe('CLI bin \'cli-engine\'', () => {
       test('user plugin heroku-debug', async () => {
         let msg
         try {
-          await run('plugins:install', 'heroku-debug@alpha')
+          await run('plugins:install', 'heroku-debug@4.0.0')
         } catch (err) {
           msg = err.message
         } finally {
@@ -125,7 +124,6 @@ describe('CLI bin \'cli-engine\'', () => {
       })
 
       test('linked plugin cli-engine-example-plugin', async () => {
-        if ((await plugins()).includes('cli-engine-example-plugin')) await run('plugins:uninstall', 'cli-engine-example-plugin')
         let msg
         try {
           await run('plugins:link', './example-plugin')
@@ -141,7 +139,7 @@ describe('CLI bin \'cli-engine\'', () => {
       test('user plugin heroku-debug with namespace \'cowabunga\'', async () => {
         let msg
         try {
-          await run('plugins:install', 'heroku-debug@cowabunga')
+          await run('plugins:install', 'heroku-debug@5.0.3')
         } catch (err) {
           msg = err.message
         } finally {
