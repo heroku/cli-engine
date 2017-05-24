@@ -39,6 +39,9 @@
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.1.2",
     "got": "6.7.1",
+    "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",
+    "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
+    "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
     "jest": "20.0.3",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
@@ -73,7 +76,7 @@
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
     "build": "babel src -d lib --ignore '*.test.js'",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib tmp",
     "download": "node ./bin/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",

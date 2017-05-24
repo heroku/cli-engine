@@ -1,54 +1,32 @@
 /* globals test expect beforeEach */
 
-import {buildConfig} from 'cli-engine-config'
-import Output from 'cli-engine-command/lib/output'
 import Plugins from '../plugins'
-import tmp from 'tmp'
-import {integrationLock} from '../../test/helpers'
+import {tmpDirs} from '../../test/helpers'
 
 const path = require('path')
 const fs = require('fs-extra')
 
-let testDir
-let cacheDir
-let dataDir
-let pluginsJsonPath
-
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
-let unlock
-beforeEach(async () => { unlock = await integrationLock() })
-afterEach(() => unlock())
-
+let tmpDir
 beforeEach(() => {
-  testDir = path.join(path.dirname(__filename), '..', '..', 'test')
-
-  dataDir = tmp.dirSync().name
-  cacheDir = tmp.dirSync().name
-
-  pluginsJsonPath = path.join(cacheDir, 'plugins.json')
+  tmpDir = tmpDirs()
 })
 
 afterEach(() => {
-  fs.removeSync(cacheDir)
-  fs.removeSync(dataDir)
+  tmpDir.clean()
 })
 
 test('user plugin should be cached', async () => {
-  let root = path.join(testDir, 'roots', 'test-foo')
-  let pjson = fs.readJSONSync(path.join(root, 'package.json'))
-  let config = buildConfig({root, cacheDir, dataDir, pjson})
-  let output = new Output({config, mock: true})
-  let plugins = new Plugins(output)
+  await tmpDir.plugins.install('heroku-debug', '4.0.0')
 
-  let userPath = path.normalize(path.join(dataDir, 'plugins', 'node_modules', 'heroku-debug'))
-
-  await plugins.install('heroku-debug', 'alpha')
+  let userPath = path.normalize(path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'heroku-debug'))
+  let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  plugins = new Plugins(output)
+  let plugins = new Plugins(tmpDir.output)
   let DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 
@@ -62,7 +40,7 @@ test('user plugin should be cached', async () => {
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  plugins = new Plugins(output)
+  plugins = new Plugins(tmpDir.output)
   DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 
