@@ -63,7 +63,7 @@ export default class UserPlugins extends Manager {
     try {
       await this.yarn.exec()
       let path = this.userPluginPath(name)
-      if (!Namespaces.namespacePermitted(path, this.config)) throw Namespaces.notPermittedError
+      Namespaces.throwErrorIfNotPermitted(path, this.config)
       // flow$ignore
       let plugin = require(path)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)

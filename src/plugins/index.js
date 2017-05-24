@@ -61,6 +61,11 @@ export default class Plugins {
 
   findCommand (cmd: string): ?Class<Command<*>> {
     for (let plugin of this.plugins) {
+      if (plugin.cachedPlugin.namespace) {
+        if (plugin.cachedPlugin.namespace !== cmd.split(':')[0]) continue
+        let c = plugin.findCommand(cmd.replace(/\w+:/, ''))
+        if (c) return c
+      }
       let c = plugin.findCommand(cmd)
       if (c) return c
     }
@@ -83,6 +88,11 @@ export default class Plugins {
   findTopic (cmd: string): ?Class<Topic> {
     if (!cmd) return
     for (let plugin of this.plugins) {
+      if (plugin.cachedPlugin.namespace) {
+        if (plugin.cachedPlugin.namespace !== cmd.split(':')[0]) continue
+        let c = plugin.findTopic(cmd.replace(/\w+:/, ''))
+        if (c) return c
+      }
       let t = plugin.findTopic(cmd)
       if (t) return t
     }
@@ -134,7 +144,7 @@ export default class Plugins {
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
-    if (!Namespaces.namespacePermitted(p, this.config)) throw Namespaces.notPermittedError
+    Namespaces.throwErrorIfNotPermitted(p, this.config)
 
     await this.linked.add(p)
     this.clearCache(p)

@@ -55,9 +55,11 @@ export default class Help extends Command {
     let matchedNamespace = this.plugins.findNamespaced(cmd)
     if (!topic && !matchedCommand && !matchedNamespace.length) throw new Error(`command ${cmd} not found`)
     if (matchedCommand) this.out.log(matchedCommand.buildHelp(this.config))
-    if (topic && this.argv.slice(0, 2).includes(topic.topic)) this.listCommandsHelp(topic.topic, this.plugins.commandsForTopic(topic.topic))
-    let numNamespaced = matchedNamespace.length
-    if (!matchedCommand && numNamespaced) this.listNamespaceHelp(matchedNamespace)
+    let namespacedTopic = topic ? `${(cmd).replace(topic.topic, '')}${topic.topic}` : ''
+    if (topic && this.argv.slice(0, 2).includes(namespacedTopic)) {
+      this.listCommandsHelp(namespacedTopic, this.plugins.commandsForTopic(topic.topic))
+    }
+    if (!matchedCommand && matchedNamespace.length) this.listNamespaceHelp(matchedNamespace)
   }
 
   topics () {
@@ -76,7 +78,12 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     this.out.log(`Usage: ${this.config.bin} ${namespace}:TOPIC\n`)
     for (var i = 0; i < plugins.length; i++) {
       let plugin = plugins[i]
-      if (plugin.topics) this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => [t.topic, t.description])))
+      if (plugin.topics) {
+        this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => {
+          let topic = plugin.cachedPlugin.namespace ? `${plugin.cachedPlugin.namespace}:${t.topic}` : t.topic
+          return [topic, t.description]
+        })))
+      }
     }
   }
 

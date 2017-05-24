@@ -18,13 +18,15 @@ export type CachedCommand = {
   description: ?string,
   help?: ?string,
   usage?: ?string,
-  hidden: boolean
+  hidden: boolean,
+  namespace?: ?string
 }
 
 export type CachedTopic = {
   topic: string,
   description?: ?string,
-  hidden: boolean
+  hidden: boolean,
+  namespace?: ?string
 }
 
 export type CachedPlugin = {

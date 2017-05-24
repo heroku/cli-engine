@@ -66,6 +66,7 @@ export class PluginPath {
     const commands: CachedCommand[] = plugin.commands
     .map(c => ({
       id: c.command ? `${c.topic}:${c.command}` : c.topic,
+      namespace: plugin.namespace,
       topic: c.topic,
       command: c.command,
       description: c.description,
@@ -79,6 +80,7 @@ export class PluginPath {
     }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
     .map(t => ({
+      namespace: plugin.namespace,
       topic: t.topic || t.name || '',
       description: t.description,
       hidden: !!t.hidden
@@ -87,6 +89,7 @@ export class PluginPath {
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
       topics.push({
+        namespace: plugin.namespace,
         topic: command.topic,
         hidden: true
       })
@@ -115,7 +118,9 @@ export class PluginPath {
       commands: required.commands && required.commands.map(this.undefaultCommand)
     }
     if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
-    return Namespaces.namespacePlugin(plugin, this.path, this.config)
+    let {namespace} = Namespaces.metaData(this.path, this.config)
+    if (namespace) return Object.assign(plugin, {namespace})
+    return plugin
   }
 
   pjson (): {name: string, version: string} {
