@@ -20,11 +20,11 @@ export default class {
     this.out = plugins.out
   }
 
-  async run () {
-    if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return
-    if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return
+  async run () : Promise<boolean> {
+    if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return false
+    if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return false
     let pljson = await this._readPluginsJSON()
-    if (!pljson) return
+    if (!pljson) return false
     this.out.debug('Migrating V5 plugins...')
     for (let p of pljson) {
       if (this.plugins.isPluginInstalled(p.name)) {
@@ -33,6 +33,7 @@ export default class {
         await this._installPlugin(p.name, p.tag)
       }
     }
+    return true
   }
 
   async _readPluginsJSON () {
