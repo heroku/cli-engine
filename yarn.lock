@@ -635,9 +635,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@3.2.1:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-3.2.1.tgz#c6ea74d6582715d3d8cd78f04dd76fcc2705764f"
+cli-engine-command@4.0.3:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-4.0.3.tgz#7ebcd1ef783ce8f2c712c68ab768531e46cac714"
   dependencies:
     ansi-escapes "2.0.0"
     cardinal "^1.0.0"
@@ -647,6 +647,7 @@ cli-engine-command@3.2.1:
     got "^6.7.1"
     http-call "1.1.2"
     lodash.maxby "4.6.0"
+    lodash.merge "4.6.0"
     netrc-parser "2.0.2"
     pretty-format "20.0.1"
     string "3.3.3"
@@ -657,6 +658,13 @@ cli-engine-config@1.1.4:
   resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.1.4.tgz#4f634cc02cb62d1f6d177736fff7fb01b866a2b1"
   dependencies:
     uuid "3.0.1"
+
+cli-engine-heroku@0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-0.3.1.tgz#c26d8e385d3ef374a7c693e930e3ecdea0d4d1eb"
+  dependencies:
+    cli-engine-command "4.0.3"
+    heroku-client "3.0.2"
 
 cli-width@^2.0.0:
   version "2.1.0"
@@ -2588,6 +2596,10 @@ lodash.mapvalues@4.6.0:
 lodash.maxby@4.6.0:
   version "4.6.0"
   resolved "https://registry.yarnpkg.com/lodash.maxby/-/lodash.maxby-4.6.0.tgz#082240068f3c7a227aa00a8380e4f38cf0786e3d"
+
+lodash.merge@4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/lodash.merge/-/lodash.merge-4.6.0.tgz#69884ba144ac33fe699737a6086deffadd0f89c5"
 
 lodash.noop@3.0.1:
   version "3.0.1"
