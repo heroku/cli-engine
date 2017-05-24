@@ -43,9 +43,14 @@ export default class Main {
 
   async run () {
     const updater = new Updater(out)
-    const plugins = new Plugins(out)
+    let plugins = new Plugins(out)
+
     const migrator = new MigrateV5Plugins(plugins, this.config)
-    await migrator.run()
+    const migrated = await migrator.run()
+    if (migrated) {
+      plugins = new Plugins(out)
+    }
+
     await updater.autoupdate()
     await plugins.refreshLinkedPlugins()
     if (this.cmdAskingForHelp) {
