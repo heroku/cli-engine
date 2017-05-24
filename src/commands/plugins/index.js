@@ -1,12 +1,12 @@
 // @flow
 
-import Command, {flags} from 'cli-engine-command'
+import Command, {BooleanFlag} from 'cli-engine-command'
 import util from '../../util'
 import Plugins from '../../plugins'
 
 export default class extends Command {
   static topic = 'plugins'
-  static flags = {core: flags.boolean()}
+  static flags = {core: BooleanFlag()}
 
   async run () {
     let plugins = new Plugins(this.out).list()
