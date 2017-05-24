@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 let fs = require('fs-extra')
-let dl = require('download')
+let got = require('got')
 let path = require('path')
 let uglify = require('uglify-js')
 let tmp = require('tmp')
@@ -30,18 +30,23 @@ function download () {
 
   console.log(`Downloading ${YARN_URL} to ${tmpFile}`)
 
-  let downloader = dl(YARN_URL)
+  let downloader = got.stream(YARN_URL)
   downloader.on('error', (err) => {
     throw err
   })
 
   downloader.pipe(fs.createWriteStream(tmpFile))
-  .on('error', () => {
+  .on('error', (err) => {
     throw err
   })
   .on('finish', () => {
     console.log(`Minifying ${tmpFile} to ${YARN_PATH}`)
-    let {code} = uglify.minify(tmpFile)
+    let {error, code} = uglify.minify(tmpFile)
+
+    if (error) {
+      throw error
+    }
+
     fs.writeFileSync(YARN_PATH, code)
   })
 }

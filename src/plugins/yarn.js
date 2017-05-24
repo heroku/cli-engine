@@ -10,6 +10,8 @@ export default class Yarn {
   out: Output
   cwd: string
 
+  static extraOpts: string[] = []
+
   constructor (output: Output, cwd: string) {
     this.out = output
     this.config = output.config
@@ -52,7 +54,7 @@ export default class Yarn {
   }
 
   async exec (args: string[] = []): Promise<void> {
-    args = args.concat(['--non-interactive'])
+    args = args.concat(['--non-interactive']).concat(Yarn.extraOpts)
 
     let options = {
       cwd: this.cwd,
