@@ -22,6 +22,33 @@ export default class Yarn {
   get lockfile (): string { return path.join(this.config.cacheDir, 'yarn.lock') }
   get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn-${this.version}.js`) }
 
+  // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
+  pathKey (): string {
+    let pathKey = 'PATH'
+
+    // windows calls its path "Path" usually, but this is not guaranteed.
+    if (process.platform === 'win32') {
+      pathKey = 'Path'
+      for (const key in process.env) {
+        if (key.toLowerCase() === 'path') {
+          pathKey = key
+        }
+      }
+    }
+    return pathKey
+  }
+
+  // https://github.com/yarnpkg/yarn/blob/master/src/util/execute-lifecycle-script.js#L130-L154
+  pathEnv (): {[string]: string} {
+    let pathKey = this.pathKey()
+    const pathParts = (process.env[pathKey] || '').split(path.delimiter)
+    pathParts.unshift(path.dirname(process.execPath))
+
+    const env = {}
+    env[pathKey] = pathParts.join(path.delimiter)
+    return env
+  }
+
   fork (modulePath: string, args: string[] = [], options: any = {}) {
     const {fork} = require('child_process')
     return new Promise((resolve, reject) => {
@@ -58,7 +85,8 @@ export default class Yarn {
 
     let options = {
       cwd: this.cwd,
-      stdio: [null, null, null, 'ipc']
+      stdio: [null, null, null, 'ipc'],
+      env: Object.assign({}, process.env, this.pathEnv())
     }
 
     this.out.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)

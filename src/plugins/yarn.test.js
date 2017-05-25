@@ -21,13 +21,7 @@ test('it adds --non-interactive', async () => {
   expect(call[1][0]).toEqual('foo')
   expect(call[1][1]).toEqual('bar')
   expect(call[1][2]).toEqual('--non-interactive')
-  expect(call[2]).toEqual({
-    'cwd': '/foo/bar',
-    'stdio': [
-      null,
-      null,
-      null,
-      'ipc'
-    ]
-  })
+  expect(call[2].cwd).toEqual('/foo/bar')
+  expect(call[2].stdio).toEqual([null, null, null, 'ipc'])
+  expect(call[2].env[yarn.pathKey()].split(path.delimiter)[0]).toEqual(path.dirname(process.execPath))
 })
