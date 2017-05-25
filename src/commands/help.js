@@ -49,17 +49,30 @@ export default class Help extends Command {
   async run () {
     this.plugins = new Plugins(this.out)
     let cmd = this.argv.find(arg => !['-h', '--help'].includes(arg))
-    if (!cmd) return this.topics()
+    if (!cmd) {
+      return this.topics()
+    }
+
     const topic = this.plugins.findTopic(cmd)
     let matchedCommand = this.plugins.findCommand(cmd)
     let matchedNamespace = this.plugins.findNamespaced(cmd)
-    if (!topic && !matchedCommand && !matchedNamespace.length) throw new Error(`command ${cmd} not found`)
-    if (matchedCommand) this.out.log(matchedCommand.buildHelp(this.config))
+
+    if (!topic && !matchedCommand && !matchedNamespace.length) {
+      throw new Error(`command ${cmd} not found`)
+    }
+
+    if (matchedCommand) {
+      this.commandHelp(matchedCommand)
+    }
+
     let namespacedTopic = topic ? `${(cmd).replace(topic.topic, '')}${topic.topic}` : ''
     if (topic && this.argv.slice(0, 2).includes(namespacedTopic)) {
       this.listCommandsHelp(namespacedTopic, this.plugins.commandsForTopic(topic.topic))
     }
-    if (!matchedCommand && matchedNamespace.length) this.listNamespaceHelp(matchedNamespace)
+
+    if (!matchedCommand && matchedNamespace.length) {
+      this.listNamespaceHelp(matchedNamespace)
+    }
   }
 
   topics () {
@@ -71,6 +84,10 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     topics = topics.map(t => [t.topic, t.description])
     this.out.log(renderList(topics))
     this.out.log()
+  }
+
+  commandHelp (matchedCommand: Class<Command<*>>) {
+    this.out.log(matchedCommand.buildHelp(this.config))
   }
 
   listNamespaceHelp (plugins: Plugin[]) {
