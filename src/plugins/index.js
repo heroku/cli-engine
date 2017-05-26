@@ -22,22 +22,34 @@ export default class Plugins {
     this.linked = new LinkedPlugins(this)
     this.user = new UserPlugins(this)
     this.core = new CorePlugins(this)
-
-    this.plugins = this.cache.fetchManagers(
-      this.builtin,
-      this.linked,
-      this.user,
-      this.core
-    )
   }
 
   builtin: BuiltinPlugins
   linked: LinkedPlugins
   user: UserPlugins
   core: CorePlugins
-  plugins: Plugin[]
+  _plugins: Plugin[]
   cache: Cache
   out: Output
+
+  async init () : Promise<Plugins> {
+    if (this._plugins) {
+      throw new Error('init() already called')
+    }
+
+    this._plugins = await this.cache.fetchManagers(
+      this.builtin,
+      this.linked,
+      this.user,
+      this.core
+    )
+    return this
+  }
+
+  get plugins () : Plugin[] {
+    if (!this._plugins) throw new Error('init() must be called first')
+    return this._plugins
+  }
 
   get commands (): CachedCommand[] {
     let commands = []

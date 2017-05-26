@@ -15,17 +15,17 @@ export default class NotFound {
     this.config = output.config
   }
 
-  allCommands (): string[] {
-    let plugins = new Plugins(this.out)
+  async allCommands (): Promise<string[]> {
+    let plugins = await (new Plugins(this.out)).init()
     return plugins.commands.reduce((commands, c) => {
       return commands.concat([c.id]).concat(c.aliases || [])
     }, [])
   }
 
-  closest (cmd: string) {
+  async closest (cmd: string) {
     const LST = require('levenshtein')
     let max
-    for (let c of this.allCommands()) {
+    for (let c of await this.allCommands()) {
       if (!c) continue
       let d = new LST(cmd, c)
       if (!max || d.distance < max[1]) max = [c, d.distance]

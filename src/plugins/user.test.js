@@ -9,8 +9,8 @@ const fs = require('fs-extra')
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let tmpDir
-beforeEach(() => {
-  tmpDir = tmpDirs()
+beforeEach(async () => {
+  tmpDir = await tmpDirs()
 })
 
 afterEach(() => {
@@ -26,7 +26,7 @@ test('user plugin should be cached', async () => {
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = await (new Plugins(tmpDir.output)).init()
   let DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 
@@ -40,7 +40,7 @@ test('user plugin should be cached', async () => {
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  plugins = new Plugins(tmpDir.output)
+  plugins = await (new Plugins(tmpDir.output)).init()
   DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 

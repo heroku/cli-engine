@@ -17,7 +17,7 @@ export default class PluginsInstall extends Command {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this.out)
+    this.plugins = await (new Plugins(this.out)).init()
     const [plugin, tag = 'latest'] = this.argv[0].split('@')
     if (!this.config.debug) this.out.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
     await this.plugins.install(plugin, tag)

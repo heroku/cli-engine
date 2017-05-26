@@ -27,7 +27,7 @@ type AnalyticsJSON = {
 type Options = {
   out: Output,
   config: Config,
-  plugins?: Plugins
+  plugins: Plugins
 }
 
 type AnalyticsJSONPost = {
@@ -44,7 +44,7 @@ export default class AnalyticsCommand {
 
   constructor (options: Options) {
     this.out = options.out
-    this.plugins = options.plugins || new Plugins(this.out)
+    this.plugins = options.plugins
     this.http = new HTTP(this.out)
     this.config = options.config
   }

@@ -7,6 +7,9 @@ let mockInstall
 jest.mock('../../plugins', () => {
   return class Plugins {
     install = mockInstall
+    async init () {
+      return this
+    }
     list () {
       return []
     }

@@ -24,7 +24,7 @@ function analyticsJson () {
   }
 }
 
-function build (options = {}) {
+async function build (options = {}) {
   let config = options.config || buildConfig({
     version: '1.2.3',
     platform: 'windows',
@@ -33,9 +33,8 @@ function build (options = {}) {
     name: 'cli-engine'
   })
   let out = options.out || new Output({config, mock: true})
-  let plugins = options.plugins || new Plugins(out)
+  let plugins = options.plugins || await (new Plugins(out)).init()
 
-  // flow$ignore
   plugins.list = function () {
     return [{
       name: 'fuzz',
@@ -96,12 +95,12 @@ describe('AnalyticsCommand', () => {
     delete process.env['CLI_ENGINE_ANALYTICS_URL']
   })
 
-  describe('submit', () => {
+  describe('submit', async () => {
     it('does not submit if config skipAnalytics is true', async () => {
       let api = nock('https://cli-analytics.heroku.com').post('/record').reply(200, {})
 
       let config = buildConfig({skipAnalytics: true})
-      let command = build({config})
+      let command = await build({config})
 
       await command.submit()
       expect(api.isDone()).toBe(false)
@@ -112,14 +111,14 @@ describe('AnalyticsCommand', () => {
 
       let api = nock('https://cli-analytics.heroku.com').post('/record').reply(200, {})
 
-      await build().submit()
+      await (await build()).submit()
       expect(api.isDone()).toBe(false)
     })
 
     it('does not submit if login is not set', async () => {
       let api = nock('https://cli-analytics.heroku.com').post('/record').reply(200, {})
 
-      let command = build({netrcLogin: null})
+      let command = await build({netrcLogin: null})
 
       await command.submit()
       expect(api.isDone()).toBe(false)
@@ -130,7 +129,7 @@ describe('AnalyticsCommand', () => {
 
       let json = analyticsJson()
       json.commands = []
-      let command = build({json})
+      let command = await build({json})
 
       await command.submit()
       expect(api.isDone()).toBe(false)
@@ -140,7 +139,7 @@ describe('AnalyticsCommand', () => {
       let json = analyticsJson()
       let api = nock('https://cli-analytics.heroku.com').post('/record', json).reply(200, {})
 
-      let command = build({json})
+      let command = await build({json})
 
       await command.submit()
       api.done()
@@ -150,7 +149,7 @@ describe('AnalyticsCommand', () => {
       let json = analyticsJson()
       let api = nock('https://cli-analytics.heroku.com').post('/record', json).reply(200, {})
 
-      let command = build({json})
+      let command = await build({json})
 
       await command.submit()
 
@@ -165,7 +164,7 @@ describe('AnalyticsCommand', () => {
       let json = analyticsJson()
       let api = nock('https://foobar.com').post('/record', json).reply(200, {})
 
-      let command = build({json})
+      let command = await build({json})
 
       await command.submit()
       api.done()
@@ -175,7 +174,7 @@ describe('AnalyticsCommand', () => {
       let json = analyticsJson()
       let api = nock('https://cli-analytics.heroku.com').post('/record', json).reply(503, {})
 
-      let command = build({json})
+      let command = await build({json})
 
       await command.submit()
 
@@ -194,10 +193,9 @@ describe('AnalyticsCommand', () => {
     it('does not record if no plugin', async () => {
       let config = buildConfig()
       let out = new Output({config, mock: true})
-      let plugins = new Plugins(out)
+      let plugins = await (new Plugins(out)).init()
 
-      let command = build({config, out, plugins})
-      // flow$ignore
+      let command = await build({config, out, plugins})
       plugins.list = function () {
         return [{
           findCommand: function () {
@@ -213,7 +211,7 @@ describe('AnalyticsCommand', () => {
 
     it('does not record if config skipAnalytics is true', async () => {
       let config = buildConfig({skipAnalytics: true})
-      let command = build({config})
+      let command = await build({config})
 
       await command.record(buildCommand())
 
@@ -223,7 +221,7 @@ describe('AnalyticsCommand', () => {
     it('does not record if HEROKU_API_KEY is set', async () => {
       process.env['HEROKU_API_KEY'] = 'secure-key'
 
-      let command = build()
+      let command = await build()
 
       await command.record(buildCommand())
 
@@ -231,7 +229,7 @@ describe('AnalyticsCommand', () => {
     })
 
     it('does not record if login is not set', async () => {
-      let command = build({netrcLogin: null})
+      let command = await build({netrcLogin: null})
 
       await command.record(buildCommand())
 
@@ -240,7 +238,7 @@ describe('AnalyticsCommand', () => {
 
     it('records commands', async () => {
       let json = analyticsJson()
-      let command = build({json})
+      let command = await build({json})
 
       let expected = analyticsJson()
       expected.commands.push({
@@ -259,7 +257,7 @@ describe('AnalyticsCommand', () => {
     })
 
     it('records commands when file missing', async () => {
-      let command = build()
+      let command = await build()
 
       // flow$ignore
       command._existsJSON = function () {
@@ -285,7 +283,7 @@ describe('AnalyticsCommand', () => {
     })
 
     it('records commands when file corrupted', async () => {
-      let command = build()
+      let command = await build()
 
       // flow$ignore
       command._readJSON = function () {

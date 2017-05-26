@@ -103,7 +103,7 @@ export default class Cache {
     }
   }
 
-  fetchManagers (...managers: Manager[]) : Plugin[] {
+  async fetchManagers (...managers: Manager[]) : Promise<Plugin[]> {
     let plugins = []
 
     for (let manager of managers) {

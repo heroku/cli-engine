@@ -6,6 +6,7 @@ let mockUpdate
 jest.mock('../../plugins', () => {
   return class Plugins {
     update = mockUpdate
+    init = async function () { return this }
   }
 })
 

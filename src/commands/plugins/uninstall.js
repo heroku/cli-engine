@@ -14,7 +14,7 @@ export default class PluginsUninstall extends Command {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this.out)
+    this.plugins = await (new Plugins(this.out)).init()
     const [plugin] = this.argv
     await this.plugins.uninstall(plugin)
   }

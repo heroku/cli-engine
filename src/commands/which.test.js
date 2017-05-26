@@ -23,6 +23,9 @@ const builtin = {
 // flow$ignore
 Plugins.mockImplementation(() => {
   return {
+    async init () {
+      return this
+    },
     list () {
       return [herokuApps, builtin]
     }

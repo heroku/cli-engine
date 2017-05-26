@@ -7,8 +7,8 @@ const fs = require('fs-extra')
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let tmpDir
-beforeEach(() => {
-  tmpDir = tmpDirs()
+beforeEach(async () => {
+  tmpDir = await tmpDirs()
 })
 
 afterEach(() => {

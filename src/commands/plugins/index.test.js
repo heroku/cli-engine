@@ -4,6 +4,7 @@ import PluginsIndex from './index'
 
 jest.mock('../../plugins', () => {
   return class Plugins {
+    async init () { return this }
     list () {
       return [
         { name: 'heroku-foo', type: 'core', options: {} },

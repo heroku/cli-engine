@@ -10,7 +10,7 @@ import Yarn from '../src/plugins/yarn'
 
 import {buildConfig} from 'cli-engine-config'
 
-export function tmpDirs (cfg: any = {}) {
+export async function tmpDirs (cfg: any = {}) {
   Yarn.extraOpts = ['--prefer-offline']
 
   let testDir = path.join(path.dirname(__filename))
@@ -29,7 +29,7 @@ export function tmpDirs (cfg: any = {}) {
   let pjson = fs.readJSONSync(path.join(root, 'package.json'))
   let config = buildConfig(Object.assign({root, cacheDir, dataDir, pjson}, cfg))
   let output = new Output({config, mock: true})
-  let plugins = new Plugins(output)
+  let plugins = await (new Plugins(output)).init(output)
 
   let clean = function () {
     try {
