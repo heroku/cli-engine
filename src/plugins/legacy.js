@@ -101,7 +101,7 @@ export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Fla
   if (!flags) return {}
   if (!Array.isArray(flags)) return flags
   return flags.reduce((flags, flag) => {
-    let opts = {
+    let opts: Flag<*> = {
       char: (flag.char: any),
       description: flag.description,
       hidden: flag.hidden,
@@ -109,6 +109,7 @@ export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Fla
       optional: flag.optional,
       parse: flag.parse
     }
+    Object.keys(opts).forEach(k => opts[k] === undefined && delete opts[k])
     flags[flag.name] = flag.hasValue ? Flags.string(opts) : Flags.boolean(opts)
     return flags
   }, {})
