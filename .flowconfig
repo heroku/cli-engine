@@ -1,8 +1,8 @@
 [ignore]
 <PROJECT_ROOT>/lib/.*
 .*/node_modules/nock.*
- <PROJECT_ROOT>/node_modules/config-chain/test/broken.json
- <PROJECT_ROOT>/node_modules/npm/node_modules/config-chain/test/broken.json
+.*/node_modules/config-chain/test/broken.json
+.*/node_modules/npm/node_modules/config-chain/test/broken.json
 
 [include]
 
