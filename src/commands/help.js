@@ -6,12 +6,12 @@ import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
 import type Plugin from '../plugins/plugin'
 
-function trimToMaxLeft (n: number) : number {
+function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
   return n > max ? max : n
 }
 
-function trimCmd (s: string, max: number) : string {
+function trimCmd (s: string, max: number): string {
   if (s.length <= max) return s
   return `${s.slice(0, max - 1)}\u2026`
 }

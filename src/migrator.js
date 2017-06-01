@@ -20,7 +20,7 @@ export default class {
     this.out = plugins.out
   }
 
-  async run () : Promise<boolean> {
+  async run (): Promise<boolean> {
     if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return false
     if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return false
     let pljson = await this._readPluginsJSON()

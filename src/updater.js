@@ -192,7 +192,7 @@ export default class Updater {
     return {dir, client, extract, node}
   }
 
-  _rename (src : string, dst : string) {
+  _rename (src: string, dst: string) {
     this.out.debug(`rename ${src} to ${dst}`)
     // moveSync tries to do a rename first then falls back to copy & delete
     // on windows the delete would error on node.exe so we explicitly rename
@@ -200,7 +200,7 @@ export default class Updater {
     rename(src, dst)
   }
 
-  _remove (dir : string) {
+  _remove (dir: string) {
     this._catch(() => {
       if (fs.existsSync(dir)) {
         this.out.debug(`remove ${dir}`)
@@ -231,7 +231,7 @@ export default class Updater {
     this.out.exit(status)
   }
 
-  get autoupdateNeeded () : boolean {
+  get autoupdateNeeded (): boolean {
     try {
       const stat = fs.statSync(this.autoupdatefile)
       return moment(stat.mtime).isBefore(moment().subtract(5, 'hours'))

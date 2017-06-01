@@ -36,7 +36,15 @@
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "6.24.1",
     "babel-plugin-transform-flow-strip-types": "6.22.0",
+    "eslint": "3.19.0",
+    "eslint-config-standard": "10.2.1",
+    "eslint-plugin-flowtype": "2.33.0",
     "eslint-plugin-flowtype": "2.34.0",
+    "eslint-plugin-import": "2.3.0",
+    "eslint-plugin-jest": "20.0.3",
+    "eslint-plugin-node": "4.2.2",
+    "eslint-plugin-promise": "3.5.0",
+    "eslint-plugin-standard": "3.0.1",
     "flow-bin": "0.47.0",
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.1.2",
@@ -47,7 +55,6 @@
     "jest": "20.0.4",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
-    "standard": "10.0.2",
     "uglify-js": "github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d"
   },
   "engines": {
@@ -82,28 +89,7 @@
     "download": "node ./bin/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
-    "test": "npm run download && jest -i && flow && standard",
+    "test": "npm run download && jest -i && flow && eslint .",
     "watch": "babel --watch src -d lib --ignore '*.test.js'"
-  },
-  "standard": {
-    "parser": "babel-eslint",
-    "env": [
-      "jest"
-    ],
-    "plugins": [
-      "flowtype"
-    ],
-    "globals": [
-      "Class",
-      "jasmine",
-      "stream$Readable"
-    ],
-    "ignore": [
-      "src/linewrap.js",
-      "example/node_modules",
-      "example/tmp",
-      "example-plugin",
-      "flow-typed"
-    ]
   }
 }

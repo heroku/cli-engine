@@ -115,7 +115,7 @@ export class PluginPath {
       commands: required.commands && required.commands.map(this.undefaultCommand)
     }
     if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
-    return Namespaces.namespacePlugin(plugin, this.path, this.config)
+    return (Namespaces.namespacePlugin(plugin, this.path, this.config): any)
   }
 
   pjson (): {name: string, version: string} {

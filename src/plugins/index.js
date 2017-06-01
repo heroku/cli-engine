@@ -90,7 +90,7 @@ export default class Plugins {
     return this.findTopic(name)
   }
 
-  findNamespaced (namespace:string) : Array<Plugin> {
+  findNamespaced (namespace: string): Array<Plugin> {
     return this.plugins.filter(p => p.namespace === namespace)
   }
 

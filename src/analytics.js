@@ -49,7 +49,7 @@ export default class AnalyticsCommand {
     this.config = options.config
   }
 
-  _initialAnalyticsJSON () : AnalyticsJSON {
+  _initialAnalyticsJSON (): AnalyticsJSON {
     return {
       schema: 1,
       commands: []
