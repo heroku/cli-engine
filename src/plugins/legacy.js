@@ -64,6 +64,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
         }
       }
       const ctx = {
+        version: this.config.userAgent,
         supportsColor: this.out.color.enabled,
         auth: {},
         debug: this.config.debug,
