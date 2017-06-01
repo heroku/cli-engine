@@ -8,7 +8,6 @@ export default class Version extends Command {
   static aliases = ['-v', 'v', '--version']
 
   async run () {
-    let channel = this.config.channel === 'stable' ? '' : ` ${this.config.channel}`
-    this.out.log(`${this.config.name}/${this.config.version}${channel} (${process.platform}-${process.arch}) node-${process.version}`)
+    this.out.log(this.config.userAgent)
   }
 }
