@@ -103,12 +103,12 @@ export default class Cache {
     }
   }
 
-  fetchManagers (...managers: Manager[]) : Plugin[] {
+  fetchManagers (...managers: Manager[]): Plugin[] {
     let plugins = []
 
     for (let manager of managers) {
       let paths = manager.list()
-      plugins = plugins.concat(paths.map(function (pluginPath) : Plugin {
+      plugins = plugins.concat(paths.map(function (pluginPath): Plugin {
         return new Plugin(this.out, pluginPath, this.fetch(pluginPath))
       }, this))
     }

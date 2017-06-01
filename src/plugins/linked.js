@@ -83,7 +83,7 @@ export default class LinkedPlugins extends Manager {
   /**
    * runs prepare() on all linked plugins
    */
-  async refresh () : Promise<string[]> {
+  async refresh (): Promise<string[]> {
     let paths : string[] = []
     let updatedAt = new Date()
     for (let plugin of this._data.plugins) {
@@ -106,7 +106,7 @@ export default class LinkedPlugins extends Manager {
   /**
    * installs plugin dependencies and runs npm prepare if needed
    */
-  async prepare (p: string) : Promise<boolean> {
+  async prepare (p: string): Promise<boolean> {
     let pjson = this._pjson(p)
     await this._install(p)
     if (!pjson.main) throw new Error(`No main script specified in ${path.join(p, 'package.json')}`)

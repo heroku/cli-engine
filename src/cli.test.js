@@ -50,16 +50,6 @@ describe('edge cases', () => {
     let cli = await run('help')
     expect(cli.cmd.out.stdout.output).toMatch(/^Usage: cli-engine COMMAND/)
   })
-
-  test.skip('shows help if present before `--`', async function () {
-    let cli = await run('-h', '-a', 'rbriggs-sushi', '--', 'man', '-h')
-    expect(cli.cmd.out.stdout.output).toMatch(/^Usage: /m)
-  })
-
-  test.skip('ignores help if present after `--`', async function () {
-    let cli = await run('-a', 'rbriggs-sushi', '--', 'man', '-h')
-    expect(cli.cmd.out.stdout.output).toMatch(/^man, version/m)
-  })
 })
 
 describe('cli help', () => {

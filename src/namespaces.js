@@ -1,3 +1,5 @@
+// @flow
+
 import fs from 'fs-extra'
 import path from 'path'
 import {type Config} from 'cli-engine-config'
@@ -7,11 +9,11 @@ export default class {
     return new Error('Plugin\'s namespace not included in permitted namespaces')
   }
 
-  static namespacePermitted (pluginPath: string, config: Config) : boolean {
+  static namespacePermitted (pluginPath: string, config: Config): boolean {
     return ['root', 'namespace'].includes(this.pluginNamespaceLocation(pluginPath, config))
   }
 
-  static pluginNamespaceLocation (pluginPath: string, config: Config) : ?string {
+  static pluginNamespaceLocation (pluginPath: string, config: Config): ?string {
     let cliBin = config.bin
     let namespaces = config.namespaces
     let namespace = this.pluginNamespace(pluginPath)
@@ -25,7 +27,7 @@ export default class {
     }
   }
 
-  static pluginNamespace (pluginPath:string) : ?string {
+  static pluginNamespace (pluginPath: string): ?string {
     try {
       let pjson = fs.readJSONSync(path.join(pluginPath, 'package.json'))
       return pjson['cli-engine'] ? pjson['cli-engine'].namespace : undefined
@@ -34,20 +36,20 @@ export default class {
     }
   }
 
-  static namespacePlugin (plugin: Object, pluginPath:string, config: Config) : ?Object {
+  static namespacePlugin (plugin: Object, pluginPath: string, config: Config): ?Object {
     let pluginsLocation = this.pluginNamespaceLocation(pluginPath, config)
     if (pluginsLocation === 'root') return plugin
     if (pluginsLocation === 'namespace') {
       let namespace = this.pluginNamespace(pluginPath)
+      if (!namespace) return plugin
       return this._namespacePlugin(namespace, plugin)
     }
     // should not get to here
     throw new Error(`Plugin ${pluginPath} namespace not permitted and may be installed incorrectly`)
   }
 
-  static _namespacePlugin (namespace: ?string, plugin: Object) : Object {
-    if (!namespace) return plugin
-    let nplugin = {namespace}
+  static _namespacePlugin (namespace: string, plugin: Object): Object {
+    let nplugin: Object = {namespace}
     nplugin.commands = plugin.commands.map(cmd => {
       return {
         topic: `${namespace}:${cmd.topic}`,
