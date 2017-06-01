@@ -91,8 +91,8 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     V5.flags.remote = Flags.remote()
   }
   if (c.needsOrg || c.wantsOrg) {
-    V5.flags.org = Flags.org() || HerokuFlags.team({required: !!c.needsOrg})
-    V5.flags.team = V5.flags.org
+    let opts = {required: !!c.needsOrg, hidden: false, description: 'organization to use'}
+    V5.flags.org = HerokuFlags.org(opts)
   }
   return V5
 }
