@@ -9,3 +9,5 @@ cli-engine
 [![codecov](https://codecov.io/gh/heroku/cli-engine/branch/master/graph/badge.svg)](https://codecov.io/gh/heroku/cli-engine)
 
 A framework for building CLIs
+
+Actively used to build the [Heroku CLI](https://cli.heroku.com). This project is not yet ready to be used by others (see #169 for more information on what is missing).
