@@ -137,7 +137,11 @@ export default class LinkedPlugins extends Manager {
 
   _needsPrepare (p: string, main: string): boolean {
     if (!fs.existsSync(main)) return true
-    return !!klaw(p, {nodir: true, ignore: '{node_modules,.git}'})
+
+    return !!klaw(p, {
+      noRecurseOnFailedFilter: true,
+      filter: f => !['.git', 'node_modules', 'flow-typed'].includes(path.basename(f.path))
+    })
     .filter(f => f.path.endsWith('.js'))
     .find(f => f.stats.mtime > this._data.updated_at)
   }
