@@ -85,7 +85,6 @@ export default class LinkedPlugins extends Manager {
    */
   async refresh (): Promise<string[]> {
     let paths : string[] = []
-    let updatedAt = new Date()
     for (let plugin of this._data.plugins) {
       try {
         if (await this.prepare(plugin)) {
@@ -97,7 +96,7 @@ export default class LinkedPlugins extends Manager {
       }
     }
     if (paths.length > 0) {
-      this._data.updated_at = updatedAt
+      this._data.updated_at = new Date()
       this._save()
     }
     return paths
