@@ -49,6 +49,13 @@ cp package.json $WORKSPACE
 # install packages
 cd $WORKSPACE
 
+yarn install --no-progress --production
+if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
+  cd $WORKSPACE/node_modules/cli-engine
+  yarn
+  yarn run prepare
+fi
+
 # install node
 if [ $OS == win32 ]; then
   NODE_BASE=node-v$NODE_VERSION-win-$ARCH
@@ -69,13 +76,6 @@ else
   tar -C $WORKSPACE -xf $ROOT/tmp/cache/$NODE_BASE.tar.xz
   mv $WORKSPACE/$NODE_BASE/bin/node $WORKSPACE/bin/node
   rm -rf $WORKSPACE/$NODE_BASE
-fi
-
-yarn install --no-progress --production
-if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
-  cd $WORKSPACE/node_modules/cli-engine
-  yarn
-  yarn run prepare
 fi
 
 # create bin runner
