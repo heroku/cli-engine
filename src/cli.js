@@ -63,8 +63,14 @@ export default class Main {
       analytics.record(Command)
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
     }
-    process.stdout.once('drain', () => out.exit(0))
+    await this.flush()
+    out.exit(0)
+  }
+
+  flush () {
+    let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
+    return p
   }
 
   get cmdAskingForHelp (): boolean {
