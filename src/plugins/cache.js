@@ -92,6 +92,7 @@ export default class Cache {
       return cachedPlugin
     } catch (err) {
       if (this.type === 'builtin') throw err
+      this.out.warn(`Error parsing plugin ${pluginPath.path}`)
       this.out.warn(err)
       return {
         name: pluginPath.path,
