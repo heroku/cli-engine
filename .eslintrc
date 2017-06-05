@@ -5,7 +5,8 @@
     "standard"
   ],
   "globals": {
-    "jasmine": true
+    "jasmine": true,
+    "testing": true
   },
   "env": {
     "jest": true
