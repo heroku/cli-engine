@@ -68,6 +68,7 @@ export default class Main {
   }
 
   flush () {
+    if (global.testing) return
     let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
     return p
