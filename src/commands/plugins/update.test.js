@@ -16,5 +16,5 @@ beforeEach(() => {
 test('updates plugins', async () => {
   let cmd = await PluginsUpdate.mock()
   expect(mockUpdate).toBeCalledWith()
-  expect(cmd.out.stderr.output).toEqual('cli-engine: Updating plugins...\ncli-engine: Updating plugins... done\n')
+  expect(cmd.out.stderr.output).toEqual('cli-engine: Updating plugins... done\n')
 })

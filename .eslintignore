@@ -7,3 +7,4 @@ src/linewrap.js
 yarn
 test/roots
 test/links
+tmp

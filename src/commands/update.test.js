@@ -40,9 +40,7 @@ describe('with no update available', () => {
     mockManifest.version = '1.0.0'
     const cmd = await Update.run({mock: true, config: {version, channel}})
     expect(cmd.out.stdout.output).toEqual('')
-    expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI...
-cli-engine: Updating CLI... already on latest version: 1.0.0
-`)
+    expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI... already on latest version: 1.0.0\n`)
     expect(PluginsUpdate.run).toBeCalled()
     expect(mockAnalytics).toBeCalled()
   })
@@ -54,7 +52,6 @@ describe('with update available', () => {
     const cmd = await Update.run({mock: true, config: {version, channel}})
     expect(cmd.out.stdout.output).toEqual('')
     expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI...
-cli-engine: Updating CLI to 1.0.1...
 cli-engine: Updating CLI to 1.0.1... done
 `)
     expect(mockUpdate).toBeCalled()

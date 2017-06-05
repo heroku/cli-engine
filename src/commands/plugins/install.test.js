@@ -19,12 +19,12 @@ beforeEach(() => {
 
 test('installs heroku-debug', async () => {
   const cmd = await Install.mock('heroku-debug')
-  expect(cmd.out.stderr.output).toEqual('Installing plugin heroku-debug...\nInstalling plugin heroku-debug... done\n')
+  expect(cmd.out.stderr.output).toEqual('Installing plugin heroku-debug... done\n')
   expect(mockInstall).toBeCalledWith('heroku-debug', 'latest')
 })
 
 test('installs heroku-debug@alpha', async () => {
   const cmd = await Install.mock('heroku-debug@alpha')
-  expect(cmd.out.stderr.output).toEqual('Installing plugin heroku-debug@alpha...\nInstalling plugin heroku-debug@alpha... done\n')
+  expect(cmd.out.stderr.output).toEqual('Installing plugin heroku-debug@alpha... done\n')
   expect(mockInstall).toBeCalledWith('heroku-debug', 'alpha')
 })
