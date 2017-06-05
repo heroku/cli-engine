@@ -17,7 +17,6 @@ import Help from './commands/help'
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 let out: Output
-process.once('exit', () => out ? out.showCursor() : null)
 process.once('SIGINT', () => out ? out.exit(1) : process.exit(1))
 let handleErr = err => {
   if (!out) throw err
