@@ -30,5 +30,13 @@ export default class Update extends Command {
     let analytics = new Analytics({out: this.out, config: this.config})
     await analytics.submit()
     await PluginsUpdate.run({config: this.config})
+    await this.logChop()
+  }
+
+  async logChop () {
+    try {
+      const logChopper = require('log-chopper').default
+      await logChopper.chop(this.out.errlog)
+    } catch (e) { this.out.debug(e.message) }
   }
 }
