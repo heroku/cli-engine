@@ -9,7 +9,7 @@
   },
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
-    "yarnDependency": "0.23.3"
+    "yarnDependency": "0.24.6"
   },
   "dependencies": {
     "cli-engine-command": "4.0.6",
