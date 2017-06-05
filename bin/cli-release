@@ -65,7 +65,7 @@ cat << EOF > tmp/build/version
 }
 EOF
 
-aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/version "$remote_base/version"
+aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/version "s3://$S3_BUCKET/$NAME/channels/$CHANNEL/version"
 
 if [ $RESULT -ne 0 ]; then
   exit $RESULT
