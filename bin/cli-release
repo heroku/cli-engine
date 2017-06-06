@@ -54,7 +54,7 @@ YARN_DIR="$ROOT/tmp/build/yarn"
 mkdir -p "$YARN_DIR"
 cp "$ROOT/package.json" "$YARN_DIR"
 cd "$YARN_DIR"
-yarn --production --offline
+yarn --production --prefer-offline
 cd "$ROOT"
 
 for PLATFORM in "${PLATFORMS[@]}"; do
