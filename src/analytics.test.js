@@ -20,6 +20,7 @@ function analyticsJson () {
         version: '1.2.3',
         plugin_version: '4.5.6',
         os: 'darwin',
+        shell: 'fish',
         valid: true
       }
     ]
@@ -29,7 +30,7 @@ function analyticsJson () {
 function build (options = {}) {
   let config = options.config || buildConfig({
     version: '1.2.3',
-    platform: 'windows',
+    platform: 'win32',
     skipAnalytics: false,
     install: '5a8ef179-1129-4f81-877c-662c89f83f1f',
     name: 'cli-engine'
@@ -193,6 +194,18 @@ describe('AnalyticsCommand', () => {
   })
 
   describe('record', () => {
+    const SHELL = process.env.SHELL
+
+    beforeAll(() => {
+      delete process.env.SHELL
+      process.env['COMSPEC'] = 'C:\\ProgramFiles\\cmd.exe'
+    })
+
+    afterAll(() => {
+      delete process.env.COMSPEC
+      process.env['SHELL'] = SHELL
+    })
+
     it('does not record if no plugin', async () => {
       let config = buildConfig()
       let out = new Output({config, mock: true})
@@ -242,12 +255,11 @@ describe('AnalyticsCommand', () => {
 
     it('records commands', async () => {
       let json = analyticsJson()
-      let command = build({json})
-
       let expected = analyticsJson()
       expected.commands.push({
         'command': 'fuzz:fizz',
-        'os': 'windows',
+        'os': 'win32',
+        'shell': 'cmd.exe',
         'plugin': 'fuzz',
         'plugin_version': '9.8.7',
         'valid': true,
@@ -255,8 +267,8 @@ describe('AnalyticsCommand', () => {
         'language': 'node'
       })
 
+      let command = build({json})
       await command.record(buildCommand())
-
       expect(command._writeJSON.mock.calls).toEqual([[expected]])
     })
 
@@ -272,7 +284,8 @@ describe('AnalyticsCommand', () => {
         schema: 1,
         commands: [{
           'command': 'fuzz:fizz',
-          'os': 'windows',
+          'os': 'win32',
+          'shell': 'cmd.exe',
           'plugin': 'fuzz',
           'plugin_version': '9.8.7',
           'valid': true,
@@ -298,7 +311,8 @@ describe('AnalyticsCommand', () => {
         schema: 1,
         commands: [{
           'command': 'fuzz:fizz',
-          'os': 'windows',
+          'os': 'win32',
+          'shell': 'cmd.exe',
           'plugin': 'fuzz',
           'plugin_version': '9.8.7',
           'valid': true,

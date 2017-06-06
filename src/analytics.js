@@ -15,6 +15,7 @@ type AnalyticsJSONCommand = {
   version: string,
   plugin_version: string,
   os: string,
+  shell: string,
   language: string,
   valid: true
 }
@@ -85,6 +86,7 @@ export default class AnalyticsCommand {
         plugin: plugin.name,
         plugin_version: plugin.version,
         os: this.config.platform,
+        shell: this.config.shell,
         valid: true,
         language: 'node'
       })
