@@ -40,3 +40,5 @@ jobs:
           key: cli-engine-{{ .Branch}}
           paths:
             - /usr/local/share/.cache/yarn
+            - /tmp/cli-engine/yarn
+            - /tmp/cli-engine/example/node_modules/cli-engine/yarn
