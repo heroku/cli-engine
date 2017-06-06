@@ -54,7 +54,7 @@ export default class Main {
       plugins = new Plugins(out)
     }
 
-    debug('autoupdate')
+    debug('autoupdating')
     await updater.autoupdate()
     debug('refreshing linked plugins')
     await plugins.refreshLinkedPlugins()

@@ -3,6 +3,8 @@
 import Output from 'cli-engine-command/lib/output'
 import NotFound from './not_found'
 
+jest.unmock('fs-extra')
+
 test('it exits with 127', async () => {
   expect.assertions(2)
   let output = new Output({mock: true})

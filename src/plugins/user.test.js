@@ -6,6 +6,8 @@ import {tmpDirs} from '../../test/helpers'
 const path = require('path')
 const fs = require('fs-extra')
 
+jest.unmock('fs-extra')
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let tmpDir

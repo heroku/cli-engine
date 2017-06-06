@@ -2,6 +2,8 @@
 
 import CLI from './cli'
 
+jest.unmock('fs-extra')
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
 async function run (...argv: string[]) {
