@@ -5,33 +5,55 @@ import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import fs from 'fs-extra'
 
-const cacheDir = path.join(__dirname, '..', 'tmp', 'cache')
-const pluginsCachePath = path.join(cacheDir, 'plugins.json')
-const config = {cacheDir}
-const output = new Output(config)
-beforeEach(() => {
-  fs.mkdirpSync(cacheDir)
-  fs.removeSync(pluginsCachePath)
-})
+jest.mock('fs-extra')
 
 const myplugin = {name: 'myplugin', path: 'myplugin', version: '1.0.0', topics: [], commands: []}
 
-jest.unmock('fs-extra')
+let output
+let config
+
+beforeEach(() => {
+  output = new Output()
+  config = output.config
+})
+
+afterEach(() => {
+  jest.resetAllMocks()
+})
 
 test('updatePlugin', () => {
   let cache = new Cache(output)
   cache.updatePlugin('myplugin', myplugin)
   cache.save()
-  let cache2 = new Cache(output)
-  const plugin = cache2.plugin('myplugin')
-  if (!plugin) throw new Error()
-  expect(plugin.version).toEqual('1.0.0')
+  expect(fs.writeJSONSync).toBeCalledWith(
+    path.join(config.cacheDir, 'plugins.json'),
+    {plugins: {myplugin}, version: config.version}
+  )
 })
 
-test('deletePlugin', () => {
-  let cache = new Cache(output)
-  cache.updatePlugin('myplugin', myplugin)
-  expect(cache.plugin('myplugin')).toBeDefined()
-  cache.deletePlugin('myplugin')
-  expect(cache.plugin('myplugin')).toBeUndefined()
+describe('with existing file', () => {
+  beforeEach(() => {
+    fs.__files({
+      [config.cacheDir]: {
+        'plugins.json': {
+          version: config.version,
+          plugins: {myplugin}
+        }
+      }
+    })
+  })
+
+  test('reads existing plugin data', () => {
+    let cache = new Cache(output)
+    expect(cache.plugin('myplugin')).toMatchObject({version: '1.0.0'})
+  })
+
+  test('deletePlugin', () => {
+    let cache = new Cache(output)
+    cache.deletePlugin('myplugin')
+    expect(fs.writeJSONSync).toBeCalledWith(
+      path.join(config.cacheDir, 'plugins.json'),
+      {plugins: {}, version: config.version}
+    )
+  })
 })
