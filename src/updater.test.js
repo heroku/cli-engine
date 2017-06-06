@@ -37,7 +37,7 @@ describe('warnIfUpdateAvailable', () => {
       assets.get('/cli-engine/channels/stable/version')
         .reply(200, {channel: 'stable', version: '1.3.0-b2ea476'})
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toEqual(' ▸    cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
+      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
     })
   })
 
@@ -52,13 +52,13 @@ describe('warnIfUpdateAvailable', () => {
     it('shows warning when minor is greater', async () => {
       version('1.3.0-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toEqual(' ▸    cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
+      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
     })
 
     it('shows warning when major is greater', async () => {
       version('2.0.0-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toEqual(' ▸    cli-engine: update available from 1.2.3-b2ea476 to 2.0.0-b2ea476\n')
+      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 2.0.0-b2ea476\n')
     })
 
     it('shows nothing when minor is less', async () => {
