@@ -249,8 +249,9 @@ export default class Updater {
       let fd = fs.openSync(this.autoupdatelogfile, 'a')
       if (!this.binPath) return
       const {spawn} = require('child_process')
-      spawn(this.binPath, ['update'], {stdio: [null, fd, fd]})
+      spawn(this.binPath, ['update'], {detached: true, stdio: ['ignore', fd, fd]})
       .on('error', e => this.out.warn(e, 'autoupdate:'))
+      .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
   }
 
