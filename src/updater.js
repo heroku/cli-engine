@@ -55,7 +55,7 @@ export default class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      return await this.http.get(this.s3url(channel, `${process.platform}/${process.arch}`))
+      return await this.http.get(this.s3url(channel, `${process.platform}-${process.arch}`))
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
