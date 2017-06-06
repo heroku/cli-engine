@@ -1,7 +1,7 @@
 // @flow
 
 import Command, {flags} from 'cli-engine-command'
-import util from '../../util'
+import {compare} from '../../util'
 import Plugins from '../../plugins'
 
 export default class extends Command {
@@ -11,7 +11,7 @@ export default class extends Command {
   async run () {
     let plugins = new Plugins(this.out).list()
     plugins = plugins.filter(p => p.type !== 'builtin')
-    plugins.sort(util.compare('name'))
+    plugins.sort(compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
     if (!plugins.length) this.out.warn('no plugins installed')
     for (let plugin of plugins) {
