@@ -102,6 +102,7 @@ export default class Plugins {
 
   async update () {
     if (this.user.list().length === 0) return
+    this.out.action.start(`${this.config.name}: Updating plugins`)
     await this.user.update()
     this.clearCache(...this.user.list().map(p => p.path))
   }
