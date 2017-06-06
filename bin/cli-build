@@ -43,13 +43,15 @@ mkdir -p $WORKSPACE/bin
 if [ -f README.md ]; then cp README.md $WORKSPACE; fi
 if [ -f LICENSE ]; then cp LICENSE $WORKSPACE; fi
 cp package.json $WORKSPACE
-# TODO: this breaks yarn with git references for some reason
-#cp yarn.lock $WORKSPACE
 
 # install packages
 cd $WORKSPACE
 
-yarn install --no-progress --production
+if [ -d "$ROOT/tmp/build/yarn" ]; then
+  cp -r "$ROOT/tmp/build/yarn/*" "$WORKSPACE"
+else
+  yarn install --no-progress --production
+fi
 if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
   cd $WORKSPACE/node_modules/cli-engine
   yarn
