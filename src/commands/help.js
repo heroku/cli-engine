@@ -1,7 +1,7 @@
 // @flow
 
 import Command from 'cli-engine-command'
-import util from '../util'
+import {compare} from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
 import type Plugin from '../plugins/plugin'
@@ -65,7 +65,7 @@ export default class Help extends Command {
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
     let topics = this.plugins.topics.filter(t => !t.hidden)
-    topics.sort(util.compare('topic'))
+    topics.sort(compare('topic'))
     topics = topics.map(t => [t.topic, t.description])
     this.out.log(renderList(topics))
     this.out.log()

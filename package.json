@@ -53,6 +53,7 @@
     "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
     "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
     "jest": "20.0.4",
+    "mock-fs": "4.3.0",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
     "uglify-js": "github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d"
