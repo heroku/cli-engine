@@ -75,6 +75,15 @@ describe('warnIfUpdateAvailable', () => {
   })
 })
 
+describe('fetchManifest', () => {
+  it('gets the manifest from the API', async () => {
+    assets.get(`/cli-engine/channels/stable/${process.platform}-${process.arch}`)
+      .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
+    let v = await updater.fetchManifest('stable')
+    expect(v.version).toEqual('1.2.3-b2ea476')
+  })
+})
+
 describe('fetchVersion', () => {
   it('gets the version from disk', async () => {
     fs.__files({
