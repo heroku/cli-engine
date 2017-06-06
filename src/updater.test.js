@@ -82,6 +82,17 @@ describe('fetchManifest', () => {
     let v = await updater.fetchManifest('stable')
     expect(v.version).toEqual('1.2.3-b2ea476')
   })
+
+  it('errors on 403', async () => {
+    expect.assertions(1)
+    assets.get(`/cli-engine/channels/invalid/${process.platform}-${process.arch}`)
+      .reply(403)
+    try {
+      await updater.fetchManifest('invalid')
+    } catch (err) {
+      expect(err.message).toEqual('HTTP 403: Invalid channel invalid')
+    }
+  })
 })
 
 describe('fetchVersion', () => {
