@@ -5,6 +5,7 @@ import Command from 'cli-engine-command'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
+import {timeout} from './util'
 
 import Analytics from './analytics'
 import Updater from './updater'
@@ -73,13 +74,13 @@ export default class Main {
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
     }
     debug('flushing stdout')
-    await this.flush()
+    await timeout(this.flush(), 10000)
     debug('exiting')
     out.exit(0)
   }
 
-  flush () {
-    if (global.testing) return
+  flush (): Promise<> {
+    if (global.testing) return Promise.resolve()
     let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
     return p
