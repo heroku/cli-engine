@@ -27,6 +27,7 @@ export default class Update extends Command {
         this.out.action.stop()
       }
     }
+    await this.updater.fetchVersion(this.config.channel, 1)
     let analytics = new Analytics({out: this.out, config: this.config})
     await analytics.submit()
     await PluginsUpdate.run({config: this.config})

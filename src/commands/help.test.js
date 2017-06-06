@@ -8,6 +8,8 @@ import Output from 'cli-engine-command/lib/output'
 const path = require('path')
 const fs = require('fs-extra')
 
+jest.unmock('fs-extra')
+
 function mockOutput () {
   let testDir = path.join(path.dirname(__filename), '..', '..', 'test')
   let root = path.join(testDir, 'roots', 'test-foo')

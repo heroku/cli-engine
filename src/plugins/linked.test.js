@@ -8,6 +8,8 @@ import tmp from 'tmp'
 const path = require('path')
 const fs = require('fs-extra')
 
+jest.unmock('fs-extra')
+
 let testDir
 let cacheDir
 let dataDir

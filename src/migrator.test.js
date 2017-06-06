@@ -1,8 +1,11 @@
-import {tmpDirs} from '../../test/helpers'
-import CLI from '../cli'
+// @flow
+
+import {tmpDirs} from '../test/helpers'
+import CLI from './cli'
 
 const path = require('path')
 const fs = require('fs-extra')
+jest.unmock('fs-extra')
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
@@ -18,7 +21,7 @@ afterEach(() => {
 test('plugins should be reloaded if migrated', async () => {
   let dataDir = tmpDir.dataDir
 
-  let src = path.join(__dirname, '..', '..', 'test', 'links', 'test-migrator')
+  let src = path.join(__dirname, '..', 'test', 'links', 'test-migrator')
   fs.mkdirsSync(path.join(dataDir, 'plugins'))
 
   let dst = path.join(dataDir, 'plugins', 'node_modules', 'test-migrator')

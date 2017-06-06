@@ -3,6 +3,8 @@
 import CLI from './cli'
 import {tmpDirs} from '../test/helpers'
 
+jest.unmock('fs-extra')
+
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000
 
 function runClosure (namespaces: ?(?string)[]) {

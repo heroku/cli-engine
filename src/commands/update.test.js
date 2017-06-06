@@ -15,10 +15,12 @@ jest.mock('./plugins/update', () => {
 })
 
 const mockUpdate = jest.fn()
+const mockFetchVersion = jest.fn()
 
 jest.mock('../updater', () => {
   return class {
     fetchManifest () { return mockManifest }
+    fetchVersion = mockFetchVersion
     update = mockUpdate
   }
 })
@@ -43,6 +45,7 @@ describe('with no update available', () => {
     expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI... already on latest version: 1.0.0\n`)
     expect(PluginsUpdate.run).toBeCalled()
     expect(mockAnalytics).toBeCalled()
+    expect(mockFetchVersion).toBeCalled()
   })
 })
 
@@ -56,5 +59,6 @@ cli-engine: Updating CLI to 1.0.1... done
 `)
     expect(mockUpdate).toBeCalled()
     expect(PluginsUpdate.run).toBeCalled()
+    expect(mockFetchVersion).toBeCalled()
   })
 })

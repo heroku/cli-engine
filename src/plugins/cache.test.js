@@ -16,6 +16,8 @@ beforeEach(() => {
 
 const myplugin = {name: 'myplugin', path: 'myplugin', version: '1.0.0', topics: [], commands: []}
 
+jest.unmock('fs-extra')
+
 test('updatePlugin', () => {
   let cache = new Cache(output)
   cache.updatePlugin('myplugin', myplugin)

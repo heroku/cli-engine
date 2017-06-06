@@ -8,6 +8,11 @@ import lock from 'rwlockfile'
 import fs from 'fs-extra'
 import moment from 'moment'
 
+type Version = {
+  version: string,
+  channel: string
+}
+
 type Manifest = {
   version: string,
   channel: string,
@@ -19,6 +24,10 @@ type TmpDirs = {
   node: string,
   client: string,
   extract: string
+}
+
+function mtime (f) {
+  return moment(fs.statSync(f).mtime)
 }
 
 export default class Updater {
@@ -37,22 +46,41 @@ export default class Updater {
   get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
   get binPath (): ?string { return process.env.CLI_BINPATH }
   get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
+  get versionFile (): string { return path.join(this.config.cacheDir, `${this.config.channel}.version`) }
+
+  s3url (channel: string, p: string): string {
+    if (!this.config.s3.host) throw new Error('S3 host not defined')
+    return `https://${this.config.s3.host}/${this.config.name}/channels/${channel}/${p}`
+  }
 
   async fetchManifest (channel: string): Promise<Manifest> {
-    if (!this.config.s3.host) throw new Error('S3 host not defined')
     try {
-      let url = `https://${this.config.s3.host}/${this.config.name}/channels/${channel}/${process.platform}-${process.arch}`
-      let manifest = await this.http.get(url)
-      return ((manifest: any): Promise<Manifest>)
+      return await this.http.get(this.s3url(channel, `${process.platform}/${process.arch}`))
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
     }
   }
 
+  async fetchVersion (channel: string, daysToStale: ?number = 30): Promise<Version> {
+    let v
+    try {
+      if (!daysToStale || mtime(this.versionFile).isAfter(moment().subtract(daysToStale, 'days'))) {
+        v = await fs.readJSON(this.versionFile)
+      }
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
+    if (!v) {
+      v = await this.http.get(this.s3url(channel, 'version'))
+      await this._catch(() => fs.writeJSON(this.versionFile, v))
+    }
+    return v
+  }
+
   _catch (fn: Function) {
     try {
-      fn()
+      return Promise.resolve(fn())
     } catch (err) {
       this.out.debug(err)
     }
@@ -157,7 +185,7 @@ export default class Updater {
 
           this._remove(dirs.node)
 
-          if (moment(fs.statSync(dirs.dir).mtime).isBefore(moment().subtract(24, 'hours'))) {
+          if (mtime(dirs.dir).isBefore(moment().subtract(24, 'hours'))) {
             this._cleanupDirs(dirs)
           } else {
             this._removeIfEmpty(dirs)
@@ -232,8 +260,7 @@ export default class Updater {
 
   get autoupdateNeeded (): boolean {
     try {
-      const stat = fs.statSync(this.autoupdatefile)
-      return moment(stat.mtime).isBefore(moment().subtract(5, 'hours'))
+      return mtime(this.autoupdatefile).isBefore(moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       return true
@@ -242,9 +269,9 @@ export default class Updater {
 
   async autoupdate () {
     try {
+      await this.warnIfUpdateAvailable()
       if (!this.autoupdateNeeded) return
-      fs.writeFileSync(this.autoupdatefile, '')
-      if (this.config.updateDisabled) await this.warnIfUpdateAvailable()
+      fs.outputFileSync(this.autoupdatefile, '')
       await this.checkIfUpdating()
       let fd = fs.openSync(this.autoupdatelogfile, 'a')
       if (!this.binPath) return
@@ -256,12 +283,14 @@ export default class Updater {
   }
 
   async warnIfUpdateAvailable () {
-    const manifest = await this.fetchManifest(this.config.channel)
-    let local = this.config.version.split('.')
-    let remote = manifest.version.split('.')
-    if (local[0] !== remote[0] || local[1] !== remote[1]) {
-      this.out.warn(`${this.config.name}: update available from ${this.config.version} to ${manifest.version}`)
-    }
+    await this._catch(async () => {
+      let v = await this.fetchVersion(this.config.channel)
+      let local = this.config.version.split('.')
+      let remote = v.version.split('.')
+      if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
+        this.out.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
+      }
+    })
   }
 
   async checkIfUpdating () {

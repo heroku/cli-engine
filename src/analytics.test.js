@@ -7,6 +7,8 @@ import nock from 'nock'
 import Plugins from './plugins'
 import AnalyticsCommand from './analytics'
 
+jest.unmock('fs-extra')
+
 function analyticsJson () {
   return {
     schema: 1,
