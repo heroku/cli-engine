@@ -31,6 +31,7 @@ if [ $# -ne 1 ]; then
   exit 1
 fi
 
+ROOT=$(pwd)
 CHANNEL=$1
 NAME=`node -p "require('./package.json').name"`
 S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3.bucket"`
@@ -47,6 +48,14 @@ function release {
 
 pids=""
 RESULT=0
+
+# install dependencies
+YARN_DIR="$ROOT/tmp/build/yarn"
+mkdir -p "$YARN_DIR"
+cp "$ROOT/package.json" "$YARN_DIR"
+cd "$YARN_DIR"
+yarn --production --offline
+cd "$ROOT"
 
 for PLATFORM in "${PLATFORMS[@]}"; do
   release &
