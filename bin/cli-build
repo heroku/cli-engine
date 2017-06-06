@@ -48,7 +48,9 @@ cp package.json $WORKSPACE
 cd $WORKSPACE
 
 if [ -d "$ROOT/tmp/build/yarn" ]; then
-  cp -r "$ROOT/tmp/build/yarn/*" "$WORKSPACE"
+  cp "$ROOT/tmp/build/yarn/package.json" "$WORKSPACE"
+  cp "$ROOT/tmp/build/yarn/yarn.lock" "$WORKSPACE"
+  cp -r "$ROOT/tmp/build/yarn/node_modules" "$WORKSPACE"
 else
   yarn install --no-progress --production
 fi
