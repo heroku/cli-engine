@@ -22,11 +22,12 @@ function find (f) {
   return file
 }
 
-fs.readJSON = async f => {
+fs.readJSONSync = f => {
   let file = find(f)
-  return Promise.resolve(file.content || file)
+  return file.content || file
 }
 
+fs.readJSON = f => Promise.resolve(fs.readJSONSync(f))
 fs.statSync = f => find(f)
 
 fs.__files = (f = {}) => { files = f }
