@@ -1,4 +1,5 @@
 [ignore]
+<PROJECT_ROOT>/tmp/.*
 <PROJECT_ROOT>/lib/.*
 .*/node_modules/nock.*
 
