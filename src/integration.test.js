@@ -42,9 +42,11 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
 
 test('tries to install a non-existant tag', async () => {
   expect.assertions(1)
-  await expect(run('plugins:install', 'heroku-debug@not-found')).rejects.toEqual(
-    new Error('yarn --non-interactive --prefer-offline exited with code 1\nerror Couldn\'t find package "heroku-debug" on the "npm" registry.\n')
-  )
+  try {
+    await run('plugins:install', 'heroku-debug@not-found')
+  } catch (err) {
+    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find package "heroku-debug" on the "npm" registry.\n')
+  }
 })
 
 test('links example plugin', async () => {

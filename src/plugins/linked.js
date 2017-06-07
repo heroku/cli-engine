@@ -124,7 +124,7 @@ export default class LinkedPlugins extends Manager {
   }
 
   _save () {
-    fs.writeJSONSync(this.file, this._data)
+    fs.writeJSONSync(this.file, this._data, {spaces: 2})
   }
 
   _needsInstall (p: string): boolean {
