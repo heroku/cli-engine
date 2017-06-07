@@ -31,7 +31,6 @@ export default class {
         this.out.debug(`Skipping already installed plugin: ${p.name}`)
       } else {
         await this._installPlugin(p.name, p.tag)
-        this.out.log(p.name)
       }
     }
     await this.userPlugins.yarn.exec(['install', '--force'])
