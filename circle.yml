@@ -13,23 +13,11 @@ jobs:
             - cli-engine-{{ .Branch }}
             - cli-engine-master
       - run: git submodule sync && git submodule update --init --recursive --remote
-      - run:
-          name: install dependencies
-          command: |
-            yarn
-            cd example
-            yarn
-            yarn add heroku/cli-engine#$CIRCLE_SHA1
-            cd node_modules/cli-engine
-            yarn
-            npm run prepare
-      - run: ./bin/run version && cd example && ./bin/run version
-      - run: cd example && ./bin/run help
-      - run: cd example && ./bin/run cli:test
-      - run: ./node_modules/.bin/jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash) -s coverage
-      - run: ./node_modules/.bin/flow check
-      - run: ./node_modules/.bin/eslint .
-      - run: cd example && ./node_modules/.bin/cli-build linux-x86 beta
+      - run: yarn --prefer-offline
+      - run: ./bin/run version
+      - run: jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash) -s coverage
+      - run: flow check
+      - run: eslint .
       - save_cache:
           key: cli-engine-{{ .Branch}}-{{checksum "package.json"}}
           paths:

@@ -72,7 +72,8 @@ if [ $OS == win32 ]; then
   mv $WORKSPACE/$NODE_BASE/node.exe $WORKSPACE/bin/node.exe
   rm -rf $WORKSPACE/$NODE_BASE
 else
-  NODE_BASE=node-v$NODE_VERSION-$PLATFORM
+  if [ "$ARCH" == "arm" ]; then NODE_ARCH=armv6l; else NODE_ARCH="$ARCH"; fi
+  NODE_BASE=node-v$NODE_VERSION-$OS-$NODE_ARCH
   if [ ! -f $ROOT/tmp/cache/$NODE_BASE.tar.xz ]; then
     URL=https://nodejs.org/dist/v$NODE_VERSION/$NODE_BASE.tar.xz
     curl -fSLo $ROOT/tmp/cache/$NODE_BASE.tar.xz $URL
