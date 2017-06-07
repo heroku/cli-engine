@@ -25,7 +25,7 @@ export default class {
     if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return false
     let pljson = await this._readPluginsJSON()
     if (!pljson) return false
-    this.out.debug('Migrating V5 plugins...')
+    this.out.action.start('Migrating Heroku CLI v5 plugins')
     for (let p of pljson) {
       if (this.plugins.isPluginInstalled(p.name)) {
         this.out.debug(`Skipping already installed plugin: ${p.name}`)
@@ -33,6 +33,11 @@ export default class {
         await this._installPlugin(p.name, p.tag)
       }
     }
+    this.out.action.status = 'clearing out old plugins'
+    await fs.removeSync(path.join(this.userPlugins.userPluginsDir, 'node_modules'))
+    this.out.action.status = 'reinstalling plugins'
+    await this.userPlugins.yarn.exec()
+    this.out.action.stop()
     return true
   }
 
