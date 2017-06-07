@@ -150,7 +150,7 @@ export default class LinkedPlugins extends Manager {
     if (!this._needsInstall(p)) return
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     let yarn = new Yarn(this.out, p)
-    await yarn.exec([])
+    await yarn.exec()
     touch(path.join(p, 'node_modules'))
     this.out.action.stop()
   }

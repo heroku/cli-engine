@@ -40,112 +40,32 @@ function mockFork (options: {
   })
 }
 
-test('has correct args', async () => {
-  expect.assertions(1)
+describe('checkForYarnLock', () => {
+  test('checks for yarn lockfile', async () => {
+    expect.assertions(2)
 
-  mockFork({}, (module, args, options) => {
-    expect(args).toEqual([
-      'foo',
-      'bar',
-      '--non-interactive'
-    ])
-  })
-
-  await yarn.exec(['foo', 'bar'])
-})
-
-test('has correct modulePath', async () => {
-  expect.assertions(1)
-
-  let yarnjs = path.resolve(yarn.bin)
-  mockFork({}, (module, args, options) => {
-    expect(module).toEqual(yarnjs)
-  })
-
-  await yarn.exec()
-})
-
-test('has path env', async () => {
-  expect.assertions(1)
-
-  mockFork({}, (module, args, options) => {
-    expect(options.env[yarn.pathKey()].split(path.delimiter)[0]).toEqual(path.dirname(process.execPath))
-  })
-
-  await yarn.exec()
-})
-
-test('has correct options', async () => {
-  expect.assertions(1)
-
-  mockFork({}, (module, args, options) => {
-    expect(options).toMatchObject({
-      cwd: '/foo/bar',
-      stdio: [null, null, null, 'ipc']
+    mockFork({}, (module, args, options) => {
+      expect(args).toEqual(['--non-interactive'])
     })
-  })
 
-  await yarn.exec()
-})
+    mockFork({}, (module, args, options) => {
+      expect(args).toEqual(['foo', '--non-interactive'])
+    })
 
-test('does not emit stdout when debug is off', async () => {
-  expect.assertions(1)
-  mockFork({code: 0, stdout: 'why hello there'})
-  await yarn.exec()
-  expect(yarn.out.stdout.output).toEqual('')
-})
-
-test('emits stdout when debug is on', async () => {
-  expect.assertions(1)
-  mockFork({code: 0, stdout: 'why hello there'})
-  yarn.config.debug = 1
-  await yarn.exec()
-  expect(yarn.out.stdout.output).toEqual('why hello there')
-})
-
-test('emits stderr when debug is on', async () => {
-  expect.assertions(1)
-  mockFork({code: 0, stderr: 'why hello there'})
-  yarn.config.debug = 1
-  await yarn.exec()
-  expect(yarn.out.stderr.output).toEqual('why hello there')
-})
-
-test('raises error', async () => {
-  expect.assertions(1)
-
-  mockFork({code: 1, stderr: 'UH OH'})
-
-  await yarn.exec().catch(err => {
-    expect(err.message).toContain('UH OH')
+    await yarn.exec(['foo'])
   })
 })
 
-test('adds --network-concurrency=1 when necessary', async () => {
-  expect.assertions(3)
-
-  mockFork({code: 1, stderr: 'EAI_AGAIN'}, (module, args, options) => {
-    expect(args).not.toContain('--network-concurrency=1')
-  })
-
-  mockFork({code: 1, stderr: 'EAI_AGAIN'}, (module, args, options) => {
-    expect(args).toContain('--network-concurrency=1')
-  })
-
-  await yarn.exec().catch(err => {
-    expect(err.message).toContain('EAI_AGAIN')
-  })
-})
-
-describe('with cacheDir', () => {
-  let yarnCacheDir = global.yarnCacheDir
+describe('with checkForYarnLock stubbed out', () => {
+  const checkForYarnLock = Yarn.prototype.checkForYarnLock
   beforeEach(() => {
-    global.yarnCacheDir = null
+    // flow$ignore
+    Yarn.prototype.checkForYarnLock = jest.fn()
   })
   afterEach(() => {
-    global.yarnCacheDir = yarnCacheDir
+    // flow$ignore
+    Yarn.prototype.checkForYarnLock = checkForYarnLock
   })
-
   test('has correct args', async () => {
     expect.assertions(1)
 
@@ -153,30 +73,137 @@ describe('with cacheDir', () => {
       expect(args).toEqual([
         'foo',
         'bar',
-        '--non-interactive',
-        `--mutex=file:${cacheDir}`,
-        `--cache-folder=${cacheDir}`
+        '--non-interactive'
       ])
     })
 
     await yarn.exec(['foo', 'bar'])
   })
-})
 
-describe('win32', () => {
-  let platform = process.platform
-  beforeEach(() => {
-    process.platform = 'win32'
-  })
-  afterEach(() => {
-    process.platform = platform
-  })
+  test('has correct modulePath', async () => {
+    expect.assertions(1)
 
-  test('finds path case insensitively', () => {
-    expect(yarn.pathKey({pATH: ''})).toEqual('pATH')
+    let yarnjs = path.resolve(yarn.bin)
+    mockFork({}, (module, args, options) => {
+      expect(module).toEqual(yarnjs)
+    })
+
+    await yarn.exec()
   })
 
-  test('defaults to Path', () => {
-    expect(yarn.pathKey({nothing_useful: ''})).toEqual('Path')
+  test('has path env', async () => {
+    expect.assertions(1)
+
+    mockFork({}, (module, args, options) => {
+      expect(options.env[yarn.pathKey()].split(path.delimiter)[0]).toEqual(path.dirname(process.execPath))
+    })
+
+    await yarn.exec()
+  })
+
+  test('has correct options', async () => {
+    expect.assertions(1)
+
+    mockFork({}, (module, args, options) => {
+      expect(options).toMatchObject({
+        cwd: '/foo/bar',
+        stdio: [null, null, null, 'ipc']
+      })
+    })
+
+    await yarn.exec()
+  })
+
+  test('does not emit stdout when debug is off', async () => {
+    expect.assertions(1)
+    mockFork({code: 0, stdout: 'why hello there'})
+    await yarn.exec()
+    expect(yarn.out.stdout.output).toEqual('')
+  })
+
+  test('emits stdout when debug is on', async () => {
+    expect.assertions(1)
+    mockFork({code: 0, stdout: 'why hello there'})
+    yarn.config.debug = 1
+    await yarn.exec()
+    expect(yarn.out.stdout.output).toEqual('why hello there')
+  })
+
+  test('emits stderr when debug is on', async () => {
+    expect.assertions(1)
+    mockFork({code: 0, stderr: 'why hello there'})
+    yarn.config.debug = 1
+    await yarn.exec()
+    expect(yarn.out.stderr.output).toEqual('why hello there')
+  })
+
+  test('raises error', async () => {
+    expect.assertions(1)
+
+    mockFork({code: 1, stderr: 'UH OH'})
+
+    await yarn.exec().catch(err => {
+      expect(err.message).toContain('UH OH')
+    })
+  })
+
+  test('adds --network-concurrency=1 when necessary', async () => {
+    expect.assertions(3)
+
+    mockFork({code: 1, stderr: 'EAI_AGAIN'}, (module, args, options) => {
+      expect(args).not.toContain('--network-concurrency=1')
+    })
+
+    mockFork({code: 1, stderr: 'EAI_AGAIN'}, (module, args, options) => {
+      expect(args).toContain('--network-concurrency=1')
+    })
+
+    await yarn.exec().catch(err => {
+      expect(err.message).toContain('EAI_AGAIN')
+    })
+  })
+
+  describe('with cacheDir', () => {
+    let yarnCacheDir = global.yarnCacheDir
+    beforeEach(() => {
+      global.yarnCacheDir = null
+    })
+    afterEach(() => {
+      global.yarnCacheDir = yarnCacheDir
+    })
+
+    test('has correct args', async () => {
+      expect.assertions(1)
+
+      mockFork({}, (module, args, options) => {
+        expect(args).toEqual([
+          'foo',
+          'bar',
+          '--non-interactive',
+          `--mutex=file:${cacheDir}`,
+          `--cache-folder=${cacheDir}`
+        ])
+      })
+
+      await yarn.exec(['foo', 'bar'])
+    })
+  })
+
+  describe('win32', () => {
+    let platform = process.platform
+    beforeEach(() => {
+      process.platform = 'win32'
+    })
+    afterEach(() => {
+      process.platform = platform
+    })
+
+    test('finds path case insensitively', () => {
+      expect(yarn.pathKey({pATH: ''})).toEqual('pATH')
+    })
+
+    test('defaults to Path', () => {
+      expect(yarn.pathKey({nothing_useful: ''})).toEqual('Path')
+    })
   })
 })
