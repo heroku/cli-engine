@@ -85,7 +85,7 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "build": "babel src -d lib --ignore '*.test.js'",
+    "build": "babel src -d lib --ignore '*.test.js,**/__mocks__/*.js'",
     "clean": "rimraf lib tmp",
     "download": "node ./bin/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
