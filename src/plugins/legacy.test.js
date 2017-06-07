@@ -2,19 +2,17 @@
 
 import {type LegacyCommand, convertFromV5} from './legacy'
 
-jest.mock('cli-engine-command/lib/heroku', function () {
-  let def = function () {
-    return {
-      auth: '1234'
-    }
+jest.mock('cli-engine-heroku/lib/vars', () => ({
+  apiHost: 'api.foo.com',
+  apiUrl: 'https://api.foo.com',
+  gitHost: 'foo.com',
+  httpGitHost: 'git.foo.com'
+}))
+
+jest.mock('cli-engine-heroku/lib/api_client', () => {
+  return function () {
+    return {auth: '1234'}
   }
-  def.vars = {
-    apiHost: 'api.foo.com',
-    apiUrl: 'https://api.foo.com',
-    gitHost: 'foo.com',
-    httpGitHost: 'git.foo.com'
-  }
-  return def
 })
 
 test('exports a context', async function () {

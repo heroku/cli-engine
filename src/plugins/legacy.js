@@ -1,8 +1,9 @@
 // @flow
 
-import Command, {type Arg, type Flag, flags as Flags} from 'cli-engine-command'
-import Heroku, {vars} from 'cli-engine-command/lib/heroku'
-import {flags as HerokuFlags} from 'cli-engine-heroku'
+import Command, {type Arg, type Flag} from 'cli-engine-command'
+import Heroku from 'cli-engine-heroku/lib/api_client'
+import vars from 'cli-engine-heroku/lib/vars'
+import {flags as Flags} from 'cli-engine-heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
@@ -93,7 +94,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
   }
   if (c.needsOrg || c.wantsOrg) {
     let opts = {required: !!c.needsOrg, hidden: false, description: 'organization to use'}
-    V5.flags.org = HerokuFlags.org(opts)
+    V5.flags.org = Flags.org(opts)
   }
   return V5
 }
