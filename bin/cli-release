@@ -24,6 +24,7 @@ PLATFORMS=(
   darwin-x64
   linux-x86
   linux-x64
+  linux-arm
 )
 
 if [ $# -ne 1 ]; then
