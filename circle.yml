@@ -33,7 +33,6 @@ jobs:
       - save_cache:
           key: cli-engine-{{ .Branch}}-{{checksum "package.json"}}
           paths:
-            - /tmp/cli-engine/example/node_modules/cli-engine/yarn
             - /tmp/cli-engine/node_modules
             - /tmp/cli-engine/npm-packages-offline-cache
             - /tmp/cli-engine/yarn
@@ -41,6 +40,5 @@ jobs:
       - save_cache:
           key: cli-engine-{{ .Branch}}
           paths:
-            - /tmp/cli-engine/example/node_modules/cli-engine/yarn
             - /tmp/cli-engine/yarn
             - /usr/local/share/.cache/yarn
