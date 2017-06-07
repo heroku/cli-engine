@@ -53,7 +53,6 @@ export default class UserPlugins extends Manager {
     fs.mkdirpSync(this.userPluginsDir)
     if (!fs.existsSync(pjson)) fs.writeFileSync(pjson, JSON.stringify({private: true}))
     if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
-    await this.yarn.exec()
   }
 
   async install (name: string, tag: string = 'latest') {

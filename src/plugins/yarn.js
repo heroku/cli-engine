@@ -3,6 +3,7 @@
 import type Output from 'cli-engine-command/lib/output'
 import {type Config} from 'cli-engine-config'
 import path from 'path'
+import fs from 'fs-extra'
 
 const debug = require('debug')('cli-engine/plugins/yarn')
 
@@ -83,6 +84,7 @@ export default class Yarn {
   }
 
   async exec (args: string[] = []): Promise<void> {
+    if (args.length !== 0) await this.checkForYarnLock()
     args = args.concat(['--non-interactive']).concat(Yarn.extraOpts)
     if (global.yarnCacheDir !== false) {
       let cacheDir = path.join(this.config.cacheDir, 'yarn')
@@ -104,6 +106,13 @@ export default class Yarn {
       if (err.message.includes('EAI_AGAIN') && !args.includes(networkConcurrency)) {
         return this.exec(args.concat(networkConcurrency))
       } else throw err
+    }
+  }
+
+  async checkForYarnLock () {
+    // add yarn lockfile if it does not exist
+    if (this.cwd && !fs.existsSync(path.join(this.cwd, 'yarn.lock'))) {
+      await this.exec()
     }
   }
 }
