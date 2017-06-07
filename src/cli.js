@@ -47,11 +47,16 @@ export default class Main {
     const updater = new Updater(out)
     let plugins = new Plugins(out)
 
-    debug('migrating plugins')
-    const migrator = new MigrateV5Plugins(plugins, this.config)
-    const migrated = await migrator.run()
-    if (migrated) {
-      plugins = new Plugins(out)
+    try {
+      debug('migrating plugins')
+      const migrator = new MigrateV5Plugins(plugins, this.config)
+      const migrated = await migrator.run()
+      if (migrated) {
+        plugins = new Plugins(out)
+      }
+    } catch (err) {
+      out.warn('Error migrating v5 plugins')
+      out.warn(err)
     }
 
     debug('autoupdating')
