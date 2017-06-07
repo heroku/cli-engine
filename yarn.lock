@@ -628,30 +628,29 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-5.0.0.tgz#b7be811307e9cdf59f85f041311e1934152d96ec"
+cli-engine-command@5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-5.0.2.tgz#804feb837e01407cf0058533b11d513f0588849f"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
     chalk "1.x"
     fs-extra "3.x"
-    http-call "1.1.2"
+    http-call "^1.2.2"
     lodash.maxby "4.x"
     lodash.merge "4.x"
-    netrc-parser "2.0.2"
     string "3.x"
     supports-color "3.x"
 
-cli-engine-config@1.3.5:
-  version "1.3.5"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.3.5.tgz#dfd72673a98e8e1aa7129409164b9f1836a9c300"
+cli-engine-config@1.3.6:
+  version "1.3.6"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.3.6.tgz#c5b0a2650d95a91ca91672aecba9bdac059b7a25"
   dependencies:
     uuid "3.x"
 
-cli-engine-heroku@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.0.0.tgz#de4bad35a819ee6ecfda3db22ecc6756206f6c1f"
+cli-engine-heroku@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.0.1.tgz#b77f04fa990f41cf9f7f489ec9d8ee03816a7555"
   dependencies:
     heroku-client "3.x"
     netrc-parser "2.0.2"
@@ -794,7 +793,7 @@ debug@2.2.0:
   dependencies:
     ms "0.7.1"
 
-debug@2.x, debug@^2.1.1, debug@^2.2.0, debug@^2.6.3:
+debug@2.x, debug@^2.1.1, debug@^2.2.0, debug@^2.6.3, debug@^2.6.8:
   version "2.6.8"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.8.tgz#e731531ca2ede27d188222427da17821d68ff4fc"
   dependencies:
@@ -1695,10 +1694,11 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.1.2.tgz#bfec491443c86104451ae2764ad5307da0feea4a"
+http-call@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-1.2.2.tgz#b00d55ee9d9338ad8668135f2129e4a713a23c57"
   dependencies:
+    debug "^2.6.8"
     tunnel-agent "^0.6.0"
 
 http-signature@~1.1.0:
