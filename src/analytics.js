@@ -8,7 +8,7 @@ import Netrc from 'netrc-parser'
 import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Plugins from './plugins'
-import {vars} from 'cli-engine-command/lib/heroku'
+import vars from 'cli-engine-heroku/lib/vars'
 
 type AnalyticsJSONCommand = {
   command: string,
