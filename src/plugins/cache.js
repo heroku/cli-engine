@@ -75,7 +75,7 @@ export default class Cache {
 
   deletePlugin (...paths: string[]) {
     for (let path of paths) {
-      this.out.debug(`Clearing cache for ${path}`)
+      this.out.debug(`clearing cache for ${path}`)
       this.constructor.updated = true
       delete this.cache.plugins[path]
     }

@@ -628,9 +628,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-4.1.0.tgz#5bd33280aa5882e053fdc5412981b5caf05672d7"
+cli-engine-command@4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-4.1.2.tgz#be6fbfc876e7eb4d0498945a02cf66e560bcc044"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
@@ -3592,8 +3592,8 @@ table@^3.7.8:
     string-width "^2.0.0"
 
 tar-fs@1.x:
-  version "1.15.2"
-  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-1.15.2.tgz#761f5b32932c7b39461a60d537faea0d8084830c"
+  version "1.15.3"
+  resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-1.15.3.tgz#eccf935e941493d8151028e636e51ce4c3ca7f20"
   dependencies:
     chownr "^1.0.1"
     mkdirp "^0.5.1"

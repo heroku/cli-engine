@@ -3,7 +3,8 @@
 import type Output from 'cli-engine-command/lib/output'
 import {type Config} from 'cli-engine-config'
 import path from 'path'
-import lock from 'rwlockfile'
+
+const debug = require('debug')('cli-engine/plugins/yarn')
 
 export default class Yarn {
   config: Config
@@ -19,17 +20,16 @@ export default class Yarn {
   }
 
   get version (): string { return require('../../package.json')['cli-engine']['yarnDependency'] }
-  get lockfile (): string { return path.join(this.config.cacheDir, 'yarn.lock') }
   get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn-${this.version}.js`) }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
-  pathKey (): string {
+  pathKey (env: {[k: string]: ?string} = process.env): string {
     let pathKey = 'PATH'
 
     // windows calls its path "Path" usually, but this is not guaranteed.
     if (process.platform === 'win32') {
       pathKey = 'Path'
-      for (const key in process.env) {
+      for (const key in env) {
         if (key.toLowerCase() === 'path') {
           pathKey = key
         }
@@ -55,15 +55,17 @@ export default class Yarn {
       let forked = fork(modulePath, args, options)
       let error = ''
 
+      forked.stdout.setEncoding('utf8')
       forked.stdout.on('data', (data) => {
         if (this.config.debug) {
-          process.stdout.write(data)
+          this.out.stdout.write(data)
         }
       })
 
+      forked.stderr.setEncoding('utf8')
       forked.stderr.on('data', (data) => {
         if (this.config.debug) {
-          process.stderr.write(data)
+          this.out.stderr.write(data)
         }
 
         error += data
@@ -82,6 +84,10 @@ export default class Yarn {
 
   async exec (args: string[] = []): Promise<void> {
     args = args.concat(['--non-interactive']).concat(Yarn.extraOpts)
+    if (global.yarnCacheDir !== false) {
+      let cacheDir = path.join(this.config.cacheDir, 'yarn')
+      args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
+    }
 
     let options = {
       cwd: this.cwd,
@@ -89,13 +95,15 @@ export default class Yarn {
       env: Object.assign({}, process.env, this.pathEnv())
     }
 
-    this.out.debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
-    let unlock = await lock.write(this.lockfile)
-    await this.fork(this.bin, args, options)
-    .catch((err) => {
-      unlock()
-      throw err
-    })
-    .then(unlock)
+    debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
+    try {
+      await this.fork(this.bin, args, options)
+    } catch (err) {
+      // TODO: https://github.com/yarnpkg/yarn/issues/2191
+      let networkConcurrency = '--network-concurrency=1'
+      if (err.message.includes('EAI_AGAIN') && !args.includes(networkConcurrency)) {
+        return this.exec(args.concat(networkConcurrency))
+      } else throw err
+    }
   }
 }
