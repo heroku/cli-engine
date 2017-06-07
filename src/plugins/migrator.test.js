@@ -1,17 +1,25 @@
 // @flow
 
-import {tmpDirs} from '../test/helpers'
-import CLI from './cli'
+import {tmpDirs} from '../../test/helpers'
+import CLI from '../cli'
+import path from 'path'
+import fs from 'fs-extra'
 
-const path = require('path')
-const fs = require('fs-extra')
 jest.unmock('fs-extra')
+
+let mockYarnExec
+jest.mock('./yarn', () => {
+  return class {
+    exec = mockYarnExec
+  }
+})
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let tmpDir
 beforeEach(() => {
   tmpDir = tmpDirs()
+  mockYarnExec = jest.fn()
 })
 
 afterEach(() => {
@@ -21,7 +29,7 @@ afterEach(() => {
 test('plugins should be reloaded if migrated', async () => {
   let dataDir = tmpDir.dataDir
 
-  let src = path.join(__dirname, '..', 'test', 'links', 'test-migrator')
+  let src = path.join(__dirname, '..', '..', 'test', 'links', 'test-migrator')
   fs.mkdirsSync(path.join(dataDir, 'plugins'))
 
   let dst = path.join(dataDir, 'plugins', 'node_modules', 'test-migrator')
@@ -36,4 +44,6 @@ test('plugins should be reloaded if migrated', async () => {
   } catch (err) {
     if (err.code !== 0) throw err
   }
+
+  expect(mockYarnExec).toBeCalledWith(['install', '--force'])
 })

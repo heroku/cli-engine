@@ -2,8 +2,8 @@
 
 import {type Config} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
-import Plugins from './plugins'
-import UserPlugins from './plugins/user'
+import Plugins from '.'
+import UserPlugins from './user'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -31,12 +31,10 @@ export default class {
         this.out.debug(`Skipping already installed plugin: ${p.name}`)
       } else {
         await this._installPlugin(p.name, p.tag)
+        this.out.log(p.name)
       }
     }
-    this.out.action.status = 'clearing out old plugins'
-    await fs.removeSync(path.join(this.userPlugins.userPluginsDir, 'node_modules'))
-    this.out.action.status = 'reinstalling plugins'
-    await this.userPlugins.yarn.exec()
+    await this.userPlugins.yarn.exec(['install', '--force'])
     this.out.action.stop()
     return true
   }

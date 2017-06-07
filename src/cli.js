@@ -11,7 +11,7 @@ import Analytics from './analytics'
 import Updater from './updater'
 import NotFound from './not_found'
 
-import MigrateV5Plugins from './migrator'
+import MigrateV5Plugins from './plugins/migrator'
 
 import Help from './commands/help'
 
