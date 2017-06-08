@@ -7,7 +7,8 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - set PATH=%LOCALAPPDATA%\Yarn\bin;%PATH%
+  - set PATH=%LOCALAPPDATA%\Yarn\config\global\node_modules\.bin;%PATH%
+  - echo %PATH%
   - yarn global add yarn
   - where yarn
   - yarn
