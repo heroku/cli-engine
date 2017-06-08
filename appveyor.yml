@@ -11,7 +11,8 @@ install:
   - echo %PATH%
   - yarn global add yarn
   - where yarn
-  - yarn
+  - yarn --version
+  - exit
   - yarn run prepare
   - git submodule sync
   - git submodule update --init --recursive --remote
