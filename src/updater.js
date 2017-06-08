@@ -246,7 +246,7 @@ export default class Updater {
   }
 
   base (manifest: Manifest): string {
-    return `${this.config.name}-v${manifest.version}-${process.platform}-${process.arch}`
+    return `${this.config.name}-v${manifest.version}-${this.config.platform}-${this.config.arch}`
   }
 
   async restartCLI () {
