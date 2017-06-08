@@ -11,7 +11,6 @@ install:
   - set PATH=%LOCALAPPDATA%\Yarn\config\global\node_modules\.bin;%PATH%
   - yarn global add yarn
   - yarn
-  - yarn run prepare
   - git submodule sync
   - git submodule update --init --recursive --remote
 test_script:
