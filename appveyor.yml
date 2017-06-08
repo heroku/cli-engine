@@ -5,6 +5,7 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
+  - yarn global add yarn
   - yarn
   - yarn run prepare
   - git submodule sync
