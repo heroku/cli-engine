@@ -1,5 +1,6 @@
 environment:
   nodejs_version: "7"
+  APPVEYOR_CACHE_SKIP_RESTORE: "true"
 cache:
   - C:\Users\appveyor\AppData\Local\Yarn -> appveyor.yml
   - node_modules -> package.json
