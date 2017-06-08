@@ -76,8 +76,36 @@ describe('warnIfUpdateAvailable', () => {
 })
 
 describe('fetchManifest', () => {
+  describe('windows-x86', () => {
+    beforeEach(() => {
+      updater.config.platform = 'windows'
+      updater.config.arch = 'x64'
+    })
+
+    it('gets the manifest from the API', async () => {
+      assets.get(`/cli-engine/channels/stable/windows-x64`)
+        .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
+      let v = await updater.fetchManifest('stable')
+      expect(v.version).toEqual('1.2.3-b2ea476')
+    })
+  })
+
+  describe('linux-x64', () => {
+    beforeEach(() => {
+      updater.config.platform = 'linux'
+      updater.config.arch = 'x86'
+    })
+
+    it('gets the manifest from the API', async () => {
+      assets.get(`/cli-engine/channels/stable/linux-x86`)
+        .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
+      let v = await updater.fetchManifest('stable')
+      expect(v.version).toEqual('1.2.3-b2ea476')
+    })
+  })
+
   it('gets the manifest from the API', async () => {
-    assets.get(`/cli-engine/channels/stable/${process.platform}-${process.arch}`)
+    assets.get(`/cli-engine/channels/stable/${updater.config.platform}-${updater.config.arch}`)
       .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
     let v = await updater.fetchManifest('stable')
     expect(v.version).toEqual('1.2.3-b2ea476')
@@ -85,7 +113,7 @@ describe('fetchManifest', () => {
 
   it('errors on 403', async () => {
     expect.assertions(1)
-    assets.get(`/cli-engine/channels/invalid/${process.platform}-${process.arch}`)
+    assets.get(`/cli-engine/channels/invalid/${updater.config.platform}-${updater.config.arch}`)
       .reply(403)
     try {
       await updater.fetchManifest('invalid')

@@ -61,7 +61,7 @@ if [ ! -f $WORKSPACE/node_modules/cli-engine/lib/cli.js ]; then
 fi
 
 # install node
-if [ $OS == win32 ]; then
+if [ "$OS" == win32 ] || [ "$OS" == windows ]; then
   NODE_BASE=node-v$NODE_VERSION-win-$ARCH
   if [ ! -f $ROOT/tmp/cache/$NODE_BASE.7z ]; then
     URL=https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-win-$ARCH.7z
@@ -84,7 +84,7 @@ else
 fi
 
 # create bin runner
-if [ $OS == "win32" ]; then
+if [ "$OS" == win32 ] || [ "$OS" == windows ]; then
   cat << EOF > $WORKSPACE/bin/$BIN.cmd
 @echo off
 set CLI_BINPATH=%~dp0\\$BIN.cmd

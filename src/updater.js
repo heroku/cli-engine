@@ -55,7 +55,7 @@ export default class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      return await this.http.get(this.s3url(channel, `${process.platform}-${process.arch}`))
+      return await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
@@ -223,7 +223,7 @@ export default class Updater {
     this.out.debug(`rename ${src} to ${dst}`)
     // moveSync tries to do a rename first then falls back to copy & delete
     // on windows the delete would error on node.exe so we explicitly rename
-    let rename = (this.config.windows) ? fs.renameSync : fs.moveSync
+    let rename = this.config.windows ? fs.renameSync : fs.moveSync
     rename(src, dst)
   }
 
