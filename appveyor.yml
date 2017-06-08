@@ -9,9 +9,7 @@ install:
   - ps: Install-Product node $env:nodejs_version x64
   - yarn global add yarn
   - yarn global bin
-  - dir %LOCALAPPDATA%\Yarn\config
-  - dir %LOCALAPPDATA%\Yarn\config\global
-  - set PATH=C:\Program Files\nodejs;%PATH%
+  - set PATH=%LOCALAPPDATA%\Yarn\bin;%PATH%
   - yarn
   - yarn run prepare
   - git submodule sync
