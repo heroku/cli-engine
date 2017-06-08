@@ -7,10 +7,10 @@ cache:
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
+  - yarn global add yarn --verbose
   - yarn global bin
-  - dir %LOCALAPPDATA%\Yarn\bin
-  - set PATH=%LOCALAPPDATA%\Yarn\bin;%PATH%
-  - yarn global add yarn
+  - dir C:\Program Files\nodejs
+  - set PATH=C:\Program Files\nodejs;%PATH%
   - yarn
   - yarn run prepare
   - git submodule sync
