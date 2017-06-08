@@ -1,12 +1,13 @@
 environment:
   nodejs_version: "7"
 cache:
- - "%LOCALAPPDATA%\\Yarn"
+ #- "%LOCALAPPDATA%\\Yarn"
  - node_modules
  - yarn
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
+  - yarn global bin
   - dir %LOCALAPPDATA%\Yarn\bin
   - set PATH=%LOCALAPPDATA%\Yarn\bin;%PATH%
   - yarn global add yarn
