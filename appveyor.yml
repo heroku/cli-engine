@@ -1,9 +1,9 @@
 environment:
   nodejs_version: "7"
 cache:
-  #- %LOCALAPPDATA%\\Yarn -> appveyor.yml
+  #- %LOCALAPPDATA%\\Yarn
   - node_modules -> package.json
-  - yarn -> appveyor.yml
+  - yarn
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
