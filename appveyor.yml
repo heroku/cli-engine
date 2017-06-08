@@ -1,14 +1,15 @@
 environment:
   nodejs_version: "7"
 cache:
- - "%LOCALAPPDATA%\\Yarn"
- - node_modules -> package.json
- - yarn
+  #- "%LOCALAPPDATA%\\Yarn"
+  #- node_modules -> package.json
+  #- yarn
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - set PATH=%LOCALAPPDATA%\Yarn\bin;%PATH%
   - yarn global add yarn
+  - where yarn
   - yarn
   - yarn run prepare
   - git submodule sync
