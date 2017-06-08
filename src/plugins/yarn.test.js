@@ -189,13 +189,9 @@ describe('with checkForYarnLock stubbed out', () => {
     })
   })
 
-  describe('win32', () => {
-    let platform = process.platform
+  describe('windows', () => {
     beforeEach(() => {
-      process.platform = 'win32'
-    })
-    afterEach(() => {
-      process.platform = platform
+      yarn.config.windows = true
     })
 
     test('finds path case insensitively', () => {

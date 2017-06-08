@@ -30,7 +30,7 @@ function analyticsJson () {
 function build (options = {}) {
   let config = options.config || buildConfig({
     version: '1.2.3',
-    platform: 'win32',
+    platform: 'windows',
     skipAnalytics: false,
     install: '5a8ef179-1129-4f81-877c-662c89f83f1f',
     name: 'cli-engine'
@@ -258,7 +258,7 @@ describe('AnalyticsCommand', () => {
       let expected = analyticsJson()
       expected.commands.push({
         'command': 'fuzz:fizz',
-        'os': 'win32',
+        'os': 'windows',
         'shell': 'cmd.exe',
         'plugin': 'fuzz',
         'plugin_version': '9.8.7',
@@ -284,7 +284,7 @@ describe('AnalyticsCommand', () => {
         schema: 1,
         commands: [{
           'command': 'fuzz:fizz',
-          'os': 'win32',
+          'os': 'windows',
           'shell': 'cmd.exe',
           'plugin': 'fuzz',
           'plugin_version': '9.8.7',
@@ -311,7 +311,7 @@ describe('AnalyticsCommand', () => {
         schema: 1,
         commands: [{
           'command': 'fuzz:fizz',
-          'os': 'win32',
+          'os': 'windows',
           'shell': 'cmd.exe',
           'plugin': 'fuzz',
           'plugin_version': '9.8.7',

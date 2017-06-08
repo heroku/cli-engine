@@ -28,7 +28,7 @@ export default class Yarn {
     let pathKey = 'PATH'
 
     // windows calls its path "Path" usually, but this is not guaranteed.
-    if (process.platform === 'win32') {
+    if (this.config.windows) {
       pathKey = 'Path'
       for (const key in env) {
         if (key.toLowerCase() === 'path') {
