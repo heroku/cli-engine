@@ -1,9 +1,8 @@
 // @flow
 
-import Command, {type Arg, type Flag} from 'cli-engine-command'
-import Heroku from 'cli-engine-heroku/lib/api_client'
+import {type Arg, type Flag} from 'cli-engine-command'
+import {Command, flags as Flags} from 'cli-engine-heroku'
 import vars from 'cli-engine-heroku/lib/vars'
-import {flags as Flags} from 'cli-engine-heroku'
 
 export type LegacyContext = {
   supportsColor: boolean
@@ -38,7 +37,7 @@ export type LegacyCommand = {
   run: (ctx: LegacyContext) => Promise<any>
 }
 
-export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
+export function convertFromV5 (c: LegacyCommand) {
   if (!c.topic) throw new Error('command has no topic')
   class V5 extends Command {
     static topic = c.topic
@@ -51,10 +50,7 @@ export function convertFromV5 (c: LegacyCommand): Class<Command<*>> {
     static help = c.help
     static usage = c.usage
 
-    heroku: Heroku
-
     run () {
-      this.heroku = new Heroku(this.out, {required: false})
       let flags: any = this.flags
       let args: (string[] | {[k: string]: string}) = this.argv
       if (!c.variableArgs) {
