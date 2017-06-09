@@ -16,12 +16,14 @@ jest.mock('./plugins/update', () => {
 
 const mockUpdate = jest.fn()
 const mockFetchVersion = jest.fn()
+const mockAutoupdate = jest.fn()
 
 jest.mock('../updater', () => {
   return class {
     fetchManifest () { return mockManifest }
     fetchVersion = mockFetchVersion
     update = mockUpdate
+    autoupdate = mockAutoupdate
   }
 })
 
@@ -54,10 +56,11 @@ describe('with update available', () => {
     mockManifest.version = '1.0.1'
     const cmd = await Update.run({mock: true, config: {version, channel}})
     expect(cmd.out.stdout.output).toEqual('')
-    expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI...
+    expect(cmd.out.stderr.output).toContain(`cli-engine: Updating CLI...
 cli-engine: Updating CLI to 1.0.1... done
 `)
     expect(mockUpdate).toBeCalled()
+    expect(mockAutoupdate).toBeCalled()
     expect(PluginsUpdate.run).toBeCalled()
     expect(mockFetchVersion).toBeCalled()
   })

@@ -25,6 +25,12 @@ export default class Update extends Command {
         this.out.action.start(`${this.config.name}: Updating CLI to ${this.out.color.green(manifest.version)}${channel === 'stable' ? '' : ' (' + this.out.color.yellow(channel) + ')'}`)
         await this.updater.update(manifest)
         this.out.action.stop()
+        try {
+          await this.updater.autoupdate(true)
+          this.out.exit(0)
+        } catch (err) {
+          this.out.warn(err, 'post-install autoupdate failed')
+        }
       }
     }
     await this.updater.fetchVersion(this.config.channel, 1)
