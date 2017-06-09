@@ -71,7 +71,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     topics = topics.map(t => (
       [
         t.topic,
-        this.out.color.gray(t.description)
+        t.description ? this.out.color.gray(t.description) : null
       ]
     ))
     this.out.log(renderList(topics))
@@ -87,7 +87,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
         this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
           [
             t.topic,
-            this.out.color.gray(t.description)
+            t.description ? this.out.color.gray(t.description) : null
           ]
       ))))
       }
