@@ -50,13 +50,13 @@ test('errors when command not found', async function () {
 describe('edge cases', () => {
   test('shows help for `help` command itself', async function () {
     let cli = await run('help')
-    expect(cli.cmd.out.stdout.output).toMatch(/^Usage: cli-engine COMMAND/)
+    expect(cli.cmd.out.stdout.output).toMatch(/Usage: cli-engine COMMAND/)
   })
 })
 
 describe('cli help', () => {
   describe('global help', () => {
-    let globalHelpOutput = /^Usage: \S+ COMMAND \[--app APP] \[command-specific-options]$/m
+    let globalHelpOutput = /^Usage: \S+ COMMAND/m
 
     test('shows help when no arguments given', async function () {
       let cli = await run()
@@ -77,22 +77,34 @@ describe('cli help', () => {
   })
 
   describe('--help & -h flags', () => {
-    let pluginsHelpOutput = `Usage: cli-engine plugins
+    let pluginsHelpOutput = `
+Usage: cli-engine plugins [flags]
 
- --core
+list installed plugins
 
-cli-engine plugins commands: (cli-engine help plugins:COMMAND for details)
+Flags:
+ --core  show core plugins
 
- plugins
- plugins:install PLUGIN   # installs a plugin into the CLI
- plugins:link [PATH]
- plugins:uninstall PLUGIN
- plugins:update
+Example:
+    $ heroku plugins
+    heroku-ci 1.8.0
+    heroku-cli-status 3.0.10 (link)
+    heroku-fork 4.1.22
+
+cli-engine plugins commands:
+ plugins                   list installed plugins
+ plugins:install PLUGIN    installs a plugin into the CLI
+ plugins:link [PATH]       links a local plugin to the CLI for development
+ plugins:uninstall PLUGIN  uninstalls or unlinks a plugin
+ plugins:update            updates installed plugins
 
 `
-    let pluginsInstallHelpOutput = `Usage: cli-engine plugins:install PLUGIN
+    let pluginsInstallHelpOutput = `
+Usage: cli-engine plugins:install PLUGIN
 
 installs a plugin into the CLI
+
+PLUGIN  plugin to install
 
 Example:
     $ heroku plugins:install heroku-production-status

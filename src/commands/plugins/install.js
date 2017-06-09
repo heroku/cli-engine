@@ -12,7 +12,7 @@ export default class PluginsInstall extends Command {
     $ heroku plugins:install heroku-production-status
   `
   static args = [
-    {name: 'plugin'}
+    {name: 'plugin', description: 'plugin to install'}
   ]
   plugins: Plugins
 
