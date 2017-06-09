@@ -27,8 +27,8 @@ function renderList (items: [string, ?string][]): string {
         let right = i[1]
         if (!right) return left
         left = `${S(trimCmd(left, maxLeftLength)).padRight(maxLeftLength)}`
-        right = linewrap(maxLeftLength, right)
-        return `${left} # ${right}`
+        right = linewrap(maxLeftLength + 2, right)
+        return `${left}  ${right}`
       }).join('\n')
 }
 
@@ -61,12 +61,19 @@ export default class Help extends Command {
   }
 
   topics () {
-    this.out.log(`Usage: ${this.config.bin} COMMAND [--app APP] [command-specific-options]
+    let color = this.out.color
+    this.out.log(`
+${color.bold('Usage:')} ${this.config.bin} COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
     let topics = this.plugins.topics.filter(t => !t.hidden)
     topics.sort(compare('topic'))
-    topics = topics.map(t => [t.topic, t.description])
+    topics = topics.map(t => (
+      [
+        t.topic,
+        this.out.color.gray(t.description)
+      ]
+    ))
     this.out.log(renderList(topics))
     this.out.log()
   }
@@ -76,14 +83,21 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     this.out.log(`Usage: ${this.config.bin} ${namespace}:TOPIC\n`)
     for (var i = 0; i < plugins.length; i++) {
       let plugin = plugins[i]
-      if (plugin.topics) this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => [t.topic, t.description])))
+      if (plugin.topics) {
+        this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
+          [
+            t.topic,
+            this.out.color.gray(t.description)
+          ]
+      ))))
+      }
     }
   }
 
   listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
-    this.out.log(`${this.config.bin} ${topic} commands: (${this.out.color.cmd(this.config.bin + ' help ' + topic + ':COMMAND')} for details)\n`)
+    this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands:`)
     this.out.log(renderList(commands.map(c => c.buildHelpLine(this.config))))
     this.out.log()
   }

@@ -108,7 +108,7 @@ describe('CLI bin \'cli-engine\'', () => {
           expect(err.message).toEqual('command debug not found')
         }
         let help = await run('help', 'heroku')
-        expect(help.out.stdout.output).toMatch(/^ +heroku:debug # CLI debugging tools$/m)
+        expect(help.out.stdout.output).toMatch(/^ +heroku:debug +CLI debugging tools$/m)
         await run('plugins:uninstall', 'heroku-debug')
       })
     })

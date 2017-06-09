@@ -628,15 +628,15 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-5.0.3.tgz#db682e34f5b21efc78c143755953037f56611ea1"
+cli-engine-command@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-5.1.0.tgz#9cc9aa41fbc2012bbc5fa382bf998dd5e51eba53"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
     chalk "1.x"
     fs-extra "3.x"
-    http-call "2.0.0"
+    http-call "^2.1.0"
     lodash.maxby "4.x"
     lodash.merge "4.x"
     string "3.x"
@@ -1694,11 +1694,12 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-2.0.0.tgz#692414ec30ceba12367692816ab99d971445ecda"
+http-call@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-2.1.0.tgz#d9da1a50a8561d6e9dc8262493a17317af957f2e"
   dependencies:
     debug "^2.6.8"
+    is-retry-allowed "^1.1.0"
     tunnel-agent "^0.6.0"
 
 http-signature@~1.1.0:
@@ -1939,7 +1940,7 @@ is-resolvable@^1.0.0:
   dependencies:
     tryit "^1.0.1"
 
-is-retry-allowed@^1.0.0:
+is-retry-allowed@^1.0.0, is-retry-allowed@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/is-retry-allowed/-/is-retry-allowed-1.1.0.tgz#11a060568b67339444033d0125a61a20d564fb34"
 
