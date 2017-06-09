@@ -267,10 +267,10 @@ export default class Updater {
     }
   }
 
-  async autoupdate () {
+  async autoupdate (force: boolean = false) {
     try {
       await this.warnIfUpdateAvailable()
-      if (!this.autoupdateNeeded) return
+      if (!force && !this.autoupdateNeeded) return
       fs.outputFileSync(this.autoupdatefile, '')
       await this.checkIfUpdating()
       let fd = fs.openSync(this.autoupdatelogfile, 'a')

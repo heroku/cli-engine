@@ -77,8 +77,7 @@ describe('cli help', () => {
   })
 
   describe('--help & -h flags', () => {
-    let pluginsHelpOutput = `
-Usage: cli-engine plugins [flags]
+    let pluginsHelpOutput = `Usage: cli-engine plugins [flags]
 
 list installed plugins
 
@@ -99,8 +98,7 @@ cli-engine plugins commands:
  plugins:update            updates installed plugins
 
 `
-    let pluginsInstallHelpOutput = `
-Usage: cli-engine plugins:install PLUGIN
+    let pluginsInstallHelpOutput = `Usage: cli-engine plugins:install PLUGIN
 
 installs a plugin into the CLI
 

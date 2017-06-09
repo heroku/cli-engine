@@ -62,8 +62,7 @@ export default class Help extends Command {
 
   topics () {
     let color = this.out.color
-    this.out.log(`
-${color.bold('Usage:')} ${this.config.bin} COMMAND
+    this.out.log(`${color.bold('Usage:')} ${this.config.bin} COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
     let topics = this.plugins.topics.filter(t => !t.hidden)
