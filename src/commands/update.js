@@ -22,7 +22,8 @@ export default class Update extends Command {
       if (this.config.version === manifest.version && channel === this.config.channel) {
         this.out.action.stop(`already on latest version: ${this.config.version}`)
       } else {
-        this.out.action.start(`${this.config.name}: Updating CLI to ${this.out.color.green(manifest.version)}${channel === 'stable' ? '' : ' (' + this.out.color.yellow(channel) + ')'}`)
+        let {yellow, green} = this.out.color
+        this.out.action.start(`${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(manifest.version)}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`)
         await this.updater.update(manifest)
         this.out.action.stop()
         try {

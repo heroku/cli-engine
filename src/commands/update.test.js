@@ -57,8 +57,7 @@ describe('with update available', () => {
     const cmd = await Update.run({mock: true, config: {version, channel}})
     expect(cmd.out.stdout.output).toEqual('')
     expect(cmd.out.stderr.output).toContain(`cli-engine: Updating CLI...
-cli-engine: Updating CLI to 1.0.1... done
-`)
+cli-engine: Updating CLI from 1.0.0 to 1.0.1... done`)
     expect(mockUpdate).toBeCalled()
     expect(mockAutoupdate).toBeCalled()
     expect(PluginsUpdate.run).toBeCalled()
