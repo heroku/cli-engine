@@ -47,11 +47,6 @@ function release {
   aws s3 cp --cache-control max-age=86400 "tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz" "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz"
   aws s3 cp --cache-control max-age=3600 "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz" "$remote_base/$NAME-$PLATFORM.tar.gz"
   aws s3 cp --cache-control max-age=3600 --content-type application/json "tmp/build/$PLATFORM" "$remote_base/$PLATFORM"
-
-  # invalidate CDN
-  if [ "$CLOUDFRONT_DISTRIBUTION" != "undefined" ]; then
-    aws cloudfront create-invalidation --distribution-id EHF9FOCUJYVZ --paths "/$remote_path/*"
-  fi
 }
 
 pids=""
@@ -82,8 +77,13 @@ cat << EOF > tmp/build/version
 }
 EOF
 
-aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/version "s3://$S3_BUCKET/$NAME/channels/$CHANNEL/version"
-
 if [ $RESULT -ne 0 ]; then
   exit $RESULT
+fi
+
+aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/version "s3://$S3_BUCKET/$NAME/channels/$CHANNEL/version"
+
+# invalidate CDN
+if [ "$CLOUDFRONT_DISTRIBUTION" != "undefined" ]; then
+  aws cloudfront create-invalidation --distribution-id EHF9FOCUJYVZ --paths "/$NAME/channels/$CHANNEL/*"
 fi
