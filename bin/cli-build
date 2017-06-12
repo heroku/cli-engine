@@ -65,7 +65,7 @@ if [ "$OS" == windows ]; then
   NODE_BASE=node-v$NODE_VERSION-win-$ARCH
   if [ ! -f $ROOT/tmp/cache/$NODE_BASE.7z ]; then
     URL=https://nodejs.org/dist/v$NODE_VERSION/node-v$NODE_VERSION-win-$ARCH.7z
-    curl -fSLo $ROOT/tmp/cache/$NODE_BASE.7z $URL
+    curl -fSsLo $ROOT/tmp/cache/$NODE_BASE.7z $URL
   fi
   cd $WORKSPACE
   7z x -bd -y $ROOT/tmp/cache/$NODE_BASE.7z > /dev/null
