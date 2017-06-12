@@ -40,7 +40,8 @@ CLOUDFRONT_DISTRIBUTION=$(node -p "require('./package.json')['cli-engine'].cloud
 
 function release {
   "$DIR/cli-build" "$PLATFORM" "$CHANNEL"
-  remote_base=s3://$S3_BUCKET/$NAME/channels/$CHANNEL
+  remote_path=$NAME/channels/$CHANNEL
+  remote_base=s3://$S3_BUCKET/$remote_path
   aws s3 cp --cache-control max-age=86400 "tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz" "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz"
   aws s3 cp --cache-control max-age=3600 "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz" "$remote_base/$NAME-$PLATFORM.tar.xz"
   aws s3 cp --cache-control max-age=86400 "tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz" "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz"
@@ -49,10 +50,7 @@ function release {
 
   # invalidate CDN
   if [ "$CLOUDFRONT_DISTRIBUTION" != "undefined" ]; then
-    aws cloudfront create-invalidation --distribution-id EHF9FOCUJYVZ --paths \
-      "$remote_base/$NAME-$PLATFORM.tar.xz" \
-      "$remote_base/$NAME-$PLATFORM.tar.gz" \
-      "$remote_base/$PLATFORM"
+    aws cloudfront create-invalidation --distribution-id EHF9FOCUJYVZ --paths "/$remote_path/*"
   fi
 }
 
