@@ -40,10 +40,10 @@ S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3.bucket"`
 function release {
   $DIR/cli-build $PLATFORM $CHANNEL
   remote_base=s3://$S3_BUCKET/$NAME/channels/$CHANNEL
-  aws s3 cp --cache-control max-age=86400 --content-type text/plain tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz
-  aws s3 cp --cache-control max-age=300 --content-type text/plain $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-$PLATFORM.tar.xz
-  aws s3 cp --cache-control max-age=86400 --content-type text/plain tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz
-  aws s3 cp --cache-control max-age=300 --content-type text/plain $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
+  aws s3 cp --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz
+  aws s3 cp --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-$PLATFORM.tar.xz
+  aws s3 cp --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz
+  aws s3 cp --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
   aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM $remote_base/$PLATFORM
 }
 
