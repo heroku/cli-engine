@@ -56,6 +56,7 @@ RESULT=0
 YARN_DIR="$ROOT/tmp/build/yarn"
 mkdir -p "$YARN_DIR"
 cp "$ROOT/package.json" "$YARN_DIR"
+cp "$ROOT/yarn.lock" "$YARN_DIR"
 cd "$YARN_DIR"
 yarn --production --prefer-offline
 cd "$ROOT"
