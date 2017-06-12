@@ -16,7 +16,7 @@ get_script_dir () {
 }
 DIR=$(get_script_dir)
 
-VERSION=`$DIR/version`
+VERSION=$("$DIR/version")
 
 PLATFORMS=(
   windows-x86
@@ -34,17 +34,26 @@ fi
 
 ROOT=$(pwd)
 CHANNEL=$1
-NAME=`node -p "require('./package.json').name"`
-S3_BUCKET=`node -p "require('./package.json')['cli-engine'].s3.bucket"`
+NAME=$(node -p "require('./package.json').name")
+S3_BUCKET=$(node -p "require('./package.json')['cli-engine'].s3.bucket")
+CLOUDFRONT_DISTRIBUTION=$(node -p "require('./package.json')['cli-engine'].cloudfront")
 
 function release {
-  $DIR/cli-build $PLATFORM $CHANNEL
+  "$DIR/cli-build" "$PLATFORM" "$CHANNEL"
   remote_base=s3://$S3_BUCKET/$NAME/channels/$CHANNEL
-  aws s3 cp --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz
-  aws s3 cp --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz $remote_base/$NAME-$PLATFORM.tar.xz
-  aws s3 cp --cache-control max-age=86400 tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz
-  aws s3 cp --cache-control max-age=300 $remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz $remote_base/$NAME-$PLATFORM.tar.gz
-  aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/$PLATFORM $remote_base/$PLATFORM
+  aws s3 cp --cache-control max-age=86400 "tmp/build/$NAME-v$VERSION-$PLATFORM.tar.xz" "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz"
+  aws s3 cp --cache-control max-age=3600 "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.xz" "$remote_base/$NAME-$PLATFORM.tar.xz"
+  aws s3 cp --cache-control max-age=86400 "tmp/build/$NAME-v$VERSION-$PLATFORM.tar.gz" "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz"
+  aws s3 cp --cache-control max-age=3600 "$remote_base/$NAME-v$VERSION-$PLATFORM.tar.gz" "$remote_base/$NAME-$PLATFORM.tar.gz"
+  aws s3 cp --cache-control max-age=3600 --content-type application/json "tmp/build/$PLATFORM" "$remote_base/$PLATFORM"
+
+  # invalidate CDN
+  if [ "$CLOUDFRONT_DISTRIBUTION" != "undefined" ]; then
+    aws cloudfront create-invalidation --distribution-id EHF9FOCUJYVZ --paths \
+      "$remote_base/$NAME-$PLATFORM.tar.xz" \
+      "$remote_base/$NAME-$PLATFORM.tar.gz" \
+      "$remote_base/$PLATFORM"
+  fi
 }
 
 pids=""
@@ -65,7 +74,7 @@ for PLATFORM in "${PLATFORMS[@]}"; do
 done
 
 for pid in $pids; do
-  wait $pid || let "RESULT=1"
+  wait "$pid" || let "RESULT=1"
 done
 
 cat << EOF > tmp/build/version
