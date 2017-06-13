@@ -67,7 +67,7 @@ export default class Main {
       this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
     } else {
       debug('finding command')
-      let Command = plugins.findCommand(this.argv[1] || this.config.defaultCommand)
+      let Command = await plugins.findCommand(this.argv[1] || this.config.defaultCommand)
       if (!Command) return new NotFound(out, this.argv).run()
       debug('out.done()')
       await out.done()

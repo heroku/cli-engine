@@ -51,12 +51,12 @@ export default class Help extends Command {
     await this.plugins.load()
     let cmd = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!cmd) return this.topics()
-    const topic = this.plugins.findTopic(cmd)
-    let matchedCommand = this.plugins.findCommand(cmd)
+    const topic = await this.plugins.findTopic(cmd)
+    let matchedCommand = await this.plugins.findCommand(cmd)
     let matchedNamespace = this.plugins.findNamespaced(cmd)
     if (!topic && !matchedCommand && !matchedNamespace.length) throw new Error(`command ${cmd} not found`)
     if (matchedCommand) this.out.log(matchedCommand.buildHelp(this.config))
-    if (topic && this.argv.slice(0, 2).includes(topic.topic)) this.listCommandsHelp(topic.topic, this.plugins.commandsForTopic(topic.topic))
+    if (topic && this.argv.slice(0, 2).includes(topic.topic)) this.listCommandsHelp(topic.topic, await this.plugins.commandsForTopic(topic.topic))
     let numNamespaced = matchedNamespace.length
     if (!matchedCommand && numNamespaced) this.listNamespaceHelp(matchedNamespace)
   }

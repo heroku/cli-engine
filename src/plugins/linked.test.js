@@ -1,4 +1,4 @@
-/* globals test expect beforeEach afterEach */
+// @flow
 
 import {buildConfig} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
@@ -44,8 +44,8 @@ test('linked plugin should be cached', async () => {
   let plugins = new Plugins(output)
   await plugins.load()
 
-  let FooCore = plugins.findCommand('foo')
-  expect(FooCore.description).toBe('core')
+  let FooCore = await plugins.findCommand('foo')
+  expect(FooCore).toHaveProperty('description', 'core')
 
   let corePath = path.normalize(path.join(root, 'node_modules', 'test-foo'))
 
@@ -57,8 +57,8 @@ test('linked plugin should be cached', async () => {
 
   plugins = new Plugins(output)
   await plugins.load()
-  let FooLinked = plugins.findCommand('foo')
-  expect(FooLinked.description).toBe('link')
+  let FooLinked = await plugins.findCommand('foo')
+  expect(FooLinked).toHaveProperty('description', 'link')
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   let cached = pluginsJson['plugins'][linkPath]
@@ -92,8 +92,8 @@ test('linked plugin should be cached', async () => {
 
   plugins = new Plugins(output)
   await plugins.load()
-  FooCore = plugins.findCommand('foo')
-  expect(FooCore.description).toBe('core')
+  FooCore = await plugins.findCommand('foo')
+  expect(FooCore).toHaveProperty('description', 'core')
 })
 
 test('linked plugin prepare should clear cache', async () => {
@@ -114,8 +114,8 @@ test('linked plugin prepare should clear cache', async () => {
 
   plugins = new Plugins(output)
   await plugins.load()
-  let FooLinked = plugins.findCommand('foo')
-  expect(FooLinked.description).toBe('link')
+  let FooLinked = await plugins.findCommand('foo')
+  expect(FooLinked).toHaveProperty('description', 'link')
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   let cached = pluginsJson['plugins'][linkPath]
