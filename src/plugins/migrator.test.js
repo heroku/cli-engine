@@ -28,7 +28,7 @@ afterEach(() => {
   tmpDir.clean()
 })
 
-test.skip('plugins should be reloaded if migrated', async () => {
+test('plugins should be reloaded if migrated', async () => {
   let dataDir = tmpDir.dataDir
 
   let src = path.join(__dirname, '..', '..', 'test', 'links', 'test-migrator')

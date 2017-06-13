@@ -30,7 +30,6 @@ export default class {
     debug('has existing plugins')
     this.out.action.start('Migrating Heroku CLI v5 plugins')
     debug('removing existing node_modules')
-    await this.rimraf(path.join(this.userPlugins.userPluginsDir, 'node_modules'))
     for (let p of pljson) {
       if (this.plugins.isPluginInstalled(p.name)) {
         debug(`Skipping already installed plugin: ${p.name}`)
@@ -71,12 +70,5 @@ export default class {
     debug(`Installing via symlink: ${name}`)
     let pluginPath = fs.realpathSync(this.userPlugins.userPluginPath(name))
     await this.plugins.addLinkedPlugin(pluginPath)
-  }
-
-  async rimraf (d: string) {
-    debug(`rimraf ${d}`)
-    return new Promise((resolve, reject) => {
-      require('rimraf')(d, err => err ? reject(err) : resolve())
-    })
   }
 }
