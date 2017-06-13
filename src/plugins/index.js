@@ -11,8 +11,18 @@ import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './cache'
 import Namespaces from '../namespaces'
+import Lock from '../lock'
 
 export default class Plugins {
+  builtin: BuiltinPlugins
+  linked: LinkedPlugins
+  user: UserPlugins
+  core: CorePlugins
+  plugins: Plugin[]
+  cache: Cache
+  out: Output
+  lock: Lock
+
   constructor (output: Output) {
     this.out = output
     this.config = output.config
@@ -22,6 +32,7 @@ export default class Plugins {
     this.linked = new LinkedPlugins(this)
     this.user = new UserPlugins(this)
     this.core = new CorePlugins(this)
+    this.lock = new Lock(this.out)
 
     this.plugins = this.cache.fetchManagers(
       this.builtin,
@@ -30,14 +41,6 @@ export default class Plugins {
       this.core
     )
   }
-
-  builtin: BuiltinPlugins
-  linked: LinkedPlugins
-  user: UserPlugins
-  core: CorePlugins
-  plugins: Plugin[]
-  cache: Cache
-  out: Output
 
   get commands (): CachedCommand[] {
     let commands = []
@@ -95,21 +98,26 @@ export default class Plugins {
   }
 
   async install (name: string, tag: string = 'latest') {
+    let downgrade = await this.lock.upgrade()
     if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
     let path = await this.user.install(name, tag)
     this.clearCache(path)
+    await downgrade()
   }
 
   async update () {
     if (this.user.list().length === 0) return
     this.out.action.start(`${this.config.name}: Updating plugins`)
+    let downgrade = await this.lock.upgrade()
     await this.user.update()
     this.clearCache(...this.user.list().map(p => p.path))
+    await downgrade()
   }
 
   async uninstall (name: string) {
     let plugin = this.plugins.filter(p => ['user', 'link'].includes(p.type)).find(p => p.name === name)
     if (!plugin) throw new Error(`${name} is not installed`)
+    let downgrade = await this.lock.upgrade()
     switch (plugin.type) {
       case 'user': {
         if (!this.config.debug) this.out.action.start(`Uninstalling plugin ${name}`)
@@ -123,6 +131,7 @@ export default class Plugins {
       }
     }
     this.clearCache(plugin.path)
+    await downgrade()
     this.out.action.stop()
   }
 
@@ -131,6 +140,7 @@ export default class Plugins {
   }
 
   async addLinkedPlugin (p: string) {
+    let downgrade = await this.lock.upgrade()
     let name = this.linked.checkLinked(p)
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
@@ -139,6 +149,7 @@ export default class Plugins {
 
     await this.linked.add(p)
     this.clearCache(p)
+    await downgrade()
   }
 
   async refreshLinkedPlugins () {

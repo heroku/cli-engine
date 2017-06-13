@@ -82,7 +82,7 @@ test('linked plugin should be cached', async () => {
     'version': '0.0.0'
   })
 
-  plugins.uninstall('test-foo')
+  await plugins.uninstall('test-foo')
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()

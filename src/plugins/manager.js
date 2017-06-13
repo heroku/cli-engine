@@ -64,25 +64,25 @@ export class PluginPath {
     if (!plugin.commands) throw new Error('no commands found')
 
     const commands: CachedCommand[] = plugin.commands
-    .map(c => ({
-      id: c.command ? `${c.topic}:${c.command}` : c.topic,
-      topic: c.topic,
-      command: c.command,
-      description: c.description,
-      args: c.args,
-      variableArgs: c.variableArgs,
-      help: c.help,
-      usage: c.usage,
-      hidden: !!c.hidden,
-      aliases: getAliases(c),
-      flags: convertFlagsFromV5(c.flags)
-    }))
+      .map(c => ({
+        id: c.command ? `${c.topic}:${c.command}` : c.topic,
+        topic: c.topic,
+        command: c.command,
+        description: c.description,
+        args: c.args,
+        variableArgs: c.variableArgs,
+        help: c.help,
+        usage: c.usage,
+        hidden: !!c.hidden,
+        aliases: getAliases(c),
+        flags: convertFlagsFromV5(c.flags)
+      }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
-    .map(t => ({
-      topic: t.topic || t.name || '',
-      description: t.description,
-      hidden: !!t.hidden
-    }))
+      .map(t => ({
+        topic: t.topic || t.name || '',
+        description: t.description,
+        hidden: !!t.hidden
+      }))
 
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue

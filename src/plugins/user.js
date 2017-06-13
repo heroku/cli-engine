@@ -4,7 +4,6 @@ import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 
 import path from 'path'
-import lock from 'rwlockfile'
 import fs from 'fs-extra'
 
 import {Manager, PluginPath} from './manager'
@@ -56,7 +55,6 @@ export default class UserPlugins extends Manager {
   }
 
   async install (name: string, tag: string = 'latest') {
-    let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.setupUserPlugins()
     this.addPackageToPJSON(name, tag)
     try {
@@ -66,10 +64,8 @@ export default class UserPlugins extends Manager {
       // flow$ignore
       let plugin = require(path)
       if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)
-      await unlock()
       return path
     } catch (err) {
-      await unlock()
       this.removePackageFromPJSON(name)
       this.out.error(err)
       throw new Error('unreachable')
@@ -82,9 +78,7 @@ export default class UserPlugins extends Manager {
   }
 
   async remove (name: string) {
-    let unlock = await lock.write(this.lockfile, {skipOwnPid: true})
     await this.yarn.exec(['remove', name])
-    await unlock()
   }
 
   addPackageToPJSON (name: string, version: string = '*') {

@@ -124,7 +124,7 @@ export default class LinkedPlugins extends Manager {
   }
 
   _save () {
-    fs.writeJSONSync(this.file, this._data, {spaces: 2})
+    fs.outputJsonSync(this.file, this._data, {spaces: 2})
   }
 
   _needsInstall (p: string): boolean {
@@ -142,8 +142,8 @@ export default class LinkedPlugins extends Manager {
       noRecurseOnFailedFilter: true,
       filter: f => !['.git', 'node_modules', 'flow-typed'].includes(path.basename(f.path))
     })
-    .filter(f => f.path.endsWith('.js'))
-    .find(f => f.stats.mtime > this._data.updated_at)
+      .filter(f => f.path.endsWith('.js'))
+      .find(f => f.stats.mtime > this._data.updated_at)
   }
 
   async _install (p: string) {
