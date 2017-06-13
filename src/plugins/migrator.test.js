@@ -2,6 +2,8 @@
 
 import {tmpDirs} from '../../test/helpers'
 import CLI from '../cli'
+import Plugins from '../plugins'
+
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -46,4 +48,36 @@ test.skip('plugins should be reloaded if migrated', async () => {
   }
 
   expect(mockYarnExec).toBeCalledWith(['install', '--force'])
+})
+
+test('linked core plugins should be migrated', async () => {
+  if (process.platform === 'win32') {
+    return
+  }
+
+  let dataDir = tmpDir.dataDir
+
+  let testDir = path.join(path.dirname(__filename), '..', '..', 'test')
+  let src = path.normalize(path.join(testDir, 'links', 'test-migrator'))
+  fs.mkdirsSync(path.join(dataDir, 'plugins'))
+
+  let dst = path.join(dataDir, 'plugins', 'node_modules', 'test-migrator')
+  fs.mkdirsSync(path.join(dataDir, 'plugins', 'node_modules'))
+  fs.symlinkSync(src, dst)
+
+  let json = [{name: 'test-migrator', tag: 'symlink'}]
+  fs.writeJSONSync(path.join(dataDir, 'plugins', 'plugins.json'), json)
+
+  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  try {
+    await cli.run()
+  } catch (err) {
+    if (err.code !== 0) throw err
+  }
+
+  let plugins = new Plugins(tmpDir.output)
+  await plugins.load()
+  let MigratorLinked = await plugins.findCommand('migrator')
+  expect(MigratorLinked).toBeDefined()
+  expect(MigratorLinked.description).toBe('link')
 })
