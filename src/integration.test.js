@@ -33,11 +33,25 @@ async function plugins (): Promise<string> {
   return index.out.stdout.output
 }
 
+let dir = console.dir
+let mockDir
+
+beforeEach(() => {
+  // flow$ignore
+  console.dir = mockDir = jest.fn()
+})
+
+afterEach(() => {
+  // flow$ignore
+  console.dir = dir
+})
+
 test('installs, runs, and uninstalls heroku-debug', async () => {
   await run('plugins:install', 'heroku-debug@4.0.0')
   await run('debug')
   await run('plugins:uninstall', 'heroku-debug')
   expect(await plugins()).not.toContain('heroku-debug')
+  expect(mockDir.mock.calls[0][0]).toMatchObject({context: {apiHost: 'api.heroku.com'}})
 })
 
 test('tries to install a non-existant tag', async () => {
