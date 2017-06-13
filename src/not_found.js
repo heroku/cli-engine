@@ -8,16 +8,17 @@ export default class NotFound {
   argv: string[]
   config: Config
   out: Output
+  plugins: Plugins
 
   constructor (output: Output, argv: string[]) {
     this.argv = argv
     this.out = output
     this.config = output.config
+    this.plugins = new Plugins(output)
   }
 
   allCommands (): string[] {
-    let plugins = new Plugins(this.out)
-    return plugins.commands.reduce((commands, c) => {
+    return this.plugins.commands.reduce((commands, c) => {
       return commands.concat([c.id]).concat(c.aliases || [])
     }, [])
   }
@@ -34,6 +35,7 @@ export default class NotFound {
   }
 
   async run () {
+    await this.plugins.load()
     let closest = this.closest(this.argv[1])
     let binHelp = `${this.config.bin} help`
 

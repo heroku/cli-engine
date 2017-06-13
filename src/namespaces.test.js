@@ -7,8 +7,8 @@ jest.unmock('fs-extra')
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 90000
 
-function runClosure (namespaces: ?(?string)[]) {
-  let tmpDir = tmpDirs({namespaces})
+async function runClosure (namespaces: ?(?string)[]) {
+  let tmpDir = await tmpDirs({namespaces})
   let fn = async function (...argv: string[]) {
     let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: tmpDir.config})
     try {
@@ -44,8 +44,8 @@ function runClosure (namespaces: ?(?string)[]) {
 describe('CLI bin \'cli-engine\'', () => {
   describe('CLI namespaces undefined OR null', () => {
     let run
-    beforeEach(() => {
-      run = runClosure()
+    beforeEach(async () => {
+      run = await runClosure()
     })
 
     afterEach(() => {
@@ -84,8 +84,8 @@ describe('CLI bin \'cli-engine\'', () => {
 
   describe('CLI namespaces [\'heroku\']', () => {
     let run
-    beforeEach(() => {
-      run = runClosure(['heroku'])
+    beforeEach(async () => {
+      run = await runClosure(['heroku'])
     })
 
     afterEach(() => {
@@ -99,6 +99,7 @@ describe('CLI bin \'cli-engine\'', () => {
         try {
           await run('debug')
         } catch (err) {
+          if (!err.code) throw err
           expect(err.code).toEqual(127)
         }
         await run('help', 'heroku:debug')

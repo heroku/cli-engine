@@ -11,7 +11,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 let tmpDir
 
 beforeEach(async () => {
-  tmpDir = tmpDirs()
+  tmpDir = await tmpDirs()
 })
 
 afterEach(async () => {

@@ -42,6 +42,7 @@ test('linked plugin should be cached', async () => {
   let config = buildConfig({root, cacheDir, dataDir, pjson})
   let output = new Output({config, mock: true})
   let plugins = new Plugins(output)
+  await plugins.load()
 
   let FooCore = plugins.findCommand('foo')
   expect(FooCore.description).toBe('core')
@@ -55,6 +56,7 @@ test('linked plugin should be cached', async () => {
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
   plugins = new Plugins(output)
+  await plugins.load()
   let FooLinked = plugins.findCommand('foo')
   expect(FooLinked.description).toBe('link')
 
@@ -89,6 +91,7 @@ test('linked plugin should be cached', async () => {
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
   plugins = new Plugins(output)
+  await plugins.load()
   FooCore = plugins.findCommand('foo')
   expect(FooCore.description).toBe('core')
 })
@@ -99,6 +102,7 @@ test('linked plugin prepare should clear cache', async () => {
   let config = buildConfig({root, cacheDir, dataDir, pjson})
   let output = new Output({config, mock: true})
   let plugins = new Plugins(output)
+  await plugins.load()
 
   let corePath = path.normalize(path.join(root, 'node_modules', 'test-foo'))
 
@@ -109,6 +113,7 @@ test('linked plugin prepare should clear cache', async () => {
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
   plugins = new Plugins(output)
+  await plugins.load()
   let FooLinked = plugins.findCommand('foo')
   expect(FooLinked.description).toBe('link')
 
@@ -140,7 +145,8 @@ test('linked plugin prepare should clear cache', async () => {
   let laterDate = new Date(new Date().getTime() + 3600)
   fs.utimesSync(path.join(linkPath, 'commands', 'foo', 'index.js'), laterDate, laterDate)
 
-  await plugins.refreshLinkedPlugins()
+  plugins.linked.loaded = false
+  await plugins.linked.load()
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()

@@ -7,6 +7,8 @@ import UserPlugins from './user'
 import path from 'path'
 import fs from 'fs-extra'
 
+const debug = require('debug')('cli-engine:migrator')
+
 export default class {
   plugins: Plugins
   userPlugins: UserPlugins
@@ -20,22 +22,27 @@ export default class {
     this.out = plugins.out
   }
 
-  async run (): Promise<boolean> {
-    if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return false
-    if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return false
+  async run () {
+    if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return
+    if (!fs.existsSync(path.join(this.userPlugins.userPluginsDir, 'plugins.json'))) return
     let pljson = await this._readPluginsJSON()
     if (!pljson) return false
+    debug('has existing plugins')
     this.out.action.start('Migrating Heroku CLI v5 plugins')
+    debug('removing existing node_modules')
+    await this.rimraf(path.join(this.userPlugins.userPluginsDir, 'node_modules'))
     for (let p of pljson) {
       if (this.plugins.isPluginInstalled(p.name)) {
-        this.out.debug(`Skipping already installed plugin: ${p.name}`)
+        debug(`Skipping already installed plugin: ${p.name}`)
       } else {
+        debug(`installing ${p.name}`)
         await this._installPlugin(p.name, p.tag)
       }
     }
     await this.userPlugins.yarn.exec(['install', '--force'])
+    this.plugins.loaded = false
+    await this.plugins.load()
     this.out.action.stop()
-    return true
   }
 
   async _readPluginsJSON () {
@@ -53,7 +60,7 @@ export default class {
         await this._reinstallViaSymlink(name)
       } else {
         if (tag === '') tag = 'latest'
-        await this._addToPJSON(name, tag)
+        await this.plugins.install(name)
       }
     } catch (err) {
       this.out.warn(err)
@@ -61,13 +68,15 @@ export default class {
   }
 
   async _reinstallViaSymlink (name: string) {
-    this.out.debug(`Installing via symlink: ${name}`)
+    debug(`Installing via symlink: ${name}`)
     let pluginPath = fs.realpathSync(this.userPlugins.userPluginPath(name))
     await this.plugins.addLinkedPlugin(pluginPath)
   }
 
-  async _addToPJSON (name: string, tag: string) {
-    this.out.debug(`Adding to plugins pjson: ${name}`)
-    this.plugins.addPackageToPJSON(name, tag)
+  async rimraf (d: string) {
+    debug(`rimraf ${d}`)
+    return new Promise((resolve, reject) => {
+      require('rimraf')(d, err => err ? reject(err) : resolve())
+    })
   }
 }

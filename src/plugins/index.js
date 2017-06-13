@@ -22,6 +22,7 @@ export default class Plugins {
   cache: Cache
   out: Output
   lock: Lock
+  loaded: boolean
 
   constructor (output: Output) {
     this.out = output
@@ -33,13 +34,17 @@ export default class Plugins {
     this.user = new UserPlugins(this)
     this.core = new CorePlugins(this)
     this.lock = new Lock(this.out)
+  }
 
-    this.plugins = this.cache.fetchManagers(
+  async load () {
+    if (this.loaded) return
+    this.plugins = await this.cache.fetchManagers(
       this.builtin,
       this.linked,
       this.user,
       this.core
     )
+    this.loaded = true
   }
 
   get commands (): CachedCommand[] {
@@ -54,7 +59,8 @@ export default class Plugins {
     return commands
   }
 
-  list () {
+  async list () {
+    await this.load()
     return this.plugins
   }
 
@@ -98,6 +104,7 @@ export default class Plugins {
   }
 
   async install (name: string, tag: string = 'latest') {
+    await this.load()
     let downgrade = await this.lock.upgrade()
     if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
     let path = await this.user.install(name, tag)
@@ -110,11 +117,12 @@ export default class Plugins {
     this.out.action.start(`${this.config.name}: Updating plugins`)
     let downgrade = await this.lock.upgrade()
     await this.user.update()
-    this.clearCache(...this.user.list().map(p => p.path))
+    this.clearCache(...(await this.user.list()).map(p => p.path))
     await downgrade()
   }
 
   async uninstall (name: string) {
+    await this.load()
     let plugin = this.plugins.filter(p => ['user', 'link'].includes(p.type)).find(p => p.name === name)
     if (!plugin) throw new Error(`${name} is not installed`)
     let downgrade = await this.lock.upgrade()
@@ -140,6 +148,7 @@ export default class Plugins {
   }
 
   async addLinkedPlugin (p: string) {
+    await this.load()
     let downgrade = await this.lock.upgrade()
     let name = this.linked.checkLinked(p)
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
@@ -150,11 +159,6 @@ export default class Plugins {
     await this.linked.add(p)
     this.clearCache(p)
     await downgrade()
-  }
-
-  async refreshLinkedPlugins () {
-    let paths: string[] = await this.linked.refresh()
-    this.clearCache(...paths)
   }
 
   clearCache (...paths: string[]) {
