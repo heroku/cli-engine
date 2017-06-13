@@ -130,18 +130,18 @@ describe('fetchVersion', () => {
         'stable.version': {channel: 'stable', version: '1.2.3-b2ea476'}
       }
     })
-    let v = await updater.fetchVersion('stable')
+    let v = await updater.fetchVersion('stable', false)
     expect(v.version).toEqual('1.2.3-b2ea476')
   })
 
   it('gets the version from the API', async () => {
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
-    let v = await updater.fetchVersion('stable')
+    let v = await updater.fetchVersion('stable', true)
     expect(v.version).toEqual('1.2.3-b2ea476')
   })
 
-  it('gets the version from the API when file version is old', async () => {
+  it('gets the version from the API when download is specified', async () => {
     fs.__files({
       [config.cacheDir]: {
         'stable.version': {
@@ -152,27 +152,14 @@ describe('fetchVersion', () => {
     })
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '2.0.0-b2ea476'})
-    let v = await updater.fetchVersion('stable')
+    let v = await updater.fetchVersion('stable', true)
     expect(v.version).toEqual('2.0.0-b2ea476')
-  })
-
-  it('gets the version from disk if it is somewhat old', async () => {
-    fs.__files({
-      [config.cacheDir]: {
-        'stable.version': {
-          mtime: moment().subtract(29, 'days').toDate(),
-          content: {channel: 'stable', version: '1.2.3-b2ea476'}
-        }
-      }
-    })
-    let v = await updater.fetchVersion('stable')
-    expect(v.version).toEqual('1.2.3-b2ea476')
   })
 
   it('saves the version to disk', async () => {
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
-    await updater.fetchVersion('stable')
+    await updater.fetchVersion('stable', true)
     expect(fs.writeJSON).toBeCalledWith(path.join(config.cacheDir, 'stable.version'), {channel: 'stable', version: '1.2.3-b2ea476'})
   })
 })
