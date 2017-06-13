@@ -293,7 +293,7 @@ export default class Updater {
   async checkIfUpdating () {
     debug('check if updating')
     if (!(await this.lock.canRead())) {
-      this.out.warn(`${this.config.name}: update in process`)
+      debug('update in process')
       await this.restartCLI()
     } else await this.lock.read()
     debug('done checking if updating')
@@ -305,7 +305,7 @@ export default class Updater {
     const {spawnSync} = require('child_process')
     const binPath = this.binPath
     if (!binPath) return debug('cannot restart CLI, no binpath')
-    this.out.warn(`${this.config.name}: update complete, restarting CLI`)
+    debug('update complete, restarting CLI')
     const {status} = spawnSync(binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
     this.out.exit(status)
   }
