@@ -41,6 +41,19 @@ async function runClosure (namespaces: ?(?string)[]) {
 //       - user plugin  X
 //       - linked plugin  ?? << need a namespaced plugin
 
+let dir = console.dir
+let mockDir
+
+beforeEach(() => {
+  // flow$ignore
+  console.dir = mockDir = jest.fn()
+})
+
+afterEach(() => {
+  // flow$ignore
+  console.dir = dir
+})
+
 describe('CLI bin \'cli-engine\'', () => {
   describe('CLI namespaces undefined OR null', () => {
     let run
@@ -56,6 +69,7 @@ describe('CLI bin \'cli-engine\'', () => {
       test('user plugin heroku-debug', async () => {
         await run('plugins:install', 'heroku-debug@4.0.0')
         await run('debug')
+        expect(mockDir.mock.calls[0][0]).toMatchObject({context: {apiHost: 'api.heroku.com'}})
         await run('help', 'debug')
         await run('plugins:uninstall', 'heroku-debug')
       })
@@ -94,6 +108,7 @@ describe('CLI bin \'cli-engine\'', () => {
 
     describe('installs permitted namespaced', () => {
       test('user plugin heroku-debug with namespace \'heroku\'', async () => {
+        expect.assertions(3)
         await run('plugins:install', 'heroku-debug@5.0.2')
         await run('heroku:debug')
         try {
