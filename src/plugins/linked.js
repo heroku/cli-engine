@@ -7,6 +7,7 @@ import Yarn from './yarn'
 import klaw from 'klaw-sync'
 import fs from 'fs-extra'
 import {Manager, PluginPath} from './manager'
+import type Cache from './cache'
 
 type PJSON = {
   name: string,
@@ -21,8 +22,15 @@ function touch (f: string) {
 }
 
 export default class LinkedPlugins extends Manager {
-  constructor ({out, config}: {out: Output, config: Config}) {
-    super({out, config})
+  loaded: boolean
+  _data: {
+    version: string,
+    updated_at: Date,
+    plugins: string[]
+  }
+
+  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
+    super({out, config, cache})
     try {
       this._data = fs.readJSONSync(this.file)
       this._data.updated_at = new Date(this._data.updated_at || 0)
@@ -34,12 +42,6 @@ export default class LinkedPlugins extends Manager {
         plugins: []
       }
     }
-  }
-
-  _data: {
-    version: string,
-    updated_at: Date,
-    plugins: string[]
   }
 
   /**
@@ -74,16 +76,28 @@ export default class LinkedPlugins extends Manager {
    * list linked plugins
    * @returns {PluginPath[]}
    */
-  list (): PluginPath[] {
-    return this._data.plugins.map(p => {
-      return new PluginPath({output: this.out, type: 'link', path: p})
-    })
+  async list (): Promise<PluginPath[]> {
+    try {
+      await this.load()
+      return this._data.plugins.map(p => {
+        return new PluginPath({output: this.out, type: 'link', path: p})
+      })
+    } catch (err) {
+      this.out.warn(err, 'Error loading linked plugins')
+      return []
+    }
+  }
+
+  async load () {
+    if (this.loaded) return
+    await this.refresh()
+    this.loaded = true
   }
 
   /**
    * runs prepare() on all linked plugins
    */
-  async refresh (): Promise<string[]> {
+  async refresh () {
     let paths : string[] = []
     for (let plugin of this._data.plugins) {
       try {
@@ -96,10 +110,10 @@ export default class LinkedPlugins extends Manager {
       }
     }
     if (paths.length > 0) {
+      this.cache.deletePlugin(...paths)
       this._data.updated_at = new Date()
       this._save()
     }
-    return paths
   }
 
   /**

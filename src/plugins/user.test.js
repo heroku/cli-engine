@@ -11,8 +11,8 @@ jest.unmock('fs-extra')
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
 
 let tmpDir
-beforeEach(() => {
-  tmpDir = tmpDirs()
+beforeEach(async () => {
+  tmpDir = await tmpDirs()
 })
 
 afterEach(() => {
@@ -29,6 +29,7 @@ test('user plugin should be cached', async () => {
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
   let plugins = new Plugins(tmpDir.output)
+  await plugins.load()
   let DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 
@@ -43,6 +44,7 @@ test('user plugin should be cached', async () => {
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
   plugins = new Plugins(tmpDir.output)
+  await plugins.load()
   DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
 

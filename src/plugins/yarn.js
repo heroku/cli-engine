@@ -5,7 +5,7 @@ import {type Config} from 'cli-engine-config'
 import path from 'path'
 import fs from 'fs-extra'
 
-const debug = require('debug')('cli-engine/plugins/yarn')
+const debug = require('debug')('cli-engine:plugins:yarn')
 
 export default class Yarn {
   config: Config

@@ -57,9 +57,9 @@ export default class AnalyticsCommand {
     }
   }
 
-  record (Command: Class<Command<*>>) {
+  async record (Command: Class<Command<*>>) {
     try {
-      let plugin = this.plugins.list().find(p => p.findCommand(Command.id))
+      let plugin = (await this.plugins.list()).find(p => p.findCommand(Command.id))
       if (!plugin) {
         this.out.debug('no plugin found for analytics')
         return
@@ -70,7 +70,7 @@ export default class AnalyticsCommand {
       let analyticsJSON
       if (this._existsJSON()) {
         try {
-          analyticsJSON = this._readJSON()
+          analyticsJSON = await this._readJSON()
         } catch (err) {
           this.out.debug(err)
         }
@@ -91,7 +91,7 @@ export default class AnalyticsCommand {
         language: 'node'
       })
 
-      this._writeJSON(analyticsJSON)
+      await this._writeJSON(analyticsJSON)
     } catch (err) {
       this.out.debug(err)
     }
@@ -102,7 +102,7 @@ export default class AnalyticsCommand {
       let user = this.user
       if (!user) return
 
-      const local: AnalyticsJSON = this._readJSON()
+      const local: AnalyticsJSON = await this._readJSON()
       if (local.commands.length === 0) return
 
       const body: AnalyticsJSONPost = {
@@ -116,10 +116,10 @@ export default class AnalyticsCommand {
       await this.http.post(this.url, {body})
 
       local.commands = []
-      this._writeJSON(local)
+      await this._writeJSON(local)
     } catch (err) {
       this.out.debug(err)
-      this._writeJSON(this._initialAnalyticsJSON())
+      await this._writeJSON(this._initialAnalyticsJSON())
     }
   }
 
@@ -143,15 +143,15 @@ export default class AnalyticsCommand {
     return this.netrcLogin
   }
 
-  _existsJSON (): boolean {
-    return fs.existsSync(this.analyticsPath)
+  async _existsJSON (): Promise<boolean> {
+    return fs.exists(this.analyticsPath)
   }
 
-  _readJSON (): AnalyticsJSON {
-    return fs.readJSONSync(this.analyticsPath)
+  async _readJSON (): Promise<AnalyticsJSON> {
+    return fs.readJson(this.analyticsPath)
   }
 
-  _writeJSON (analyticsJSON: AnalyticsJSON) {
-    return fs.writeJSONSync(this.analyticsPath, analyticsJSON)
+  async _writeJSON (analyticsJSON: AnalyticsJSON) {
+    return fs.writeJson(this.analyticsPath, analyticsJSON)
   }
 }

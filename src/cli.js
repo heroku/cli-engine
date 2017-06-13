@@ -49,22 +49,19 @@ export default class Main {
     debug('autoupdating')
     await updater.autoupdate()
 
+    debug('loading plugins')
     let plugins = new Plugins(out)
+    await plugins.load()
 
     try {
       debug('migrating plugins')
       const migrator = new MigrateV5Plugins(plugins, this.config)
-      const migrated = await migrator.run()
-      if (migrated) {
-        plugins = new Plugins(out)
-      }
+      await migrator.run()
     } catch (err) {
       out.warn('Error migrating v5 plugins')
       out.warn(err)
     }
 
-    debug('refreshing linked plugins')
-    await plugins.refreshLinkedPlugins()
     if (this.cmdAskingForHelp) {
       debug('running help')
       this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
@@ -76,7 +73,7 @@ export default class Main {
       await out.done()
       debug('recording analytics')
       let analytics = new Analytics({config: this.config, out, plugins})
-      analytics.record(Command)
+      await analytics.record(Command)
       debug('running cmd')
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
     }

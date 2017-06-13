@@ -104,11 +104,11 @@ export default class Cache {
     }
   }
 
-  fetchManagers (...managers: Manager[]): Plugin[] {
+  async fetchManagers (...managers: Manager[]): Promise<Plugin[]> {
     let plugins = []
 
     for (let manager of managers) {
-      let paths = manager.list()
+      let paths = await manager.list()
       plugins = plugins.concat(paths.map(function (pluginPath): Plugin {
         return new Plugin(this.out, pluginPath, this.fetch(pluginPath))
       }, this))

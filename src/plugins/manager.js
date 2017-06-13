@@ -3,7 +3,7 @@
 import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
-import {type CachedPlugin, type CachedCommand, type CachedTopic} from './cache'
+import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyCommand} from './legacy'
 import Namespaces from '../namespaces'
 import path from 'path'
@@ -131,13 +131,15 @@ export class PluginPath {
 export class Manager {
   out: Output
   config: Config
+  cache: Cache
 
-  constructor ({out, config}: {out: Output, config: Config}) {
+  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
     this.out = out
     this.config = config
+    this.cache = cache
   }
 
-  list (): PluginPath[] {
+  async list (): Promise<PluginPath[]> {
     throw new Error('abstract method Manager.list')
   }
 }

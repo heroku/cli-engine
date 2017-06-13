@@ -2,6 +2,7 @@
 
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
+import type Cache from './cache'
 
 import path from 'path'
 import fs from 'fs-extra'
@@ -16,8 +17,8 @@ type PJSON = {
 }
 
 export default class UserPlugins extends Manager {
-  constructor ({out, config}: {out: Output, config: Config}) {
-    super({out, config})
+  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
+    super({out, config, cache})
     this.yarn = new Yarn(this.out, this.userPluginsDir)
   }
 
@@ -27,11 +28,16 @@ export default class UserPlugins extends Manager {
    * list user plugins
    * @returns {PluginPath[]}
    */
-  list (): PluginPath[] {
-    const pjson = this.userPluginsPJSON
-    return entries(pjson.dependencies || {}).map(([name, tag]) => {
-      return new PluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag})
-    })
+  async list (): Promise<PluginPath[]> {
+    try {
+      const pjson = this.userPluginsPJSON
+      return entries(pjson.dependencies || {}).map(([name, tag]) => {
+        return new PluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag})
+      })
+    } catch (err) {
+      this.out.warn(err, 'error loading user plugins')
+      return []
+    }
   }
 
   get userPluginsPJSON (): PJSON {
@@ -100,8 +106,6 @@ export default class UserPlugins extends Manager {
   get userPluginsPJSONPath (): string { return path.join(this.userPluginsDir, 'package.json') }
 
   userPluginPath (name: string): string { return path.join(this.userPluginsDir, 'node_modules', name) }
-
-  get lockfile (): string { return path.join(this.config.cacheDir, 'plugins.lock') }
 }
 
 const entries = <T> (o: {[k: string]: T}): [string, T][] => Object.keys(o).map(k => [k, o[k]])
