@@ -12,7 +12,8 @@ const debug = require('debug')('cli-engine:updater')
 
 type Version = {
   version: string,
-  channel: string
+  channel: string,
+  message?: string
 }
 
 type Manifest = {
@@ -65,12 +66,10 @@ export default class Updater {
     }
   }
 
-  async fetchVersion (channel: string, daysToStale: ?number = 30): Promise<Version> {
+  async fetchVersion (channel: string, download: boolean): Promise<Version> {
     let v
     try {
-      if (!daysToStale || mtime(this.versionFile).isAfter(moment().subtract(daysToStale, 'days'))) {
-        v = await fs.readJSON(this.versionFile)
-      }
+      if (!download) v = await fs.readJSON(this.versionFile)
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
@@ -291,11 +290,14 @@ export default class Updater {
 
   async warnIfUpdateAvailable () {
     await this._catch(async () => {
-      let v = await this.fetchVersion(this.config.channel)
+      let v = await this.fetchVersion(this.config.channel, false)
       let local = this.config.version.split('.')
       let remote = v.version.split('.')
       if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
         this.out.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
+      }
+      if (v.message) {
+        this.out.warn(`${this.config.name}: ${v.message}`)
       }
     })
   }
