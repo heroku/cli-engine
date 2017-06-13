@@ -82,7 +82,7 @@ if [ $RESULT -ne 0 ]; then
   exit $RESULT
 fi
 
-aws s3 cp --cache-control max-age=300 --content-type application/json tmp/build/version "s3://$S3_BUCKET/$NAME/channels/$CHANNEL/version"
+aws s3 cp --cache-control max-age=3600 --content-type application/json tmp/build/version "s3://$S3_BUCKET/$NAME/channels/$CHANNEL/version"
 
 # invalidate CDN
 if [ "$CLOUDFRONT_DISTRIBUTION" != "undefined" ]; then
