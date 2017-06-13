@@ -12,6 +12,7 @@ test('it exits with 127', async () => {
   try {
     await nf.run()
   } catch (err) {
+    if (!err.code) throw err
     expect(err.code).toEqual(127)
     expect(output.stderr.output).toMatch(/ +foo is not a cli-engine command.\n/)
   }

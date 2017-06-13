@@ -7,13 +7,39 @@ import type Cache from './cache'
 import path from 'path'
 import fs from 'fs-extra'
 
-import {Manager, PluginPath} from './manager'
+import {Manager, PluginPath, type PluginType} from './manager'
 import Namespaces from '../namespaces'
 
 import Yarn from './yarn'
 
 type PJSON = {
   dependencies?: { [name: string]: string }
+}
+
+class UserPluginPath extends PluginPath {
+  yarn: Yarn
+  repairAttempted = false
+
+  constructor ({output, type, path, tag, yarn}: {
+    output: Output,
+      type: PluginType,
+      tag: string,
+      path: string,
+      yarn: Yarn
+  }) {
+    super({output, type, path, tag})
+    this.yarn = yarn
+  }
+
+  async repair (err: Error): Promise<boolean> {
+    if (err.code !== 'MODULE_NOT_FOUND') return false
+    if (this.repairAttempted) return false
+    this.out.action.start('Repairing plugins')
+    this.repairAttempted = true
+    await this.yarn.exec(['install', '--force'])
+    this.out.action.stop()
+    return true
+  }
 }
 
 export default class UserPlugins extends Manager {
@@ -32,7 +58,7 @@ export default class UserPlugins extends Manager {
     try {
       const pjson = this.userPluginsPJSON
       return entries(pjson.dependencies || {}).map(([name, tag]) => {
-        return new PluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag})
+        return new UserPluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag, yarn: this.yarn})
       })
     } catch (err) {
       this.out.warn(err, 'error loading user plugins')

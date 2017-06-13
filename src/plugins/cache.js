@@ -82,16 +82,17 @@ export default class Cache {
     this.save()
   }
 
-  fetch (pluginPath: PluginPath): CachedPlugin {
+  async fetch (pluginPath: PluginPath): Promise<CachedPlugin> {
     let c = this.plugin(pluginPath.path)
     if (c) return c
     try {
       this.out.debug('updating cache for ' + pluginPath.path)
-      let cachedPlugin = pluginPath.convertToCached()
+      let cachedPlugin = await pluginPath.convertToCached()
       this.updatePlugin(pluginPath.path, cachedPlugin)
       return cachedPlugin
     } catch (err) {
-      if (this.type === 'builtin') throw err
+      if (pluginPath.type === 'builtin') throw err
+      if (await pluginPath.repair(err)) return this.fetch(pluginPath)
       this.out.warn(`Error parsing plugin ${pluginPath.path}`)
       this.out.warn(err)
       return {
@@ -109,9 +110,9 @@ export default class Cache {
 
     for (let manager of managers) {
       let paths = await manager.list()
-      plugins = plugins.concat(paths.map(function (pluginPath): Plugin {
-        return new Plugin(this.out, pluginPath, this.fetch(pluginPath))
-      }, this))
+      for (let path of paths) {
+        plugins.push(new Plugin(this.out, path, await this.fetch(path)))
+      }
     }
 
     this.save()

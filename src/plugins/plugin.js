@@ -53,22 +53,22 @@ export default class Plugin {
     return this.cachedPlugin.namespace
   }
 
-  findCommand (cmd: string): ?Class<Command<*>> {
+  async findCommand (cmd: string): Promise<?Class<Command<*>>> {
     if (!cmd) return
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
     if (!c) return
     let {topic, command} = c
-    let p = this.pluginPath.require()
+    let p = await this.pluginPath.require()
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
     return typeof Command === 'function' ? Command : convertFromV5((Command: any))
   }
 
-  findTopic (name: string): ?Class<Topic> {
+  async findTopic (name: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.topic === name)
     if (!t) return
-    let plugin = this.pluginPath.require()
+    let plugin = await this.pluginPath.require()
     let Topic = (plugin.topics || [])
       .find(t => [t.topic, t.name].includes(name))
     if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === name ? plugin.topic : ''

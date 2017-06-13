@@ -68,14 +68,14 @@ export default class Plugins {
     return !!this.plugins.find(p => p.name === name)
   }
 
-  findCommand (cmd: string): ?Class<Command<*>> {
+  async findCommand (cmd: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
-      let c = plugin.findCommand(cmd)
+      let c = await plugin.findCommand(cmd)
       if (c) return c
     }
   }
 
-  commandsForTopic (topic: string): Class<Command<*>>[] {
+  async commandsForTopic (topic: string): Promise<Class<Command<*>>[]> {
     let commands = this.plugins.reduce((t, p) => {
       try {
         return t.concat(p.commands
@@ -86,13 +86,14 @@ export default class Plugins {
         return t
       }
     }, [])
+    commands = await Promise.all(commands)
     return uniqby(commands, 'id')
   }
 
-  findTopic (cmd: string): ?Class<Topic> {
+  async findTopic (cmd: string): Promise<?Class<Topic>> {
     if (!cmd) return
     for (let plugin of this.plugins) {
-      let t = plugin.findTopic(cmd)
+      let t = await plugin.findTopic(cmd)
       if (t) return t
     }
     let name = cmd.split(':').slice(0, cmd.split(':').length - 1).join(':')

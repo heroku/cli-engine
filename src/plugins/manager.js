@@ -8,7 +8,9 @@ import {convertFlagsFromV5, type LegacyCommand} from './legacy'
 import Namespaces from '../namespaces'
 import path from 'path'
 
-type PluginType = | "builtin" | "core" | "user" | "link"
+export type PluginType = | "builtin" | "core" | "user" | "link"
+
+const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = | {
   name?: ?string,
@@ -49,8 +51,8 @@ export class PluginPath {
   type: PluginType
   tag: string | void
 
-  convertToCached (): CachedPlugin {
-    let plugin: ParsedPlugin = this.require()
+  async convertToCached (): Promise<CachedPlugin> {
+    let plugin: ParsedPlugin = await this.require()
 
     const getAliases = (c: ParsedCommand) => {
       let aliases = c.aliases || []
@@ -106,9 +108,15 @@ export class PluginPath {
     return (c: any)
   }
 
-  require (): ParsedPlugin {
-    // flow$ignore
-    let required = require(this.path)
+  async require (): Promise<ParsedPlugin> {
+    let required
+    try {
+      // flow$ignore
+      required = require(this.path)
+    } catch (err) {
+      if (await this.repair(err)) return this.require()
+      else throw err
+    }
     let plugin = {
       topic: required.topic && this.undefaultTopic(required.topic),
       topics: required.topics && required.topics.map(this.undefaultTopic),
@@ -125,6 +133,11 @@ export class PluginPath {
 
     // flow$ignore
     return require(path.join(this.path, 'package.json'))
+  }
+
+  async repair (err: Error): Promise<boolean> {
+    debug(err)
+    return false
   }
 }
 
