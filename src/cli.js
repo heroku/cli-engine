@@ -15,7 +15,7 @@ import MigrateV5Plugins from './plugins/migrator'
 
 import Help from './commands/help'
 
-const debug = require('debug')('cli-engine/cli')
+const debug = require('debug')('cli-engine:cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 let out: Output
@@ -44,7 +44,11 @@ export default class Main {
 
   async run () {
     debug('starting run')
+
     const updater = new Updater(out)
+    debug('autoupdating')
+    await updater.autoupdate()
+
     let plugins = new Plugins(out)
 
     try {
@@ -59,8 +63,6 @@ export default class Main {
       out.warn(err)
     }
 
-    debug('autoupdating')
-    await updater.autoupdate()
     debug('refreshing linked plugins')
     await plugins.refreshLinkedPlugins()
     if (this.cmdAskingForHelp) {

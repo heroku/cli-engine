@@ -4,9 +4,11 @@ import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import HTTP from 'cli-engine-command/lib/http'
 import path from 'path'
-import lock from 'rwlockfile'
+import Lock from './lock'
 import fs from 'fs-extra'
 import moment from 'moment'
+
+const debug = require('debug')('cli-engine:updater')
 
 type Version = {
   version: string,
@@ -34,16 +36,17 @@ export default class Updater {
   config: Config
   out: Output
   http: HTTP
+  lock: Lock
 
   constructor (output: Output) {
     this.out = output
     this.config = output.config
     this.http = new HTTP(output)
+    this.lock = new Lock(output)
   }
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
-  get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
   get binPath (): ?string { return process.env.CLI_BINPATH }
   get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
   get versionFile (): string { return path.join(this.config.cacheDir, `${this.config.channel}.version`) }
@@ -105,10 +108,10 @@ export default class Updater {
 
     this._cleanup()
 
-    let unlock = await lock.write(this.updatelockfile, {skipOwnPid: true})
+    let downgrade = await this.lock.upgrade()
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
-    unlock()
+    downgrade()
 
     this._cleanupDirs(dirs)
   }
@@ -171,8 +174,8 @@ export default class Updater {
       gunzip.on('error', fail)
 
       stream
-      .pipe(gunzip)
-      .pipe(extract)
+        .pipe(gunzip)
+        .pipe(extract)
     })
   }
 
@@ -249,15 +252,6 @@ export default class Updater {
     return `${this.config.name}-v${manifest.version}-${this.config.platform}-${this.config.arch}`
   }
 
-  async restartCLI () {
-    await lock.read(this.updatelockfile)
-    lock.unreadSync(this.updatelockfile)
-    const {spawnSync} = require('child_process')
-    if (!this.binPath) return
-    const {status} = spawnSync(this.binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
-    this.out.exit(status)
-  }
-
   get autoupdateNeeded (): boolean {
     try {
       return mtime(this.autoupdatefile).isBefore(moment().subtract(5, 'hours'))
@@ -269,16 +263,19 @@ export default class Updater {
 
   async autoupdate (force: boolean = false) {
     try {
+      await this.checkIfUpdating()
       await this.warnIfUpdateAvailable()
       if (!force && !this.autoupdateNeeded) return
+      debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
-      await this.checkIfUpdating()
       let fd = fs.openSync(this.autoupdatelogfile, 'a')
-      if (!this.binPath) return
+      const binPath = this.binPath
+      if (!binPath) return debug('no binpath set')
+      debug(`spawning autoupdate on ${binPath}`)
       const {spawn} = require('child_process')
-      spawn(this.binPath, ['update'], {detached: true, stdio: ['ignore', fd, fd]})
-      .on('error', e => this.out.warn(e, 'autoupdate:'))
-      .unref()
+      spawn(binPath, ['update'], {detached: true, stdio: ['ignore', fd, fd]})
+        .on('error', e => this.out.warn(e, 'autoupdate:'))
+        .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
   }
 
@@ -294,9 +291,22 @@ export default class Updater {
   }
 
   async checkIfUpdating () {
-    if (await lock.hasWriter(this.updatelockfile)) {
-      this.out.warn(`${this.config.name}: warning: update in process`)
+    debug('check if updating')
+    if (!(await this.lock.canRead())) {
+      this.out.warn(`${this.config.name}: update in process`)
       await this.restartCLI()
-    } else await lock.read(this.updatelockfile)
+    } else await this.lock.read()
+    debug('done checking if updating')
+  }
+
+  async restartCLI () {
+    let unread = await this.lock.read()
+    await unread()
+    const {spawnSync} = require('child_process')
+    const binPath = this.binPath
+    if (!binPath) return debug('cannot restart CLI, no binpath')
+    this.out.warn(`${this.config.name}: update complete, restarting CLI`)
+    const {status} = spawnSync(binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    this.out.exit(status)
   }
 }

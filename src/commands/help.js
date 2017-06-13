@@ -22,14 +22,14 @@ function renderList (items: [string, ?string][]): string {
 
   let maxLeftLength = trimToMaxLeft(max(items, '[0].length')[0].length + 1)
   return items
-      .map(i => {
-        let left = ` ${i[0]}`
-        let right = i[1]
-        if (!right) return left
-        left = `${S(trimCmd(left, maxLeftLength)).padRight(maxLeftLength)}`
-        right = linewrap(maxLeftLength + 2, right)
-        return `${left}  ${right}`
-      }).join('\n')
+    .map(i => {
+      let left = ` ${i[0]}`
+      let right = i[1]
+      if (!right) return left
+      left = `${S(trimCmd(left, maxLeftLength)).padRight(maxLeftLength)}`
+      right = linewrap(maxLeftLength + 2, right)
+      return `${left}  ${right}`
+    }).join('\n')
 }
 
 function linewrap (length: number, s: string): string {
@@ -88,7 +88,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
             t.topic,
             t.description ? this.out.color.gray(t.description) : null
           ]
-      ))))
+        ))))
       }
     }
   }
