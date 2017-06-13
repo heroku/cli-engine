@@ -67,18 +67,7 @@ export default class AnalyticsCommand {
 
       if (!this.user) return
 
-      let analyticsJSON
-      if (this._existsJSON()) {
-        try {
-          analyticsJSON = await this._readJSON()
-        } catch (err) {
-          this.out.debug(err)
-        }
-      }
-
-      if (!analyticsJSON) {
-        analyticsJSON = this._initialAnalyticsJSON()
-      }
+      let analyticsJSON = await this._readJSON()
 
       analyticsJSON.commands.push({
         command: Command.id,
@@ -143,15 +132,16 @@ export default class AnalyticsCommand {
     return this.netrcLogin
   }
 
-  async _existsJSON (): Promise<boolean> {
-    return fs.exists(this.analyticsPath)
-  }
-
   async _readJSON (): Promise<AnalyticsJSON> {
-    return fs.readJson(this.analyticsPath)
+    try {
+      return await fs.readJson(this.analyticsPath)
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+      return this._initialAnalyticsJSON()
+    }
   }
 
   async _writeJSON (analyticsJSON: AnalyticsJSON) {
-    return fs.writeJson(this.analyticsPath, analyticsJSON)
+    return fs.outputJson(this.analyticsPath, analyticsJSON)
   }
 }
