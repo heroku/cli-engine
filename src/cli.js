@@ -54,7 +54,6 @@ export default class Main {
     await plugins.load()
 
     try {
-      debug('migrating plugins')
       const migrator = new MigrateV5Plugins(plugins, this.config)
       await migrator.run()
     } catch (err) {
