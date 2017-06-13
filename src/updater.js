@@ -91,11 +91,21 @@ export default class Updater {
 
   async update (manifest: Manifest) {
     let base = this.base(manifest)
+    const filesize = require('filesize')
 
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let stream = await this.http.stream(url)
+
+    if (this.out.action.frames) { // if spinner action
+      let total = stream.headers['content-length']
+      let current = 0
+      stream.on('data', data => {
+        current += data.length
+        this.out.action.status = `${filesize(current)}/${filesize(total)}`
+      })
+    }
 
     fs.mkdirpSync(this.updateDir)
     let dirs = this._dirs(require('tmp').dirSync({dir: this.updateDir}).name)
