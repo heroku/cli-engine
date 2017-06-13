@@ -271,59 +271,5 @@ describe('AnalyticsCommand', () => {
       await command.record(buildCommand())
       expect(command._writeJSON.mock.calls).toEqual([[expected]])
     })
-
-    it('records commands when file missing', async () => {
-      let command = build()
-
-      // flow$ignore
-      command._existsJSON = function () {
-        return false
-      }
-
-      let expected = {
-        schema: 1,
-        commands: [{
-          'command': 'fuzz:fizz',
-          'os': 'windows',
-          'shell': 'cmd.exe',
-          'plugin': 'fuzz',
-          'plugin_version': '9.8.7',
-          'valid': true,
-          'version': '1.2.3',
-          'language': 'node'
-        }]
-      }
-
-      await command.record(buildCommand())
-
-      expect(command._writeJSON.mock.calls).toEqual([[expected]])
-    })
-
-    it('records commands when file corrupted', async () => {
-      let command = build()
-
-      // flow$ignore
-      command._readJSON = function () {
-        throw new Error()
-      }
-
-      let expected = {
-        schema: 1,
-        commands: [{
-          'command': 'fuzz:fizz',
-          'os': 'windows',
-          'shell': 'cmd.exe',
-          'plugin': 'fuzz',
-          'plugin_version': '9.8.7',
-          'valid': true,
-          'version': '1.2.3',
-          'language': 'node'
-        }]
-      }
-
-      await command.record(buildCommand())
-
-      expect(command._writeJSON.mock.calls).toEqual([[expected]])
-    })
   })
 })
