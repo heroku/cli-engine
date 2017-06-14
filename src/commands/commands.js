@@ -17,8 +17,9 @@ export default class Commands extends Command {
       command: c.command,
       topic: c.topic,
       usage: c.usage,
-      summary: c.description,
+      description: c.description,
       help: c.help,
+      fullHelp: c.help,
       hidden: c.hidden
     }))
     this.out.styledJSON({topics, commands})
