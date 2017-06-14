@@ -78,6 +78,5 @@ test('linked core plugins should be migrated', async () => {
   let plugins = new Plugins(tmpDir.output)
   await plugins.load()
   let MigratorLinked = await plugins.findCommand('migrator')
-  expect(MigratorLinked).toBeDefined()
-  expect(MigratorLinked.description).toBe('link')
+  expect(MigratorLinked).toHaveProperty('description', 'link')
 })
