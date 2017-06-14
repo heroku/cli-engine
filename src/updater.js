@@ -282,7 +282,7 @@ export default class Updater {
       if (!binPath) return debug('no binpath set')
       debug(`spawning autoupdate on ${binPath}`)
       const {spawn} = require('child_process')
-      spawn(binPath, ['update'], {detached: true, stdio: ['ignore', fd, fd]})
+      spawn(binPath, ['update'], {detached: !this.config.windows, stdio: ['ignore', fd, fd]})
         .on('error', e => this.out.warn(e, 'autoupdate:'))
         .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
