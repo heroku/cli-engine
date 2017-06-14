@@ -50,15 +50,32 @@ export default class Help extends Command {
     this.plugins = new Plugins(this.out)
     await this.plugins.load()
     let cmd = this.argv.find(arg => !['-h', '--help'].includes(arg))
-    if (!cmd) return this.topics()
+    if (!cmd) {
+      return this.topics()
+    }
+
     const topic = await this.plugins.findTopic(cmd)
     let matchedCommand = await this.plugins.findCommand(cmd)
     let matchedNamespace = this.plugins.findNamespaced(cmd)
-    if (!topic && !matchedCommand && !matchedNamespace.length) throw new Error(`command ${cmd} not found`)
-    if (matchedCommand) this.out.log(matchedCommand.buildHelp(this.config))
-    if (topic && this.argv.slice(0, 2).includes(topic.topic)) this.listCommandsHelp(topic.topic, await this.plugins.commandsForTopic(topic.topic))
-    let numNamespaced = matchedNamespace.length
-    if (!matchedCommand && numNamespaced) this.listNamespaceHelp(matchedNamespace)
+
+    if (!topic && !matchedCommand && !matchedNamespace.length) {
+      throw new Error(`command ${cmd} not found`)
+    }
+
+    if (matchedCommand) {
+      if (this.plugins.findNamespaced(cmd.split(':')[0]).length) {
+        matchedCommand.topic = cmd.split(':').slice(0, 2).join(':')
+      }
+      this.out.log(matchedCommand.buildHelp(this.config))
+    }
+
+    if (topic) {
+      this.listCommandsHelp(cmd, await this.plugins.commandsForTopic(topic.topic))
+    }
+
+    if (!matchedCommand && matchedNamespace.length) {
+      this.listNamespaceHelp(matchedNamespace)
+    }
   }
 
   topics () {
@@ -86,7 +103,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
       if (plugin.topics) {
         this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
           [
-            t.topic,
+            plugin.cachedPlugin.namespace ? `${plugin.cachedPlugin.namespace}:${t.topic}` : t.topic,
             t.description ? this.out.color.gray(t.description) : null
           ]
         ))))
@@ -97,8 +114,12 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
   listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
+    let hasNamespace = this.plugins.findNamespaced(topic.split(':')[0]).length
     this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands:`)
-    this.out.log(renderList(commands.map(c => c.buildHelpLine(this.config))))
+    this.out.log(renderList(commands.map(c => {
+      if (hasNamespace) c.topic = topic
+      return c.buildHelpLine(this.config)
+    })))
     this.out.log()
   }
 }

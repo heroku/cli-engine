@@ -70,6 +70,11 @@ export default class Plugins {
 
   async findCommand (cmd: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
+      if (plugin.namespace) {
+        let split = cmd.split(':')
+        if (plugin.namespace !== split[0]) return
+        cmd = split.slice(1, split.length).join(':')
+      }
       let c = await plugin.findCommand(cmd)
       if (c) return c
     }
@@ -93,11 +98,14 @@ export default class Plugins {
   async findTopic (cmd: string): Promise<?Class<Topic>> {
     if (!cmd) return
     for (let plugin of this.plugins) {
+      if (plugin.namespace) {
+        let split = cmd.split(':')
+        if (plugin.namespace !== split[0]) return
+        cmd = split.slice(1, split.length).join(':')
+      }
       let t = await plugin.findTopic(cmd)
       if (t) return t
     }
-    let name = cmd.split(':').slice(0, cmd.split(':').length - 1).join(':')
-    return this.findTopic(name)
   }
 
   findNamespaced (namespace: string): Array<Plugin> {
@@ -155,7 +163,7 @@ export default class Plugins {
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
-    if (!Namespaces.namespacePermitted(p, this.config)) throw Namespaces.notPermittedError
+    Namespaces.throwErrorIfNotPermitted(p, this.config)
 
     await this.linked.add(p)
     this.clearCache(p)

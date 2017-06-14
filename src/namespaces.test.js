@@ -82,7 +82,7 @@ describe('CLI bin \'cli-engine\'', () => {
       })
     })
 
-    describe('does not install namespaced', () => {
+    describe('does not install unpermitted namespaced', () => {
       test('user plugin heroku-debug with namespace \'heroku\'', async () => {
         let msg
         try {
@@ -108,23 +108,28 @@ describe('CLI bin \'cli-engine\'', () => {
 
     describe('installs permitted namespaced', () => {
       test('user plugin heroku-debug with namespace \'heroku\'', async () => {
-        expect.assertions(3)
+        expect.assertions(5)
         await run('plugins:install', 'heroku-debug@5.0.2')
         await run('heroku:debug')
+        let namspaceHelp = await run('help', 'heroku')
+        expect(namspaceHelp.out.stdout.output).toMatch(/^ +heroku:debug +CLI debugging tools$/m)
+        let topicCommandHelp = await run('help', 'heroku:debug')
+        // since heroku:debug is a topic-command
+        // expect both command help and topic help
+        expect(topicCommandHelp.out.stdout.output).toMatch(/^Usage: cli-engine heroku:debug(\n|\s)+Outputs debugging info$/m)
+        expect(topicCommandHelp.out.stdout.output).toMatch(/cli-engine heroku:debug commands:(\n\s)+heroku:debug +Outputs debugging info$/m)
+        // make sure it didn't install w/o a namespace
         try {
           await run('debug')
         } catch (err) {
           if (!err.code) throw err
           expect(err.code).toEqual(127)
         }
-        await run('help', 'heroku:debug')
         try {
           await run('help', 'debug')
         } catch (err) {
           expect(err.message).toEqual('command debug not found')
         }
-        let help = await run('help', 'heroku')
-        expect(help.out.stdout.output).toMatch(/^ +heroku:debug +CLI debugging tools$/m)
         await run('plugins:uninstall', 'heroku-debug')
       })
     })
@@ -153,7 +158,7 @@ describe('CLI bin \'cli-engine\'', () => {
       })
     })
 
-    describe('does not install namespaced', () => {
+    describe('does not install unpermitted namespaced', () => {
       test('user plugin heroku-debug with namespace \'cowabunga\'', async () => {
         let msg
         try {
