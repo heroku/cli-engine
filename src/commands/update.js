@@ -62,12 +62,12 @@ export default class Update extends Command {
         fs.copySync(cli, client)
       }
       const plugins = await new Plugins(this.out).list()
-      const cmds = plugins.map(p => p.cachedPlugin.commands.map(c => {
+      const cmds = plugins.map(p => p.commands.map(c => {
         if (c.hidden) return
         let plublicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
         let flags = plublicFlags.length ? ` ${plublicFlags}` : ''
-        // to-do: add namespace in after namespace refactor
-        return `${c.id}${flags}`
+        let namespace = p.namespace ? `${p.namespace}:` : ''
+        return `${namespace}${c.id}${flags}`
       }))
       const commands = flatten(cmds).filter(c => !!c).join('\n')
       fs.writeFileSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'commands'), commands)
