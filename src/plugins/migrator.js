@@ -31,12 +31,8 @@ export default class {
     this.out.action.start('Migrating Heroku CLI v5 plugins')
     debug('removing existing node_modules')
     for (let p of pljson) {
-      if (this.plugins.isPluginInstalled(p.name)) {
-        debug(`Skipping already installed plugin: ${p.name}`)
-      } else {
-        debug(`installing ${p.name}`)
-        await this._installPlugin(p.name, p.tag)
-      }
+      debug(`installing ${p.name}`)
+      await this._installPlugin(p.name, p.tag)
     }
     await this.userPlugins.yarn.exec(['install', '--force'])
     this.plugins.loaded = false
