@@ -120,10 +120,13 @@ export class PluginPath {
     let plugin = {
       topic: required.topic && this.undefaultTopic(required.topic),
       topics: required.topics && required.topics.map(this.undefaultTopic),
-      commands: required.commands && required.commands.map(this.undefaultCommand)
+      commands: required.commands && required.commands.map(this.undefaultCommand),
+      namespace: undefined
     }
     if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
-    return (Namespaces.namespacePlugin(plugin, this.path, this.config): any)
+    let {namespace} = Namespaces.metaData(this.path, this.config)
+    if (namespace) plugin.namespace = namespace
+    return plugin
   }
 
   pjson (): {name: string, version: string} {

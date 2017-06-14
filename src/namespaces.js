@@ -9,71 +9,45 @@ export default class {
     return new Error('Plugin\'s namespace not included in permitted namespaces')
   }
 
-  static namespacePermitted (pluginPath: string, config: Config): boolean {
-    return ['root', 'namespace'].includes(this.pluginNamespaceLocation(pluginPath, config))
+  static throwErrorIfNotPermitted (pluginPath: string, config: Config) {
+    if (this._permitted(pluginPath, config)) return
+    throw this.notPermittedError
   }
 
-  static pluginNamespaceLocation (pluginPath: string, config: Config): ?string {
+  static _permitted (pluginPath: string, config: Config): boolean {
+    let namespace = this._readNamespace(pluginPath)
+    return ['root', 'namespace'].includes(this._installLevel(namespace, config))
+  }
+
+  static _installLevel (namespace: ?string, config: Config): string {
     let cliBin = config.bin
     let namespaces = config.namespaces
-    let namespace = this.pluginNamespace(pluginPath)
     if (!namespace && !namespaces) namespace = namespaces = null
     if (cliBin === namespace || (!namespaces && !namespace)) {
       return 'root'
     } else if (namespaces && namespaces.includes(namespace)) {
       return 'namespace'
-    } else {
-      return undefined
     }
+    return 'undefined'
   }
 
-  static pluginNamespace (pluginPath: string): ?string {
+  static _readNamespace (pluginPath: string): ?string {
     try {
       let pjson = fs.readJSONSync(path.join(pluginPath, 'package.json'))
       return pjson['cli-engine'] ? pjson['cli-engine'].namespace : undefined
-    } catch (err) {
-      return undefined
-    }
+    } catch (err) {}
   }
 
-  static namespacePlugin (plugin: Object, pluginPath: string, config: Config): ?Object {
-    let pluginsLocation = this.pluginNamespaceLocation(pluginPath, config)
-    if (pluginsLocation === 'root') return plugin
-    if (pluginsLocation === 'namespace') {
-      let namespace = this.pluginNamespace(pluginPath)
-      if (!namespace) return plugin
-      return this._namespacePlugin(namespace, plugin)
-    }
-    // should not get to here
-    throw new Error(`Plugin ${pluginPath} namespace not permitted and may be installed incorrectly`)
-  }
+  static metaData (pluginPath: string, config: Config): any {
+    let pjsonNamespace = this._readNamespace(pluginPath)
+    let permitted = this._permitted(pluginPath, config)
+    let installLevel = this._installLevel(pjsonNamespace, config)
 
-  static _namespacePlugin (namespace: string, plugin: Object): Object {
-    let nplugin: Object = {namespace}
-    nplugin.commands = plugin.commands.map(cmd => {
-      return {
-        topic: `${namespace}:${cmd.topic}`,
-        command: cmd.command,
-        description: cmd.description,
-        run: cmd.run
-      }
-    })
-    if (plugin.topic) {
-      nplugin.topic = {
-        topic: `${namespace}:${plugin.topic.name}`,
-        description: plugin.topic.description,
-        hidden: plugin.topic.hidden
-      }
+    return {
+      permitted,
+      installLevel,
+      namespace: (permitted && installLevel === 'namespace') ? pjsonNamespace : undefined,
+      pjsonNamespace
     }
-    if (plugin.topics) {
-      nplugin.topics = plugin.topics.map(topic => {
-        return {
-          topic: `${namespace}:${topic.name}`,
-          description: topic.description,
-          hidden: topic.hidden
-        }
-      })
-    }
-    return nplugin
   }
 }
