@@ -160,6 +160,6 @@ export class Manager {
   }
 
   async handleNodeVersionChange () {
-    // user will override
+    // user and linked will override
   }
 }
