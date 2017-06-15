@@ -160,12 +160,8 @@ export default class LinkedPlugins extends Manager {
       .find(f => f.stats.mtime > this._data.updated_at)
   }
 
-  async _install (p: string) {
-    if (!this._needsInstall(p)) return
-    await this._forceInstall(p)
-  }
-
-  async _forceInstall (p: string) {
+  async _install (p: string, force: boolean = false) {
+    if (!force && !this._needsInstall(p)) return
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     let yarn = new Yarn(this.out, p)
     await yarn.exec()
@@ -175,7 +171,7 @@ export default class LinkedPlugins extends Manager {
 
   async handleNodeVersionChange () {
     for (let p of this._data.plugins) {
-      await this._forceInstall(p)
+      await this._install(p, true)
     }
   }
 
