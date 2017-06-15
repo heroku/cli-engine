@@ -7,6 +7,7 @@ import Plugin from './plugin'
 import {Manager, type PluginPath} from './manager'
 import path from 'path'
 import fs from 'fs-extra'
+import Lock from '../lock'
 
 export type CachedCommand = {
   id: string,
@@ -127,9 +128,13 @@ export default class Cache {
   async fetchManagers (...managers: Manager[]): Promise<Plugin[]> {
     let plugins = []
     if (this.cache.node_version !== process.version) {
+      let lock = new Lock(this.out)
+
+      let downgrade = await lock.upgrade()
       for (let manager of managers) {
         await manager.handleNodeVersionChange()
       }
+      await downgrade()
 
       this.cache.node_version = process.version
       this.constructor.updated = true
