@@ -59,7 +59,6 @@ test('user plugin should be cached', async () => {
 })
 
 test('plugins should be reloaded when node_version null', async () => {
-  console.log(tmpDir.dataDir)
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
@@ -92,7 +91,6 @@ test('plugins should be reloaded when node_version null', async () => {
 })
 
 test('plugins should be reloaded when node_version changed', async () => {
-  console.log(tmpDir.dataDir)
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
