@@ -21,18 +21,13 @@ afterEach(() => {
   jest.resetAllMocks()
 })
 
-test('new Cache(output)', () => {
-  let cache = new Cache(output)
-  expect(cache.cache.node_version).toBeNull()
-})
-
 test('updatePlugin', () => {
   let cache = new Cache(output)
   cache.updatePlugin('myplugin', myplugin)
   cache.save()
   expect(fs.writeJSONSync).toBeCalledWith(
     path.join(config.cacheDir, 'plugins.json'),
-    {node_version: null, plugins: {myplugin}, version: config.version}
+    {plugins: {myplugin}, version: config.version}
   )
 })
 
@@ -60,24 +55,5 @@ describe('with existing file', () => {
       path.join(config.cacheDir, 'plugins.json'),
       {plugins: {}, version: config.version}
     )
-  })
-})
-
-describe('with existing for a previous version', () => {
-  beforeEach(() => {
-    fs.__files({
-      [config.cacheDir]: {
-        'plugins.json': {
-          version: '1.0.0',
-          plugins: {myplugin},
-          node_version: '2.0.0'
-        }
-      }
-    })
-  })
-
-  test('does not clear node_version', () => {
-    let cache = new Cache(output)
-    expect(cache.cache).toEqual({node_version: '2.0.0', plugins: {}, version: config.version})
   })
 })
