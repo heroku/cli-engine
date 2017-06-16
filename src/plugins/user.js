@@ -86,12 +86,6 @@ export default class UserPlugins extends Manager {
     if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
   }
 
-  async handleNodeVersionChange () {
-    if (fs.existsSync(path.join(this.userPluginsDir, 'node_modules'))) {
-      await this.yarn.exec(['install', '--force'])
-    }
-  }
-
   async install (name: string, tag: string = 'latest') {
     await this.setupUserPlugins()
     this.addPackageToPJSON(name, tag)
