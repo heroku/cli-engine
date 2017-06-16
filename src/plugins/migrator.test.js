@@ -46,6 +46,8 @@ test('plugins should be reloaded if migrated', async () => {
   } catch (err) {
     if (err.code !== 0) throw err
   }
+
+  expect(mockYarnExec).toBeCalledWith(['install', '--force'])
 })
 
 test('linked plugins should be migrated', async () => {
