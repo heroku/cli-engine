@@ -58,7 +58,7 @@ mkdir -p "$YARN_DIR"
 cp "$ROOT/package.json" "$YARN_DIR"
 cp "$ROOT/yarn.lock" "$YARN_DIR"
 cd "$YARN_DIR"
-yarn --production --prefer-offline
+yarn --production --prefer-offline --pure-lockfile
 cd "$ROOT"
 
 for PLATFORM in "${PLATFORMS[@]}"; do
