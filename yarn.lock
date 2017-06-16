@@ -443,6 +443,10 @@ binary-extensions@^1.0.0:
     buffers "~0.1.1"
     chainsaw "~0.1.0"
 
+bindings@~1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.2.1.tgz#14ad6113812d2d37d72e67b4cacb4bb726505f11"
+
 bl@^1.0.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/bl/-/bl-1.2.1.tgz#cac328f7bee45730d404b692203fcb590e172d5e"
@@ -1614,6 +1618,12 @@ heroku-debug@5.0.3:
     co "4.6.0"
     heroku-cli-util "6.1.17"
     inquirer "3.0.6"
+
+heroku-hello-world-build@0.0.0:
+  version "0.0.0"
+  resolved "https://registry.yarnpkg.com/heroku-hello-world-build/-/heroku-hello-world-build-0.0.0.tgz#aff4b4c86b9b0c013f236d3e080da2b2a620bfd9"
+  dependencies:
+    bindings "~1.2.1"
 
 hoek@2.x.x:
   version "2.16.3"
