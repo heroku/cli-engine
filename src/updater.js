@@ -279,12 +279,11 @@ export default class Updater {
       if (!force && !this.autoupdateNeeded) return
       debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
-      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       const binPath = this.binPath
       if (!binPath) return debug('no binpath set')
       debug(`spawning autoupdate on ${binPath}`)
       const {spawn} = require('child_process')
-      spawn(binPath, ['update'], {detached: !this.config.windows, stdio: ['ignore', fd, fd]})
+      spawn(binPath, ['update'], {detached: !this.config.windows, stdio: 'ignore'})
         .on('error', e => this.out.warn(e, 'autoupdate:'))
         .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
