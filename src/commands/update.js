@@ -4,7 +4,6 @@ import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
-import fs from 'fs-extra'
 
 export default class Update extends Command {
   static topic = 'update'
