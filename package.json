@@ -46,7 +46,7 @@
     "eslint-plugin-node": "5.0.0",
     "eslint-plugin-promise": "3.5.0",
     "eslint-plugin-standard": "3.0.1",
-    "flow-bin": "0.47.0",
+    "flow-bin": "0.48.0",
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.1.2",
     "got": "7.0.0",
