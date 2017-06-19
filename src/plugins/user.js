@@ -34,7 +34,8 @@ class UserPluginPath extends PluginPath {
   async repair (err: Error): Promise<boolean> {
     if (err.code !== 'MODULE_NOT_FOUND') return false
     if (this.repairAttempted) return false
-    this.out.action.start('Repairing plugins')
+    this.out.warn(err)
+    this.out.action.start(`Repairing plugin ${this.path}`)
     this.repairAttempted = true
     await this.yarn.exec(['install', '--force'])
     this.out.action.stop()
