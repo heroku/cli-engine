@@ -11,37 +11,35 @@ export default class Update extends Command {
   static args = [
     {name: 'channel', optional: true}
   ]
+  static flags = {
+    autoupdate: flags.boolean({hidden: true})
+  }
   updater: Updater
   autoupdatelogfile: String
 
   async run () {
-    this.updater = new Updater(this.out)
-    this.autoupdatelogfile = fs.openSync(this.config.autoupdatelogfile, 'a')
-    if (this.config.updateDisabled) {
-      this.out.warn(this.config.updateDisabled)
-      this.out.logAutocomplete(this.config.updateDisabled)
+    // on manual run, also log to file
+    if (!this.flags.autoupdate) {
+      this.out.stdout.logfile = this.out.autoupdatelog
+      this.out.stderr.logfile = this.out.autoupdatelog
     }
+    this.updater = new Updater(this.out)
+    if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
     else {
       this.out.action.start(`${this.config.name}: Updating CLI`)
-      this.out.logAutocomplete(`${this.config.name}: Updating CLI`)
-      let channel = this.argv[0] || this.config.channel
+      let channel =`` this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         this.out.action.stop(`already on latest version: ${this.config.version}`)
-        this.out.logAutocomplete(`already on latest version: ${this.config.version}`)
       } else {
         let {yellow, green} = this.out.color
         this.out.action.start(`${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(manifest.version)}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`)
-        this.out.logAutocomplete(`${this.config.name}: Updating CLI from ${this.config.version} to ${manifest.version}${channel === 'stable' ? '' : ' (' + channel + ')'}`)
         await this.updater.update(manifest)
         this.out.action.stop()
         try {
           await this.updater.autoupdate(true)
           this.out.exit(0)
-        } catch (err) {
-          this.out.warn(err, 'post-install autoupdate failed')
-          this.out.logAutocomplete(err, 'post-install autoupdate failed')
-        }
+        } catch (err) { this.out.warn(err, 'post-install autoupdate failed') }
       }
     }
     await this.updater.fetchVersion(this.config.channel, true)
