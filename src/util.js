@@ -16,8 +16,7 @@ export function compare (...props: any) {
 
 export function wait (ms: number) {
   return new Promise(resolve => {
-    let t: any = setTimeout(resolve, ms)
-    t.unref()
+    setTimeout(resolve, ms)
   })
 }
 
