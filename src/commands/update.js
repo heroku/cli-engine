@@ -1,6 +1,6 @@
 // @flow
 
-import Command from 'cli-engine-command'
+import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
@@ -10,9 +10,17 @@ export default class Update extends Command {
   static args = [
     {name: 'channel', optional: true}
   ]
+  static flags = {
+    autoupdate: flags.boolean({hidden: true})
+  }
   updater: Updater
 
   async run () {
+    // on manual run, also log to file
+    if (!this.flags.autoupdate) {
+      this.out.stdout.logfile = this.out.autoupdatelog
+      this.out.stderr.logfile = this.out.autoupdatelog
+    }
     this.updater = new Updater(this.out)
     if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
     else {
@@ -37,7 +45,7 @@ export default class Update extends Command {
     await this.updater.fetchVersion(this.config.channel, true)
     let analytics = new Analytics({out: this.out, config: this.config})
     await analytics.submit()
-    await PluginsUpdate.run({config: this.config})
+    await PluginsUpdate.run({config: this.config, output: this.out})
     await this.logChop()
   }
 
