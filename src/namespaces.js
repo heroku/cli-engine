@@ -28,7 +28,7 @@ export default class {
     } else if (namespaces && namespaces.includes(namespace)) {
       return 'namespace'
     }
-    return 'undefined'
+    return 'not-permitted-for-install'
   }
 
   static _readNamespace (pluginPath: string): ?string {
@@ -43,10 +43,13 @@ export default class {
     let permitted = this._permitted(pluginPath, config)
     let installLevel = this._installLevel(pjsonNamespace, config)
 
+    if (installLevel === 'not-permitted-for-install') installLevel = undefined
+    let namespace = (permitted && installLevel === 'namespace') ? pjsonNamespace : undefined
+
     return {
       permitted,
       installLevel,
-      namespace: (permitted && installLevel === 'namespace') ? pjsonNamespace : undefined,
+      namespace,
       pjsonNamespace
     }
   }
