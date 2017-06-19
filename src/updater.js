@@ -119,7 +119,7 @@ export default class Updater {
     this._cleanup()
 
     let downgrade = await this.lock.upgrade()
-    await wait(1000) // wait 1000ms for any commands that were partially loaded to finish loading
+    // await wait(1000) // wait 1000ms for any commands that were partially loaded to finish loading
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
