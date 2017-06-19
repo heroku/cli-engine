@@ -15,7 +15,6 @@ export default class Update extends Command {
     autoupdate: flags.boolean({hidden: true})
   }
   updater: Updater
-  autoupdatelogfile: String
 
   async run () {
     // on manual run, also log to file
@@ -27,7 +26,7 @@ export default class Update extends Command {
     if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
     else {
       this.out.action.start(`${this.config.name}: Updating CLI`)
-      let channel =`` this.argv[0] || this.config.channel
+      let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         this.out.action.stop(`already on latest version: ${this.config.version}`)
@@ -39,13 +38,15 @@ export default class Update extends Command {
         try {
           await this.updater.autoupdate(true)
           this.out.exit(0)
-        } catch (err) { this.out.warn(err, 'post-install autoupdate failed') }
+        } catch (err) {
+          this.out.warn(err, 'post-install autoupdate failed')
+        }
       }
     }
     await this.updater.fetchVersion(this.config.channel, true)
     let analytics = new Analytics({out: this.out, config: this.config})
     await analytics.submit()
-    await PluginsUpdate.run({config: this.config})
+    await PluginsUpdate.run({config: this.config, output: this.out})
     await this.logChop()
   }
 
