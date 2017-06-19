@@ -65,7 +65,7 @@ export default class Help extends Command {
     if (matchedCommand) {
       const splitCmd = cmd.split(':')
       if (this.plugins.findNamespaced(splitCmd[0]).length) {
-        // if namespaced, updated topic name for proper help display
+        // if namespaced, update topic name for proper help display
         matchedCommand.topic = splitCmd.slice(0, 2).join(':')
       }
       this.out.log(matchedCommand.buildHelp(this.config))
@@ -119,7 +119,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     let hasNamespace = this.plugins.findNamespaced(topic.split(':')[0]).length
     this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands:`)
     this.out.log(renderList(commands.map(c => {
-      // if namespaced, updated topic name for proper help display
+      // if namespaced, update topic name for proper help display
       if (hasNamespace) c.topic = topic
       return c.buildHelpLine(this.config)
     })))
