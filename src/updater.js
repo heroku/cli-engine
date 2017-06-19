@@ -279,15 +279,31 @@ export default class Updater {
       if (!force && !this.autoupdateNeeded) return
       debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
-      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       const binPath = this.binPath
       if (!binPath) return debug('no binpath set')
       debug(`spawning autoupdate on ${binPath}`)
+      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       const {spawn} = require('child_process')
-      spawn(binPath, ['update'], {detached: !this.config.windows, stdio: ['ignore', fd, fd]})
+      spawn(binPath, ['update', '--autoupdate'], {
+        detached: !this.config.windows,
+        stdio: ['ignore', fd, fd],
+        env: this.autoupdateEnv
+      })
         .on('error', e => this.out.warn(e, 'autoupdate:'))
         .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
+  }
+
+  get timestampEnvVar (): string {
+    // TODO: use function from cli-engine-config
+    let bin = this.config.bin.replace('-', '_').toUpperCase()
+    return `${bin}_TIMESTAMPS`
+  }
+
+  get autoupdateEnv (): {[k: string]: string} {
+    return Object.assign({}, process.env, {
+      [this.timestampEnvVar]: '1'
+    })
   }
 
   async warnIfUpdateAvailable () {
