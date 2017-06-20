@@ -1,6 +1,6 @@
 #compdef heroku
 
-COMMANDS_PATH=$(heroku autocomplete --location)
+COMMANDS_PATH=$(heroku autocomplete --commands)
 
 _flags () {
   compadd "$@" - $(grep "$words[2]" $COMMANDS_PATH | sed -n "s/^$words[2] //p")

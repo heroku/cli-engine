@@ -1,6 +1,6 @@
 #!/bin/bash
 
-COMMANDS_PATH=$(heroku autocomplete --location)
+COMMANDS_PATH=$(heroku autocomplete --commands)
 
 _heroku()
 {

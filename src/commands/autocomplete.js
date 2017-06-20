@@ -8,11 +8,10 @@ export default class Autocomplete extends Command {
   static topic = 'autocomplete'
   static description = 'autocomplete installation instructions'
   static hidden = true
-  static args = [
-    {name: 'shell', description: 'shell to use', required: false}
-  ]
   static flags = {
-    location: flags.boolean({hidden: true})
+    commands: flags.boolean({hidden: true}),
+    script: flags.boolean({hidden: true}),
+    shell: flags.string({description: 'shell to use', char: 's'})
   }
 
   async run () {
@@ -21,13 +20,13 @@ export default class Autocomplete extends Command {
       return
     }
 
-    const autocompletePath = path.join(this.config.dataDir, 'client', 'autocomplete')
-    if (this.flags.location) {
-      this.out.log(autocompletePath)
+    const clientPath = path.join(this.config.dataDir, 'client')
+    if (this.flags.commands) {
+      this.out.log(path.join(clientPath, 'autocomplete', 'commands'))
       return
     }
-
-    const shell = this.argv[0]
+    let shell = this.flags.shell
+    if (!shell) shell = this.config.shell
     if (!shell) {
       this.out.error('Error: Missing required argument shell')
       return
@@ -37,15 +36,26 @@ export default class Autocomplete extends Command {
       case 'bash':
         this.out.log('Symlink the autocomplete function via:')
         this.out.log()
-        this.out.log(CustomColors.cmd(`$ ln -s ${autocompletePath}/commands /usr/local/etc/bash_completion.d/heroku`))
+        let fnFile = path.join(clientPath, 'node_modules', 'cli-engine', 'autocomplete', 'bash', 'heroku')
+        this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
         break
       case 'zsh':
+        if (this.flags.script) {
+          this.out.log(`fpath=(
+  ${path.join(clientPath, 'node_modules', 'cli-engine', 'autocomplete', 'zsh')}
+  $fpath
+);
+autoload -Uz compinit;
+compinit;`)
+          return
+        }
         this.out.log('Add the autocomplete function to your fpath via:')
         this.out.log()
-        this.out.log(CustomColors.cmd(`$ echo 'fpath=(${autocompletePath}/zsh $fpath)' >> ~/.zshrc`))
+        this.out.log(CustomColors.cmd(`$ echo $(heroku autocomplete --shell zsh --script) >> ~/.zshrc`))
         break
       default:
-        this.out.log('Currently not a supported shell for autocomplete')
+        this.out.log(`Currently ${shell} not a supported shell for autocomplete`)
+        return
     }
     this.out.log()
     this.out.log('Lastly, restart your shell')

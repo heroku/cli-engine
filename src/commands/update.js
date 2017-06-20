@@ -63,12 +63,12 @@ export default class Update extends Command {
 
   async generateAutocompleteCommands () {
     try {
-      // move from cli to client dir if not already present
-      if (!fs.pathExistsSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'bash', 'heroku'))) {
-        const cli = path.join(this.config.dataDir, 'cli', 'autocomplete')
-        const client = path.join(this.config.dataDir, 'client', 'autocomplete')
-        fs.copySync(cli, client)
-      }
+      // TODO: move from cli to client dir if not already present
+      // if (!fs.pathExistsSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'bash', 'heroku'))) {
+      //   const cli = path.join(this.config.dataDir, 'cli', 'autocomplete')
+      //   const client = path.join(this.config.dataDir, 'client', 'autocomplete')
+      //   fs.copySync(cli, client)
+      // }
       const plugins = await new Plugins(this.out).list()
       const cmds = plugins.map(p => p.commands.map(c => {
         if (c.hidden) return
@@ -78,6 +78,7 @@ export default class Update extends Command {
         return `${namespace}${c.id}${flags}`
       }))
       const commands = flatten(cmds).filter(c => !!c).join('\n')
+      fs.mkdirpSync(path.join(this.config.dataDir, 'client', 'autocomplete'))
       fs.writeFileSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'commands'), commands)
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')
