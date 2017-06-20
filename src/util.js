@@ -14,15 +14,16 @@ export function compare (...props: any) {
   }
 }
 
-export function wait (ms: number) {
+export function wait (ms: number, unref: boolean = false) {
   return new Promise(resolve => {
-    setTimeout(resolve, ms)
+    let t: any = setTimeout(resolve, ms)
+    if (unref) t.unref()
   })
 }
 
 export function timeout (p: Promise<*>, ms: number) {
   return Promise.race([
     p,
-    wait(ms).then(() => debug('timed out'))
+    wait(ms, true).then(() => debug('timed out'))
   ])
 }
