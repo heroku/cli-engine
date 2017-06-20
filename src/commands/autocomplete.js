@@ -20,9 +20,9 @@ export default class Autocomplete extends Command {
       return
     }
 
-    const clientPath = path.join(this.config.dataDir, 'client')
+    const autocompletePath = path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
     if (this.flags.commands) {
-      this.out.log(path.join(clientPath, 'autocomplete', 'commands'))
+      this.out.log(path.join(autocompletePath, 'commands'))
       return
     }
     let shell = this.flags.shell
@@ -36,13 +36,13 @@ export default class Autocomplete extends Command {
       case 'bash':
         this.out.log('Symlink the autocomplete function via:')
         this.out.log()
-        let fnFile = path.join(clientPath, 'node_modules', 'cli-engine', 'autocomplete', 'bash', 'heroku')
+        let fnFile = path.join(autocompletePath, 'bash', 'heroku')
         this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
         break
       case 'zsh':
         if (this.flags.script) {
           this.out.log(`fpath=(
-  ${path.join(clientPath, 'node_modules', 'cli-engine', 'autocomplete', 'zsh')}
+  ${path.join(autocompletePath, 'zsh')}
   $fpath
 );
 autoload -Uz compinit;

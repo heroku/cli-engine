@@ -78,8 +78,7 @@ export default class Update extends Command {
         return `${namespace}${c.id}${flags}`
       }))
       const commands = flatten(cmds).filter(c => !!c).join('\n')
-      fs.mkdirpSync(path.join(this.config.dataDir, 'client', 'autocomplete'))
-      fs.writeFileSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'commands'), commands)
+      fs.writeFileSync(path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
