@@ -7,7 +7,6 @@ import Analytics from '../analytics'
 import Plugins from '../plugins'
 import fs from 'fs-extra'
 import path from 'path'
-import flatten from 'lodash.flatten'
 
 export default class Update extends Command {
   static topic = 'update'
@@ -62,6 +61,7 @@ export default class Update extends Command {
   }
 
   async generateAutocompleteCommands () {
+    const flatten = require('lodash.flatten')
     try {
       // TODO: move from cli to client dir if not already present
       // if (!fs.pathExistsSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'bash', 'heroku'))) {
@@ -70,14 +70,13 @@ export default class Update extends Command {
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(this.out).list()
-      const cmds = plugins.map(p => p.commands.map(c => {
-        if (c.hidden) return
-        let plublicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
-        let flags = plublicFlags.length ? ` ${plublicFlags}` : ''
+      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden).map(c => {
+        let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
+        let flags = publicFlags.length ? ` ${publicFlags}` : ''
         let namespace = p.namespace ? `${p.namespace}:` : ''
         return `${namespace}${c.id}${flags}`
       }))
-      const commands = flatten(cmds).filter(c => !!c).join('\n')
+      const commands = flatten(cmds).join('\n')
       fs.writeFileSync(path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')

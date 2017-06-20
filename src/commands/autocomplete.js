@@ -16,7 +16,7 @@ export default class Autocomplete extends Command {
 
   async run () {
     if (this.config.windows) {
-      this.out.warn('Autocomplete is not currently supported in Windows')
+      this.out.error('Autocomplete is not currently supported in Windows')
       return
     }
 
@@ -25,8 +25,8 @@ export default class Autocomplete extends Command {
       this.out.log(path.join(autocompletePath, 'commands'))
       return
     }
-    let shell = this.flags.shell
-    if (!shell) shell = this.config.shell
+
+    const shell = this.flags.shell || this.config.shell
     if (!shell) {
       this.out.error('Error: Missing required argument shell')
       return
@@ -54,7 +54,7 @@ compinit;`)
         this.out.log(CustomColors.cmd(`$ echo $(heroku autocomplete --shell zsh --script) >> ~/.zshrc`))
         break
       default:
-        this.out.log(`Currently ${shell} not a supported shell for autocomplete`)
+        this.out.error(`Currently ${shell} not a supported shell for autocomplete`)
         return
     }
     this.out.log()
