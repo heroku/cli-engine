@@ -7,6 +7,7 @@ import path from 'path'
 import Lock from './lock'
 import fs from 'fs-extra'
 import moment from 'moment'
+import {wait} from './util'
 
 const debug = require('debug')('cli-engine:updater')
 
@@ -118,6 +119,8 @@ export default class Updater {
     this._cleanup()
 
     let downgrade = await this.lock.upgrade()
+    // wait 1000ms for any commands that were partially loaded to finish loading
+    await wait(1000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
@@ -277,15 +280,31 @@ export default class Updater {
       if (!force && !this.autoupdateNeeded) return
       debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
-      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       const binPath = this.binPath
       if (!binPath) return debug('no binpath set')
       debug(`spawning autoupdate on ${binPath}`)
+      let fd = fs.openSync(this.autoupdatelogfile, 'a')
       const {spawn} = require('child_process')
-      spawn(binPath, ['update'], {detached: !this.config.windows, stdio: ['ignore', fd, fd]})
+      spawn(binPath, ['update', '--autoupdate'], {
+        detached: !this.config.windows,
+        stdio: ['ignore', fd, fd],
+        env: this.autoupdateEnv
+      })
         .on('error', e => this.out.warn(e, 'autoupdate:'))
         .unref()
     } catch (e) { this.out.warn(e, 'autoupdate:') }
+  }
+
+  get timestampEnvVar (): string {
+    // TODO: use function from cli-engine-config
+    let bin = this.config.bin.replace('-', '_').toUpperCase()
+    return `${bin}_TIMESTAMPS`
+  }
+
+  get autoupdateEnv (): {[k: string]: string} {
+    return Object.assign({}, process.env, {
+      [this.timestampEnvVar]: '1'
+    })
   }
 
   async warnIfUpdateAvailable () {

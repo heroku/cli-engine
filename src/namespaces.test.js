@@ -117,7 +117,7 @@ describe('CLI bin \'cli-engine\'', () => {
         // since heroku:debug is a topic-command
         // expect both command help and topic help
         expect(topicCommandHelp.out.stdout.output).toMatch(/^Usage: cli-engine heroku:debug(\n|\s)+Outputs debugging info$/m)
-        expect(topicCommandHelp.out.stdout.output).toMatch(/cli-engine heroku:debug commands:(\n\s)+heroku:debug +Outputs debugging info$/m)
+        expect(topicCommandHelp.out.stdout.output).toMatch(/cli-engine heroku:debug commands: \(get help with cli-engine help heroku:debug:COMMAND\)(\n\s)+heroku:debug +Outputs debugging info$/m)
         // make sure it didn't install w/o a namespace
         try {
           await run('debug')

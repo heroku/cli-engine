@@ -90,7 +90,7 @@ Example:
     heroku-cli-status 3.0.10 (link)
     heroku-fork 4.1.22
 
-cli-engine plugins commands:
+cli-engine plugins commands: (get help with cli-engine help plugins:COMMAND)
  plugins                   list installed plugins
  plugins:install PLUGIN    installs a plugin into the CLI
  plugins:link [PATH]       links a local plugin to the CLI for development
