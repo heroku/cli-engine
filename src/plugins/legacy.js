@@ -77,7 +77,8 @@ export function convertFromV5 (c: LegacyCommand) {
         apiToken: this.heroku.auth,
         apiHost: vars.apiHost,
         gitHost: vars.gitHost,
-        httpGitHost: vars.httpGitHost
+        httpGitHost: vars.httpGitHost,
+        cwd: process.cwd()
       }
       ctx.auth.password = ctx.apiToken
       return c.run(ctx)
