@@ -8,11 +8,6 @@ const channel = 'stable'
 
 const mockManifest = {}
 
-// flow$ignore
-Update.prototype.logChop = jest.fn()
-// flow$ignore
-Update.prototype.generateAutocompleteCommands = jest.fn()
-
 jest.mock('./plugins/update', () => {
   return class {
     static run = jest.fn()
@@ -67,7 +62,5 @@ cli-engine: Updating CLI from 1.0.0 to 1.0.1... done`)
     expect(mockAutoupdate).toBeCalled()
     expect(PluginsUpdate.run).toBeCalled()
     expect(mockFetchVersion).toBeCalled()
-    expect(Update.prototype.logChop).toBeCalled()
-    expect(Update.prototype.generateAutocompleteCommands).toBeCalled()
   })
 })
