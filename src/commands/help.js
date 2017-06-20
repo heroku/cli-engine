@@ -116,8 +116,10 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
   listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
+    commands.sort(compare('command'))
     let hasNamespace = this.plugins.findNamespaced(topic.split(':')[0]).length
-    this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands:`)
+    let helpCmd = this.out.color.cmd(`${this.config.bin} help ${topic}:COMMAND`)
+    this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands: (get help with ${helpCmd})`)
     this.out.log(renderList(commands.map(c => {
       // if namespaced, update topic name for proper help display
       if (hasNamespace) c.topic = topic
