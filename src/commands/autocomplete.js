@@ -54,7 +54,7 @@ compinit;`)
         this.out.log(CustomColors.cmd(`$ echo $(heroku autocomplete --shell zsh --script) >> ~/.zshrc`))
         break
       default:
-        this.out.error(`Currently ${shell} not a supported shell for autocomplete`)
+        this.out.error(`Currently ${shell} is not a supported shell for autocomplete`)
         return
     }
     this.out.log()
