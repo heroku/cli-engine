@@ -9,6 +9,7 @@ export default class Autocomplete extends Command {
   static description = 'autocomplete installation instructions'
   static hidden = true
   static flags = {
+    apps: flags.boolean({hidden: true}),
     commands: flags.boolean({hidden: true}),
     script: flags.boolean({hidden: true}),
     shell: flags.string({description: 'shell to use', char: 's'})
@@ -23,6 +24,11 @@ export default class Autocomplete extends Command {
     const autocompletePath = path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
     if (this.flags.commands) {
       this.out.log(path.join(autocompletePath, 'commands'))
+      return
+    }
+
+    if (this.flags.apps) {
+      this.out.log(path.join(autocompletePath, 'apps'))
       return
     }
 
