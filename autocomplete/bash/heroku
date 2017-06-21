@@ -1,0 +1,25 @@
+#!/bin/bash
+
+COMMANDS_PATH=$(heroku autocomplete --commands)
+
+_heroku()
+{
+    local cur opts
+    COMPREPLY=()
+
+    if [[ "${COMP_CWORD}" -eq 1 ]] ; then
+        OLD_BREAKS=${COMP_WORDBREAKS}
+        COMP_WORDBREAKS=$"\"'@><=;|&("
+        cur=${COMP_WORDS[COMP_CWORD]}
+        opts=$(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH)
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        COMP_WORDBREAKS=${OLD_BREAKS}
+    else
+        cur=${COMP_WORDS[COMP_CWORD]}
+        opts=$(grep "${COMP_WORDS[1]}" $COMMANDS_PATH | sed -n "s/^${COMP_WORDS[1]} //p")
+        COMPREPLY=( $(compgen -W  "${opts}" -- ${cur}) )
+    fi
+    return 0
+}
+
+complete -F _heroku heroku
