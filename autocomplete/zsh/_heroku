@@ -1,6 +1,6 @@
 #compdef heroku
 
-COMMANDS_PATH=$(heroku autocomplete --commands)
+COMMANDS_PATH=$(heroku autocomplete:commandspath)
 APPS_PATH=$(heroku autocomplete --apps)
 
 _flags () {

@@ -92,7 +92,7 @@ export default class Update extends Command {
     const Netrc = require('netrc-parser')
     let netrc = new Netrc()
     try {
-      const token =  netrc.machines[vars.apiHost].password || ''
+      const token = netrc.machines[vars.apiHost].password || ''
       const apps = await this.http.get('https://api.heroku.com/users/~/apps', { headers: {
         'Authorization': `Bearer ${token}`,
         'accept': 'application/vnd.heroku+json; version=3',
