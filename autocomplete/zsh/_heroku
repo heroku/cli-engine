@@ -1,0 +1,26 @@
+#compdef heroku
+
+COMMANDS_PATH=$(heroku autocomplete --commands)
+
+_flags () {
+  compadd "$@" - $(grep "$words[2]" $COMMANDS_PATH | sed -n "s/^$words[2] //p")
+}
+
+_command_id () {
+  _arguments "1:commands:($(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH))"
+}
+
+_heroku() {
+  local state
+
+  _arguments \
+    '1: :->command_id'\
+    '*: :->flags'
+
+  case $state in
+    (command_id) _command_id ;;
+    (*) _flags ;;
+  esac
+}
+
+_heroku "$@"
