@@ -38,10 +38,11 @@ export default class Autocomplete extends AutocompleteBase {
 
     switch (shell) {
       case 'bash':
-        this.out.log('Symlink the autocomplete function via:')
-        this.out.log()
-        let fnFile = path.join(this.autocompletePath, 'bash', 'heroku')
-        this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
+        this.out.log('Bash autocomplete coming soon')
+        // this.out.log('Symlink the autocomplete function via:')
+        // this.out.log()
+        // let fnFile = path.join(this.autocompletePath, 'bash', 'heroku')
+        // this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
         break
       case 'zsh':
         if (this.flags.script) {
