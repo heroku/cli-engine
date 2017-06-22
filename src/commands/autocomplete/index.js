@@ -3,9 +3,18 @@
 import Command, {flags} from 'cli-engine-command'
 import path from 'path'
 import {CustomColors} from 'cli-engine-command/lib/output'
-import AutocompleteUtil from '../../autocomplete'
 
-export default class Autocomplete extends Command {
+function autocompletePath (datadir: string): string {
+  return path.join(datadir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
+}
+
+export class AutocompleteBase extends Command {
+  get autocompletePath (): string {
+    return autocompletePath(this.config.dataDir)
+  }
+}
+
+export default class Autocomplete extends AutocompleteBase {
   static topic = 'autocomplete'
   static description = 'autocomplete instructions and scripts'
   // hide until beta release
@@ -14,10 +23,6 @@ export default class Autocomplete extends Command {
     script: flags.boolean({hidden: true})
   }
   static args = [{name: 'shell', description: 'shell type', required: false}]
-
-  get autocompletePath (): string {
-    return AutocompleteUtil.autocompletePath(this.config.dataDir)
-  }
 
   async run () {
     if (this.config.windows) {

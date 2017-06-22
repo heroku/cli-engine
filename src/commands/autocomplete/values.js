@@ -2,18 +2,20 @@
 
 import Command, {flags} from 'cli-engine-command'
 import Plugins from '../../plugins'
+import ACCache from '../../cache'
+import path from 'path'
 
 export default class AutocompleteValues extends Command {
   static topic = 'autocomplete'
-  static commands = 'values'
+  static command = 'values'
   static description = 'generates autocomplete values'
   static hidden = true
   static flags = {
+    // don't require cmd or flag
+    // we want it to fail silently
+    // or autocomplete gets weird
     cmd: flags.string({description: '', char: 'c'}),
-    flag: flags.string({description: '', char: 'f'}),
-    app: flags.string({values: function (): string {
-      return 'foo\nbar\nbaz'
-    }})
+    flag: flags.string({description: '', char: 'f'})
   }
 
   async run () {
@@ -26,12 +28,14 @@ export default class AutocompleteValues extends Command {
       const plugins = new Plugins(this.out)
       await plugins.load()
       let Command = await plugins.findCommand(this.flags.cmd)
-      if (!Command || !this.flags.flag) {
-        return
-      }
+      if (!Command || !this.flags.flag) return
       let long = this.flags.flag.replace(/-+/, '')
-      // use this current Command for testing
-      this.out.log(this.constructor.flags[long].values() || '')
+      let flag = Command.flags[long]
+      if (flag && flag.completions && flag.completions.options) {
+        let flagCache = path.join(this.config.cacheDir, 'completions', long)
+        let apps = await ACCache.get(flagCache, flag.completions.cacheDuration, flag.completions.options)
+        this.out.log((apps || []).join('\n'))
+      }
     }
   }
 }
