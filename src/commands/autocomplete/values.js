@@ -33,7 +33,13 @@ export default class AutocompleteValues extends Command {
       let flag = Command.flags[long]
       if (flag && flag.completions && flag.completions.options) {
         let flagCache = path.join(this.config.cacheDir, 'completions', long)
-        let apps = await ACCache.get(flagCache, flag.completions.cacheDuration, flag.completions.options)
+        let apps
+        try {
+          apps = await ACCache.fetch(flagCache, flag.completions.cacheDuration, flag.completions.options)
+        } catch (err) {
+          // fail silently
+          // or autocomplete gets weird
+        }
         this.out.log((apps || []).join('\n'))
       }
     }

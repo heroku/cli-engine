@@ -6,19 +6,15 @@ import fs from 'fs-extra'
 import moment from 'moment'
 
 export default class {
-  static async get (cachePath: string, cacheDuration: ?number, cacheFn: any): Promise<?Array<?string>> {
+  static async fetch (cachePath: string, cacheDuration: ?number, cacheFn: any): Promise<?Array<?string>> {
     let cache
     let cachePresent = await fs.exists(cachePath)
-    try {
-      if (cachePresent) {
-        cache = await fs.readJSON(cachePath)
-        if (this._isStale(cachePath, cacheDuration)) this._updateCache(cachePath, cacheFn)
-        return cache
-      }
-      return await this._updateCache(cachePath, cacheFn)
-    } catch (err) {
-      return []
+    if (cachePresent) {
+      cache = await fs.readJSON(cachePath)
+      if (this._isStale(cachePath, cacheDuration)) this._updateCache(cachePath, cacheFn)
+      return cache
     }
+    return await this._updateCache(cachePath, cacheFn)
   }
 
   static async _updateCache (cachePath: string, cacheFn: any): Promise<?Array<?string>> {
@@ -31,7 +27,7 @@ export default class {
 
   static _isStale (cachePath: string, cacheDuration: ?number): boolean {
     if (!cacheDuration) return false
-    return this._mtime(cachePath).isBefore(moment().subtract(cacheDuration, 'second'))
+    return this._mtime(cachePath).isBefore(moment().subtract(cacheDuration, 'seconds'))
   }
 
   static _mtime (f) {
