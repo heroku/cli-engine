@@ -52,7 +52,6 @@ export default class Update extends Command {
     await PluginsUpdate.run({config: this.config, output: this.out})
     await this.logChop()
     await this.generateAutocompleteCommands()
-    await this.generateAutocompleteApps()
   }
 
   async logChop () {
@@ -83,25 +82,6 @@ export default class Update extends Command {
       fs.writeFileSync(path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')
-      this.out.debug(e.message)
-    }
-  }
-
-  async generateAutocompleteApps () {
-    if (this.config.windows) return
-    const Netrc = require('netrc-parser')
-    let netrc = new Netrc()
-    try {
-      const token = netrc.machines[vars.apiHost].password || ''
-      const apps = await this.http.get('https://api.heroku.com/users/~/apps', { headers: {
-        'Authorization': `Bearer ${token}`,
-        'accept': 'application/vnd.heroku+json; version=3',
-        'content-type': 'application/json'}
-      })
-      const appNames = apps.map(a => a.name).join('\n')
-      fs.writeFileSync(path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'apps'), appNames)
-    } catch (e) {
-      this.out.debug('Error creating autocomplete apps')
       this.out.debug(e.message)
     }
   }

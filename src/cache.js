@@ -1,5 +1,7 @@
 // @flow
 
+// TODO: move to its own package
+
 import fs from 'fs-extra'
 import moment from 'moment'
 
