@@ -1,11 +1,12 @@
 // @flow
 
-import Command, {flags} from 'cli-engine-command'
+import {flags} from 'cli-engine-command'
+import HerokuCommand from 'cli-engine-heorku'
 import Plugins from '../../plugins'
 import ACCache from '../../cache'
 import path from 'path'
 
-export default class AutocompleteValues extends Command {
+export default class AutocompleteValues extends HerokuCommand {
   static topic = 'autocomplete'
   static command = 'values'
   static description = 'generates autocomplete values'
@@ -35,7 +36,9 @@ export default class AutocompleteValues extends Command {
         let flagCache = path.join(this.config.cacheDir, 'completions', long)
         let apps
         try {
-          apps = await ACCache.fetch(flagCache, flag.completions.cacheDuration, flag.completions.options)
+          let duration = flag.completions.cacheDuration
+          let opts = {cacheFn: flag.completions.options, cacheFnArg: this.heroku}
+          apps = await ACCache.fetch(flagCache, duration, opts)
         } catch (err) {
           // fail silently
           // or autocomplete gets weird

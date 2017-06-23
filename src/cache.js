@@ -6,13 +6,13 @@ import fs from 'fs-extra'
 import moment from 'moment'
 
 export default class {
-  static async fetch (cachePath: string, cacheDuration: ?number, cacheFn: any): Promise<?Array<?string>> {
+  static async fetch (cachePath: string, cacheDuration: ?number, options: any = {}): Promise<?Array<?string>> {
     let cache
     let cachePresent = await fs.exists(cachePath)
     if (cachePresent) {
       if (this._isStale(cachePath, cacheDuration)) {
         // TODO: move this to a fork
-        let cache = await cacheFn()
+        let cache = await options.cacheFn(options.cacheFnArg)
         this._updateCache(cachePath, cache)
         // until TODO complete, return fresh cache
         return cache
@@ -20,7 +20,7 @@ export default class {
       cache = await fs.readJSON(cachePath)
       return cache
     }
-    cache = await cacheFn()
+    cache = await options.cacheFn(options.cacheFnArg)
     // TODO: move this to a fork
     this._updateCache(cachePath, cache)
     return cache
