@@ -10,19 +10,25 @@ export default class {
     let cache
     let cachePresent = await fs.exists(cachePath)
     if (cachePresent) {
+      if (this._isStale(cachePath, cacheDuration)) {
+        // TODO: move this to a fork
+        let cache = await cacheFn()
+        this._updateCache(cachePath, cache)
+        // until TODO complete, return fresh cache
+        return cache
+      }
       cache = await fs.readJSON(cachePath)
-      if (this._isStale(cachePath, cacheDuration)) this._updateCache(cachePath, cacheFn)
       return cache
     }
-    return await this._updateCache(cachePath, cacheFn)
+    cache = await cacheFn()
+    // TODO: move this to a fork
+    this._updateCache(cachePath, cache)
+    return cache
   }
 
-  static async _updateCache (cachePath: string, cacheFn: any): Promise<?Array<?string>> {
-    if (!cacheFn) return
+  static async _updateCache (cachePath: string, cache: ?any) {
     await fs.ensureFile(cachePath)
-    let cache = await cacheFn()
-    fs.writeJSON(cachePath, cache)
-    return cache
+    await fs.writeJSON(cachePath, cache)
   }
 
   static _isStale (cachePath: string, cacheDuration: ?number): boolean {
