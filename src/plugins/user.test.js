@@ -3,6 +3,7 @@
 import Plugins from '../plugins'
 import {tmpDirs} from '../../test/helpers'
 import CLI from '../cli'
+import Yarn from './yarn'
 
 const path = require('path')
 const fs = require('fs-extra')
@@ -116,4 +117,72 @@ test('plugins should be reloaded when node_version changed', async () => {
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['node_version']).toEqual(process.version)
+})
+
+test('problematic version of semver should be overwritten', async () => {
+  await tmpDir.plugins.install('heroku-kafka', '2.9.8')
+  await tmpDir.plugins.install('heroku-pg-extras', '1.0.11')
+
+  // remove the cache that tmpDirs creates
+  let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
+  fs.removeSync(pluginsJsonPath)
+
+  let plugins = new Plugins(tmpDir.output)
+  await plugins.load()
+
+  let semverPath = path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'semver')
+  let pluginsList = await plugins.list()
+
+  let semverPlugin = pluginsList.find((plugin) => plugin.path === semverPath)
+  expect(semverPlugin).toBeUndefined()
+
+  let pluginsJson = fs.readJSONSync(pluginsJsonPath)
+  expect(pluginsJson['node_version']).toEqual(process.version)
+})
+
+test('problematic version of semver from previous release should be overwritten', async () => {
+  await tmpDir.plugins.install('heroku-kafka', '2.9.8')
+  await tmpDir.plugins.install('heroku-pg-extras', '1.0.11')
+
+  // remove the cache that tmpDirs creates
+  let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
+  fs.removeSync(pluginsJsonPath)
+
+  let yarn = new Yarn(tmpDir.output, tmpDir.plugins.user.userPluginsDir)
+
+  try {
+    // put our installation in the same state as the failed updates
+    await yarn.exec(['install', '--force'])
+  } catch (err) {}
+
+  let plugins = new Plugins(tmpDir.output)
+  await plugins.load()
+
+  let pluginsJson = fs.readJSONSync(pluginsJsonPath)
+  expect(pluginsJson['node_version']).toEqual(process.version)
+})
+
+test('plugins should be loaded when things cannot be rebuilt', async () => {
+  await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
+
+  let dataDir = tmpDir.dataDir
+  let plugins = path.join(dataDir, 'plugins')
+
+  // force a rebuild because of missing plugins.json
+  let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
+  fs.removeSync(pluginsJsonPath)
+
+  // make the yarn install --force fail
+  let packageJsonPath = path.join(plugins, 'package.json')
+  fs.writeFileSync(packageJsonPath, '')
+
+  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  try {
+    await cli.run()
+  } catch (err) {
+    if (err.code !== 0) throw err
+  }
+
+  let pluginsJson = fs.readJSONSync(pluginsJsonPath)
+  expect(pluginsJson['node_version']).toBeNull()
 })

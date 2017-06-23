@@ -168,10 +168,17 @@ export default class LinkedPlugins extends Manager {
     this.out.action.stop()
   }
 
-  async handleNodeVersionChange () {
+  async handleNodeVersionChange (): Promise<boolean> {
+    let handled = true
     for (let p of this._data.plugins) {
-      await this._install(p, true)
+      try {
+        await this._install(p, true)
+      } catch (err) {
+        this.out.warn(err)
+        handled = false
+      }
     }
+    return handled
   }
 
   checkLinked (p: string) {

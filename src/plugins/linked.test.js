@@ -162,3 +162,26 @@ test('plugins should be reloaded when node_version changed', async () => {
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['node_version']).toEqual(process.version)
 })
+
+test('plugins should be loaded when things cannot be rebuilt', async () => {
+  let linkPath = copyLink('1_hello_world')
+  await tmpDir.plugins.addLinkedPlugin(linkPath)
+
+  // force a rebuild because of missing plugins.json
+  let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
+  fs.removeSync(pluginsJsonPath)
+
+  // make the yarn install --force fail
+  let packageJsonPath = path.join(linkPath, 'package.json')
+  fs.writeFileSync(packageJsonPath, '')
+
+  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  try {
+    await cli.run()
+  } catch (err) {
+    if (err.code !== 0) throw err
+  }
+
+  let pluginsJson = fs.readJSONSync(pluginsJsonPath)
+  expect(pluginsJson['node_version']).toBeNull()
+})

@@ -1,8 +1,7 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
-import Plugins from '.'
+import {PluginsBase} from '.'
 import UserPlugins from './user'
 import path from 'path'
 import fs from 'fs-extra'
@@ -10,16 +9,14 @@ import fs from 'fs-extra'
 const debug = require('debug')('cli-engine:migrator')
 
 export default class {
-  plugins: Plugins
+  plugins: PluginsBase
   userPlugins: UserPlugins
-  config: Config
   out: Output
 
-  constructor (plugins: Plugins, config: Config) {
-    this.plugins = plugins
-    this.config = config
-    this.userPlugins = plugins.user
-    this.out = plugins.out
+  constructor (out: Output) {
+    this.plugins = new PluginsBase(out)
+    this.userPlugins = this.plugins.user
+    this.out = out
   }
 
   async run () {
@@ -34,8 +31,6 @@ export default class {
       debug(`installing ${p.name}`)
       await this._installPlugin(p.name, p.tag)
     }
-    this.plugins.loaded = false
-    await this.plugins.load()
     this.out.action.stop()
   }
 

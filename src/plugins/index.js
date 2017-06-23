@@ -13,7 +13,7 @@ import Cache, {type CachedCommand, type CachedTopic} from './cache'
 import Namespaces from '../namespaces'
 import Lock from '../lock'
 
-export default class Plugins {
+export class PluginsBase {
   builtin: BuiltinPlugins
   linked: LinkedPlugins
   user: UserPlugins
@@ -23,6 +23,7 @@ export default class Plugins {
   out: Output
   lock: Lock
   loaded: boolean
+  config: Config
 
   constructor (output: Output) {
     this.out = output
@@ -36,6 +37,42 @@ export default class Plugins {
     this.lock = new Lock(this.out)
   }
 
+  clearCache (...paths: string[]) {
+    this.cache.deletePlugin(...paths)
+  }
+
+  async _installCheck (name: string, tag: string) {
+    // will be overridden in Plugins
+  }
+
+  async install (name: string, tag: string = 'latest') {
+    let downgrade = await this.lock.upgrade()
+
+    await this._installCheck(name, tag)
+
+    let path = await this.user.install(name, tag)
+    this.clearCache(path)
+    await downgrade()
+  }
+
+  async _addLinkedPluginCheck (p: string) {
+    // will be overridden in Plugins
+  }
+
+  async addLinkedPlugin (p: string) {
+    let downgrade = await this.lock.upgrade()
+
+    await this._addLinkedPluginCheck(p)
+
+    Namespaces.throwErrorIfNotPermitted(p, this.config)
+
+    await this.linked.add(p)
+    this.clearCache(p)
+    await downgrade()
+  }
+}
+
+export default class Plugins extends PluginsBase {
   async load () {
     if (this.loaded) return
     this.plugins = await this.cache.fetchManagers(
@@ -112,13 +149,9 @@ export default class Plugins {
     return this.plugins.filter(p => p.namespace === namespace)
   }
 
-  async install (name: string, tag: string = 'latest') {
+  async _installCheck (name: string, tag: string) {
     await this.load()
-    let downgrade = await this.lock.upgrade()
     if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
-    let path = await this.user.install(name, tag)
-    this.clearCache(path)
-    await downgrade()
   }
 
   async update () {
@@ -156,27 +189,15 @@ export default class Plugins {
     this.user.addPackageToPJSON(name, version)
   }
 
-  async addLinkedPlugin (p: string) {
-    await this.load()
-    let downgrade = await this.lock.upgrade()
+  async _addLinkedPluginCheck (p: string) {
     let name = this.linked.checkLinked(p)
+    await this.load()
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
-    Namespaces.throwErrorIfNotPermitted(p, this.config)
-
-    await this.linked.add(p)
-    this.clearCache(p)
-    await downgrade()
-  }
-
-  clearCache (...paths: string[]) {
-    this.cache.deletePlugin(...paths)
   }
 
   get topics (): CachedTopic[] {
     return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
-
-  config: Config
 }

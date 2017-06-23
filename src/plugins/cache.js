@@ -129,15 +129,18 @@ export default class Cache {
     let plugins = []
     if (this.cache.node_version !== process.version) {
       let lock = new Lock(this.out)
+      let handled = true
 
       let downgrade = await lock.upgrade()
       for (let manager of managers) {
-        await manager.handleNodeVersionChange()
+        handled = await manager.handleNodeVersionChange() && handled
       }
       await downgrade()
 
-      this.cache.node_version = process.version
-      this.constructor.updated = true
+      if (handled) {
+        this.cache.node_version = process.version
+        this.constructor.updated = true
+      }
     }
 
     for (let manager of managers) {
