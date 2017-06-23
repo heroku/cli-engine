@@ -111,7 +111,6 @@ export class PluginPath {
   async require (): Promise<ParsedPlugin> {
     let required
     try {
-      // flow$ignore
       required = require(this.path)
     } catch (err) {
       if (await this.repair(err)) return this.require()
@@ -134,7 +133,6 @@ export class PluginPath {
       return {name: 'builtin', version: this.config.version}
     }
 
-    // flow$ignore
     return require(path.join(this.path, 'package.json'))
   }
 
