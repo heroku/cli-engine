@@ -53,7 +53,6 @@ export default class LinkedPlugins extends Manager {
 
     await this.prepare(p)
 
-    // flow$ignore
     let m = require(p)
     if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
 
@@ -174,7 +173,6 @@ export default class LinkedPlugins extends Manager {
     return this._pjson(p).name
   }
 
-  // flow$ignore
   _pjson (p: string): PJSON { return require(path.join(p, 'package.json')) }
 
   get file (): string { return path.join(this.config.dataDir, 'linked_plugins.json') }
