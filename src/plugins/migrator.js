@@ -34,7 +34,6 @@ export default class {
       debug(`installing ${p.name}`)
       await this._installPlugin(p.name, p.tag)
     }
-    await this.userPlugins.yarn.exec(['install', '--force'])
     this.plugins.loaded = false
     await this.plugins.load()
     this.out.action.stop()
