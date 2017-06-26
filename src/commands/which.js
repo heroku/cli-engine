@@ -14,8 +14,7 @@ export default class extends Command {
   async run () {
     this.plugins = new Plugins(this.out)
     const [command] = this.argv
-    const plugins = await this.plugins.list()
-    const plugin = plugins.findPluginWithCommand(command)
+    const plugin = await this.plugins.findPluginWithCommand(command)
     if (!plugin) throw new Error('not found')
     if (plugin.type === 'builtin') {
       this.out.log('builtin command')
