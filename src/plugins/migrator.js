@@ -1,7 +1,7 @@
 // @flow
 
 import Output from 'cli-engine-command/lib/output'
-import {PluginsBase} from '.'
+import Plugins from '.'
 import UserPlugins from './user'
 import path from 'path'
 import fs from 'fs-extra'
@@ -9,12 +9,12 @@ import fs from 'fs-extra'
 const debug = require('debug')('cli-engine:migrator')
 
 export default class {
-  plugins: PluginsBase
+  plugins: Plugins
   userPlugins: UserPlugins
   out: Output
 
   constructor (out: Output) {
-    this.plugins = new PluginsBase(out)
+    this.plugins = new Plugins(out, {migrating: true})
     this.userPlugins = this.plugins.user
     this.out = out
   }
