@@ -161,9 +161,10 @@ export default class Plugins {
 
   async addLinkedPlugin (p: string) {
     let downgrade = await this.lock.upgrade()
-    let name = this.linked.checkLinked(p)
 
     await this.load()
+    let name = this.linked.checkLinked(p)
+
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
