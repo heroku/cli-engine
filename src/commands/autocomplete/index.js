@@ -8,6 +8,12 @@ export class AutocompleteBase extends Command {
   get autocompletePath (): string {
     return path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
   }
+
+  function errorIfWindows () {
+    if (this.config.windows) {
+      this.out.error('Autocomplete is not currently supported in Windows')
+    }
+  }
 }
 
 export default class Autocomplete extends AutocompleteBase {
@@ -18,10 +24,7 @@ export default class Autocomplete extends AutocompleteBase {
   static args = [{name: 'shell', description: 'shell type', required: false}]
 
   async run () {
-    if (this.config.windows) {
-      this.out.error('Autocomplete is not currently supported in Windows')
-      return
-    }
+    this.errorIfWindows()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {

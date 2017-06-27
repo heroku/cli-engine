@@ -14,9 +14,7 @@ export default class InstallScript extends AutocompleteBase {
   static args = [{name: 'shell', description: 'shell type', required: false}]
 
   async run () {
-    if (this.config.windows) {
-      this.out.error('Autocomplete is not currently supported in Windows')
-    }
+    this.errorIfWindows()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {

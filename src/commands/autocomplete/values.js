@@ -1,11 +1,12 @@
 // @flow
 
-import Command, {flags} from 'cli-engine-command'
+import {flags} from 'cli-engine-command'
+import AutocompleteBase from '.'
 import Plugins from '../../plugins'
 import ACCache from '../../cache'
 import path from 'path'
 
-export default class AutocompleteValues extends Command {
+export default class AutocompleteValues extends AutocompleteBase {
   static topic = 'autocomplete'
   static command = 'values'
   static description = 'generates autocomplete values'
@@ -21,10 +22,7 @@ export default class AutocompleteValues extends Command {
 
   async run () {
     try {
-      if (this.config.windows) {
-        this.out.error('Autocomplete is not currently supported in Windows')
-        return
-      }
+      this.errorIfWindows()
 
       if (this.flags.cmd) {
         const plugins = new Plugins(this.out)

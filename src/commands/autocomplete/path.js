@@ -10,8 +10,7 @@ export default class AutocompletePath extends AutocompleteBase {
   static hidden = true
 
   async run () {
-    if (this.config.windows) {
-      this.out.error('Autocomplete is not currently supported in Windows')
-    } else this.out.log(path.join(this.autocompletePath, 'commands'))
+    this.errorIfWindows()
+    this.out.log(path.join(this.autocompletePath, 'commands'))
   }
 }
