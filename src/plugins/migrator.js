@@ -1,21 +1,23 @@
 // @flow
 
 import Output from 'cli-engine-command/lib/output'
-import Plugins from '.'
 import UserPlugins from './user'
+import LinkedPlugins from './linked'
+import PluginCache from './cache'
 import path from 'path'
 import fs from 'fs-extra'
 
 const debug = require('debug')('cli-engine:migrator')
 
 export default class {
-  plugins: Plugins
   userPlugins: UserPlugins
+  linkedPlugins: LinkedPlugins
   out: Output
 
   constructor (out: Output) {
-    this.plugins = new Plugins(out, {migrating: true})
-    this.userPlugins = this.plugins.user
+    let cache = new PluginCache(out)
+    this.userPlugins = new UserPlugins({out, config: out.config, cache})
+    this.linkedPlugins = new LinkedPlugins({out, config: out.config, cache})
     this.out = out
   }
 
@@ -49,7 +51,7 @@ export default class {
         await this._reinstallViaSymlink(name)
       } else {
         if (tag === '') tag = 'latest'
-        await this.plugins.install(name)
+        await this.userPlugins.install(name)
       }
     } catch (err) {
       this.out.warn(err)
@@ -59,6 +61,6 @@ export default class {
   async _reinstallViaSymlink (name: string) {
     debug(`Installing via symlink: ${name}`)
     let pluginPath = fs.realpathSync(this.userPlugins.userPluginPath(name))
-    await this.plugins.addLinkedPlugin(pluginPath)
+    await this.linkedPlugins.add(pluginPath)
   }
 }
