@@ -127,6 +127,9 @@ test('problematic version of semver should be overwritten', async () => {
   let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
   fs.removeSync(pluginsJsonPath)
 
+  let snappyBuild = path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'snappy', 'build')
+  fs.removeSync(snappyBuild)
+
   let plugins = new Plugins(tmpDir.output)
   await plugins.load()
 
@@ -138,6 +141,8 @@ test('problematic version of semver should be overwritten', async () => {
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['node_version']).toEqual(process.version)
+
+  expect(fs.existsSync(snappyBuild)).toEqual(true)
 })
 
 test('problematic version of semver from previous release should be overwritten', async () => {
@@ -148,18 +153,24 @@ test('problematic version of semver from previous release should be overwritten'
   let pluginsJsonPath = path.join(tmpDir.cacheDir, 'plugins.json')
   fs.removeSync(pluginsJsonPath)
 
-  let yarn = new Yarn(tmpDir.output, tmpDir.plugins.user.userPluginsDir)
+  let pluginsDir = tmpDir.plugins.user.userPluginsDir
+  let yarn = new Yarn(tmpDir.output, pluginsDir)
 
   try {
     // put our installation in the same state as the failed updates
     await yarn.exec(['install', '--force'])
   } catch (err) {}
 
+  let snappyBuild = path.join(pluginsDir, 'node_modules', 'snappy', 'build')
+  fs.removeSync(snappyBuild)
+
   let plugins = new Plugins(tmpDir.output)
   await plugins.load()
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['node_version']).toEqual(process.version)
+
+  expect(fs.existsSync(snappyBuild)).toEqual(true)
 })
 
 test('plugins should be loaded when things cannot be rebuilt', async () => {
@@ -184,5 +195,5 @@ test('plugins should be loaded when things cannot be rebuilt', async () => {
   }
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
-  expect(pluginsJson['node_version']).toBeNull()
+  expect(pluginsJson['node_version']).toEqual(process.version)
 })

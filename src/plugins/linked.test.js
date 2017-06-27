@@ -183,5 +183,5 @@ test('plugins should be loaded when things cannot be rebuilt', async () => {
   }
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
-  expect(pluginsJson['node_version']).toBeNull()
+  expect(pluginsJson['node_version']).toEqual(process.version)
 })

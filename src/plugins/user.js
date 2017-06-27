@@ -124,13 +124,11 @@ export default class UserPlugins extends Manager {
     }
   }
 
-  async handleNodeVersionChange (): Promise<boolean> {
+  async handleNodeVersionChange () {
     try {
       await this.installForce()
-      return true
     } catch (err) {
       this.out.warn(err)
-      return false
     }
   }
 

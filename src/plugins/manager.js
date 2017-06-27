@@ -157,8 +157,7 @@ export class Manager {
     throw new Error('abstract method Manager.list')
   }
 
-  async handleNodeVersionChange (): Promise<boolean> {
+  async handleNodeVersionChange () {
     // user and linked will override
-    return true
   }
 }
