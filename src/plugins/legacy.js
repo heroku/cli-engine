@@ -83,7 +83,9 @@ export function convertFromV5 (c: LegacyCommand) {
       ctx.auth.password = ctx.apiToken
       const ansi = require('ansi-escapes')
       process.once('exit', () => {
-        process.stderr.write(ansi.cursorShow)
+        if (process.stderr.isTTY) {
+          process.stderr.write(ansi.cursorShow)
+        }
       })
       return c.run(ctx)
     }
