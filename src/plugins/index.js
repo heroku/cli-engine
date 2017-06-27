@@ -13,10 +13,6 @@ import Cache, {type CachedCommand, type CachedTopic} from './cache'
 import Namespaces from '../namespaces'
 import Lock from '../lock'
 
-type PluginsOptions = {
-  migrating: boolean
-}
-
 export default class Plugins {
   builtin: BuiltinPlugins
   linked: LinkedPlugins
@@ -28,13 +24,11 @@ export default class Plugins {
   lock: Lock
   loaded: boolean
   config: Config
-  migrating: boolean
 
-  constructor (output: Output, options: PluginsOptions = {migrating: false}) {
+  constructor (output: Output) {
     this.out = output
     this.config = output.config
     this.cache = new Cache(output)
-    this.migrating = options.migrating
 
     this.builtin = new BuiltinPlugins(this)
     this.linked = new LinkedPlugins(this)
@@ -44,10 +38,6 @@ export default class Plugins {
   }
 
   async load () {
-    if (this.migrating) {
-      throw new Error('Cannot load plugins while migrating')
-    }
-
     if (this.loaded) return
     this.plugins = await this.cache.fetchManagers(
       this.builtin,
@@ -126,10 +116,8 @@ export default class Plugins {
   async install (name: string, tag: string = 'latest') {
     let downgrade = await this.lock.upgrade()
 
-    if (!this.migrating) {
-      await this.load()
-      if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
-    }
+    await this.load()
+    if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
 
     let path = await this.user.install(name, tag)
     this.clearCache(path)
@@ -175,11 +163,9 @@ export default class Plugins {
     let downgrade = await this.lock.upgrade()
     let name = this.linked.checkLinked(p)
 
-    if (!this.migrating) {
-      await this.load()
-      if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
-        throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
-      }
+    await this.load()
+    if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
+      throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
 
     Namespaces.throwErrorIfNotPermitted(p, this.config)
