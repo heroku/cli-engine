@@ -10,6 +10,7 @@ import path from 'path'
 
 export default class Update extends Command {
   static topic = 'update'
+	static description = 'Updates the Heroku CLI'
   static args = [
     {name: 'channel', optional: true}
   ]
