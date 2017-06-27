@@ -10,7 +10,7 @@ const fs = require('fs-extra')
 
 jest.unmock('fs-extra')
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
 let tmpDir
 beforeEach(async () => {
@@ -120,6 +120,8 @@ test('plugins should be reloaded when node_version changed', async () => {
 })
 
 test('problematic version of semver should be overwritten', async () => {
+  if (tmpDir.config.windows) return // cannot remove snappy dir when loaded
+
   await tmpDir.plugins.install('heroku-kafka', '2.9.8')
   await tmpDir.plugins.install('heroku-pg-extras', '1.0.11')
 
@@ -146,6 +148,8 @@ test('problematic version of semver should be overwritten', async () => {
 })
 
 test('problematic version of semver from previous release should be overwritten', async () => {
+  if (tmpDir.config.windows) return // cannot remove snappy dir when loaded
+
   await tmpDir.plugins.install('heroku-kafka', '2.9.8')
   await tmpDir.plugins.install('heroku-pg-extras', '1.0.11')
 
@@ -174,6 +178,8 @@ test('problematic version of semver from previous release should be overwritten'
 })
 
 test('plugins should be loaded when things cannot be rebuilt', async () => {
+  if (tmpDir.config.windows) return // cannot remove package.json when loaded
+
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
