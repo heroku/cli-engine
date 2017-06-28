@@ -8,6 +8,7 @@ import AutocompleteScript from './autocomplete/script'
 
 export default class Update extends Command {
   static topic = 'update'
+  static description = 'update the Heroku CLI'
   static args = [
     {name: 'channel', optional: true}
   ]

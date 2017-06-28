@@ -6,7 +6,7 @@ import Plugins from '../../plugins'
 export default class PluginsUpdate extends Command {
   static topic = 'plugins'
   static command = 'update'
-  static description = 'updates installed plugins'
+  static description = 'update installed plugins'
 
   plugins: Plugins
 
