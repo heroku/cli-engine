@@ -27,6 +27,7 @@ _heroku() {
       l=${#words[@]}
       case ${words[l-1]} in
          (--app) _apps;;
+         (-a) _apps;;
          (*) _flags;;
       esac
       ;;
