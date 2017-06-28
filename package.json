@@ -51,9 +51,9 @@
     "flow-copy-source": "1.1.0",
     "flow-typed": "2.1.2",
     "got": "7.0.0",
-    "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",
-    "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
-    "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
+    "heroku-debug-4.0.0": "file:devDependencies/heroku-debug/4.0.0",
+    "heroku-debug-5.0.2": "file:devDependencies/heroku-debug/5.0.2",
+    "heroku-debug-5.0.3": "file:devDependencies/heroku-debug/5.0.3",
     "heroku-hello-world-build": "0.0.0",
     "heroku-kafka": "2.9.8",
     "heroku-pg-extras": "1.0.11",
@@ -72,7 +72,8 @@
     "autocomplete",
     "lib",
     "bin",
-    "yarn"
+    "yarn",
+    "devDependencies"
   ],
   "homepage": "https://github.com/heroku/cli-engine",
   "jest": {
