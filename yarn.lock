@@ -1826,17 +1826,17 @@ heroku-client@3.0.2, heroku-client@3.x:
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.4.0"
 
-"heroku-debug-4.0.0@file:test/heroku-debug/4.0.0":
+"heroku-debug-4.0.0@file:devDependencies/heroku-debug/4.0.0":
   version "0.0.0"
   dependencies:
     heroku-debug "4.0.0"
 
-"heroku-debug-5.0.2@file:test/heroku-debug/5.0.2":
+"heroku-debug-5.0.2@file:devDependencies/heroku-debug/5.0.2":
   version "0.0.0"
   dependencies:
     heroku-debug "5.0.2"
 
-"heroku-debug-5.0.3@file:test/heroku-debug/5.0.3":
+"heroku-debug-5.0.3@file:devDependencies/heroku-debug/5.0.3":
   version "0.0.0"
   dependencies:
     heroku-debug "5.0.3"
