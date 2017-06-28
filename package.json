@@ -12,6 +12,7 @@
     "yarnDependency": "0.24.6"
   },
   "dependencies": {
+    "ansi-escapes": "^2.0.0",
     "cli-engine-command": "5.1.5",
     "cli-engine-config": "1.3.7",
     "cli-engine-heroku": "1.1.1",
