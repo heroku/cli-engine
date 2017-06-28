@@ -6,11 +6,11 @@ import fs from 'fs-extra'
 import moment from 'moment'
 
 type Options = {
-  cacheFn: Function
+  cacheFn: () => Promise<Array<string>>
 }
 
 export default class {
-  static async fetch (cachePath: string, cacheDuration: number, options: Options): Promise<?Array<?string>> {
+  static async fetch (cachePath: string, cacheDuration: number, options: Options): Promise<Array<string>> {
     let cachePresent = await fs.exists(cachePath)
     if (cachePresent && !this._isStale(cachePath, cacheDuration)) {
       return fs.readJSON(cachePath)
