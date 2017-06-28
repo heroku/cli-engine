@@ -1,7 +1,7 @@
 {
   "name": "cli-engine",
   "description": "Generic CLI Framework",
-  "version": "3.5.33",
+  "version": "3.5.34",
   "author": "Jeff Dickey @dickeyxxx",
   "bin": {
     "cli-build": "bin/cli-build",
@@ -55,10 +55,13 @@
     "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
     "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
     "heroku-hello-world-build": "0.0.0",
+    "heroku-kafka": "2.9.8",
+    "heroku-pg-extras": "1.0.11",
     "jest": "20.0.4",
     "mock-fs": "4.4.1",
     "nock": "9.0.13",
     "rimraf": "2.6.1",
+    "semver": "5.3.0",
     "uglify-js": "github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d"
   },
   "engines": {

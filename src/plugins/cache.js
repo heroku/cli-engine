@@ -7,6 +7,7 @@ import Plugin from './plugin'
 import {Manager, type PluginPath} from './manager'
 import path from 'path'
 import fs from 'fs-extra'
+import Lock from '../lock'
 
 export type CachedCommand = {
   id: string,
@@ -38,6 +39,7 @@ export type CachedPlugin = {
 
 type CacheData = {
   version: string,
+  node_version?: ?string,
   plugins: {[path: string]: CachedPlugin}
 }
 
@@ -52,17 +54,35 @@ export default class Cache {
     this.config = output.config
   }
 
+  initialize () {
+    this._cache = {
+      version: this.config.version,
+      plugins: {},
+      node_version: null
+    }
+  }
+
+  clear () {
+    this._cache = {
+      version: this.config.version,
+      plugins: {},
+      node_version: this._cache.node_version
+    }
+  }
+
   get file (): string { return path.join(this.config.cacheDir, 'plugins.json') }
   get cache (): CacheData {
     if (this._cache) return this._cache
-    let initial = {version: this.config.version, plugins: {}}
+
     try {
       this._cache = fs.readJSONSync(this.file)
     } catch (err) {
       if (err.code !== 'ENOENT') this.out.debug(err)
-      this._cache = initial
+      this.initialize()
     }
-    if (this._cache.version !== this.config.version) this._cache = initial
+    if (this._cache.version !== this.config.version) {
+      this.clear()
+    }
     return this._cache
   }
 
@@ -107,6 +127,18 @@ export default class Cache {
 
   async fetchManagers (...managers: Manager[]): Promise<Plugin[]> {
     let plugins = []
+    if (this.cache.node_version !== process.version) {
+      let lock = new Lock(this.out)
+
+      let downgrade = await lock.upgrade()
+      for (let manager of managers) {
+        await manager.handleNodeVersionChange()
+      }
+      await downgrade()
+
+      this.cache.node_version = process.version
+      this.constructor.updated = true
+    }
 
     for (let manager of managers) {
       let paths = await manager.list()
