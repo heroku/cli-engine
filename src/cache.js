@@ -32,10 +32,6 @@ export default class {
   }
 
   static _isStale (cachePath: string, cacheDuration: number): boolean {
-    // don't rely on flow to catch this
-    // we don't want forever caches
-    if (!cacheDuration) return true
-    // TODO: test this
     return this._mtime(cachePath).isBefore(moment().subtract(cacheDuration, 'seconds'))
   }
 
