@@ -95,7 +95,7 @@ cli-engine plugins commands: (get help with cli-engine help plugins:COMMAND)
  plugins:install PLUGIN    installs a plugin into the CLI
  plugins:link [PATH]       links a local plugin to the CLI for development
  plugins:uninstall PLUGIN  uninstalls or unlinks a plugin
- plugins:update            updates installed plugins
+ plugins:update            update installed plugins
 
 `
     let pluginsInstallHelpOutput = `Usage: cli-engine plugins:install PLUGIN
