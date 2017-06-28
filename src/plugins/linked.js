@@ -53,7 +53,6 @@ export default class LinkedPlugins extends Manager {
 
     await this.prepare(p)
 
-    // flow$ignore
     let m = require(p)
     if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
 
@@ -160,8 +159,8 @@ export default class LinkedPlugins extends Manager {
       .find(f => f.stats.mtime > this._data.updated_at)
   }
 
-  async _install (p: string) {
-    if (!this._needsInstall(p)) return
+  async _install (p: string, force: boolean = false) {
+    if (!force && !this._needsInstall(p)) return
     if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
     let yarn = new Yarn(this.out, p)
     await yarn.exec()
@@ -169,12 +168,21 @@ export default class LinkedPlugins extends Manager {
     this.out.action.stop()
   }
 
+  async handleNodeVersionChange () {
+    for (let p of this._data.plugins) {
+      try {
+        await this._install(p, true)
+      } catch (err) {
+        this.out.warn(err)
+      }
+    }
+  }
+
   checkLinked (p: string) {
     if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
     return this._pjson(p).name
   }
 
-  // flow$ignore
   _pjson (p: string): PJSON { return require(path.join(p, 'package.json')) }
 
   get file (): string { return path.join(this.config.dataDir, 'linked_plugins.json') }
