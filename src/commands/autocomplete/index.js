@@ -38,7 +38,7 @@ export default class Autocomplete extends AutocompleteBase {
         // this.out.log()
         // let fnFile = path.join(this.autocompletePath, 'bash', 'heroku')
         // this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
-        break
+        return
       case 'zsh':
         this.out.log('Add the autocomplete function to your fpath via:')
         this.out.log()
