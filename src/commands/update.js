@@ -7,7 +7,7 @@ import Analytics from '../analytics'
 import Plugins from '../plugins'
 import fs from 'fs-extra'
 import path from 'path'
-import Autocomplete from './autocomplete'
+import AutocompleteScript from './autocomplete/script'
 
 export default class Update extends Command {
   static topic = 'update'
@@ -51,7 +51,7 @@ export default class Update extends Command {
     await analytics.submit()
     await PluginsUpdate.run({config: this.config, output: this.out})
     await this.logChop()
-    await Autocomplete.generateAutocompleteCommands({out: this.out, config: this.config})
+    await AutocompleteScript.generateAutocompleteCommands({out: this.out, config: this.config})
   }
 
   async logChop () {
