@@ -1,6 +1,6 @@
 #compdef heroku
 
-COMMANDS_PATH=$(heroku autocomplete --commands)
+COMMANDS_PATH=$(heroku autocomplete:commandspath)
 
 _flags () {
   compadd "$@" - $(grep "$words[2]" $COMMANDS_PATH | sed -n "s/^$words[2] //p")
@@ -8,6 +8,10 @@ _flags () {
 
 _command_id () {
   _arguments "1:commands:($(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH))"
+}
+
+_apps () {
+  compadd "$@" - $(heroku autocomplete:values --cmd ${words[2]} --flag '--app')
 }
 
 _heroku() {
@@ -19,7 +23,14 @@ _heroku() {
 
   case $state in
     (command_id) _command_id ;;
-    (*) _flags ;;
+    (flags)
+      l=${#words[@]}
+      case ${words[l-1]} in
+         (--app) _apps;;
+         (-a) _apps;;
+         (*) _flags;;
+      esac
+      ;;
   esac
 }
 
