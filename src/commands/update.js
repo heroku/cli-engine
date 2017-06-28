@@ -7,7 +7,6 @@ import Analytics from '../analytics'
 import Plugins from '../plugins'
 import fs from 'fs-extra'
 import path from 'path'
-import vars from 'cli-engine-heroku/lib/vars'
 
 export default class Update extends Command {
   static topic = 'update'

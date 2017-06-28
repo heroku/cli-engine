@@ -30,7 +30,8 @@ export default class AutocompleteValues extends AutocompleteBase {
         let Command = await plugins.findCommand(this.flags.cmd)
         if (!Command || !this.flags.flag) this.out.error(`Command ${this.flags.cmd} not found`)
         let long = this.flags.flag.replace(/-+/, '')
-        let flag = Command.flags[long]
+        let flags = Command ? Command.flags : {}
+        let flag = flags[long]
         if (!flag) this.out.error(`Flag ${long} not found`)
         if (flag.completions && flag.completions.options) {
           let flagCache = path.join(this.config.cacheDir, 'completions', long)

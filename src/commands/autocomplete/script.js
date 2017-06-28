@@ -1,8 +1,6 @@
 // @flow
 
-import Command, {flags} from 'cli-engine-command'
 import path from 'path'
-import {CustomColors} from 'cli-engine-command/lib/output'
 import AutocompleteBase from '.'
 
 export default class InstallScript extends AutocompleteBase {

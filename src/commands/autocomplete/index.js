@@ -1,6 +1,6 @@
 // @flow
 
-import Command, {flags} from 'cli-engine-command'
+import Command from 'cli-engine-command'
 import path from 'path'
 import {CustomColors} from 'cli-engine-command/lib/output'
 
@@ -9,7 +9,7 @@ export class AutocompleteBase extends Command {
     return path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
   }
 
-  function errorIfWindows () {
+  errorIfWindows () {
     if (this.config.windows) {
       this.out.error('Autocomplete is not currently supported in Windows')
     }
