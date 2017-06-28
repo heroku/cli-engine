@@ -17,18 +17,18 @@ type PJSON = {
 }
 
 class UserPluginPath extends PluginPath {
-  yarn: Yarn
+  userPlugins: UserPlugins
   repairAttempted = false
 
-  constructor ({output, type, path, tag, yarn}: {
+  constructor ({output, type, path, tag, userPlugins}: {
     output: Output,
       type: PluginType,
       tag: string,
       path: string,
-      yarn: Yarn
+      userPlugins: UserPlugins
   }) {
     super({output, type, path, tag})
-    this.yarn = yarn
+    this.userPlugins = userPlugins
   }
 
   async repair (err: Error): Promise<boolean> {
@@ -37,16 +37,37 @@ class UserPluginPath extends PluginPath {
     this.out.warn(err)
     this.out.action.start(`Repairing plugin ${this.path}`)
     this.repairAttempted = true
-    await this.yarn.exec(['install', '--force'])
+
+    await this.userPlugins.installForce()
     this.out.action.stop()
     return true
   }
 }
 
 export default class UserPlugins extends Manager {
+  hardcodedDepFixes: Object
+
   constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
     super({out, config, cache})
     this.yarn = new Yarn(this.out, this.userPluginsDir)
+
+    /**
+     * There is a bug with snappy & node-gyp & semver that causes issues when
+     * we rebuild.  What happens is that semver is downgraded from 5.3.0 to
+     * 4.3.2 which has a bug in it that causes node-gyp to fail
+     *
+     * I was going to try and make this an add to package.json to save some
+     * time but that causes 4.3.2 to install into node-gyp/node_modules for
+     * reasons I do not understand but `add` does the right thing
+     *
+     * I set version to ~5.3.0 to match the current dependency from node-gyp
+     * under the assumption that it is the most likely to work properly
+     *
+     * https://github.com/nodejs/node-gyp/blob/75cfae290fee1791a23fa68820ae5dd841e93e14/package.json#L34
+     */
+    this.hardcodedDepFixes = {
+      semver: '~5.3.0'
+    }
   }
 
   yarn: Yarn
@@ -58,9 +79,13 @@ export default class UserPlugins extends Manager {
   async list (): Promise<PluginPath[]> {
     try {
       const pjson = this.userPluginsPJSON
-      return entries(pjson.dependencies || {}).map(([name, tag]) => {
-        return new UserPluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag, yarn: this.yarn})
-      })
+      return entries(pjson.dependencies || {})
+        .filter(([name, tag]) => {
+          return !this.hardcodedDepFixes[name]
+        })
+        .map(([name, tag]) => {
+          return new UserPluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag, userPlugins: this})
+        })
     } catch (err) {
       this.out.warn(err, 'error loading user plugins')
       return []
@@ -85,6 +110,26 @@ export default class UserPlugins extends Manager {
     fs.mkdirpSync(this.userPluginsDir)
     if (!fs.existsSync(pjson)) fs.writeFileSync(pjson, JSON.stringify({private: true}))
     if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
+  }
+
+  async installForce () {
+    if (fs.existsSync(path.join(this.userPluginsDir, 'node_modules'))) {
+      let dependencies = this.userPluginsPJSON['dependencies'] || {}
+      for (let mod in this.hardcodedDepFixes) {
+        if (!dependencies[mod]) {
+          await this.yarn.exec(['add', `${mod}@${this.hardcodedDepFixes[mod]}`])
+        }
+      }
+      await this.yarn.exec(['install', '--force'])
+    }
+  }
+
+  async handleNodeVersionChange () {
+    try {
+      await this.installForce()
+    } catch (err) {
+      this.out.warn(err)
+    }
   }
 
   async install (name: string, tag: string = 'latest') {

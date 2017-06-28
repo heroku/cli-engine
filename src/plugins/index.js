@@ -23,6 +23,7 @@ export default class Plugins {
   out: Output
   lock: Lock
   loaded: boolean
+  config: Config
 
   constructor (output: Output) {
     this.out = output
@@ -119,9 +120,11 @@ export default class Plugins {
   }
 
   async install (name: string, tag: string = 'latest') {
-    await this.load()
     let downgrade = await this.lock.upgrade()
+
+    await this.load()
     if (this.plugins.find(p => p.name === name && p.tag === tag)) throw new Error(`Plugin ${name} is already installed`)
+
     let path = await this.user.install(name, tag)
     this.clearCache(path)
     await downgrade()
@@ -163,12 +166,15 @@ export default class Plugins {
   }
 
   async addLinkedPlugin (p: string) {
-    await this.load()
     let downgrade = await this.lock.upgrade()
+
+    await this.load()
     let name = this.linked.checkLinked(p)
+
     if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
       throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
     }
+
     Namespaces.throwErrorIfNotPermitted(p, this.config)
 
     await this.linked.add(p)
@@ -183,6 +189,4 @@ export default class Plugins {
   get topics (): CachedTopic[] {
     return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
-
-  config: Config
 }
