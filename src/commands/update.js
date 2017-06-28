@@ -4,9 +4,6 @@ import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
-import Plugins from '../plugins'
-import fs from 'fs-extra'
-import path from 'path'
 import AutocompleteScript from './autocomplete/script'
 
 export default class Update extends Command {
