@@ -5,6 +5,7 @@ import Plugins from '../plugins'
 
 export default class extends Command {
   static topic = 'which'
+  static description = 'show which plugin a command is from'
   static args = [
     {name: 'command'}
   ]
