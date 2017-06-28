@@ -49,12 +49,8 @@ export default class Main {
     debug('autoupdating')
     await updater.autoupdate()
 
-    debug('loading plugins')
-    let plugins = new Plugins(out)
-    await plugins.load()
-
     try {
-      const migrator = new MigrateV5Plugins(plugins, this.config)
+      const migrator = new MigrateV5Plugins(out)
       await migrator.run()
     } catch (err) {
       out.warn('Error migrating v5 plugins')
@@ -65,6 +61,10 @@ export default class Main {
       debug('running help')
       this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
     } else {
+      debug('loading plugins')
+      let plugins = new Plugins(out)
+      await plugins.load()
+
       debug('finding command')
       let Command = await plugins.findCommand(this.argv[1] || this.config.defaultCommand)
       if (!Command) return new NotFound(out, this.argv).run()
