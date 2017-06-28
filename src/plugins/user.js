@@ -13,6 +13,9 @@ import Namespaces from '../namespaces'
 import Yarn from './yarn'
 
 type PJSON = {
+  'cli-engine'?: {
+    nodeVersion?: string
+  },
   dependencies?: { [name: string]: string }
 }
 
@@ -78,6 +81,7 @@ export default class UserPlugins extends Manager {
    */
   async list (): Promise<PluginPath[]> {
     try {
+      await this.checkForNodeVersionChange()
       const pjson = this.userPluginsPJSON
       return entries(pjson.dependencies || {})
         .filter(([name, tag]) => {
@@ -102,6 +106,21 @@ export default class UserPlugins extends Manager {
 
   saveUserPluginsPJSON (pjson: PJSON) {
     fs.writeJSONSync(path.join(this.userPluginsPJSONPath), pjson)
+  }
+
+  async checkForNodeVersionChange () {
+    const pjson = this.userPluginsPJSON
+    if (this.nodeVersionChanged()) {
+      await this.yarn.exec(['install', '--force'])
+      pjson['cli-engine'] = Object.assign(pjson['cli-engine'] || {}, {nodeVersion: process.version})
+      this.saveUserPluginsPJSON(pjson)
+    }
+  }
+
+  nodeVersionChanged (): boolean {
+    const pjson = this.userPluginsPJSON
+    if (!pjson['cli-engine']) return true
+    return pjson['cli-engine'].nodeVersion === process.version
   }
 
   async setupUserPlugins () {
