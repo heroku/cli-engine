@@ -33,10 +33,10 @@ export default class AutocompleteValues extends AutocompleteBase {
         let flags = Command ? Command.flags : {}
         let flag = flags[long]
         if (!flag) this.out.error(`Flag ${long} not found`)
-        if (flag.completions && flag.completions.options) {
+        if (flag.completion && flag.completion.options) {
           let flagCache = path.join(this.config.cacheDir, 'completions', long)
-          let duration = flag.completions.cacheDuration || 60 * 60 * 24 // 1 day
-          let opts = {cacheFn: () => flag.completions.options(this.out)}
+          let duration = flag.completion.cacheDuration || 60 * 60 * 24 // 1 day
+          let opts = {cacheFn: () => flag.completion.options(this.out)}
           let options = await ACCache.fetch(flagCache, duration, opts)
           this.out.log((options || []).join('\n'))
         }
