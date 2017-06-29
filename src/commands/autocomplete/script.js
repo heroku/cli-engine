@@ -49,7 +49,7 @@ compinit;`)
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(out).list()
-      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden || !!c.id).map(Command => {
+      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden || !!c.id).map(c => {
         let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
         if (c.args && c.args.find(a => a.name === 'app')) publicFlags.concat(' --app')
         let flags = publicFlags.length ? ` ${publicFlags}` : ''
