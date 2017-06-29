@@ -6,6 +6,7 @@ import Output from 'cli-engine-command/lib/output'
 import {type Config} from 'cli-engine-config'
 import fs from 'fs-extra'
 import Plugins from '../../plugins'
+import {convertFromV5} from '../../plugins/legacy'
 
 export default class AutocompleteScript extends AutocompleteBase {
   static topic = 'autocomplete'
@@ -48,7 +49,8 @@ compinit;`)
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(out).list()
-      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden).map(c => {
+      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden).map(Command => {
+        const c = typeof Command === 'function' ? Command : convertFromV5((Command: any))
         let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
         let flags = publicFlags.length ? ` ${publicFlags}` : ''
         let namespace = p.namespace ? `${p.namespace}:` : ''
