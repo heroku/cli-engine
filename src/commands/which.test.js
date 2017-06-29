@@ -23,8 +23,9 @@ const builtin = {
 // flow$ignore
 Plugins.mockImplementation(() => {
   return {
-    list () {
-      return [herokuApps, builtin]
+    findPluginWithCommand (cmd) {
+      if (cmd === `apps:info`) return {name: 'heroku-apps', type: 'user'}
+      if (cmd === `plugins:install`) return {name: 'builtin', type: 'builtin'}
     }
   }
 })
