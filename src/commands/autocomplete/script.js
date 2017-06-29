@@ -50,8 +50,8 @@ compinit;`)
       // }
       const plugins = await new Plugins(out).list()
       const cmds = plugins.map(p => p.commands.filter(c => !c.hidden || !!c.id).map(Command => {
-        const c = typeof Command === 'function' ? Command : convertFromV5((Command: any))
         let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
+        if (c.args && c.args.find(a => a.name === 'app')) publicFlags.concat(' --app')
         let flags = publicFlags.length ? ` ${publicFlags}` : ''
         let namespace = p.namespace ? `${p.namespace}:` : ''
         return `${namespace}${c.id}${flags}`
