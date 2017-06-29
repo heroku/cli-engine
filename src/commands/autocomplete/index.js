@@ -5,8 +5,12 @@ import path from 'path'
 import {CustomColors} from 'cli-engine-command/lib/output'
 
 export class AutocompleteBase extends Command {
-  get autocompletePath (): string {
+  get functionsPath (): string {
     return path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
+  }
+
+  get completionsPath (): string {
+    return path.join(this.config.cacheDir, 'completions')
   }
 
   errorIfWindows () {
