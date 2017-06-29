@@ -1,0 +1,395 @@
+[Heroku CLI](heroku-cli) plugins are just Node.js npm packages that export 2 objects, `topics` and `commands`. They are installed with `heroku plugins:install PLUGINNAME` where `PLUGINNAME` is an npm package on [npmjs.com](https://npmjs.com). For development, they may also be linked into the cli with `heroku plugins:link`.
+
+For more information on the Heroku CLI, check out [the project on GitHub](https://github.com/heroku/cli).
+
+The plugins will be run with a current version of node (usually the latest) no matter what version of node is installed on the machine (if any). There is no need to support old versions of node.
+
+Plugins are built in [standard format](https://standardjs.com) with [flow.js](https://flow.org).
+
+This is a short walkthrough to make a [simple hello world plugin](https://github.com/heroku/heroku-cli-hello-world). For a more complete example, check out the [heroku-git plugin](https://github.com/heroku/heroku-git).
+
+Creating the plugin
+--------------------
+
+Install the plugin generator plugin and generate a new plugin called `heroku-cli-hello-world`. This will create a new directory called `heroku-cli-hello-world`.
+
+```term
+$ heroku plugins:install heroku-cli-plugin-generator
+Installing plugin heroku-cli-plugin-generator... done
+$ heroku plugins:generate heroku-cli-hello-world
+Building plugin...
+...
+Plugin generated. Link with heroku plugins:link heroku-cli-hello-world
+```
+
+Installing the plugin
+---------------------
+
+While plugins on npmjs.com can be installed with `heroku plugins:install`, developing plugins locally you will want to use `heroku plugins:link .`. This will validate the plugin, then link it in `~/.local/share/heroku/plugins/linked.json`.
+
+To setup this plugin locally, go to the root of your plugin directory and link the plugin:
+
+```term
+$ cd heroku-cli-hello-world
+$ heroku plugins:link
+Running prepare script for heroku-cli-hello-world... done
+$ heroku hello:world
+hello world!
+$ heroku hello:world --name jeff
+hello jeff!
+$ heroku help hello
+Usage: heroku hello:world [flags]
+
+say hi
+
+Flags:
+ --name  name to say hello to
+```
+
+Plugin Structure
+---------------------
+
+```term
+$ tree
+.
+├── appveyor.yml
+├── circle.yml
+├── lib
+│   ├── commands
+│   │   └── hello.js
+│   └── index.js
+├── package.json
+├── src
+│   ├── commands
+│   │   ├── hello.js
+│   │   └── hello.test.js
+│   └── index.js
+└── yarn.lock
+```
+
+Important files:
+
+* `package.json` describing the package's dependencies and metadata
+* `appveyor.yml` Appveyor CI config (for windows CI)
+* `circle.yml` Circle CI config (for linux CI)
+* `lib/*` babel-generated files that will go into npm tarball
+* `src/*` code files checked into the repo that will not be in npm tarball
+* `src/index.js` main entry point
+* `src/commands/hello.js` example command
+* `src/commands/hello.test.js` example command test
+
+### package.json
+
+This is some metadata for the package:
+
+```json
+{
+  "name": "heroku-cli-hello-world",
+  "version": "0.0.0",
+  "files": [
+    "lib"
+  ],
+  "keywords": [
+    "heroku-plugin"
+  ],
+  "license": "ISC",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel src -d lib --ignore '*.test.js'",
+    "clean": "rimraf lib",
+    "prepare": "npm run clean && npm run build",
+    "test": "jest && flow && eslint .",
+    "release": "np"
+  },
+  "dependencies": { ... },
+  "devDependencies": { ... }
+}
+```
+
+Make sure you update your license to whatever you like. Default is ISC.
+
+Including the keyword `heroku-plugin` in `package.json` will later help us find all plugins in the wild.
+
+### src/commands/hello.js
+
+The hello command:
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class HelloCommand extends Command {
+  static topic = 'hello'
+  static command = 'world'
+  static description = 'say hi'
+  static flags = {
+    name: flags.string({description: 'name to say hello to'})
+  }
+
+  async run () {
+    let name = this.flags.name || 'world'
+    this.out.log(`hello ${name}!`)
+  }
+}
+```
+
+The topic and command properties are what is used to make this command execute under `heroku hello:world`. The `run` function contains the implementation. It must export a promise to be completed when the command is complete (async functions do this by default so long as you `await` on all promises).
+
+Editing the plugin
+------------------
+
+The CLI will detect any changes to the plugin and automatically rebuild it. Change `this.out.log()` to say something else and run it again:
+
+```term
+$ heroku hello:world
+goodbye, world!
+```
+
+Command line flags
+------------------------
+
+One way to get input from the user for a command is to declare a flag. We already have a string flag `name`, let's add a `json` flag to output JSON:
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class HelloCommand extends Command {
+  static topic = 'hello'
+  static command = 'world'
+  static description = 'say hi'
+  static flags = {
+    name: flags.string({description: 'name to say hello to'}),
+    json: flags.boolean({char: 'j', description: 'output in json format'})
+  }
+
+  async run () {
+    let name = this.flags.name || 'world'
+    if (this.flags.json) {
+      this.out.styledJSON({hello: name})
+    } else {
+      this.out.log(`hello ${name}!`)
+    }
+  }
+}
+```
+
+Now run it:
+
+```term
+$ heroku hello:world --name jeff
+hello jeff!
+$ heroku hello:world -j --name jeff
+{
+  "hello": "jeff"
+}
+```
+
+You can also check to see if the flag is set up correctly by using help:
+
+```term
+$ heroku help hello:world
+Usage: heroku hello:world [flags]
+
+say hi
+
+Flags:
+ -j, --json output in json format
+ --name     name to say hello to
+```
+
+Command line arguments
+----------------------------
+
+To declare an argument instead of a flag (such as `heroku hello:world NAME` instead of `heroku hello:world --name NAME`):
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class HelloCommand extends Command {
+  static topic = 'hello'
+  static command = 'world'
+  static description = 'say hi'
+  static args = [
+    {name: 'NAME', optional: true}
+  ]
+
+  async run () {
+    // alternatively: this.argv[1]
+    let name = this.args.name || 'world'
+    this.out.log(`hello ${name}!`)
+  }
+}
+```
+
+If you want to accept a variable amount of arguments, (for instance, in [heroku run](https://github.com/heroku/heroku-run/blob/master/commands/run.js)) set `variableArgs` to true. This disables argument validation but gives full flexibility in accepting arguments.
+
+Warnings and Errors
+--------
+
+Warnings are used to notify the user something is wrong without exiting. Errors are used to show something is wrong **and** exit:
+
+```js
+this.out.warn('this is a warning message!')
+this.out.error('this is an error message!')
+this.out.error('exit with code 10', 10)
+this.out.error('show error but do not exit', null)
+```
+
+[See cli-engine-command for more information.](https://github.com/heroku/cli-engine-command)
+
+Using the Heroku API
+--------------------
+
+To use the Heroku API, we'll add a new command to this plugin to get information about an app. Create this file at `src/commands/app.js`:
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class AppCommand extends Command {
+  static topic = 'hello'
+  static command = 'app'
+  static description = 'say hi to an app'
+  static flags = {
+    remote: flags.remote(),
+    app: flags.app({required: true})
+  }
+
+  async run () {
+    let app = await this.heroku.get(`/apps/${this.flags.app}`)
+    console.dir(app)
+  }
+}
+```
+
+And run the command with `heroku hello:app --app myapp`. Note that you must `await `on the promise that `this.heroku.get` returns as it is run asynchronously. Read up on async/await for more information on how this works.  The Heroku API client is an instance of [http-call](https://github.com/heroku/http-call).
+
+Aliasing
+---------
+
+The CLI allows you to alias commands:
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class HelloCommand extends Command {
+  static topic = 'hello'
+  static command = 'world'
+  static aliases = ['my-alias']
+
+  async run () { ... }
+}
+```
+
+Now you can use `heroku my-alias` to run the same command.
+
+Debugging tips
+--------------
+
+Use `console.dir()` to pretty-print an object.
+
+Run a command with `HEROKU_DEBUG=1` to print debugging statements. `HEROKU_DEBUG_HEADERS=1` to also get the headers. Use `DEBUG=*` for lots of internal debug output.
+
+Inspect `~/.heroku/error.log` for extra error output.
+
+All command options
+-------------------
+
+Here is an example command with all available command options.
+
+```js
+import {Command, flags} from 'cli-engine-heroku'
+
+export default class KitchenSinkCommand extends Command {
+  static topic = 'kitchen'
+  static command = 'sink'
+  static description = 'example command with many options set' // short help when listing many commands
+  // put long help and examples here
+  static help = `
+  Example kitchen sink plugin.
+
+Examples:
+
+  $ heroku kitchen:sink large-pot --temperature=110 --drain
+`,
+  static hidden = true     // hide in help
+  static flags = {
+    temperature: flags.string({
+      // get this flag value with this.flags.temperature
+      char: 't',            // -t
+      hidden: false,        // hide flag from help
+      required: true,       // require flag to be set
+      description: 'temperature of faucet', // help text
+    })
+  }
+
+  // set variableArgs to true if your command needs a variable amount of arguments.
+  // if true, ignores anything in the args array and does no argument validation.
+  variableArgs: false,
+
+  static args = [
+    {
+      // get this argument with context.args.dish
+      name: 'dish',   // name of argument
+      optional: true, // argument not required
+      hidden: true    // do not show argument in help
+      description: 'arg description'
+    }
+  ]
+}
+```
+
+## Releasing plugins
+
+All that is needed to run `heroku plugins:install` to install a plugin is for it to be published on [npmjs.com](https://npmjs.com).
+
+[Create an account](https://www.npmjs.com/signup) then log into it from your terminal:
+
+```
+$ npm login
+Username: dickeyxxx
+Password:
+Email: (this IS public) npm@heroku.com
+Logged in as dickeyxxx on https://registry.npmjs.org/
+```
+
+We recommend using [np](https://github.com/sindresorhus/np) to make publishing to npm easier. Install np as a development dependency with `npm install --save-dev np`, then use these script commands in your package.json:
+
+```js
+{
+  "scripts": {
+    "test": "jest && flow && eslint .",
+    "release": "np"
+  }
+}
+```
+
+Now you can perform a release with `npm run release` and it will prompt for a new version, run the tests, as well as other checks to make sure a proper release is being performed.
+
+### Release Channels
+
+To have a beta, staging, or development channel for plugins, you can use [npm dist-tags](https://docs.npmjs.com/cli/dist-tag).
+
+First publish a package to a dist-tag:
+
+```
+npm publish --tag beta
+```
+
+Then install the plugin with that tag:
+
+```
+heroku plugins:install myplugin@beta
+```
+
+The CLI will continue to update the plugin to any new releases on the beta channel.
+
+## Flow
+
+Flow is used to validate the types used in the plugin. Run `./node_modules/.bin/flow` from the root of your project to statically check that your code is using valid types. Flow is just a checker and can be removed without impacting the execution of the plugin.
+
+It makes development of CLI plugins much easier as it can integrate with your editor to provide powerful autocompletion. See [nuclide](https://nuclide.io) for atom or [vim-flow](https://github.com/flowtype/vim-flow) for vim.
+
+Make sure that the flow directive: `// @flow` is at the top of each file for flow to check it.
+
+## Testing
+
+For information on testing your plugin, see [Testing CLI Plugins](testing-cli-plugins).
