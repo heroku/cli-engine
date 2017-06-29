@@ -6,7 +6,7 @@ import {CustomColors} from 'cli-engine-command/lib/output'
 
 export class AutocompleteBase extends Command {
   get functionsPath (): string {
-    return path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
+    return path.join(__dirname, '..', '..', '..', 'autocomplete')
   }
 
   get completionsPath (): string {
