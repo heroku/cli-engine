@@ -69,6 +69,12 @@ export default class Plugins {
     return !!this.plugins.find(p => p.name === name)
   }
 
+  async findPluginWithCommand (cmd: string): Promise<?Plugin> {
+    for (let plugin of await this.list()) {
+      if (await plugin.findCommand(cmd)) return plugin
+    }
+  }
+
   async findCommand (cmd: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
       if (plugin.namespace) {
