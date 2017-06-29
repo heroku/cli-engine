@@ -4,12 +4,11 @@ import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
-import Plugins from '../plugins'
-import fs from 'fs-extra'
-import path from 'path'
+import AutocompleteScript from './autocomplete/script'
 
 export default class Update extends Command {
   static topic = 'update'
+  static description = 'update the Heroku CLI'
   static args = [
     {name: 'channel', optional: true}
   ]
@@ -50,7 +49,7 @@ export default class Update extends Command {
     await analytics.submit()
     await PluginsUpdate.run({config: this.config, output: this.out})
     await this.logChop()
-    await this.generateAutocompleteCommands()
+    await AutocompleteScript.generateAutocompleteCommands({out: this.out, config: this.config})
   }
 
   async logChop () {
@@ -58,29 +57,5 @@ export default class Update extends Command {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.out.errlog)
     } catch (e) { this.out.debug(e.message) }
-  }
-
-  async generateAutocompleteCommands () {
-    const flatten = require('lodash.flatten')
-    try {
-      // TODO: move from cli to client dir if not already present
-      // if (!fs.pathExistsSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'bash', 'heroku'))) {
-      //   const cli = path.join(this.config.dataDir, 'cli', 'autocomplete')
-      //   const client = path.join(this.config.dataDir, 'client', 'autocomplete')
-      //   fs.copySync(cli, client)
-      // }
-      const plugins = await new Plugins(this.out).list()
-      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden).map(c => {
-        let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
-        let flags = publicFlags.length ? ` ${publicFlags}` : ''
-        let namespace = p.namespace ? `${p.namespace}:` : ''
-        return `${namespace}${c.id}${flags}`
-      }))
-      const commands = flatten(cmds).join('\n')
-      fs.writeFileSync(path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
-    } catch (e) {
-      this.out.debug('Error creating autocomplete commands')
-      this.out.debug(e.message)
-    }
   }
 }
