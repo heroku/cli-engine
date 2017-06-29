@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# vendor scop/bash-completio
 if ! type _get_comp_words_by_ref >/dev/null 2>&1; then
 _upvars() {
     if ! (( $# )); then
