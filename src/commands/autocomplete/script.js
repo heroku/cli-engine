@@ -49,7 +49,7 @@ compinit;`)
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(out).list()
-      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden).map(Command => {
+      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden || !!c.id).map(Command => {
         const c = typeof Command === 'function' ? Command : convertFromV5((Command: any))
         let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
         let flags = publicFlags.length ? ` ${publicFlags}` : ''
