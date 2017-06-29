@@ -1,17 +1,17 @@
-[Heroku CLI](heroku-cli) plugins are just Node.js npm packages that export 2 objects, `topics` and `commands`. They are installed with `heroku plugins:install PLUGINNAME` where `PLUGINNAME` is an npm package on [npmjs.com](https://npmjs.com). For development, they may also be linked into the cli with `heroku plugins:link`.
+[Heroku CLI](heroku-cli) plugins are Node.js npm packages that export two objects: `topic` and `commands`. Users install them with `heroku plugins:install PLUGINNAME`, where `PLUGINNAME` is an npm package on [npmjs.com](https://npmjs.com). Plugin developers can also link them into the CLI with `heroku plugins:link`, as described below.
 
 For more information on the Heroku CLI, check out [the project on GitHub](https://github.com/heroku/cli).
 
-The plugins will be run with a current version of node (usually the latest) no matter what version of node is installed on the machine (if any). There is no need to support old versions of node.
+On Windows and OS X, the plugins will be run with a current version of node (usually the latest) no matter what version of node is installed on the machine (if any). There is no need to support old versions of node. If you are using Linux debs or rpms, the CLI uses the system's node.
 
-Plugins are built in [standard format](https://standardjs.com) with [flow.js](https://flow.org).
+We build our plugins in [standard JS style](https://standardjs.com) with the [flow.js](https://flow.org) type checker. Core plugins must use these tools, and we'll guide you to use them below.
 
-This is a short walkthrough to make a [simple hello world plugin](https://github.com/heroku/heroku-cli-hello-world). For a more complete example, check out the [heroku-git plugin](https://github.com/heroku/heroku-git).
+We will walk you through developing a [simple hello world plugin](https://github.com/heroku/heroku-cli-hello-world). For a fuller example, check out the [heroku-git plugin](https://github.com/heroku/heroku-git).
 
 Creating the plugin
 --------------------
 
-Install the plugin generator plugin and generate a new plugin called `heroku-cli-hello-world`. This will create a new directory called `heroku-cli-hello-world`.
+Install the plugin generator plugin and generate a new plugin called `heroku-cli-hello-world`. This will create a new directory called `heroku-cli-hello-world`. The "heroku-cli-" prefix is simply a convention.
 
 ```term
 $ heroku plugins:install heroku-cli-plugin-generator
@@ -25,7 +25,7 @@ Plugin generated. Link with heroku plugins:link heroku-cli-hello-world
 Installing the plugin
 ---------------------
 
-While plugins on npmjs.com can be installed with `heroku plugins:install`, developing plugins locally you will want to use `heroku plugins:link .`. This will validate the plugin, then link it in `~/.local/share/heroku/plugins/linked.json`.
+While plugins on npmjs.com can be installed with `heroku plugins:install`, when developing plugins locally you will want to use `heroku plugins:link`. This will validate the plugin, then link it in `~/.local/share/heroku/plugins/linked.json`.
 
 To setup this plugin locally, go to the root of your plugin directory and link the plugin:
 
@@ -33,11 +33,20 @@ To setup this plugin locally, go to the root of your plugin directory and link t
 $ cd heroku-cli-hello-world
 $ heroku plugins:link
 Running prepare script for heroku-cli-hello-world... done
+```
+
+The initial plug-in that `heroku-cli-plugin-generator` creates has basic Hello World functionality! Try it out.
+
+```term
 $ heroku hello:world
 hello world!
 $ heroku hello:world --name jeff
 hello jeff!
 $ heroku help hello
+heroku hello commands: (get help with heroku help hello:COMMAND)
+ hello:world  say hi
+
+$ heroku help hello:world
 Usage: heroku hello:world [flags]
 
 say hi
@@ -46,11 +55,15 @@ Flags:
  --name  name to say hello to
 ```
 
+Now we'll show how to customize this skeleton for your own functionality.
+
 Plugin Structure
 ---------------------
 
+How does this plugin work? Let's look at the files.
+
 ```term
-$ tree
+$ tree -I 'node_modules|flow-typed'
 .
 ├── appveyor.yml
 ├── circle.yml
@@ -70,8 +83,8 @@ $ tree
 Important files:
 
 * `package.json` describing the package's dependencies and metadata
-* `appveyor.yml` Appveyor CI config (for windows CI)
-* `circle.yml` Circle CI config (for linux CI)
+* `appveyor.yml` [Appveyor](https://www.appveyor.com/) config (for windows CI)
+* `circle.yml` [CircleCI](https://circleci.com/) config (for linux CI)
 * `lib/*` babel-generated files that will go into npm tarball
 * `src/*` code files checked into the repo that will not be in npm tarball
 * `src/index.js` main entry point
@@ -106,13 +119,34 @@ This is some metadata for the package:
 }
 ```
 
-Make sure you update your license to whatever you like. Default is ISC.
+Make sure you update your license to whatever you like and include the associated legal language in a LICENSE.txt or similar. Our default is [ISC](https://opensource.org/licenses/ISC).
 
 Including the keyword `heroku-plugin` in `package.json` will later help us find all plugins in the wild.
 
+### src/index.js
+
+The main entry point for the command has the `topic` and `commands` objects that we mentioned at the beginning of this document.
+
+```js
+import fs from 'fs-extra'
+import path from 'path'
+
+export const topic = {
+  name: 'hello',
+  description: 'says hello (example plugin)'
+}
+
+let dir = path.join(__dirname, 'commands')
+export const commands = fs.readdirSync(dir)
+  .filter(f => path.extname(f) === '.js')
+  .map(f => require('./commands/' + f).default)
+```
+
+You typically won't need to edit this file other than to edit your topic's name and description. As you can see, the last four lines automatically look for exports named `default` in JS files in the `src/commands` directory.
+
 ### src/commands/hello.js
 
-The hello command:
+Let's look at our command, then: the `world` command in the `hello` topic.
 
 ```js
 import {Command, flags} from 'cli-engine-heroku'
@@ -132,7 +166,7 @@ export default class HelloCommand extends Command {
 }
 ```
 
-The topic and command properties are what is used to make this command execute under `heroku hello:world`. The `run` function contains the implementation. It must export a promise to be completed when the command is complete (async functions do this by default so long as you `await` on all promises).
+The CLI uses the `topic` and `command` properties to make this command execute under `heroku hello:world`. The `run` function contains the implementation. It must export a promise to be completed when the command is complete (`async` functions do this by default so long as you `await` on all promises).
 
 Editing the plugin
 ------------------
@@ -196,6 +230,19 @@ Flags:
  --name     name to say hello to
 ```
 
+As of this writing, we support six kinds of flags.
+
+* `boolean`
+* `number`
+* `string`
+* `app` (a Heroku app)
+* `remote`(a Heroku git remote)
+* `team` (a Heroku team)
+
+An additional `org` flag is in the process of being deprecated in favor of `team`.
+
+See more details in the code, for both the [three generic flags](https://github.com/heroku/cli-engine-command/blob/master/src/flags/index.js) and the [three Heroku-specific flags](https://github.com/heroku/cli-engine-heroku/blob/master/src/flags/index.js).
+
 Command line arguments
 ----------------------------
 
@@ -234,7 +281,7 @@ this.out.error('exit with code 10', 10)
 this.out.error('show error but do not exit', null)
 ```
 
-[See cli-engine-command for more information.](https://github.com/heroku/cli-engine-command)
+The `out` object supports many as-yet-undocumented useful features. [Check out the code](https://github.com/heroku/cli-engine-command/blob/master/src/output/index.js) for more.
 
 Using the Heroku API
 --------------------
