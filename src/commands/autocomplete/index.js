@@ -43,6 +43,10 @@ export default class Autocomplete extends AutocompleteBase {
         this.out.log('Add the autocomplete function to your fpath via:')
         this.out.log()
         this.out.log(CustomColors.cmd(`$ echo $(heroku autocomplete:script zsh) >> ~/.zshrc`))
+        this.out.log()
+        this.out.log('Run the following zsh command to ensure no permissions conflicts:')
+        this.out.log()
+        this.out.log(CustomColors.cmd(`$ compaudit`))
         break
       default:
         this.out.error(`Currently ${shell} is not a supported shell for autocomplete`)
