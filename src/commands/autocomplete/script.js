@@ -6,7 +6,6 @@ import Output from 'cli-engine-command/lib/output'
 import {type Config} from 'cli-engine-config'
 import fs from 'fs-extra'
 import Plugins from '../../plugins'
-import {convertFromV5} from '../../plugins/legacy'
 
 export default class AutocompleteScript extends AutocompleteBase {
   static topic = 'autocomplete'
