@@ -6,6 +6,8 @@ import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
 import AutocompleteScript from './autocomplete/script'
 
+const debug = require('debug')('cli-engine:update')
+
 export default class Update extends Command {
   static topic = 'update'
   static description = 'update the Heroku CLI'
@@ -44,12 +46,18 @@ export default class Update extends Command {
         }
       }
     }
+    debug('fetch version')
     await this.updater.fetchVersion(this.config.channel, true)
+    debug('analytics')
     let analytics = new Analytics({out: this.out, config: this.config})
     await analytics.submit()
+    debug('plugins update')
     await PluginsUpdate.run({config: this.config, output: this.out})
+    debug('log chop')
     await this.logChop()
+    debug('autocomplete')
     await AutocompleteScript.generateAutocompleteCommands({out: this.out, config: this.config})
+    debug('done')
   }
 
   async logChop () {
