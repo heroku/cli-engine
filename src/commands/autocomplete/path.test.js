@@ -8,5 +8,6 @@ let skipWindows = (os.platform() === 'windows' || os.platform() === 'win32') ? x
 
 skipWindows('outputs commands file path', async () => {
   let cmd = await AutocompletePath.mock()
-  expect(cmd.out.stdout.output).toMatch(/client\/node_modules\/cli-engine\/autocomplete\/commands\n/)
+  expect(cmd.out.stdout.output).toMatch(/cache/i)
+  expect(cmd.out.stdout.output).toMatch(/\/cli-engine\/completions\/commands\n/)
 })

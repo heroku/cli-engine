@@ -27,7 +27,7 @@ export default class AutocompleteScript extends AutocompleteBase {
     switch (shell) {
       case 'zsh':
         this.out.log(`fpath=(
-  ${path.join(this.autocompletePath, 'zsh')}
+  ${path.join(this.functionsPath, 'zsh')}
   $fpath
 );
 autoload -Uz compinit;

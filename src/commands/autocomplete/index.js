@@ -5,8 +5,12 @@ import path from 'path'
 import {CustomColors} from 'cli-engine-command/lib/output'
 
 export class AutocompleteBase extends Command {
-  get autocompletePath (): string {
-    return path.join(this.config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete')
+  get functionsPath (): string {
+    return path.join(__dirname, '..', '..', '..', 'autocomplete')
+  }
+
+  get completionsPath (): string {
+    return path.join(this.config.cacheDir, 'completions')
   }
 
   errorIfWindows () {
@@ -33,7 +37,7 @@ export default class Autocomplete extends AutocompleteBase {
 
     switch (shell) {
       case 'bash':
-        const cmd = CustomColors.cmd(`$ echo 'source ${path.join(this.autocompletePath, 'bash', 'heroku.bash')}' >> ~/.bashrc`)
+        const cmd = CustomColors.cmd(`$ echo 'source ${path.join(this.functionsPath, 'bash', 'heroku.bash')}' >> ~/.bashrc`)
         this.out.log(`Add the autocomplete function to your .bashrc or .bash_profile via:\n\n${cmd}`)
         break
       case 'zsh':
