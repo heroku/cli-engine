@@ -42,12 +42,6 @@ compinit;`)
   static async generateAutocompleteCommands ({config, out}: {config: Config, out: Output}) {
     const flatten = require('lodash.flatten')
     try {
-      // TODO: move from cli to client dir if not already present
-      // if (!fs.pathExistsSync(path.join(this.config.dataDir, 'client', 'autocomplete', 'bash', 'heroku'))) {
-      //   const cli = path.join(this.config.dataDir, 'cli', 'autocomplete')
-      //   const client = path.join(this.config.dataDir, 'client', 'autocomplete')
-      //   fs.copySync(cli, client)
-      // }
       const plugins = await new Plugins(out).list()
       const cmds = await Promise.all(plugins.map(async (p) => {
         const hydrated = await p.pluginPath.require()
