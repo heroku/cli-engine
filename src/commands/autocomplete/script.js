@@ -6,6 +6,7 @@ import Output from 'cli-engine-command/lib/output'
 import {type Config} from 'cli-engine-config'
 import fs from 'fs-extra'
 import Plugins from '../../plugins'
+import {convertFromV5} from '../../plugins/legacy'
 
 export default class AutocompleteScript extends AutocompleteBase {
   static topic = 'autocomplete'
@@ -48,13 +49,18 @@ compinit;`)
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(out).list()
-      const cmds = plugins.map(p => p.commands.filter(c => !c.hidden || !!c.id).map(c => {
-        let publicFlags = Object.keys(c.flags).filter(flag => !c.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
-        if (c.args && c.args.find(a => a.name === 'app')) publicFlags.concat(' --app')
-        let flags = publicFlags.length ? ` ${publicFlags}` : ''
-        let namespace = p.namespace ? `${p.namespace}:` : ''
-        return `${namespace}${c.id}${flags}`
-      }))
+      const cmds = await plugins.map(async (p) => {
+        const hydrated = await p.pluginPath.require()
+        const cmds = hydrated.commands || []
+        return cmds.filter(c => !c.hidden).map(c => {
+          const Command = typeof c === 'function' ? c : convertFromV5((c: any))
+          const publicFlags = Object.keys(Command.flags).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
+          const flags = publicFlags.length ? ` ${publicFlags}` : ''
+          const namespace = p.namespace ? `${p.namespace}:` : ''
+          const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
+          return `${namespace}${id}${flags}`
+        })
+      })
       const commands = flatten(cmds).join('\n')
       fs.writeFileSync(path.join(config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
     } catch (e) {
