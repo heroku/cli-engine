@@ -22,9 +22,9 @@ export default class extends Command {
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
     if (!plugins.length) this.out.warn('no plugins installed')
     for (let plugin of plugins) {
-      let output = `${plugin.name} ${this.out.color.gray(plugin.version)}`
-      if (plugin.type !== 'user') output += this.out.color.gray(` (${plugin.type})`)
-      else if (plugin.tag !== 'latest') output += this.out.color.gray(` (${String(plugin.tag)})`)
+      let output = `${plugin.name} ${this.out.color.dim(plugin.version)}`
+      if (plugin.type !== 'user') output += this.out.color.dim(` (${plugin.type})`)
+      else if (plugin.tag !== 'latest') output += this.out.color.dim(` (${String(plugin.tag)})`)
       this.out.log(output)
     }
   }
