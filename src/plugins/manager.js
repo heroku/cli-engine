@@ -21,7 +21,7 @@ type ParsedTopic = | {
 
 type ParsedCommand = | LegacyCommand | Class<Command<*>>
 
-export type ParsedPlugin = {
+type ParsedPlugin = {
   topic?: ParsedTopic,
   topics?: ParsedTopic[],
   commands?: ParsedCommand[],
