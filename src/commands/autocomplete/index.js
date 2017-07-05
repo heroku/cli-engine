@@ -33,21 +33,23 @@ export default class Autocomplete extends AutocompleteBase {
 
     switch (shell) {
       case 'bash':
-        this.out.log('Bash autocomplete coming soon')
-        // this.out.log('Symlink the autocomplete function via:')
-        // this.out.log()
-        // let fnFile = path.join(this.autocompletePath, 'bash', 'heroku')
-        // this.out.log(CustomColors.cmd(`$ ln -s ${fnFile} /usr/local/etc/bash_completion.d/heroku`))
-        return
+        const cmd = CustomColors.cmd(`$ echo 'source ${path.join(this.autocompletePath, 'bash', 'heroku.bash')}' >> ~/.bashrc`)
+        this.out.log(`Add the autocomplete function to your .bashrc or .bash_profile via:\n\n${cmd}`)
+        break
       case 'zsh':
-        this.out.log('Add the autocomplete function to your fpath via:')
-        this.out.log()
-        this.out.log(CustomColors.cmd(`$ echo $(heroku autocomplete:script zsh) >> ~/.zshrc`))
+        const cmd1 = CustomColors.cmd(`$ echo $(heroku autocomplete:script zsh) >> ~/.zshrc`)
+        const cmd2 = CustomColors.cmd(`$ compaudit`)
+        this.out.log(`Add the autocomplete function to your fpath via:
+
+${cmd1}
+
+Run the following zsh command to ensure no permissions conflicts:
+
+${cmd2}`)
         break
       default:
         this.out.error(`Currently ${shell} is not a supported shell for autocomplete`)
     }
-    this.out.log()
-    this.out.log('Lastly, restart your shell')
+    this.out.log('\nLastly, restart your shell')
   }
 }
