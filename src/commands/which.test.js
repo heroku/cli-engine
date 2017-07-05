@@ -7,24 +7,19 @@ jest.mock('../plugins')
 
 const herokuApps = {
   type: 'user',
-  name: 'heroku-apps',
-  findCommand (cmd: string) {
-    return cmd === 'apps:info'
-  }
+  name: 'heroku-apps'
 }
 
 const builtin = {
-  type: 'builtin',
-  findCommand (cmd: string) {
-    return cmd === 'plugins:install'
-  }
+  type: 'builtin'
 }
 
 // flow$ignore
 Plugins.mockImplementation(() => {
   return {
-    list () {
-      return [herokuApps, builtin]
+    findPluginWithCommand (cmd) {
+      if (cmd === `apps:info`) return herokuApps
+      if (cmd === `plugins:install`) return builtin
     }
   }
 })
