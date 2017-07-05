@@ -50,7 +50,6 @@ ${cmd2}`)
       default:
         this.out.error(`Currently ${shell} is not a supported shell for autocomplete`)
     }
-    this.out.log()
-    this.out.log('Lastly, restart your shell')
+    this.out.log('\nLastly, restart your shell')
   }
 }
