@@ -49,20 +49,20 @@ compinit;`)
       //   fs.copySync(cli, client)
       // }
       const plugins = await new Plugins(out).list()
-      const cmds = await plugins.map(async (p) => {
+      const cmds = await Promise.all(plugins.map(async (p) => {
         const hydrated = await p.pluginPath.require()
         const cmds = hydrated.commands || []
         return cmds.filter(c => !c.hidden).map(c => {
           const Command = typeof c === 'function' ? c : convertFromV5((c: any))
-          const publicFlags = Object.keys(Command.flags).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
+          const publicFlags = Object.keys(Command.flags || {}).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
           const flags = publicFlags.length ? ` ${publicFlags}` : ''
           const namespace = p.namespace ? `${p.namespace}:` : ''
           const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
           return `${namespace}${id}${flags}`
         })
-      })
+      }))
       const commands = flatten(cmds).join('\n')
-      fs.writeFileSync(path.join(config.dataDir, 'client', 'node_modules', 'cli-engine', 'autocomplete', 'commands'), commands)
+      fs.writeFileSync(path.join((new this().completionsPath), 'commands'), commands)
     } catch (e) {
       out.debug('Error creating autocomplete commands')
       out.debug(e.message)
