@@ -33,7 +33,7 @@ export default class Autocomplete extends AutocompleteBase {
 
     switch (shell) {
       case 'bash':
-        const cmd = CustomColors.cmd(`$ echo \'source ${path.join(this.autocompletePath, 'bash', 'heroku.bash')}\' >> ~/.bashrc`)
+        const cmd = CustomColors.cmd(`$ echo 'source ${path.join(this.autocompletePath, 'bash', 'heroku.bash')}' >> ~/.bashrc`)
         this.out.log(`Add the autocomplete function to your .bashrc or .bash_profile via:\n\n${cmd}`)
         break
       case 'zsh':
