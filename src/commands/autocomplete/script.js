@@ -56,7 +56,7 @@ compinit;`)
         })
       }))
       const commands = flatten(cmds).join('\n')
-      fs.writeFileSync(path.join((new this().completionsPath), 'commands'), commands)
+      fs.writeFileSync(path.join(config.cacheDir, 'completions', 'commands'), commands)
     } catch (e) {
       out.debug('Error creating autocomplete commands')
       out.debug(e.message)
