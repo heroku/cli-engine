@@ -35,7 +35,7 @@ autoload -Uz compinit;
 compinit;`)
         break
       default:
-        this.out.error(`Currently ${shell} is not a supported shell for autocomplete`)
+        this.out.error(`No autocomplete script for ${shell}. Run $ heroku autocomplete for install instructions.`)
     }
   }
 
