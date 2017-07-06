@@ -4,7 +4,7 @@ import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Analytics from '../analytics'
-import AutocompleteScript from './autocomplete/script'
+import AutocompleteScripter from '../autocomplete'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -56,7 +56,8 @@ export default class Update extends Command {
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
-    await AutocompleteScript.generateAutocompleteCommands({out: this.out, config: this.config})
+    let ac = new AutocompleteScripter(this)
+    await ac.generateCommandsCache()
     debug('done')
   }
 

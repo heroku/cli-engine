@@ -2,11 +2,7 @@
 
 import path from 'path'
 import AutocompleteBase from '.'
-import Output from 'cli-engine-command/lib/output'
-import {type Config} from 'cli-engine-config'
-import fs from 'fs-extra'
-import Plugins from '../../plugins'
-import {convertFromV5} from '../../plugins/legacy'
+import AutocompleteScripter from '../../autocomplete'
 
 export default class AutocompleteScript extends AutocompleteBase {
   static topic = 'autocomplete'
@@ -18,7 +14,7 @@ export default class AutocompleteScript extends AutocompleteBase {
 
   async run () {
     this.errorIfWindows()
-    await AutocompleteScript.generateAutocompleteCommands(this)
+    await new AutocompleteScripter(this).generateCommandsCache()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {
@@ -36,30 +32,6 @@ compinit;`)
         break
       default:
         this.out.error(`No autocomplete script for ${shell}. Run $ heroku autocomplete for install instructions.`)
-    }
-  }
-
-  static async generateAutocompleteCommands ({config, out}: {config: Config, out: Output}) {
-    const flatten = require('lodash.flatten')
-    try {
-      const plugins = await new Plugins(out).list()
-      const cmds = await Promise.all(plugins.map(async (p) => {
-        const hydrated = await p.pluginPath.require()
-        const cmds = hydrated.commands || []
-        return cmds.filter(c => !c.hidden).map(c => {
-          const Command = typeof c === 'function' ? c : convertFromV5((c: any))
-          const publicFlags = Object.keys(Command.flags || {}).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
-          const flags = publicFlags.length ? ` ${publicFlags}` : ''
-          const namespace = p.namespace ? `${p.namespace}:` : ''
-          const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
-          return `${namespace}${id}${flags}`
-        })
-      }))
-      const commands = flatten(cmds).join('\n')
-      fs.writeFileSync(path.join(config.cacheDir, 'completions', 'commands'), commands)
-    } catch (e) {
-      out.debug('Error creating autocomplete commands')
-      out.debug(e.message)
     }
   }
 }
