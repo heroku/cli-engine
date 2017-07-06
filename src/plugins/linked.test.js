@@ -10,7 +10,7 @@ const fs = require('fs-extra')
 
 jest.unmock('fs-extra')
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 30000
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
 let pluginsJsonPath
 
