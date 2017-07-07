@@ -57,30 +57,35 @@ export default class {
                                       // if (f.char) completion.concat(`-${f.char}[${f.description}]`)
                                       return `\'${completion}\'`
                                     })
-                                    .join(' ')
+                                    .join('\n')
           const flags = publicFlags.length ? ` ${publicFlags}` : ''
           const namespace = p.namespace ? `${p.namespace}:` : ''
           const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
-          const description = Command.description ? `'${Command.description}'` : ''
-          const cmdAndDesc = `'${namespace.replace(/:/, '\\:')}${id.replace(/:/, '\\:')}'${description}`
-          if (!flags) return {cmd: cmdAndDesc}
-          let cmdFunc = `_${namespace}${id.replace(/:/, '_')} () {
-#local -a flags
-_flags=(${flags})
-#_describe 'flags' flags
+          const description = Command.description ? `:'${Command.description}'` : ''
+          const cmdAndDesc = `'${namespace.replace(/:/g, '\\:')}${id.replace(/:/g, '\\:')}'${description}`
+          let z = {cad: cmdAndDesc, func: undefined, appArg: undefined}
+          if (Command.args.find(a => a.name === 'app')) z.appArg = id
+          if (!flags) return z
+          let cmdFunc = `_${namespace}${id.replace(/:/g, '_')} () {
+_flags=(
+${flags}
+)
 }
 `
-          return {cmd: cmdAndDesc, func: cmdFunc}
+          return Object.assign(z, {func: cmdFunc})
         })
       }))
       const cmds = flatten(commands)
-      const commandFuncs = cmds.map(c => c.func)
-                               .filter(c => c)
-                               .concat(this._gen_cmd_list(cmds.map(c => c.cmd)))
-                               .join('\n')
+      // grab completion functions
+      var commandFuncs = cmds.map(c => c.func).filter(c => c)
+      // add single commands list function
+      commandFuncs = commandFuncs.concat(this._gen_cmd_list(cmds.map(c => c.cad)))
+      // add single commands with arg app list function
+      commandFuncs = commandFuncs.concat(this._gen_cmd_with_arg_app(cmds.map(c => c.appArg).filter(c => c)))
+      commandFuncs = commandFuncs.join('\n')
       // this.out.log(path.join(this.config.cacheDir, 'completions', 'command_functions'))
-      this.out.log(commandFuncs)
-      // fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), commandFuncs)
+      // this.out.log(commandFuncs)
+      fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), commandFuncs)
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
@@ -93,9 +98,19 @@ _cmds_list () {
 _commands_list=(
 ${flatten(cmds).join('\n')}
 )
-#_describe -t all-commands 'all commands' list
 }
 `
     return cmdsList
+  }
+
+  _gen_cmd_with_arg_app(cmds: Array<string>) : string {
+    const cmdsWithArgApp = `
+_cmds_with_arg_app() {
+_commands_with_arg_app=(
+  ${flatten(cmds).join('\n')}
+)
+}
+`
+    return cmdsWithArgApp
   }
 }

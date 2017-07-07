@@ -1,55 +1,80 @@
 #compdef heroku
 
-COMMANDS_PATH=$(heroku autocomplete:commandspath)
-COMMANDS_FUNCS_PATH="$(heroku autocomplete:commandspath)_functions"
+_heroku () {
+  _arguments '*:: :->notusedstate'
+  local _command_id=${words[1]}
+  local -a _flags
 
-source $COMMANDS_FUNCS_PATH
+  COMMANDS_PATH=$(heroku autocomplete:commandspath)
+  COMMANDS_FUNCS_PATH=$(heroku autocomplete:commandspath)_functions
 
-_cmds_list_backup () {
-  compadd "$@" - $(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH)
+  source $COMMANDS_FUNCS_PATH
+
+  _cmds_list_backup () {
+    compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH)
+  }
+
+  _containsElement () {
+    local e
+    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+    return 1
+  }
+
+  _has_app () {
+    local -a _commands_with_arg_app
+    if type _cmds_with_arg_app >/dev/null 2>&1; then _cmds_with_arg_app; fi
+    _has_arg_app=$(_containsElement $1 "${_commands_with_arg_app[@]}" && echo ${?+1})
+  }
+
+  _apps_options () {
+    compset -P '*[=:]'
+    compadd "$@" - $(heroku autocomplete:values --cmd $_command_id --flag '--app')
+  }
+
+  _args_options () {
+    _has_app $_prev
+    if [ "$_has_arg_app" -eq 1 ]; then
+      _apps_options && return
+    fi
+    _arguments $_flags
+  }
+
+  # first arg, always handle command_id
+  if [ "${#words}" -eq 1 ]; then
+    local -a _commands_list
+    if type _cmds_list >/dev/null 2>&1; then
+      _cmds_list
+      _describe -t all-commands "all command" _commands_list
+      return
+    fi
+    _cmds_list_backup && return
+  else
+  # handle 0-to-N arg options, flags, and flag options
+    local _ret=0
+    local _cur _prev
+    local _has_arg_app=0
+    _cur=${words[CURRENT]}
+    _prev=${words[CURRENT-1]}
+
+    case $_cur in
+       (--app=*) _apps_options && _ret=1 ;;
+    esac
+
+    case $_prev in
+       (--app) _apps_options && _ret=1 ;;
+       (-a) _apps_options && _ret=1 ;;
+    esac
+
+    if [ $_ret -eq 1 ]; then
+      return
+    fi
+
+    local _completion_func="_${_command_id//:/_}"
+    declare -f $_completion_func >/dev/null && $_completion_func && _ret=0
+
+    _arguments '1: :_args_options' \
+        $_flags
+  fi
 }
 
-_apps () {
-  compset -P '*[=:]'
-  _describe $(heroku autocomplete:values --cmd $_cmd_id --flag '--app')
-}
-
-_arguments '*:: :->fillintheblank'
-
-local -a _plugins
-local -a _flags
-local -a _commands_list
-local cur
-local _cmd_id=${words[1]}
-
-# first arg, always handle command_id
-if [ "${#words}" -eq 1 ]; then
-  # _describe -t commands "heroku command" _1st_arguments
-  if type _cmds_list >/dev/null 2>&1; then
-    _cmds_list
-    _describe -t all-commands "all commands" _commands_list
-    return
-  fi
-  _cmds_list_backup && return
-else
-# handle 0-to-N arg options, flags, and flag options
-  local _ret=0
-  cur=${words[CURRENT]}
-  prev=${words[CURRENT-1]}
-  case $cur in
-     (--app=*) _apps && _ret=1 ;;
-  esac
-  case $prev in
-     (--app) _apps && _ret=1 ;;
-     (-a) _apps && _ret=1 ;;
-  esac
-  if [ $_ret -eq 1 ]; then
-    return
-  fi
-fi
-
-local command="${words[1]}"
-local completion_func="_${command//:/_}"
-declare -f $completion_func >/dev/null && $completion_func
-
-_arguments $_flags
+_heroku
