@@ -134,7 +134,9 @@ export default class AnalyticsCommand {
 
   async _readJSON (): Promise<AnalyticsJSON> {
     try {
-      return await fs.readJson(this.analyticsPath)
+      let analytics = await fs.readJson(this.analyticsPath)
+      analytics.commands = analytics.commands || []
+      return analytics
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
       return this._initialAnalyticsJSON()
