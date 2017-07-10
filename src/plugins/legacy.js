@@ -49,6 +49,7 @@ export function convertFromV5 (c: LegacyCommand) {
     static variableArgs = !!c.variableArgs
     static help = c.help
     static usage = c.usage
+    static aliases = c.aliases || []
 
     run () {
       let flags: any = this.flags
