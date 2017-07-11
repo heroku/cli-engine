@@ -19,22 +19,24 @@ const debug = require('debug')('cli-engine:cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 let out: Output
-process.once('SIGINT', () => {
-  if (out) {
-    if (out.action.task) out.action.stop(out.color.red('ctrl-c'))
-    out.exit(1)
-  } else {
-    process.exit(1)
+if (!global.testing) {
+  process.once('SIGINT', () => {
+    if (out) {
+      if (out.action.task) out.action.stop(out.color.red('ctrl-c'))
+      out.exit(1)
+    } else {
+      process.exit(1)
+    }
+  })
+  let handleErr = err => {
+    if (!out) throw err
+    out.error(err)
   }
-})
-let handleErr = err => {
-  if (!out) throw err
-  out.error(err)
+  process.once('uncaughtException', handleErr)
+  process.once('unhandledRejection', handleErr)
+  process.stdout.on('error', handleEPIPE)
+  process.stderr.on('error', handleEPIPE)
 }
-process.once('uncaughtException', handleErr)
-process.once('unhandledRejection', handleErr)
-process.stdout.on('error', handleEPIPE)
-process.stderr.on('error', handleEPIPE)
 
 export default class Main {
   mock: boolean
