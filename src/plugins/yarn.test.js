@@ -31,6 +31,9 @@ function mockFork (options: {
     p.stdout.setEncoding = jest.fn()
     p.stderr = new EventEmitter()
     p.stderr.setEncoding = jest.fn()
+    p.stdin = new EventEmitter()
+    p.stdin.setEncoding = jest.fn()
+    p.stdin.write = jest.fn()
     process.nextTick(() => {
       if (options.stdout) p.stdout.emit('data', options.stdout)
       if (options.stderr) p.stderr.emit('data', options.stderr)
