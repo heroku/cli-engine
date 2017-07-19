@@ -1,80 +1,47 @@
 #compdef heroku
 
 _heroku () {
-  _arguments '*:: :->notusedstate'
-  local _command_id=${words[1]}
-  local -a _flags
+  local -a _flags=()
+  local -a _args=()
+  local _command_id=${words[2]}
+  local _cur
+  _cur=${words[CURRENT]}
 
-  COMMANDS_PATH=$(heroku autocomplete:commandspath)
-  COMMANDS_FUNCS_PATH=$(heroku autocomplete:commandspath)_functions
-
-  source $COMMANDS_FUNCS_PATH
-
-  _cmds_list_backup () {
-    compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH)
+  ## all commands
+  _all_commands_backup () {
+   compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_COMMANDS_PATH)
   }
 
-  _containsElement () {
-    local e
-    for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
-    return 1
+  _complete_commands () {
+   local -a _all_commands_list
+   if type _set_all_commands_list >/dev/null 2>&1; then
+     _set_all_commands_list
+     _describe -t all-commands "all command" _all_commands_list
+     return
+   fi
+   _all_commands_backup
   }
+  ## end all commands
 
-  _has_app () {
-    local -a _commands_with_arg_app
-    if type _cmds_with_arg_app >/dev/null 2>&1; then _cmds_with_arg_app; fi
-    _has_arg_app=$(_containsElement $1 "${_commands_with_arg_app[@]}" && echo ${?+1})
+  ## complete apps
+  _get_apps () {
+   compadd "$@" - $(heroku autocomplete:values --cmd $_command_id --flag app)
   }
+  ## end complete apps
 
-  _apps_options () {
-    compset -P '*[=:]'
-    compadd "$@" - $(heroku autocomplete:values --cmd $_command_id --flag '--app')
-  }
-
-  _args_options () {
-    _has_app $_prev
-    if [ "$_has_arg_app" -eq 1 ]; then
-      _apps_options && return
+  if [ $CURRENT -gt 2 ]; then
+    if [[ "$_cur" == -* ]]; then
+      local _flag_completion_func="_set_${_command_id//:/_}_flags"
+      declare -f $_flag_completion_func >/dev/null && $_flag_completion_func
+    elif [ $CURRENT -eq 3 ]; then
+      local _arg_completion_func="_set_${_command_id//:/_}_args"
+      declare -f $_arg_completion_func >/dev/null && $_arg_completion_func
     fi
-    _arguments $_flags
-  }
-
-  # first arg, always handle command_id
-  if [ "${#words}" -eq 1 ]; then
-    local -a _commands_list
-    if type _cmds_list >/dev/null 2>&1; then
-      _cmds_list
-      _describe -t all-commands "all command" _commands_list
-      return
-    fi
-    _cmds_list_backup && return
-  else
-  # handle 0-to-N arg options, flags, and flag options
-    local _ret=0
-    local _cur _prev
-    local _has_arg_app=0
-    _cur=${words[CURRENT]}
-    _prev=${words[CURRENT-1]}
-
-    case $_cur in
-       (--app=*) _apps_options && _ret=1 ;;
-    esac
-
-    case $_prev in
-       (--app) _apps_options && _ret=1 ;;
-       (-a) _apps_options && _ret=1 ;;
-    esac
-
-    if [ $_ret -eq 1 ]; then
-      return
-    fi
-
-    local _completion_func="_${_command_id//:/_}"
-    declare -f $_completion_func >/dev/null && $_completion_func && _ret=0
-
-    _arguments '1: :_args_options' \
-        $_flags
   fi
+
+  _arguments  '1: :_complete_commands' \
+              $_flags \
+              $_args
 }
 
 _heroku

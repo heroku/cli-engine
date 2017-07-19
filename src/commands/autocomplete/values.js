@@ -24,8 +24,8 @@ export default class AutocompleteValues extends AutocompleteBase {
     try {
       this.errorIfWindows()
 
-      if (!this.flags.cmd) this.out.error('Missing required value for --cmd')
-      if (!this.flags.flag) this.out.error('Missing required value for --flag')
+      if (!this.flags.cmd) throw new Error('Missing required value for --cmd')
+      if (!this.flags.flag) throw new Error('Missing required value for --flag')
 
       const plugins = new Plugins(this.out)
       await plugins.load()
