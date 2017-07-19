@@ -23,11 +23,15 @@ _heroku () {
   }
   ## end all commands
 
-  ## complete apps
+  ## complete resources
   _get_apps () {
-   compadd "$@" - $(heroku autocomplete:values --cmd $_command_id --flag app)
+   compadd "$@" - $(heroku autocomplete:values --cmd=$_command_id --resource=app)
   }
-  ## end complete apps
+
+  _get_addons () {
+   compadd "$@" - $(./bin/run autocomplete:values --cmd=$_command_id --resource=addon --type=arg)
+  }
+  ## end complete resources
 
   if [ $CURRENT -gt 2 ]; then
     if [[ "$_cur" == -* ]]; then

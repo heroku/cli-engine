@@ -51,8 +51,11 @@ export default class {
     try {
       const plugins = await new Plugins(this.out).list()
       const completions = await Promise.all(plugins.map(async (p) => {
+        // let yes
+        // if (p.topics.find(t => t.topic === 'autocomplete')) yes = 1
         const hydrated = await p.pluginPath.require()
         const commands = hydrated.commands || []
+        // if (yes) console.log(commands[0])
         return commands.map(c => {
           if (c.hidden || !c.topic) return
           // TODO: fix here
@@ -64,6 +67,7 @@ export default class {
       }))
       this._writeFunctionsToCache(flatten(completions))
     } catch (e) {
+      console.log(e.message)
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
     }
@@ -109,7 +113,7 @@ ${flatten(cmds).filter(c => c).join('\n')}
         // TODO: make this dynamic
         // when we have reusable args
         // if (args.completions) etc...
-        if (arg.name === 'app') return arg
+        if (arg.name === 'app' || arg.name === 'addon') return arg
       }).filter(a => a)
     return this._createCmdCmplFunctions(id, description, namespace, flags, args)
   }
