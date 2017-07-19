@@ -56,8 +56,13 @@ export default class Update extends Command {
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
-    let ac = new AutocompleteScripter(this)
-    await ac.generateCommandsCache()
+    if (this.config.windows) {
+      debug('skipping autocomplete on windows')
+    } else {
+      let ac = new AutocompleteScripter(this)
+      await ac.generateCommandsCache()
+      await ac.generateCommandFuncs()
+    }
     debug('done')
   }
 
