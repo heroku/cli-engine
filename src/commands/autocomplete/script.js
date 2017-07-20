@@ -25,8 +25,8 @@ export default class AutocompleteScript extends AutocompleteBase {
 
     switch (shell) {
       case 'zsh':
-        this.out.log(`COMMANDS_PATH=${this.completionsPath}/commands;
-source $\{COMMANDS_PATH\}_functions;
+        this.out.log(`HEROKU_COMMANDS_PATH=${this.completionsPath}/commands;
+source \${HEROKU_COMMANDS_PATH}_functions;
 fpath=(
   ${path.join(this.functionsPath, 'zsh')}
   $fpath
