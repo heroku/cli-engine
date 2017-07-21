@@ -21,10 +21,11 @@ jobs:
           command: |
             set -x
             mkdir -p /tmp/test-results
+            export TEST_REPORT_PATH=/tmp/test-results
             export JEST_JUNIT_OUTPUT=/tmp/test-results/junit.xml
             export JEST_USE_PATH_FOR_SUITE_NAME=true
             jest \
-              --testResultsProcessor=jest-junit \
+              --testResultsProcessor=jest-junit-reporter \
               --coverage \
               --runInBand \
               $(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)

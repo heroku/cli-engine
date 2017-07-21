@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite id="0" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/user.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/user.test.js" hostname="localhost" tests="6" failures="0" time="51.041" timestamp="2017-07-21T20:55:53">
+    <properties>
+    </properties>
+    <testcase classname="user plugin should be cached" name="user plugin should be cached" time="0">
+    </testcase>
+    <testcase classname="plugins should be reloaded when node_version null" name="plugins should be reloaded when node_version null" time="0">
+    </testcase>
+    <testcase classname="plugins should be reloaded when node_version changed" name="plugins should be reloaded when node_version changed" time="0">
+    </testcase>
+    <testcase classname="problematic version of semver should be overwritten" name="problematic version of semver should be overwritten" time="0">
+    </testcase>
+    <testcase classname="problematic version of semver from previous release should be overwritten" name="problematic version of semver from previous release should be overwritten" time="0">
+    </testcase>
+    <testcase classname="plugins should be loaded when things cannot be rebuilt" name="plugins should be loaded when things cannot be rebuilt" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="1" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/namespaces.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/namespaces.test.js" hostname="localhost" tests="7" failures="0" time="14.234" timestamp="2017-07-21T20:56:45">
+    <properties>
+    </properties>
+    <testcase classname="installs undefined namespaced" name="user plugin heroku-debug" time="0">
+    </testcase>
+    <testcase classname="installs undefined namespaced" name="linked plugin cli-engine-example-plugin" time="0">
+    </testcase>
+    <testcase classname="does not install unpermitted namespaced" name="user plugin heroku-debug with namespace &apos;heroku&apos;" time="0">
+    </testcase>
+    <testcase classname="installs permitted namespaced" name="user plugin heroku-debug with namespace &apos;heroku&apos;" time="0">
+    </testcase>
+    <testcase classname="does not install undefined namespaced" name="user plugin heroku-debug" time="0">
+    </testcase>
+    <testcase classname="does not install undefined namespaced" name="linked plugin cli-engine-example-plugin" time="0">
+    </testcase>
+    <testcase classname="does not install unpermitted namespaced" name="user plugin heroku-debug with namespace &apos;cowabunga&apos;" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="2" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/linked.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/linked.test.js" hostname="localhost" tests="4" failures="0" time="5.171" timestamp="2017-07-21T20:56:59">
+    <properties>
+    </properties>
+    <testcase classname="linked plugin should be cached" name="linked plugin should be cached" time="0">
+    </testcase>
+    <testcase classname="linked plugin prepare should clear cache" name="linked plugin prepare should clear cache" time="0">
+    </testcase>
+    <testcase classname="plugins should be reloaded when node_version changed" name="plugins should be reloaded when node_version changed" time="0">
+    </testcase>
+    <testcase classname="plugins should be loaded when things cannot be rebuilt" name="plugins should be loaded when things cannot be rebuilt" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="3" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/integration.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/integration.test.js" hostname="localhost" tests="3" failures="0" time="5.273" timestamp="2017-07-21T20:57:04">
+    <properties>
+    </properties>
+    <testcase classname="installs, runs, and uninstalls heroku-debug" name="installs, runs, and uninstalls heroku-debug" time="0">
+    </testcase>
+    <testcase classname="tries to install a non-existant tag" name="tries to install a non-existant tag" time="0">
+    </testcase>
+    <testcase classname="links example plugin" name="links example plugin" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="4" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/cli.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/cli.test.js" hostname="localhost" tests="11" failures="0" time="0.294" timestamp="2017-07-21T20:57:09">
+    <properties>
+    </properties>
+    <testcase classname="runs the version command" name="runs the version command" time="0">
+    </testcase>
+    <testcase classname="errors with invalid arguments" name="errors with invalid arguments" time="0">
+    </testcase>
+    <testcase classname="errors when command not found" name="errors when command not found" time="0">
+    </testcase>
+    <testcase classname="edge cases" name="shows help for `help` command itself" time="0">
+    </testcase>
+    <testcase classname="global help" name="shows help when no arguments given" time="0">
+    </testcase>
+    <testcase classname="global help" name="shows help for `help` command and no additonal arguments" time="0">
+    </testcase>
+    <testcase classname="global help" name="shows help for `--help` or `-h` flag and no additonal arguments" time="0">
+    </testcase>
+    <testcase classname="--help &amp; -h flags" name="shows help for plugins" time="0">
+    </testcase>
+    <testcase classname="--help &amp; -h flags" name="shows help for plugins (prefixed)" time="0">
+    </testcase>
+    <testcase classname="--help &amp; -h flags" name="shows help for plugins:install" time="0">
+    </testcase>
+    <testcase classname="--help &amp; -h flags" name="shows help for plugins:install (prefixed)" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="5" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/update.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/update.test.js" hostname="localhost" tests="2" failures="0" time="0.19" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="with no update available" name="updates plugins only" time="0">
+    </testcase>
+    <testcase classname="with update available" name="updates CLI and plugins" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="6" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/migrator.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/migrator.test.js" hostname="localhost" tests="3" failures="0" time="0.12" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="plugins should be reloaded if migrated" name="plugins should be reloaded if migrated" time="0">
+    </testcase>
+    <testcase classname="linked plugins should be migrated" name="linked plugins should be migrated" time="0">
+    </testcase>
+    <testcase classname="linked plugins that override core should be migrated" name="linked plugins that override core should be migrated" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="7" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/help.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/help.test.js" hostname="localhost" tests="4" failures="0" time="0.063" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="shows the topics" name="shows the topics" time="0">
+    </testcase>
+    <testcase classname="shows help about plugins" name="shows help about plugins" time="0">
+    </testcase>
+    <testcase classname="help should show usage in topics" name="help should show usage in topics" time="0">
+    </testcase>
+    <testcase classname="help should show usage in commands" name="help should show usage in commands" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="8" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/analytics.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/analytics.test.js" hostname="localhost" tests="13" failures="0" time="0.066" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="submit" name="does not submit if config skipAnalytics is true" time="0">
+    </testcase>
+    <testcase classname="submit" name="does not submit if HEROKU_API_KEY is set" time="0">
+    </testcase>
+    <testcase classname="submit" name="does not submit if login is not set" time="0">
+    </testcase>
+    <testcase classname="submit" name="does not submit if commands is empty" time="0">
+    </testcase>
+    <testcase classname="submit" name="pushes data to the record endpoint" time="0">
+    </testcase>
+    <testcase classname="submit" name="clears the local commands after success" time="0">
+    </testcase>
+    <testcase classname="submit" name="pushes data to the CLI_ENGINE_ANALYTICS_URL endpoint" time="0">
+    </testcase>
+    <testcase classname="submit" name="traps errors sending to the endpoint" time="0">
+    </testcase>
+    <testcase classname="record" name="does not record if no plugin" time="0">
+    </testcase>
+    <testcase classname="record" name="does not record if config skipAnalytics is true" time="0">
+    </testcase>
+    <testcase classname="record" name="does not record if HEROKU_API_KEY is set" time="0">
+    </testcase>
+    <testcase classname="record" name="does not record if login is not set" time="0">
+    </testcase>
+    <testcase classname="record" name="records commands" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="9" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/updater.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/updater.test.js" hostname="localhost" tests="13" failures="0" time="0.093" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="without a file" name="hits the network to find version" time="0">
+    </testcase>
+    <testcase classname="with a file" name="shows warning when minor is greater" time="0">
+    </testcase>
+    <testcase classname="with a file" name="shows warning when major is greater" time="0">
+    </testcase>
+    <testcase classname="with a file" name="shows nothing when minor is less" time="0">
+    </testcase>
+    <testcase classname="with a file" name="shows nothing when patch is greater" time="0">
+    </testcase>
+    <testcase classname="windows-x86" name="gets the manifest from the API" time="0">
+    </testcase>
+    <testcase classname="linux-x64" name="gets the manifest from the API" time="0">
+    </testcase>
+    <testcase classname="fetchManifest" name="gets the manifest from the API" time="0">
+    </testcase>
+    <testcase classname="fetchManifest" name="errors on 403" time="0">
+    </testcase>
+    <testcase classname="fetchVersion" name="gets the version from disk" time="0">
+    </testcase>
+    <testcase classname="fetchVersion" name="gets the version from the API" time="0">
+    </testcase>
+    <testcase classname="fetchVersion" name="gets the version from the API when download is specified" time="0">
+    </testcase>
+    <testcase classname="fetchVersion" name="saves the version to disk" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="10" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/yarn.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/yarn.test.js" hostname="localhost" tests="13" failures="0" time="0.123" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="checkForYarnLock" name="checks for yarn lockfile" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="has correct args" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="has correct modulePath" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="has path env" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="has correct options" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="does not emit stdout when debug is off" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="emits stdout when debug is on" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="emits stderr when debug is on" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="raises error" time="0">
+    </testcase>
+    <testcase classname="with checkForYarnLock stubbed out" name="adds --network-concurrency=1 when necessary" time="0">
+    </testcase>
+    <testcase classname="with cacheDir" name="has correct args" time="0">
+    </testcase>
+    <testcase classname="windows" name="finds path case insensitively" time="0">
+    </testcase>
+    <testcase classname="windows" name="defaults to Path" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="11" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/commands.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/commands.test.js" hostname="localhost" tests="1" failures="0" time="0.045" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="outputs commands" name="outputs commands" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="12" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/which.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/which.test.js" hostname="localhost" tests="3" failures="0" time="0.056" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="errors if not found" name="errors if not found" time="0">
+    </testcase>
+    <testcase classname="finds a user plugin" name="finds a user plugin" time="0">
+    </testcase>
+    <testcase classname="finds a builtin command" name="finds a builtin command" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="13" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/cache.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/cache.test.js" hostname="localhost" tests="5" failures="0" time="0.048" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="new Cache(output)" name="new Cache(output)" time="0">
+    </testcase>
+    <testcase classname="updatePlugin" name="updatePlugin" time="0">
+    </testcase>
+    <testcase classname="with existing file" name="reads existing plugin data" time="0">
+    </testcase>
+    <testcase classname="with existing file" name="deletePlugin" time="0">
+    </testcase>
+    <testcase classname="with existing for a previous version" name="does not clear node_version" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="14" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/not_found.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/not_found.test.js" hostname="localhost" tests="1" failures="0" time="0.041" timestamp="2017-07-21T20:57:10">
+    <properties>
+    </properties>
+    <testcase classname="it exits with 127" name="it exits with 127" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="15" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/legacy.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/plugins/legacy.test.js" hostname="localhost" tests="1" failures="0" time="0.029" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="exports a context" name="exports a context" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="16" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/update.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/update.test.js" hostname="localhost" tests="1" failures="0" time="0.039" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="updates plugins" name="updates plugins" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="17" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/version.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/version.test.js" hostname="localhost" tests="1" failures="0" time="0.041" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="shows the version" name="shows the version" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="18" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/index.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/index.test.js" hostname="localhost" tests="1" failures="0" time="0.089" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="updates plugins" name="updates plugins" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="19" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/autocomplete/path.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/autocomplete/path.test.js" hostname="localhost" tests="1" failures="0" time="0.088" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="outputs commands file path" name="outputs commands file path" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+  <testsuite id="20" name="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/install.test.js" errors="0" package="/Users/jdickey/src/github.com/heroku/cli-engine/src/commands/plugins/install.test.js" hostname="localhost" tests="2" failures="0" time="0.031" timestamp="2017-07-21T20:57:11">
+    <properties>
+    </properties>
+    <testcase classname="installs heroku-debug" name="installs heroku-debug" time="0">
+    </testcase>
+    <testcase classname="installs heroku-debug@alpha" name="installs heroku-debug@alpha" time="0">
+    </testcase>
+    <system-out/>
+    <system-err/>
+  </testsuite>
+</testsuites>
