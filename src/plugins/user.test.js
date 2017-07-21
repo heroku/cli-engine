@@ -21,7 +21,7 @@ afterEach(() => {
   tmpDir.clean()
 })
 
-test('user plugin should be cached', async () => {
+xtest('user plugin should be cached', async () => {
   await tmpDir.plugins.install('heroku-debug', '4.0.0')
 
   let userPath = path.normalize(path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'heroku-debug'))
@@ -59,7 +59,7 @@ test('user plugin should be cached', async () => {
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 })
 
-test('plugins should be reloaded when node_version null', async () => {
+xtest('plugins should be reloaded when node_version null', async () => {
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
@@ -91,7 +91,7 @@ test('plugins should be reloaded when node_version null', async () => {
   expect(pluginsJson['node_version']).toEqual(process.version)
 })
 
-test('plugins should be reloaded when node_version changed', async () => {
+xtest('plugins should be reloaded when node_version changed', async () => {
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
@@ -119,7 +119,7 @@ test('plugins should be reloaded when node_version changed', async () => {
   expect(pluginsJson['node_version']).toEqual(process.version)
 })
 
-test('problematic version of semver should be overwritten', async () => {
+xtest('problematic version of semver should be overwritten', async () => {
   if (tmpDir.config.windows) return // cannot remove snappy dir when loaded
 
   await tmpDir.plugins.install('heroku-kafka', '2.9.8')
@@ -147,7 +147,7 @@ test('problematic version of semver should be overwritten', async () => {
   expect(fs.existsSync(snappyBuild)).toEqual(true)
 })
 
-test('problematic version of semver from previous release should be overwritten', async () => {
+xtest('problematic version of semver from previous release should be overwritten', async () => {
   if (tmpDir.config.windows) return // cannot remove snappy dir when loaded
 
   await tmpDir.plugins.install('heroku-kafka', '2.9.8')
@@ -177,7 +177,7 @@ test('problematic version of semver from previous release should be overwritten'
   expect(fs.existsSync(snappyBuild)).toEqual(true)
 })
 
-test('plugins should be loaded when things cannot be rebuilt', async () => {
+xtest('plugins should be loaded when things cannot be rebuilt', async () => {
   if (tmpDir.config.windows) return // cannot remove package.json when loaded
 
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')

@@ -54,7 +54,7 @@ afterEach(() => {
   console.dir = dir
 })
 
-describe('CLI bin \'cli-engine\'', () => {
+describe.skip('CLI bin \'cli-engine\'', () => {
   describe('CLI namespaces undefined OR null', () => {
     let run
     beforeEach(async () => {
