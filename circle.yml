@@ -21,7 +21,7 @@ jobs:
       - run: flow check
       - run: eslint .
       - store_test_results:
-        path: /tmp/test-results
+          path: /tmp/test-results
       - save_cache:
           key: cli-engine-{{ .Branch}}-{{checksum "package.json"}}
           paths:
