@@ -26,36 +26,36 @@ export default class AutocompleteValues extends AutocompleteBase {
     try {
       this.errorIfWindows()
 
+      // handle missing flags here, not in parser
       if (!this.flags.cmd) throw new Error('Missing required value for --cmd')
       if (!this.flags.resource) throw new Error('Missing required value for --resource')
 
+      // find Command
       const plugins = new Plugins(this.out)
       await plugins.load()
       let Command = await plugins.findCommand(this.flags.cmd)
       if (!Command) throw new Error(`Command ${this.flags.cmd} not found`)
 
+      // get cache key and options
       let cacheKey = 'void'
-      let cacheCompletion = {}
+      let cacheCompletion : ?Object
       if (this.flags.arg) {
         let args = Command ? Command.args : []
         let arg = args.find(a => a.name === this.flags.resource)
         if (!arg) throw new Error(`Arg ${this.flags.resource} not found`)
-        if (arg.completion && arg.completion.options) {
-          cacheKey = arg.name
-          cacheCompletion = arg.completion
-        }
+        cacheKey = arg.name
+        cacheCompletion = arg.completion
       } else {
         let long = this.flags.resource.replace(/^-+/, '')
         let flags = Command ? Command.flags : {}
         let flag = flags[long]
         if (!flag) throw new Error(`Flag ${long} not found`)
-        if (flag.completion && flag.completion.options) {
-          cacheKey = long
-          cacheCompletion = flag.completion
-        }
+        cacheKey = long
+        cacheCompletion = flag.completion
       }
 
-      if (cacheCompletion.options) {
+      // create/fetch cache
+      if (cacheCompletion && cacheCompletion.options) {
         let flagCache = path.join(this.completionsPath, cacheKey)
         let duration = cacheCompletion.duration || 60 * 60 * 24 // 1 day
         let opts = {cacheFn: () => cacheCompletion.options(this.out)}

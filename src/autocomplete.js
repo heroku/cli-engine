@@ -47,19 +47,27 @@ export default class {
     }
   }
 
-  async generateCommandFuncs () {
+  async generateCommandFuncsCache () {
     try {
       const plugins = await new Plugins(this.out).list()
+      // for every plugin
       const completions = await Promise.all(plugins.map(async (p) => {
+        // re-hydrate
         const hydrated = await p.pluginPath.require()
         const commands = hydrated.commands || []
+        // for every command in plugin
         return commands.map(c => {
           if (c.hidden || !c.topic) return
           // TODO: fix here
           // convertFromV5 pukes here w/o topic
           // but we lose this cmd
           const cmd = typeof c === 'function' ? c : convertFromV5((c: any))
-          return this._createCompletionsForCmd(cmd, (p.namespace || ''))
+          const namespace = (p.namespace || '')
+          // create completion setters
+          const argFunc = this._createCmdArgSetter(cmd, namespace)
+          const flagFunc = this._createCmdFlagSetter(cmd, namespace)
+          const cmdAndDesc = this._createCmdWithDescription(cmd, namespace)
+          return {argFunc, flagFunc, cmdAndDesc}
         })
       }))
       this._writeFunctionsToCache(flatten(completions))
@@ -67,6 +75,64 @@ export default class {
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
     }
+  }
+
+  _createCmdArgSetter (Command: Class<Command<*>>, namespace: string) : ?string {
+    const id = this._genCmdID(Command, namespace)
+    const args = (Command.args || []).filter(arg => !arg.hidden)
+      .map(arg => {
+        // TODO: make this dynamic
+        // when we have reusable args
+        // if (args.completions) etc...
+        if (arg.name === 'app' || arg.name === 'addon') return arg
+      }).filter(a => a)
+    if (args.length) {
+      let n = 0
+      let argscompletions = args.map(a => {
+        n += 1
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${a.name} --arg))`
+        return `"${n === 1 ? '$1' : ''}${a.required ? '' : ':'}: :{${evalStatement}}"`
+      }).join('\n')
+      return `_set_${id.replace(/:/g, '_')}_args () {
+_args=(${argscompletions})
+}
+`
+    }
+  }
+
+  _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string) : ?string {
+    const id = this._genCmdID(Command, namespace)
+    const description = Command.description ? `:'${Command.description}'` : ''
+    // const cmdAndDesc = `'${namespace.replace(/:/g, '\\:')}${id.replace(/:/g, '\\:')}'${description}`
+    const flags = Object.keys(Command.flags || {})
+      .filter(flag => !Command.flags[flag].hidden)
+      .map(flag => {
+        const f = Command.flags[flag]
+        const name = f.parse ? `${flag}=-` : flag
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))`
+        const cachecompl = f.completion ? `: :{${evalStatement}}` : ''
+        let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
+        return `"${completion}"`
+      })
+    if (flags.length) {
+      return `_set_${id.replace(/:/g, '_')}_flags () {
+_flags=(
+${flags.join('\n')}
+)
+}
+`
+    }
+  }
+
+  _createCmdWithDescription (Command: Class<Command<*>>, namespace: string) : string {
+    const description = Command.description ? `:'${Command.description}'` : ''
+    return `'${this._genCmdID(Command, namespace).replace(/:/g, '\\:')}'${description}`
+  }
+
+  _genCmdID (Command: Class<Command<*>>, namespace: string) : string {
+    const ns = namespace ? `${namespace}:` : ''
+    const id = Command.command ? `${ns}${Command.topic}:${Command.command}` : `${ns}${Command.topic}`
+    return id
   }
 
   _genAllCmdsListSetter (cmds: Array<string>): string {
@@ -88,57 +154,8 @@ ${flatten(cmds).filter(c => c).join('\n')}
       if (c.argFunc) completionFunctions.push(c.argFunc)
       if (c.cmdAndDesc) cmdAndDescriptions.push(c.cmdAndDesc)
     })
-    const completions = completionFunctions.concat(this._genAllCmdsListSetter(cmdAndDescriptions)).join('\n')
+    const allCmds = this._genAllCmdsListSetter(cmdAndDescriptions)
+    const completions = completionFunctions.concat(allCmds).join('\n')
     fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), completions)
-  }
-
-  _createCompletionsForCmd (Command: Class<Command<*>>, namespace: string = ''): CmdCmplData {
-    const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
-    const description = Command.description ? `:'${Command.description}'` : ''
-    const flags = Object.keys(Command.flags || {})
-      .filter(flag => !Command.flags[flag].hidden)
-      .map(flag => {
-        const f = Command.flags[flag]
-        const name = f.parse ? `${flag}=-` : flag
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))`
-        const cachecompl = f.completion ? `: :{${evalStatement}}` : ''
-        let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
-        return `"${completion}"`
-      })
-    const args = (Command.args || []).filter(arg => !arg.hidden)
-      .map(arg => {
-        // TODO: make this dynamic
-        // when we have reusable args
-        // if (args.completions) etc...
-        if (arg.name === 'app' || arg.name === 'addon') return arg
-      }).filter(a => a)
-    return this._createCmdCmplFunctions(id, description, namespace, flags, args)
-  }
-
-  _createCmdCmplFunctions (id: string, description: string, namespace: string, flags: Array<*>, args: Array<*>): CmdCmplData {
-    const cmdAndDesc = `'${namespace.replace(/:/g, '\\:')}${id.replace(/:/g, '\\:')}'${description}`
-    let completions = {}
-    completions.cmdAndDesc = cmdAndDesc
-    if (flags.length) {
-      completions.flagFunc = `_set_${namespace}${id.replace(/:/g, '_')}_flags () {
-_flags=(
-${flags.join('\n')}
-)
-}
-`
-    }
-    if (args.length) {
-      let n = 0
-      let argscompletions = args.map(a => {
-        n += 1
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${a.name} --arg))`
-        return `"${n === 1 ? '$1' : ''}${a.required ? '' : ':'}: :{${evalStatement}}"`
-      }).join('\n')
-      completions.argFunc = `_set_${namespace}${id.replace(/:/g, '_')}_args () {
-_args=(${argscompletions})
-}
-`
-    }
-    return completions
   }
 }
