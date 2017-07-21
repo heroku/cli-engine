@@ -15,8 +15,6 @@ jobs:
             - cli-engine-master
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
-      - run: ./bin/run version
-      - run: echo $(circleci tests glob "src/**/*.test.js" | circleci tests split)
       - run:
         command: |
           mkdir -p /tmp/test-results
@@ -28,8 +26,11 @@ jobs:
             $(circleci tests glob "src/**/*.test.js" | circleci tests split)
           bash <(curl -s https://codecov.io/bash) -s coverage
           ls /tmp/test-results
-      - run: flow check
-      - run: eslint .
+      - run:
+        command: |
+          ./bin/version
+          flow check
+          eslint .
       - store_test_results:
           path: /tmp/test-results
       - save_cache:
