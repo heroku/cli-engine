@@ -20,6 +20,7 @@ jobs:
             set -x
             mkdir -p /tmp/test-results
             export JEST_JUNIT_OUTPUT=/tmp/test-results/junit.xml
+            export JEST_USE_PATH_FOR_SUITE_NAME=true
             jest \
               --testResultsProcessor=jest-junit \
               --coverage \
