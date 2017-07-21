@@ -5,6 +5,7 @@ jobs:
     docker:
       - image: dickeyxxx/cli-engine-docker:v1.2.0-node7
     working_directory: /tmp/cli-engine
+    parallelism: 3
     steps:
       - checkout
       - restore_cache:
