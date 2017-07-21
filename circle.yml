@@ -13,10 +13,10 @@ jobs:
             - cli-engine-{{ .Branch }}-{{checksum "package.json"}}
             - cli-engine-{{ .Branch }}
             - cli-engine-master
+      - run: cat /.circleci-task-data/circle-test-results/*
       - run: echo $(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)
       # clear cache
-      - run: rm -rf /tmp/cli-engine/node_modules /tmp/cli-engine/npm-packages-offline-cache /tmp/cli-engine/yarn /usr/local/share/.cache
-      - run: ls /.circleci-task-data/circle-test-results/
+      # - run: rm -rf /tmp/cli-engine/node_modules /tmp/cli-engine/npm-packages-offline-cache /tmp/cli-engine/yarn /usr/local/share/.cache
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
       - run:
