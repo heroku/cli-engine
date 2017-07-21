@@ -17,6 +17,7 @@ jobs:
       - run: yarn --prefer-offline
       - run:
           command: |
+            set -x
             mkdir -p /tmp/test-results
             export TEST_REPORT_PATH=/tmp/test-results
             jest \
