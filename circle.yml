@@ -19,13 +19,14 @@ jobs:
           command: |
             set -x
             mkdir -p /tmp/test-results
-            export TEST_REPORT_PATH=/tmp/test-results
+            export JEST_JUNIT_OUTPUT=/tmp/test-results/junit.xml
             jest \
-              --testResultsProcessor=jest-junit-reporter \
+              --testResultsProcessor=jest-junit \
               --coverage \
               --runInBand \
               $(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)
             bash <(curl -s https://codecov.io/bash) -s coverage
+            cat $JEST_JUNIT_OUTPUT
       - run:
           command: |
             set -x
