@@ -16,7 +16,7 @@ jobs:
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
       - run: ./bin/run version
-      - run: echo $(circleci tests glob "src/**/*.test.js")
+      - run: echo $(circleci tests glob "src/**/*.test.js" | circleci tests split)
       # - run: jest --coverage --runInBand && bash <(curl -s https://codecov.io/bash) -s coverage
       - run: flow check
       - run: eslint .
