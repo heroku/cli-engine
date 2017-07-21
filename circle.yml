@@ -30,7 +30,7 @@ jobs:
               --runInBand \
               $(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)
             bash <(curl -s https://codecov.io/bash) -s coverage
-            cat $JEST_JUNIT_OUTPUT
+            cat /tmp/test-results/*
       - run:
           command: |
             set -x
