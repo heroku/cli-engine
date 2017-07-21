@@ -116,7 +116,7 @@ export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Fla
       parse: flag.parse
     }
     Object.keys(opts).forEach(k => opts[k] === undefined && delete opts[k])
-    flags[flag.name] = flag.hasValue ? Flags.string(opts) : Flags.boolean(opts)
+    flags[flag.name] = flag.hasValue ? Flags.string(opts) : Flags.boolean((opts: any))
     return flags
   }, {})
 }
