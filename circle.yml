@@ -46,7 +46,6 @@ jobs:
             - /tmp/cli-engine/npm-packages-offline-cache
             - /tmp/cli-engine/yarn
             - /usr/local/share/.cache/yarn
-      #
       - save_cache:
           key: cli-engine-{{ .Branch}}
           paths:
