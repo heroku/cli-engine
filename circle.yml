@@ -24,7 +24,7 @@ jobs:
               --testResultsProcessor=jest-junit-reporter \
               --coverage \
               --runInBand \
-              $(circleci tests glob "src/**/*.test.js" | circleci tests split)
+              $(circleci tests glob "src/**/*.test.js" | circleci tests split --split-by=timings)
             bash <(curl -s https://codecov.io/bash) -s coverage
       - run:
           command: |
