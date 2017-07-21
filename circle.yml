@@ -13,6 +13,8 @@ jobs:
             - cli-engine-{{ .Branch }}-{{checksum "package.json"}}
             - cli-engine-{{ .Branch }}
             - cli-engine-master
+      # clear cache
+      - run: rm -rf /tmp/cli-engine /usr/local/share/.cache
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
       - run:
