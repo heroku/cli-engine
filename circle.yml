@@ -26,9 +26,9 @@ jobs:
               --runInBand \
               $(circleci tests glob "src/**/*.test.js" | circleci tests split)
             bash <(curl -s https://codecov.io/bash) -s coverage
-            ls /tmp/test-results
       - run:
           command: |
+            set -x
             ./bin/version
             flow check
             eslint .
