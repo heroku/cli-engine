@@ -15,6 +15,7 @@ jobs:
             - cli-engine-master
       # clear cache
       - run: rm -rf /tmp/cli-engine /usr/local/share/.cache
+      - run: ls /.circleci-task-data/circle-test-results/
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
       - run:
