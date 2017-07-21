@@ -4,23 +4,19 @@ _heroku () {
   local -a _flags=()
   local -a _args=()
   local _command_id=${words[2]}
-  local _cur
+  local _cur=${words[CURRENT]}
   local _arg_i=2
-  _cur=${words[CURRENT]}
 
   ## all commands
-  _all_commands_backup () {
-   compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_COMMANDS_PATH)
-  }
-
   _complete_commands () {
    local -a _all_commands_list
    if type _set_all_commands_list >/dev/null 2>&1; then
      _set_all_commands_list
-     _describe -t all-commands "all command" _all_commands_list
+     _describe -t all-commands "all commands" _all_commands_list
      return
    fi
-   _all_commands_backup
+   # fallback to grep'ing cmds from cache
+   compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_COMMANDS_PATH)
   }
   ## end all commands
 
@@ -30,7 +26,6 @@ _heroku () {
       if [[ ! $i =~ ^- ]] && [[ "$n" -gt 1 ]]; ; then
         _arg_i="$n"
         return
-        # echo "$n" >> ~/Desktop/g #
       fi
       n=$(($n + 1))
     done
@@ -44,9 +39,6 @@ _heroku () {
       _find_first_arg_index
       local _arg_completion_func="_set_${_command_id//:/_}_args"
       declare -f $_arg_completion_func >/dev/null && $_arg_completion_func $_arg_i
-
-      echo "\n" >> ~/Desktop/g
-      echo $_arg_i >> ~/Desktop/g
     fi
   fi
 
