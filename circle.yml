@@ -16,21 +16,21 @@ jobs:
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --prefer-offline
       - run:
-        command: |
-          mkdir -p /tmp/test-results
-          export TEST_REPORT_PATH=/tmp/test-results
-          jest \
-            --testResultsProcessor=jest-junit-reporter \
-            --coverage \
-            --runInBand \
-            $(circleci tests glob "src/**/*.test.js" | circleci tests split)
-          bash <(curl -s https://codecov.io/bash) -s coverage
-          ls /tmp/test-results
+          command: |
+            mkdir -p /tmp/test-results
+            export TEST_REPORT_PATH=/tmp/test-results
+            jest \
+              --testResultsProcessor=jest-junit-reporter \
+              --coverage \
+              --runInBand \
+              $(circleci tests glob "src/**/*.test.js" | circleci tests split)
+            bash <(curl -s https://codecov.io/bash) -s coverage
+            ls /tmp/test-results
       - run:
-        command: |
-          ./bin/version
-          flow check
-          eslint .
+          command: |
+            ./bin/version
+            flow check
+            eslint .
       - store_test_results:
           path: /tmp/test-results
       - save_cache:
