@@ -17,7 +17,7 @@ jobs:
       - run: yarn --prefer-offline
       - run: ./bin/run version
       - run: echo $(circleci tests glob "src/**/*.test.js" | circleci tests split)
-      - run: jest --coverage --runInBand $(circleci tests glob "src/**/*.test.js" | circleci tests split) && bash <(curl -s https://codecov.io/bash) -s coverage
+      - run: jest --testResultsReporter=jest-junit-reporter --coverage --runInBand $(circleci tests glob "src/**/*.test.js" | circleci tests split) && bash <(curl -s https://codecov.io/bash) -s coverage
       - run: flow check
       - run: eslint .
       - save_cache:
