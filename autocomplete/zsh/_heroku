@@ -5,6 +5,7 @@ _heroku () {
   local -a _args=()
   local _command_id=${words[2]}
   local _cur
+  local _arg_i=2
   _cur=${words[CURRENT]}
 
   ## all commands
@@ -23,23 +24,29 @@ _heroku () {
   }
   ## end all commands
 
-  ## complete resources
-  _get_apps () {
-   compadd "$@" - $(heroku autocomplete:values --cmd=$_command_id --resource=app)
+  _find_first_arg_index () {
+    n=0
+    for i in "${words[@]}"; do
+      if [[ ! $i =~ ^- ]] && [[ "$n" -gt 1 ]]; ; then
+        _arg_i="$n"
+        return
+        # echo "$n" >> ~/Desktop/g #
+      fi
+      n=$(($n + 1))
+    done
   }
-
-  _get_addons () {
-   compadd "$@" - $(./bin/run autocomplete:values --cmd=$_command_id --resource=addon --type=arg)
-  }
-  ## end complete resources
 
   if [ $CURRENT -gt 2 ]; then
     if [[ "$_cur" == -* ]]; then
       local _flag_completion_func="_set_${_command_id//:/_}_flags"
       declare -f $_flag_completion_func >/dev/null && $_flag_completion_func
-    elif [ $CURRENT -eq 3 ]; then
+    else
+      _find_first_arg_index
       local _arg_completion_func="_set_${_command_id//:/_}_args"
-      declare -f $_arg_completion_func >/dev/null && $_arg_completion_func
+      declare -f $_arg_completion_func >/dev/null && $_arg_completion_func $_arg_i
+
+      echo "\n" >> ~/Desktop/g
+      echo $_arg_i >> ~/Desktop/g
     fi
   fi
 

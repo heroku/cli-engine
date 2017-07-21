@@ -51,11 +51,8 @@ export default class {
     try {
       const plugins = await new Plugins(this.out).list()
       const completions = await Promise.all(plugins.map(async (p) => {
-        // let yes
-        // if (p.topics.find(t => t.topic === 'autocomplete')) yes = 1
         const hydrated = await p.pluginPath.require()
         const commands = hydrated.commands || []
-        // if (yes) console.log(commands[0])
         return commands.map(c => {
           if (c.hidden || !c.topic) return
           // TODO: fix here
@@ -67,7 +64,6 @@ export default class {
       }))
       this._writeFunctionsToCache(flatten(completions))
     } catch (e) {
-      console.log(e.message)
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
     }
@@ -104,9 +100,10 @@ ${flatten(cmds).filter(c => c).join('\n')}
       .map(flag => {
         const f = Command.flags[flag]
         const name = f.parse ? `${flag}=-` : flag
-        const cachecompl = f.completion ? `: :_get_${flag}s` : ''
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))`
+        const cachecompl = f.completion ? `: :{${evalStatement}}` : ''
         let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
-        return `'${completion}'`
+        return `"${completion}"`
       })
     const args = (Command.args || []).filter(arg => !arg.hidden)
       .map(arg => {
@@ -131,11 +128,11 @@ ${flags.join('\n')}
 `
     }
     if (args.length) {
-      let n = 1
+      let n = 0
       let argscompletions = args.map(a => {
         n += 1
-        // TODO: how do we ensure this func exists?
-        return `'${n}${a.required ? '' : ':'}: :_get_${a.name}s'`
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${a.name} --arg))`
+        return `"${n === 1 ? '$1' : ''}${a.required ? '' : ':'}: :{${evalStatement}}"`
       }).join('\n')
       completions.argFunc = `_set_${namespace}${id.replace(/:/g, '_')}_args () {
 _args=(${argscompletions})
