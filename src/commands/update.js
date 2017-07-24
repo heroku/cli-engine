@@ -3,6 +3,7 @@
 import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
+import Plugins from '../plugins'
 import Analytics from '../analytics'
 import AutocompleteScripter from '../autocomplete'
 
@@ -59,9 +60,15 @@ export default class Update extends Command {
     if (this.config.windows) {
       debug('skipping autocomplete on windows')
     } else {
-      let ac = new AutocompleteScripter(this)
-      await ac.generateCommandsCache()
-      await ac.generateCommandFuncsCache()
+      const plugins = await new Plugins(this.out).list()
+      const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
+      if (acPlugin) {
+        let ac = new AutocompleteScripter(this)
+        await ac.generateCommandsCache()
+        await ac.generateCommandFuncsCache()
+      } else {
+        debug('skipping autocomplete, not installed')
+      }
     }
     debug('done')
   }
