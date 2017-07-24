@@ -14,7 +14,9 @@ export default class AutocompleteScript extends AutocompleteBase {
 
   async run () {
     this.errorIfWindows()
-    await new AutocompleteScripter(this).generateCommandsCache()
+    const ac = new AutocompleteScripter(this)
+    await ac.generateCommandsCache()
+    await ac.generateCommandFuncs()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {
@@ -23,7 +25,10 @@ export default class AutocompleteScript extends AutocompleteBase {
 
     switch (shell) {
       case 'zsh':
-        this.out.log(`fpath=(
+        this.out.log(`HEROKU_COMMANDS_PATH=${this.completionsPath}/commands;
+HEROKU_AC_SETTERS_PATH=\${HEROKU_COMMANDS_PATH}_functions && test -f $HEROKU_AC_SETTERS_PATH && source $HEROKU_AC_SETTERS_PATH;
+
+fpath=(
   ${path.join(this.functionsPath, 'zsh')}
   $fpath
 );

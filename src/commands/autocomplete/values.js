@@ -24,17 +24,17 @@ export default class AutocompleteValues extends AutocompleteBase {
     try {
       this.errorIfWindows()
 
-      if (!this.flags.cmd) this.out.error('Missing required value for --cmd')
-      if (!this.flags.flag) this.out.error('Missing required value for --flag')
+      if (!this.flags.cmd) throw new Error('Missing required value for --cmd')
+      if (!this.flags.flag) throw new Error('Missing required value for --flag')
 
       const plugins = new Plugins(this.out)
       await plugins.load()
       let Command = await plugins.findCommand(this.flags.cmd)
-      if (!Command) this.out.error(`Command ${this.flags.cmd} not found`)
+      if (!Command) throw new Error(`Command ${this.flags.cmd} not found`)
       let long = this.flags.flag.replace(/^-+/, '')
       let flags = Command ? Command.flags : {}
       let flag = flags[long]
-      if (!flag) this.out.error(`Flag ${long} not found`)
+      if (!flag) throw new Error(`Flag ${long} not found`)
       if (flag.completion && flag.completion.options) {
         let flagCache = path.join(this.completionsPath, long)
         let duration = flag.completion.cacheDuration || 60 * 60 * 24 // 1 day
