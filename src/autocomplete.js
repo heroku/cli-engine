@@ -77,10 +77,10 @@ export default class {
     }
   }
 
-  _createCmdArgSetter (Command: Class<Command<*>>, namespace: string) : ?string {
+  _createCmdArgSetter (Command: Class<Command<*>>, namespace: string): ?string {
     const id = this._genCmdID(Command, namespace)
     const argscompletions = (Command.args || [])
-      .map(arg => {if (arg.completion && !arg.hidden) return arg})
+      .map(arg => { if (arg.completion && !arg.hidden) return arg })
       .filter(arg => arg)
       .map((arg, i) => {
         // make flow happy here
@@ -93,15 +93,16 @@ export default class {
       })
       .join('\n')
 
-      if (argscompletions) return `_set_${id.replace(/:/g, '_')}_args () {
+    if (argscompletions) {
+      return `_set_${id.replace(/:/g, '_')}_args () {
 _args=(${argscompletions})
 }
 `
+    }
   }
 
-  _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string) : ?string {
+  _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string): ?string {
     const id = this._genCmdID(Command, namespace)
-    const description = Command.description ? `:'${Command.description}'` : ''
     const flagscompletions = Object.keys(Command.flags || {})
       .filter(flag => !Command.flags[flag].hidden)
       .map(flag => {
@@ -114,20 +115,22 @@ _args=(${argscompletions})
       })
       .join('\n')
 
-    if (flagscompletions) return `_set_${id.replace(/:/g, '_')}_flags () {
+    if (flagscompletions) {
+      return `_set_${id.replace(/:/g, '_')}_flags () {
 _flags=(
 ${flagscompletions}
 )
 }
 `
+    }
   }
 
-  _createCmdWithDescription (Command: Class<Command<*>>, namespace: string) : string {
+  _createCmdWithDescription (Command: Class<Command<*>>, namespace: string): string {
     const description = Command.description ? `:'${Command.description}'` : ''
     return `'${this._genCmdID(Command, namespace).replace(/:/g, '\\:')}'${description}`
   }
 
-  _genCmdID (Command: Class<Command<*>>, namespace: string) : string {
+  _genCmdID (Command: Class<Command<*>>, namespace: string): string {
     const ns = namespace ? `${namespace}:` : ''
     const id = Command.command ? `${ns}${Command.topic}:${Command.command}` : `${ns}${Command.topic}`
     return id
