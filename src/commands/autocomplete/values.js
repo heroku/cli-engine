@@ -5,7 +5,6 @@ import AutocompleteBase from '.'
 import Plugins from '../../plugins'
 import ACCache from '../../cache'
 import path from 'path'
-import {APIClient as Heroku} from 'cli-engine-heroku'
 
 export default class AutocompleteValues extends AutocompleteBase {
   static topic = 'autocomplete'
