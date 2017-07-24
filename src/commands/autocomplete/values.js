@@ -25,7 +25,7 @@ export default class AutocompleteValues extends AutocompleteBase {
     try {
       this.errorIfWindows()
 
-      // handle missing flags here, not in parser
+      // handle missing flags e, not in parser
       if (!this.flags.cmd) throw new Error('Missing required value for --cmd')
       if (!this.flags.resource) throw new Error('Missing required value for --resource')
 
@@ -55,10 +55,12 @@ export default class AutocompleteValues extends AutocompleteBase {
 
       // create/fetch cache
       if (cacheCompletion && cacheCompletion.options) {
-        let flagCache = path.join(this.completionsPath, cacheKey)
-        let duration = cacheCompletion.duration || 60 * 60 * 24 // 1 day
-        let opts = {cacheFn: () => cacheCompletion.options(this.out)}
-        let options = await ACCache.fetch(flagCache, duration, opts)
+        const key = (cacheCompletion.cacheKey || cacheKey)
+        const flagCache = path.join(this.completionsPath, key)
+        const duration = cacheCompletion.cacheDuration || 60 * 60 * 24 // 1 day
+        const cacheFunc = cacheCompletion.options(this.out)
+        const opts = {cacheFn: () => cacheFunc}
+        const options = await ACCache.fetch(flagCache, duration, opts)
         this.out.log((options || []).join('\n'))
       }
     } catch (err) {
