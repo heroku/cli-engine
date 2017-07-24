@@ -79,32 +79,28 @@ export default class {
 
   _createCmdArgSetter (Command: Class<Command<*>>, namespace: string) : ?string {
     const id = this._genCmdID(Command, namespace)
-    const args = (Command.args || []).filter(arg => !arg.hidden)
-      .map(arg => {
-        // TODO: make this dynamic
-        // when we have reusable args
-        // if (args.completions) etc...
-        if (arg.name === 'app' || arg.name === 'addon') return arg
-      }).filter(a => a)
-    if (args.length) {
-      let n = 0
-      let argscompletions = args.map(a => {
-        n += 1
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${a.name} --arg))`
-        return `"${n === 1 ? '$1' : ''}${a.required ? '' : ':'}: :{${evalStatement}}"`
-      }).join('\n')
-      return `_set_${id.replace(/:/g, '_')}_args () {
+    const argscompletions = (Command.args || [])
+      .map(arg => {if (arg.completion) return arg})
+      .filter(arg => arg && !arg.hidden)
+      .map((arg, i) => {
+        // make flow happy
+        // it can't see the filter above
+        if (!arg) return ''
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${arg.name} --arg))`
+        return `"${i === 0 ? '$1' : ''}${arg.required ? '' : ':'}: :{${evalStatement}}"`
+      })
+      .join('\n')
+
+      if (argscompletions) return `_set_${id.replace(/:/g, '_')}_args () {
 _args=(${argscompletions})
 }
 `
-    }
   }
 
   _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string) : ?string {
     const id = this._genCmdID(Command, namespace)
     const description = Command.description ? `:'${Command.description}'` : ''
-    // const cmdAndDesc = `'${namespace.replace(/:/g, '\\:')}${id.replace(/:/g, '\\:')}'${description}`
-    const flags = Object.keys(Command.flags || {})
+    const flagscompletions = Object.keys(Command.flags || {})
       .filter(flag => !Command.flags[flag].hidden)
       .map(flag => {
         const f = Command.flags[flag]
@@ -114,14 +110,14 @@ _args=(${argscompletions})
         let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
         return `"${completion}"`
       })
-    if (flags.length) {
-      return `_set_${id.replace(/:/g, '_')}_flags () {
+      .join('\n')
+
+    if (flagscompletions) return `_set_${id.replace(/:/g, '_')}_flags () {
 _flags=(
-${flags.join('\n')}
+${flagscompletions}
 )
 }
 `
-    }
   }
 
   _createCmdWithDescription (Command: Class<Command<*>>, namespace: string) : string {
