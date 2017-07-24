@@ -2,10 +2,18 @@
 
 import path from 'path'
 import Output from 'cli-engine-command/lib/output'
+import type Command from 'cli-engine-command'
 import {type Config} from 'cli-engine-config'
 import fs from 'fs-extra'
 import Plugins from './plugins'
 import {convertFromV5} from './plugins/legacy'
+import flatten from 'lodash.flatten'
+
+type CmdCmplData = {
+  cmdAndDesc: ?string,
+  flagFunc: ?string,
+  argFunc: ?string
+}
 
 export default class {
   out: Output
@@ -17,7 +25,6 @@ export default class {
   }
 
   async generateCommandsCache () {
-    const flatten = require('lodash.flatten')
     try {
       const plugins = await new Plugins(this.out).list()
       const cmds = await Promise.all(plugins.map(async (p) => {
@@ -38,5 +45,99 @@ export default class {
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
     }
+  }
+
+  async generateCommandFuncs () {
+    try {
+      const plugins = await new Plugins(this.out).list()
+      const completions = await Promise.all(plugins.map(async (p) => {
+        const hydrated = await p.pluginPath.require()
+        const commands = hydrated.commands || []
+        return commands.map(c => {
+          if (c.hidden || !c.topic) return
+          // TODO: fix here
+          // convertFromV5 pukes here w/o topic
+          // but we lose this cmd
+          const cmd = typeof c === 'function' ? c : convertFromV5((c: any))
+          return this._createCompletionsForCmd(cmd, (p.namespace || ''))
+        })
+      }))
+      this._writeFunctionsToCache(flatten(completions))
+    } catch (e) {
+      this.out.debug('Error creating autocomplete commands')
+      this.out.debug(e.message)
+    }
+  }
+
+  _genAllCmdsListSetter (cmds: Array<string>): string {
+    return `
+_set_all_commands_list () {
+_all_commands_list=(
+${flatten(cmds).filter(c => c).join('\n')}
+)
+}
+`
+  }
+
+  _writeFunctionsToCache (commands: Array<CmdCmplData>) {
+    var completionFunctions = []
+    var cmdAndDescriptions = []
+    commands.map(c => {
+      if (!c) return
+      if (c.flagFunc) completionFunctions.push(c.flagFunc)
+      if (c.argFunc) completionFunctions.push(c.argFunc)
+      if (c.cmdAndDesc) cmdAndDescriptions.push(c.cmdAndDesc)
+    })
+    const completions = completionFunctions.concat(this._genAllCmdsListSetter(cmdAndDescriptions)).join('\n')
+    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), completions)
+  }
+
+  _createCompletionsForCmd (Command: Class<Command<*>>, namespace: string = ''): CmdCmplData {
+    const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
+    const description = Command.description ? `:'${Command.description}'` : ''
+    const flags = Object.keys(Command.flags || {})
+      .filter(flag => !Command.flags[flag].hidden)
+      .map(flag => {
+        const f = Command.flags[flag]
+        const name = f.parse ? `${flag}=-` : flag
+        const cachecompl = f.completion ? `: :_get_${flag}s` : ''
+        let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
+        return `'${completion}'`
+      })
+    const args = (Command.args || []).filter(arg => !arg.hidden)
+      .map(arg => {
+        // TODO: make this dynamic
+        // when we have reusable args
+        // if (args.completions) etc...
+        if (arg.name === 'app') return arg
+      }).filter(a => a)
+    return this._createCmdCmplFunctions(id, description, namespace, flags, args)
+  }
+
+  _createCmdCmplFunctions (id: string, description: string, namespace: string, flags: Array<*>, args: Array<*>): CmdCmplData {
+    const cmdAndDesc = `'${namespace.replace(/:/g, '\\:')}${id.replace(/:/g, '\\:')}'${description}`
+    let completions = {}
+    completions.cmdAndDesc = cmdAndDesc
+    if (flags.length) {
+      completions.flagFunc = `_set_${namespace}${id.replace(/:/g, '_')}_flags () {
+_flags=(
+${flags.join('\n')}
+)
+}
+`
+    }
+    if (args.length) {
+      let n = 1
+      let argscompletions = args.map(a => {
+        n += 1
+        // TODO: how do we ensure this func exists?
+        return `'${n}${a.required ? '' : ':'}: :_get_${a.name}s'`
+      }).join('\n')
+      completions.argFunc = `_set_${namespace}${id.replace(/:/g, '_')}_args () {
+_args=(${argscompletions})
+}
+`
+    }
+    return completions
   }
 }

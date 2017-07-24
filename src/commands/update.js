@@ -61,6 +61,7 @@ export default class Update extends Command {
     } else {
       let ac = new AutocompleteScripter(this)
       await ac.generateCommandsCache()
+      await ac.generateCommandFuncs()
     }
     debug('done')
   }
