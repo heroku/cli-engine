@@ -80,14 +80,16 @@ export default class {
   _createCmdArgSetter (Command: Class<Command<*>>, namespace: string) : ?string {
     const id = this._genCmdID(Command, namespace)
     const argscompletions = (Command.args || [])
-      .map(arg => {if (arg.completion) return arg})
-      .filter(arg => arg && !arg.hidden)
+      .map(arg => {if (arg.completion && !arg.hidden) return arg})
+      .filter(arg => arg)
       .map((arg, i) => {
-        // make flow happy
-        // it can't see the filter above
-        if (!arg) return ''
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${arg.name} --arg))`
-        return `"${i === 0 ? '$1' : ''}${arg.required ? '' : ':'}: :{${evalStatement}}"`
+        // make flow happy here
+        // even though arg exists
+        const name = arg ? arg.name : ''
+        const optionalPosition = i === 0 ? '$1' : ''
+        const optionalColon = (arg && arg.required) ? '' : ':'
+        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${name} --arg))`
+        return `"${optionalPosition}${optionalColon}: :{${evalStatement}}"`
       })
       .join('\n')
 
