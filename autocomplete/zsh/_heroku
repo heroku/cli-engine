@@ -16,7 +16,7 @@ _heroku () {
      return
    fi
    # fallback to grep'ing cmds from cache
-   compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_COMMANDS_PATH)
+   compadd $(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_AC_COMMANDS_PATH)
   }
   ## end all commands
 

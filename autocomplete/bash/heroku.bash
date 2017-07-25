@@ -188,11 +188,11 @@ _heroku()
     _get_comp_words_by_ref -n : cur
 
     if [[ "${COMP_CWORD}" -eq 1 ]] ; then
-        opts=$(grep -oe '^[a-zA-Z0-9:_-]\+' $COMMANDS_PATH)
+        opts=$(grep -oe '^[a-zA-Z0-9:_-]\+' $HEROKU_AC_COMMANDS_PATH)
         COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
          __ltrim_colon_completions "$cur"
     else
-        opts=$(grep "${COMP_WORDS[1]}" $COMMANDS_PATH | sed -n "s/^${COMP_WORDS[1]} //p")
+        opts=$(grep "${COMP_WORDS[1]}" $HEROKU_AC_COMMANDS_PATH | sed -n "s/^${COMP_WORDS[1]} //p")
         COMPREPLY=( $(compgen -W  "${opts}" -- ${cur}) )
     fi
     return 0

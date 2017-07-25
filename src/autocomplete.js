@@ -79,9 +79,10 @@ export default class {
   }
 
   _writeShellSetupsToCache () {
-    const zsh_setup = `
-HEROKU_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
-HEROKU_AC_SETTERS_PATH=\${HEROKU_COMMANDS_PATH}_functions && test -f $HEROKU_AC_SETTERS_PATH && source $HEROKU_AC_SETTERS_PATH;
+    try {
+      const zsh_setup = `
+HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
+HEROKU_ZSH_AC_SETTERS_PATH=\${HEROKU_AC_COMMANDS_PATH}_functions && test -f $HEROKU_ZSH_AC_SETTERS_PATH && source $HEROKU_ZSH_AC_SETTERS_PATH;
 fpath=(
 ${path.join(__dirname, '..', 'autocomplete', 'zsh')}
 $fpath
@@ -89,7 +90,18 @@ $fpath
 autoload -Uz compinit;
 compinit;
 `
-    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'zsh_setup'), zsh_setup)
+      const bash_setup = `
+HEROKU_BASH_AC_PATH=${path.join(__dirname, '..', 'autocomplete', 'bash', 'heroku.bash')}
+test -f $HEROKU_BASH_AC_PATH && source $HEROKU_BASH_AC_PATH;
+`
+      fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'zsh_setup'), zsh_setup)
+      fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'bash_setup'), bash_setup)
+    }
+    catch (err) {
+
+    }
+
+
   }
 
   _createCmdArgSetter (Command: Class<Command<*>>, namespace: string): ?string {
