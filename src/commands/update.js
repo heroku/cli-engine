@@ -64,8 +64,7 @@ export default class Update extends Command {
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
         let ac = new AutocompleteScripter(this)
-        await ac.generateCommandsCache()
-        await ac.generateCommandFuncsCache()
+        await ac.createCaches()
       } else {
         debug('skipping autocomplete, not installed')
       }

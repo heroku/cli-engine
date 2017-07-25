@@ -15,8 +15,7 @@ export default class AutocompleteScript extends AutocompleteBase {
   async run () {
     this.errorIfWindows()
     const ac = new AutocompleteScripter(this)
-    await ac.generateCommandsCache()
-    await ac.generateCommandFuncsCache()
+    await ac.createCaches()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {

@@ -23,7 +23,12 @@ export default class {
     this.out = out
   }
 
-  async generateCommandsCache () {
+  async createCaches () {
+    await this._createCommandsCache()
+    await this._createCommandFuncsCache()
+  }
+
+  async _createCommandsCache () {
     try {
       const plugins = await new Plugins(this.out).list()
       await Promise.all(plugins.map(async (p) => {
@@ -46,7 +51,7 @@ export default class {
     }
   }
 
-  async generateCommandFuncsCache () {
+  async _createCommandFuncsCache () {
     try {
       const plugins = await new Plugins(this.out).list()
       // for every plugin
@@ -63,9 +68,9 @@ export default class {
           const cmd = typeof c === 'function' ? c : convertFromV5((c: any))
           const namespace = (p.namespace || '')
           // create completion setters
-          this._addArgsSetterFn(this._createCmdArgSetter(cmd, namespace))
-          this._addFlagsSetterFn(this._createCmdFlagSetter(cmd, namespace))
-          this._addCmdWithDesc(this._createCmdWithDescription(cmd, namespace))
+          this._addArgsSetterFn(this._genCmdArgSetter(cmd, namespace))
+          this._addFlagsSetterFn(this._genCmdFlagSetter(cmd, namespace))
+          this._addCmdWithDesc(this._genCmdWithDescription(cmd, namespace))
         })
       }))
       // write setups and functions to cache
@@ -99,27 +104,7 @@ export default class {
     this.compaddFlags.push(flag)
   }
 
-  _genCompaddArgs (): Array<string> {
-    const args = this.compaddArgs
-    // console.log(args)
-    return args.map(arg => {
-      return `_compadd_arg_${arg} () {
-compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${arg} --arg))
-}`
-    })
-  }
-
-  _genCompaddFlags (): Array<string> {
-    const flags = this.compaddFlags
-    // console.log(flags)
-    return flags.map(flag => {
-      return `_compadd_flag_${flag} () {
-compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))
-}`
-    })
-  }
-
-  _createCmdArgSetter (Command: Class<Command<*>>, namespace: string): ?string {
+  _genCmdArgSetter (Command: Class<Command<*>>, namespace: string): ?string {
     const id = this._genCmdID(Command, namespace)
     const argscompletions = (Command.args || [])
       .map(arg => { if (arg.completion && !arg.hidden) return arg })
@@ -143,7 +128,7 @@ _args=(${argscompletions})
     }
   }
 
-  _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string): ?string {
+  _genCmdFlagSetter (Command: Class<Command<*>>, namespace: string): ?string {
     const id = this._genCmdID(Command, namespace)
     const flagscompletions = Object.keys(Command.flags || {})
       .filter(flag => !Command.flags[flag].hidden)
@@ -170,7 +155,7 @@ ${flagscompletions}
     }
   }
 
-  _createCmdWithDescription (Command: Class<Command<*>>, namespace: string): string {
+  _genCmdWithDescription (Command: Class<Command<*>>, namespace: string): string {
     const description = Command.description ? `:'${Command.description}'` : ''
     return `'${this._genCmdID(Command, namespace).replace(/:/g, '\\:')}'${description}`
   }
@@ -189,6 +174,24 @@ ${this.cmdsWithDesc.join('\n')}
 )
 }
 `
+  }
+
+  _genCompaddArgs (): Array<string> {
+    const args = this.compaddArgs
+    return args.map(arg => {
+      return `_compadd_arg_${arg} () {
+compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${arg} --arg))
+}`
+    })
+  }
+
+  _genCompaddFlags (): Array<string> {
+    const flags = this.compaddFlags
+    return flags.map(flag => {
+      return `_compadd_flag_${flag} () {
+compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))
+}`
+    })
   }
 
   _writeShellSetupsToCache () {
