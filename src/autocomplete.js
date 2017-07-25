@@ -70,11 +70,26 @@ export default class {
           return {argFunc, flagFunc, cmdAndDesc}
         })
       }))
+      this._writeShellSetupsToCache()
       this._writeFunctionsToCache(flatten(completions))
     } catch (e) {
       this.out.debug('Error creating autocomplete commands')
       this.out.debug(e.message)
     }
+  }
+
+  _writeShellSetupsToCache () {
+    const zsh_setup = `
+HEROKU_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
+HEROKU_AC_SETTERS_PATH=\${HEROKU_COMMANDS_PATH}_functions && test -f $HEROKU_AC_SETTERS_PATH && source $HEROKU_AC_SETTERS_PATH;
+fpath=(
+${path.join(__dirname, '..', 'autocomplete', 'zsh')}
+$fpath
+);
+autoload -Uz compinit;
+compinit;
+`
+    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'zsh_setup'), zsh_setup)
   }
 
   _createCmdArgSetter (Command: Class<Command<*>>, namespace: string): ?string {

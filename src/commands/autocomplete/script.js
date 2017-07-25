@@ -23,17 +23,10 @@ export default class AutocompleteScript extends AutocompleteBase {
       this.out.error('Error: Missing required argument shell')
     }
 
+
     switch (shell) {
       case 'zsh':
-        this.out.log(`HEROKU_COMMANDS_PATH=${this.completionsPath}/commands;
-HEROKU_AC_SETTERS_PATH=\${HEROKU_COMMANDS_PATH}_functions && test -f $HEROKU_AC_SETTERS_PATH && source $HEROKU_AC_SETTERS_PATH;
-
-fpath=(
-  ${path.join(this.functionsPath, 'zsh')}
-  $fpath
-);
-autoload -Uz compinit;
-compinit;`)
+        this.out.log(`HEROKU_AC_SETUP_PATH=${path.join(this.completionsPath, 'zsh_setup')} && test -f $HEROKU_AC_SETUP_PATH && source $HEROKU_AC_SETUP_PATH;`)
         break
       default:
         this.out.error(`No autocomplete script for ${shell}. Run $ heroku autocomplete for install instructions.`)
