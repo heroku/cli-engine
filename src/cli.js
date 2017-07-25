@@ -10,6 +10,7 @@ import {timeout} from './util'
 import Analytics from './analytics'
 import Updater from './updater'
 import NotFound from './not_found'
+import Lock from './lock'
 
 import MigrateV5Plugins from './plugins/migrator'
 
@@ -43,12 +44,14 @@ export default class Main {
   argv: string[]
   config: Config
   cmd: Command<*>
+  lock: Lock
 
   constructor (options: {argv: string[], config?: ConfigOptions, mock?: boolean}) {
     this.mock = !!options.mock
     this.argv = options.argv
     this.config = buildConfig(options.config)
     out = new Output({config: this.config, mock: this.mock})
+    this.lock = new Lock(out)
   }
 
   async run () {
@@ -83,6 +86,7 @@ export default class Main {
       let analytics = new Analytics({config: this.config, out, plugins})
       await analytics.record(Command)
       debug('running cmd')
+      await this.lock.unread()
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
     }
     debug('flushing stdout')
