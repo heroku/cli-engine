@@ -23,7 +23,6 @@ export default class AutocompleteScript extends AutocompleteBase {
       this.out.error('Error: Missing required argument shell')
     }
 
-
     switch (shell) {
       case 'zsh':
         this.out.log(`HEROKU_ZSH_AC_SETUP_PATH=${path.join(this.completionsPath, 'zsh_setup')} && test -f $HEROKU_ZSH_AC_SETUP_PATH && source $HEROKU_ZSH_AC_SETUP_PATH;`)
