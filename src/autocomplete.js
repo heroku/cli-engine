@@ -122,18 +122,18 @@ _args=(${argscompletions})
     }
   }
 
-  _addCompaddArg(arg: string) {
+  _addCompaddArg (arg: string) {
     console.log('***', arg, this.compaddArgs, this.compaddArgs.find(a => a === arg))
     if (this.compaddArgs.find(a => a === arg)) return
     this.compaddArgs.push(arg)
   }
 
-  _addCompaddFlag(flag: string) {
+  _addCompaddFlag (flag: string) {
     if (this.compaddFlags.find(f => f === flag)) return
     this.compaddFlags.push(flag)
   }
 
-  _genCompaddArgs () : Array<string> {
+  _genCompaddArgs (): Array<string> {
     const args = this.compaddArgs
     // console.log(args)
     return args.map(arg => {
@@ -143,7 +143,7 @@ compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --res
     })
   }
 
-  _genCompaddFlags () : Array<string> {
+  _genCompaddFlags (): Array<string> {
     const flags = this.compaddFlags
     // console.log(flags)
     return flags.map(flag => {
@@ -212,9 +212,9 @@ ${flatten(cmds).filter(c => c).join('\n')}
     })
     const allCmds = this._genAllCmdsListSetter(cmdAndDescriptions)
     const completions = completionFunctions.concat(allCmds)
-                                            .concat(this._genCompaddArgs())
-                                            .concat(this._genCompaddFlags())
-                                            .join('\n')
+      .concat(this._genCompaddArgs())
+      .concat(this._genCompaddFlags())
+      .join('\n')
     fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), completions)
   }
 }
