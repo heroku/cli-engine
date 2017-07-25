@@ -18,6 +18,8 @@ type CmdCmplData = {
 export default class {
   out: Output
   config: Config
+  compaddArgs: Array<string> = []
+  compaddFlags: Array<string> = []
 
   constructor ({config, out}: {config: Config, out: Output}) {
     this.config = config
@@ -107,8 +109,8 @@ test -f $HEROKU_BASH_AC_PATH && source $HEROKU_BASH_AC_PATH;
         const name = arg ? arg.name : ''
         const optionalPosition = i === 0 ? '$1' : ''
         const optionalColon = (arg && arg.required) ? '' : ':'
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${name} --arg))`
-        return `"${optionalPosition}${optionalColon}: :{${evalStatement}}"`
+        this._addCompaddArg(name)
+        return `"${optionalPosition}${optionalColon}: :_compadd_arg_${name}"`
       })
       .join('\n')
 
@@ -120,6 +122,37 @@ _args=(${argscompletions})
     }
   }
 
+  _addCompaddArg(arg: string) {
+    console.log('***', arg, this.compaddArgs, this.compaddArgs.find(a => a === arg))
+    if (this.compaddArgs.find(a => a === arg)) return
+    this.compaddArgs.push(arg)
+  }
+
+  _addCompaddFlag(flag: string) {
+    if (this.compaddFlags.find(f => f === flag)) return
+    this.compaddFlags.push(flag)
+  }
+
+  _genCompaddArgs () : Array<string> {
+    const args = this.compaddArgs
+    // console.log(args)
+    return args.map(arg => {
+      return `_compadd_arg_${arg} () {
+compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${arg} --arg))
+}`
+    })
+  }
+
+  _genCompaddFlags () : Array<string> {
+    const flags = this.compaddFlags
+    // console.log(flags)
+    return flags.map(flag => {
+      return `_compadd_flag_${flag} () {
+compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))
+}`
+    })
+  }
+
   _createCmdFlagSetter (Command: Class<Command<*>>, namespace: string): ?string {
     const id = this._genCmdID(Command, namespace)
     const flagscompletions = Object.keys(Command.flags || {})
@@ -127,9 +160,12 @@ _args=(${argscompletions})
       .map(flag => {
         const f = Command.flags[flag]
         const name = f.parse ? `${flag}=-` : flag
-        let evalStatement = `compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --resource=${flag}))`
-        const cachecompl = f.completion ? `: :{${evalStatement}}` : ''
-        let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl}`
+        let cachecompl
+        if (f.completion) {
+          this._addCompaddFlag(flag)
+          cachecompl = `: :_compadd_flag_${flag}`
+        }
+        let completion = `--${name}[${f.parse ? '' : '(bool) '}${f.description}]${cachecompl || ''}`
         return `"${completion}"`
       })
       .join('\n')
@@ -175,7 +211,10 @@ ${flatten(cmds).filter(c => c).join('\n')}
       if (c.cmdAndDesc) cmdAndDescriptions.push(c.cmdAndDesc)
     })
     const allCmds = this._genAllCmdsListSetter(cmdAndDescriptions)
-    const completions = completionFunctions.concat(allCmds).join('\n')
+    const completions = completionFunctions.concat(allCmds)
+                                            .concat(this._genCompaddArgs())
+                                            .concat(this._genCompaddFlags())
+                                            .join('\n')
     fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), completions)
   }
 }
