@@ -39,6 +39,7 @@ export default class Autocomplete extends AutocompleteBase {
       case 'bash':
         const cmd = CustomColors.cmd(`$ echo $(heroku autocomplete:script bash) >> ~/.bashrc`)
         this.out.log(`Add the autocomplete setup script to your .bashrc or .bash_profile via:
+
 ${cmd}`)
         break
       case 'zsh':
