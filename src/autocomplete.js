@@ -79,8 +79,7 @@ export default class {
   }
 
   _writeShellSetupsToCache () {
-    const zshSetup = `
-HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
+    const zshSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
 HEROKU_ZSH_AC_SETTERS_PATH=\${HEROKU_AC_COMMANDS_PATH}_functions && test -f $HEROKU_ZSH_AC_SETTERS_PATH && source $HEROKU_ZSH_AC_SETTERS_PATH;
 fpath=(
 ${path.join(__dirname, '..', 'autocomplete', 'zsh')}
@@ -89,7 +88,7 @@ $fpath
 autoload -Uz compinit;
 compinit;
 `
-    const bashSetup = `
+    const bashSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
 HEROKU_BASH_AC_PATH=${path.join(__dirname, '..', 'autocomplete', 'bash', 'heroku.bash')}
 test -f $HEROKU_BASH_AC_PATH && source $HEROKU_BASH_AC_PATH;
 `

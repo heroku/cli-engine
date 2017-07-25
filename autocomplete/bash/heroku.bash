@@ -179,8 +179,6 @@ __ltrim_colon_completions() {
 fi
 # end vendor scop/bash-completion
 
-COMMANDS_PATH=$(heroku autocomplete:commandspath)
-
 _heroku()
 {
     local cur opts
