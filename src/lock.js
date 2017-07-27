@@ -24,6 +24,10 @@ export default class Lock {
     return lock.read(this.updatelockfile)
   }
 
+  async unread () {
+    await lock.unread(this.updatelockfile)
+  }
+
   async canRead () {
     debug('canRead()')
     let hasWriter = await lock.hasWriter(this.updatelockfile)
@@ -34,7 +38,7 @@ export default class Lock {
   async upgrade () {
     debug('upgrading to writer lock')
     // take off reader
-    await lock.unread(this.updatelockfile)
+    await this.unread()
 
     // check for other readers
     if (await lock.hasReaders(this.updatelockfile)) {
