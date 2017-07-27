@@ -1362,9 +1362,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flow-bin@^0.50.0:
-  version "0.50.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.50.0.tgz#d4cdb2430dee1a3599f0eb6fe551146e3027256a"
+flow-bin@^0.51.1:
+  version "0.51.1"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.51.1.tgz#7929c6f0a94e765429fcb2ee6e468278faa9c732"
 
 flow-copy-source@1.2.0:
   version "1.2.0"
@@ -4010,6 +4010,10 @@ sax@^1.2.1:
 semver@4.3.2:
   version "4.3.2"
   resolved "https://registry.yarnpkg.com/semver/-/semver-4.3.2.tgz#c7a07158a80bedd052355b770d82d6640f803be7"
+
+semver@^5.4.1:
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-5.4.1.tgz#e059c09d8571f0540823733433505d3a2f00b18e"
 
 semver@~5.0.1:
   version "5.0.3"
