@@ -45,7 +45,7 @@ ${cmd}`)
       case 'zsh':
         const cmd1 = CustomColors.cmd(`$ echo $(heroku autocomplete:script zsh) >> ~/.zshrc`)
         const cmd2 = CustomColors.cmd(`$ compaudit`)
-        this.out.log(`Add the autocomplete setup script to your fpath via:
+        this.out.log(`Add the autocomplete setup script to your .zshrc via:
 
 ${cmd1}
 
