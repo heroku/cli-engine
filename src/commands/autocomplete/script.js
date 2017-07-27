@@ -15,8 +15,7 @@ export default class AutocompleteScript extends AutocompleteBase {
   async run () {
     this.errorIfWindows()
     const ac = new AutocompleteScripter(this)
-    await ac.generateCommandsCache()
-    await ac.generateCommandFuncs()
+    await ac.createCaches()
 
     const shell = this.argv[0] || this.config.shell
     if (!shell) {
@@ -25,15 +24,10 @@ export default class AutocompleteScript extends AutocompleteBase {
 
     switch (shell) {
       case 'zsh':
-        this.out.log(`HEROKU_COMMANDS_PATH=${this.completionsPath}/commands;
-HEROKU_AC_SETTERS_PATH=\${HEROKU_COMMANDS_PATH}_functions && test -f $HEROKU_AC_SETTERS_PATH && source $HEROKU_AC_SETTERS_PATH;
-
-fpath=(
-  ${path.join(this.functionsPath, 'zsh')}
-  $fpath
-);
-autoload -Uz compinit;
-compinit;`)
+        this.out.log(`HEROKU_ZSH_AC_SETUP_PATH=${path.join(this.completionsPath, 'zsh_setup')} && test -f $HEROKU_ZSH_AC_SETUP_PATH && source $HEROKU_ZSH_AC_SETUP_PATH;`)
+        break
+      case 'bash':
+        this.out.log(`HEROKU_BASH_AC_SETUP_PATH=${path.join(this.completionsPath, 'bash_setup')} && test -f $HEROKU_BASH_AC_SETUP_PATH && source $HEROKU_BASH_AC_SETUP_PATH;`)
         break
       default:
         this.out.error(`No autocomplete script for ${shell}. Run $ heroku autocomplete for install instructions.`)
