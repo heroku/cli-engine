@@ -23,7 +23,12 @@ export default class {
     this.out = out
   }
 
+  get completionsCachePath (): string {
+    return path.join(this.config.cacheDir, 'completions')
+  }
+
   async createCaches () {
+    await fs.ensureDir(this.completionsCachePath)
     await this._createCommandsCache()
     await this._createCommandFuncsCache()
   }
@@ -34,19 +39,25 @@ export default class {
       await Promise.all(plugins.map(async (p) => {
         const hydrated = await p.pluginPath.require()
         const cmds = hydrated.commands || []
-        return cmds.filter(c => !c.hidden).map(c => {
-          const Command = typeof c === 'function' ? c : convertFromV5((c: any))
-          const publicFlags = Object.keys(Command.flags || {}).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
-          const flags = publicFlags.length ? ` ${publicFlags}` : ''
-          const namespace = p.namespace ? `${p.namespace}:` : ''
-          const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
-          this.cmdsWithFlags.push(`${namespace}${id}${flags}`)
+        return cmds.map(c => {
+          try {
+            if (c.hidden || !c.topic) return
+            const Command = typeof c === 'function' ? c : convertFromV5((c: any))
+            const publicFlags = Object.keys(Command.flags || {}).filter(flag => !Command.flags[flag].hidden).map(flag => `--${flag}`).join(' ')
+            const flags = publicFlags.length ? ` ${publicFlags}` : ''
+            const namespace = p.namespace ? `${p.namespace}:` : ''
+            const id = Command.command ? `${Command.topic}:${Command.command}` : Command.topic
+            this.cmdsWithFlags.push(`${namespace}${id}${flags}`)
+          } catch (err) {
+            this.out.debug(`Error creating autocomplete a command in ${p.name}, moving on...`)
+            this.out.debug(err.message)
+          }
         })
       }))
       const commands = this.cmdsWithFlags.join('\n')
-      fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands'), commands)
+      fs.writeFileSync(path.join(this.completionsCachePath, 'commands'), commands)
     } catch (e) {
-      this.out.debug('Error creating autocomplete commands')
+      this.out.debug('Error creating autocomplete commands cache')
       this.out.debug(e.message)
     }
   }
@@ -61,23 +72,28 @@ export default class {
         const commands = hydrated.commands || []
         // for every command in plugin
         return commands.map(c => {
-          if (c.hidden || !c.topic) return
-          // TODO: fix here
-          // convertFromV5 pukes here w/o topic
-          // but we lose this cmd
-          const cmd = typeof c === 'function' ? c : convertFromV5((c: any))
-          const namespace = (p.namespace || '')
-          // create completion setters
-          this._addArgsSetterFn(this._genCmdArgSetter(cmd, namespace))
-          this._addFlagsSetterFn(this._genCmdFlagSetter(cmd, namespace))
-          this._addCmdWithDesc(this._genCmdWithDescription(cmd, namespace))
+          try {
+            if (c.hidden || !c.topic) return
+            // TODO: fix here
+            // convertFromV5 pukes here w/o topic
+            // but we lose this cmd
+            const cmd = typeof c === 'function' ? c : convertFromV5((c: any))
+            const namespace = (p.namespace || '')
+            // create completion setters
+            this._addArgsSetterFn(this._genCmdArgSetter(cmd, namespace))
+            this._addFlagsSetterFn(this._genCmdFlagSetter(cmd, namespace))
+            this._addCmdWithDesc(this._genCmdWithDescription(cmd, namespace))
+          } catch (err) {
+            this.out.debug(`Error creating azsh autocomplete command in ${p.name}, moving on...`)
+            this.out.debug(err.message)
+          }
         })
       }))
       // write setups and functions to cache
       this._writeShellSetupsToCache()
       this._writeFunctionsToCache()
     } catch (e) {
-      this.out.debug('Error creating autocomplete commands')
+      this.out.debug('Error creating zsh autocomplete functions cache')
       this.out.debug(e.message)
     }
   }
@@ -195,7 +211,7 @@ compadd $(echo $(${this.config.bin} autocomplete:values --cmd=$_command_id --res
   }
 
   _writeShellSetupsToCache () {
-    const zshSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
+    const zshSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.completionsCachePath, 'commands')};
 HEROKU_ZSH_AC_SETTERS_PATH=\${HEROKU_AC_COMMANDS_PATH}_functions && test -f $HEROKU_ZSH_AC_SETTERS_PATH && source $HEROKU_ZSH_AC_SETTERS_PATH;
 fpath=(
 ${path.join(__dirname, '..', 'autocomplete', 'zsh')}
@@ -204,12 +220,12 @@ $fpath
 autoload -Uz compinit;
 compinit;
 `
-    const bashSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.config.cacheDir, 'completions', 'commands')};
+    const bashSetup = `HEROKU_AC_COMMANDS_PATH=${path.join(this.completionsCachePath, 'commands')};
 HEROKU_BASH_AC_PATH=${path.join(__dirname, '..', 'autocomplete', 'bash', 'heroku.bash')}
 test -f $HEROKU_BASH_AC_PATH && source $HEROKU_BASH_AC_PATH;
 `
-    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'zsh_setup'), zshSetup)
-    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'bash_setup'), bashSetup)
+    fs.writeFileSync(path.join(this.completionsCachePath, 'zsh_setup'), zshSetup)
+    fs.writeFileSync(path.join(this.completionsCachePath, 'bash_setup'), bashSetup)
   }
 
   _writeFunctionsToCache () {
@@ -220,6 +236,6 @@ test -f $HEROKU_BASH_AC_PATH && source $HEROKU_BASH_AC_PATH;
       .concat(this._genCompaddArgs())
       .concat(this._genCompaddFlags())
       .join('\n')
-    fs.writeFileSync(path.join(this.config.cacheDir, 'completions', 'commands_functions'), completions)
+    fs.writeFileSync(path.join(this.completionsCachePath, 'commands_functions'), completions)
   }
 }
