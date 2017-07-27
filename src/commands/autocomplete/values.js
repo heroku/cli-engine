@@ -17,29 +17,50 @@ export default class AutocompleteValues extends AutocompleteBase {
     // or autocomplete will use any
     // flag errors as options
     cmd: flags.string({description: '', char: 'c'}),
-    flag: flags.string({description: '', char: 'f'})
+    resource: flags.string({description: '', char: 'r'}),
+    arg: flags.boolean({description: '', char: 'a'})
   }
 
   async run () {
     try {
       this.errorIfWindows()
 
+      // handle missing flags e, not in parser
       if (!this.flags.cmd) throw new Error('Missing required value for --cmd')
-      if (!this.flags.flag) throw new Error('Missing required value for --flag')
+      if (!this.flags.resource) throw new Error('Missing required value for --resource')
 
+      // find Command
       const plugins = new Plugins(this.out)
       await plugins.load()
       let Command = await plugins.findCommand(this.flags.cmd)
       if (!Command) throw new Error(`Command ${this.flags.cmd} not found`)
-      let long = this.flags.flag.replace(/^-+/, '')
-      let flags = Command ? Command.flags : {}
-      let flag = flags[long]
-      if (!flag) throw new Error(`Flag ${long} not found`)
-      if (flag.completion && flag.completion.options) {
-        let flagCache = path.join(this.completionsPath, long)
-        let duration = flag.completion.cacheDuration || 60 * 60 * 24 // 1 day
-        let opts = {cacheFn: () => flag.completion.options(this.out)}
-        let options = await ACCache.fetch(flagCache, duration, opts)
+
+      // get cache key and options
+      let cacheKey = 'void'
+      let cacheCompletion : ?Object
+      if (this.flags.arg) {
+        let args = Command ? Command.args : []
+        let arg = args.find(a => a.name === this.flags.resource)
+        if (!arg) throw new Error(`Arg ${this.flags.resource} not found`)
+        cacheKey = arg.name
+        cacheCompletion = arg.completion
+      } else {
+        let long = this.flags.resource.replace(/^-+/, '')
+        let flags = Command ? Command.flags : {}
+        let flag = flags[long]
+        if (!flag) throw new Error(`Flag ${long} not found`)
+        cacheKey = long
+        cacheCompletion = flag.completion
+      }
+
+      // create/fetch cache
+      if (cacheCompletion && cacheCompletion.options) {
+        const key = (cacheCompletion.cacheKey || cacheKey)
+        const flagCache = path.join(this.completionsPath, key)
+        const duration = cacheCompletion.cacheDuration || 60 * 60 * 24 // 1 day
+        const cacheFunc = cacheCompletion.options(this.out)
+        const opts = {cacheFn: () => cacheFunc}
+        const options = await ACCache.fetch(flagCache, duration, opts)
         this.out.log((options || []).join('\n'))
       }
     } catch (err) {
