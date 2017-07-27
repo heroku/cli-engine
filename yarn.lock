@@ -3162,7 +3162,7 @@ mock-fs@4.4.1:
   version "4.4.1"
   resolved "https://registry.yarnpkg.com/mock-fs/-/mock-fs-4.4.1.tgz#f285fa025b42a4031faf75b66f632b21e7056683"
 
-moment@2.x, moment@^2.18.1:
+moment@^2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
 

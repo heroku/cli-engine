@@ -25,7 +25,7 @@
     "lodash.maxby": "4.x",
     "lodash.uniqby": "4.x",
     "log-chopper": "^1.0.1",
-    "moment": "2.x",
+    "moment": "^2.18.1",
     "netrc-parser": "2.0.2",
     "node-gyp": "3.x",
     "rwlockfile": "^1.4.5",
