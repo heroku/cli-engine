@@ -61,7 +61,7 @@ export default class {
           } catch (err) {
             this.out.debug(`Error creating autocomplete a command in ${p.name}, moving on...`)
             this.out.debug(err.message)
-            this.writeLogFile(err.message, this.acLogfile)
+            this.writeLogFile(err.message)
           }
         })
       }))
@@ -70,7 +70,7 @@ export default class {
     } catch (e) {
       this.out.debug('Error creating autocomplete commands cache')
       this.out.debug(e.message)
-      this.writeLogFile(e.message, this.acLogfile)
+      this.writeLogFile(e.message)
     }
   }
 
@@ -98,7 +98,7 @@ export default class {
           } catch (err) {
             this.out.debug(`Error creating azsh autocomplete command in ${p.name}, moving on...`)
             this.out.debug(err.message)
-            this.writeLogFile(err.message, this.acLogfile)
+            this.writeLogFile(err.message)
           }
         })
       }))
@@ -108,7 +108,7 @@ export default class {
     } catch (e) {
       this.out.debug('Error creating zsh autocomplete functions cache')
       this.out.debug(e.message)
-      this.writeLogFile(e.message, this.acLogfile)
+      this.writeLogFile(e.message)
     }
   }
 
