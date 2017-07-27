@@ -2,6 +2,8 @@
 
 import path from 'path'
 import Output from 'cli-engine-command/lib/output'
+import {logToFile} from 'cli-engine-command/lib/output/stream'
+import moment from 'moment'
 import type Command from 'cli-engine-command'
 import {type Config} from 'cli-engine-config'
 import fs from 'fs-extra'
@@ -25,6 +27,14 @@ export default class {
 
   get completionsCachePath (): string {
     return path.join(this.config.cacheDir, 'completions')
+  }
+
+  get acLogfile (): string {
+    return path.join(this.config.cacheDir, 'autocomplete.log')
+  }
+
+  writeLogFile (msg: string) {
+    logToFile(`[${moment().format()}] ${msg}`, this.acLogfile)
   }
 
   async createCaches () {
@@ -51,6 +61,7 @@ export default class {
           } catch (err) {
             this.out.debug(`Error creating autocomplete a command in ${p.name}, moving on...`)
             this.out.debug(err.message)
+            this.writeLogFile(err.message)
           }
         })
       }))
@@ -59,6 +70,7 @@ export default class {
     } catch (e) {
       this.out.debug('Error creating autocomplete commands cache')
       this.out.debug(e.message)
+      this.writeLogFile(e.message)
     }
   }
 
@@ -86,6 +98,7 @@ export default class {
           } catch (err) {
             this.out.debug(`Error creating azsh autocomplete command in ${p.name}, moving on...`)
             this.out.debug(err.message)
+            this.writeLogFile(err.message)
           }
         })
       }))
@@ -95,6 +108,7 @@ export default class {
     } catch (e) {
       this.out.debug('Error creating zsh autocomplete functions cache')
       this.out.debug(e.message)
+      this.writeLogFile(e.message)
     }
   }
 
@@ -172,8 +186,8 @@ ${flagscompletions}
   }
 
   _genCmdWithDescription (Command: Class<Command<*>>, namespace: string): string {
-    const description = Command.description ? `:'${Command.description}'` : ''
-    return `'${this._genCmdID(Command, namespace).replace(/:/g, '\\:')}'${description}`
+    const description = Command.description ? `:"${Command.description}"` : ''
+    return `"${this._genCmdID(Command, namespace).replace(/:/g, '\\:')}"${description}`
   }
 
   _genCmdID (Command: Class<Command<*>>, namespace: string): string {
