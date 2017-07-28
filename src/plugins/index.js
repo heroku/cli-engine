@@ -187,6 +187,12 @@ export default class Plugins {
   }
 
   get topics (): CachedTopic[] {
-    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
+    return uniqby(this.plugins.reduce((t, p) => {
+      const topics = p.topics.map(t => {
+        if (p.namespace) return Object.assign(t, {topic: `${p.namespace}:${t.topic}`})
+        return t
+      })
+      return t.concat(topics)
+    }, []), 'topic')
   }
 }
