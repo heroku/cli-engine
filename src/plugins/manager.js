@@ -13,6 +13,7 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = | {
+  namespace?: ?string,
   name?: ?string,
   topic?: ?string,
   description?: ?string,
@@ -68,6 +69,7 @@ export class PluginPath {
     const commands: CachedCommand[] = plugin.commands
       .map(c => ({
         id: c.command ? `${c.topic}:${c.command}` : c.topic,
+        namespace: c.namespace,
         topic: c.topic,
         command: c.command,
         description: c.description,
@@ -81,6 +83,7 @@ export class PluginPath {
       }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
       .map(t => ({
+        namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
         hidden: !!t.hidden
@@ -89,6 +92,7 @@ export class PluginPath {
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
       topics.push({
+        namespace: command.namespace,
         topic: command.topic,
         hidden: true
       })
@@ -108,6 +112,11 @@ export class PluginPath {
     return (c: any)
   }
 
+  namespaceObj (o: ParsedTopic | ParsedCommand, namespace: ?string): ParsedTopic | ParsedCommand {
+    // flow$ignore
+    return Object.assign(o, {namespace})
+  }
+
   async require (): Promise<ParsedPlugin> {
     let required
     try {
@@ -116,15 +125,20 @@ export class PluginPath {
       if (await this.repair(err)) return this.require()
       else throw err
     }
-    let plugin = {
-      topic: required.topic && this.undefaultTopic(required.topic),
-      topics: required.topics && required.topics.map(this.undefaultTopic),
-      commands: required.commands && required.commands.map(this.undefaultCommand),
-      namespace: undefined
+
+    let namespace
+    if (required.type !== 'builtin' || !/(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) {
+      const nsMeta = Namespaces.metaData(this.path, this.config)
+      namespace = nsMeta.namespace
     }
-    if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
-    let {namespace} = Namespaces.metaData(this.path, this.config)
-    if (namespace) plugin.namespace = namespace
+
+    let plugin = {
+      // flow$ignore
+      topic: required.topic && this.namespaceObj(this.undefaultTopic(required.topic), namespace),
+      topics: required.topics && required.topics.map(t => this.namespaceObj(this.undefaultTopic(t), namespace)),
+      commands: required.commands && required.commands.map(t => this.namespaceObj(this.undefaultCommand(t), namespace)),
+      namespace: namespace
+    }
     return plugin
   }
 
