@@ -54,7 +54,7 @@ export default class Plugin {
   }
 
   async findCommand (cmd: string): Promise<?Class<Command<*>>> {
-    if (cmd == null) return
+    if (!cmd && cmd !== '') return
     let c = this.commands.find(c => c.id === cmd || (c.aliases || []).includes(cmd))
     if (!c) return
     let {topic, command} = c
