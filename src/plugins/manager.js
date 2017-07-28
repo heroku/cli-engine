@@ -113,7 +113,6 @@ export class PluginPath {
   }
 
   namespaceObj (o: ParsedTopic | ParsedCommand, namespace: ?string): ParsedTopic | ParsedCommand {
-    // flow$ignore
     return Object.assign(o, {namespace})
   }
 
@@ -133,7 +132,6 @@ export class PluginPath {
     }
 
     let plugin = {
-      // flow$ignore
       topic: required.topic && this.namespaceObj(this.undefaultTopic(required.topic), namespace),
       topics: required.topics && required.topics.map(t => this.namespaceObj(this.undefaultTopic(t), namespace)),
       commands: required.commands && required.commands.map(t => this.namespaceObj(this.undefaultCommand(t), namespace)),
