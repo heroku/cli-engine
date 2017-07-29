@@ -82,7 +82,7 @@ export class PluginPath {
         flags: convertFlagsFromV5(c.flags)
       }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
-      .map(t => ({
+      .map((t: ParsedTopic) => ({
         namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
@@ -112,8 +112,7 @@ export class PluginPath {
     return (c: any)
   }
 
-  namespaceObj (o: ParsedCommand | ParsedTopic , namespace: ?string): ?ParsedTopic | ?ParsedCommand {
-    if (!o) return
+  namespaceParsedObj (o: ParsedCommand | ParsedTopic, namespace: ?string): ParsedTopic | ParsedCommand {
     o.namespace = namespace
     return o
   }
@@ -137,8 +136,8 @@ export class PluginPath {
     // make flow happy by
     // namespacing topic this way
     if (topic) topic.namespace = namespace
-    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.namespaceObj(this.undefaultTopic(t), namespace))
-    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.namespaceObj(this.undefaultCommand(t), namespace))
+    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.namespaceParsedObj(this.undefaultTopic(t), namespace))
+    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.namespaceParsedObj(this.undefaultCommand(t), namespace))
     return {topic, topics, commands, namespace}
   }
 
