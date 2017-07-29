@@ -23,10 +23,10 @@ type ParsedTopic = | {
 type ParsedCommand = | LegacyCommand | Class<Command<*>>
 
 type ParsedPlugin = {
-  topic?: ParsedTopic,
-  topics?: ParsedTopic[],
-  commands?: ParsedCommand[],
-  namespace?: string
+  topic: ?ParsedTopic,
+  topics: ?ParsedTopic[],
+  commands: ?ParsedCommand[],
+  namespace: ?string
 }
 
 type PluginPathOptions = {
@@ -67,7 +67,7 @@ export class PluginPath {
     if (!plugin.commands) throw new Error('no commands found')
 
     const commands: CachedCommand[] = plugin.commands
-      .map(c => ({
+      .map((c: ParsedCommand) => ({
         id: c.command ? `${c.topic}:${c.command}` : c.topic,
         namespace: c.namespace,
         topic: c.topic,
@@ -112,8 +112,10 @@ export class PluginPath {
     return (c: any)
   }
 
-  namespaceObj (o: ParsedTopic | ParsedCommand, namespace: ?string): ParsedTopic | ParsedCommand {
-    return Object.assign(o, {namespace})
+  namespaceObj (o: ParsedCommand | ParsedTopic , namespace: ?string): ?ParsedTopic | ?ParsedCommand {
+    if (!o) return
+    o.namespace = namespace
+    return o
   }
 
   async require (): Promise<ParsedPlugin> {
@@ -131,13 +133,13 @@ export class PluginPath {
       namespace = nsMeta.namespace
     }
 
-    let plugin = {
-      topic: required.topic && this.namespaceObj(this.undefaultTopic(required.topic), namespace),
-      topics: required.topics && required.topics.map(t => this.namespaceObj(this.undefaultTopic(t), namespace)),
-      commands: required.commands && required.commands.map(t => this.namespaceObj(this.undefaultCommand(t), namespace)),
-      namespace: namespace
-    }
-    return plugin
+    let topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
+    // make flow happy by
+    // namespacing topic this way
+    if (topic) topic.namespace = namespace
+    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.namespaceObj(this.undefaultTopic(t), namespace))
+    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.namespaceObj(this.undefaultCommand(t), namespace))
+    return {topic, topics, commands, namespace}
   }
 
   pjson (): {name: string, version: string} {
