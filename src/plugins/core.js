@@ -10,11 +10,19 @@ export default class CorePlugins extends Manager {
    */
   async list (): Promise<PluginPath[]> {
     try {
-      let cli = this.config.pjson['cli-engine']
-      if (!cli) return []
-      return (cli.plugins || []).map(name => {
-        return new PluginPath({output: this.out, type: 'core', path: path.join(this.config.root, 'node_modules', name)})
-      })
+      const cli = this.config.pjson['cli-engine']
+      let plugins = []
+      if (this.config.pjson.main) {
+        // if main is set in package.json, add plugin as self
+        plugins.push(new PluginPath({output: this.out, type: 'core', path: this.config.root)})
+      }
+      if (!cli) return plugins
+      if (cli.plugins) {
+        plugins = plugins.concat((cli.plugins || []).map(name => {
+          return new PluginPath({output: this.out, type: 'core', path: path.join(this.config.root, 'node_modules', name)})
+        }))
+      }
+      return plugins
     } catch (err) {
       this.out.warn(err, 'Error loading core plugins')
       return []
