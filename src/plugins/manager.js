@@ -13,6 +13,7 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = | {
+  namespace?: ?string,
   name?: ?string,
   topic?: ?string,
   description?: ?string,
@@ -22,10 +23,10 @@ type ParsedTopic = | {
 type ParsedCommand = | LegacyCommand | Class<Command<*>>
 
 type ParsedPlugin = {
-  topic?: ParsedTopic,
-  topics?: ParsedTopic[],
-  commands?: ParsedCommand[],
-  namespace?: string
+  topic: ?ParsedTopic,
+  topics: ?ParsedTopic[],
+  commands: ?ParsedCommand[],
+  namespace: ?string
 }
 
 type PluginPathOptions = {
@@ -66,8 +67,9 @@ export class PluginPath {
     if (!plugin.commands) throw new Error('no commands found')
 
     const commands: CachedCommand[] = plugin.commands
-      .map(c => ({
+      .map((c: ParsedCommand) => ({
         id: c.command ? `${c.topic}:${c.command}` : c.topic,
+        namespace: c.namespace,
         topic: c.topic,
         command: c.command,
         description: c.description,
@@ -80,7 +82,8 @@ export class PluginPath {
         flags: convertFlagsFromV5(c.flags)
       }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
-      .map(t => ({
+      .map((t: ParsedTopic) => ({
+        namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
         hidden: !!t.hidden
@@ -89,6 +92,7 @@ export class PluginPath {
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
       topics.push({
+        namespace: command.namespace,
         topic: command.topic,
         hidden: true
       })
@@ -108,6 +112,11 @@ export class PluginPath {
     return (c: any)
   }
 
+  namespaceParsedObj (o: ParsedCommand | ParsedTopic, namespace: ?string): ParsedTopic | ParsedCommand {
+    o.namespace = namespace
+    return o
+  }
+
   async require (): Promise<ParsedPlugin> {
     let required
     try {
@@ -116,16 +125,20 @@ export class PluginPath {
       if (await this.repair(err)) return this.require()
       else throw err
     }
-    let plugin = {
-      topic: required.topic && this.undefaultTopic(required.topic),
-      topics: required.topics && required.topics.map(this.undefaultTopic),
-      commands: required.commands && required.commands.map(this.undefaultCommand),
-      namespace: undefined
+
+    let namespace
+    if (required.type !== 'builtin' || !/(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) {
+      const nsMeta = Namespaces.metaData(this.path, this.config)
+      namespace = nsMeta.namespace
     }
-    if (required.type === 'builtin' || /(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) return plugin
-    let {namespace} = Namespaces.metaData(this.path, this.config)
-    if (namespace) plugin.namespace = namespace
-    return plugin
+
+    let topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
+    // make flow happy by
+    // namespacing topic this way
+    if (topic) topic.namespace = namespace
+    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.namespaceParsedObj(this.undefaultTopic(t), namespace))
+    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.namespaceParsedObj(this.undefaultCommand(t), namespace))
+    return {topic, topics, commands, namespace}
   }
 
   pjson (): {name: string, version: string} {
