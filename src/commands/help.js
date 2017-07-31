@@ -5,6 +5,7 @@ import {compare} from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
 import type Plugin from '../plugins/plugin'
+import uniqby from 'lodash.uniqby'
 
 function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
@@ -85,14 +86,20 @@ export default class Help extends Command {
     this.out.log(`${color.bold('Usage:')} ${this.config.bin} COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
-    let topics = this.plugins.topics.filter(t => !t.hidden)
-    topics.sort(compare('topic'))
+    let topics = this.plugins.topics.filter(t => !t.hidden).filter(t => !t.namespace)
+    let ns = uniqby(this.plugins.topics.map(t => t.namespace)).filter(t => t)
     topics = topics.map(t => (
       [
         t.topic,
         t.description ? this.out.color.dim(t.description) : null
       ]
-    ))
+    )).concat(ns.map(t => (
+      [
+        t,
+        this.out.color.dim(`topics for ${t}`)
+      ]
+    )))
+    topics.sort()
     this.out.log(renderList(topics))
     this.out.log()
   }
