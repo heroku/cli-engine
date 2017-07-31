@@ -5,3 +5,4 @@ lib
 /npm-packages-offline-cache
 tmp
 yarn
+/package-lock.json
