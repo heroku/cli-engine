@@ -14,7 +14,7 @@ export default class CorePlugins extends Manager {
       let plugins = []
       if (this.config.pjson.main) {
         // if main is set in package.json, add plugin as self
-        plugins.push(new PluginPath({output: this.out, type: 'core', path: this.config.root)})
+        plugins.push(new PluginPath({output: this.out, type: 'core', path: this.config.root}))
       }
       if (!cli) return plugins
       if (cli.plugins) {
