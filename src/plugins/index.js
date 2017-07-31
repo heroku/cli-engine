@@ -77,12 +77,13 @@ export default class Plugins {
 
   async findCommand (cmd: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
+      let nsCmd
       if (plugin.namespace) {
         let split = cmd.split(':')
         if (plugin.namespace !== split[0]) return
-        cmd = split.slice(1, split.length).join(':')
+        nsCmd = split.slice(1, split.length).join(':')
       }
-      let c = await plugin.findCommand(cmd)
+      let c = await plugin.findCommand(nsCmd || cmd)
       if (c) return c
     }
   }
@@ -105,12 +106,13 @@ export default class Plugins {
   async findTopic (cmd: string): Promise<?Class<Topic>> {
     if (!cmd) return
     for (let plugin of this.plugins) {
+      let nsCmd
       if (plugin.namespace) {
         let split = cmd.split(':')
         if (plugin.namespace !== split[0]) return
-        cmd = split.slice(1, split.length).join(':')
+        nsCmd = split.slice(1, split.length).join(':')
       }
-      let t = await plugin.findTopic(cmd)
+      let t = await plugin.findTopic(nsCmd || cmd)
       if (t) return t
     }
   }
