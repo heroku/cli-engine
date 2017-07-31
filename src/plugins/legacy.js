@@ -20,6 +20,7 @@ export type LegacyFlag = {
 }
 
 export type LegacyCommand = {
+  namespace?: ?string,
   topic: string,
   command?: string,
   aliases?: string[],

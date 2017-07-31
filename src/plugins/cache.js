@@ -11,6 +11,7 @@ import Lock from '../lock'
 
 export type CachedCommand = {
   id: string,
+  namespace?: ?string,
   topic: string,
   command?: ?string,
   aliases?: string[],
@@ -23,6 +24,7 @@ export type CachedCommand = {
 }
 
 export type CachedTopic = {
+  namespace?: ?string,
   topic: string,
   description?: ?string,
   hidden: boolean
