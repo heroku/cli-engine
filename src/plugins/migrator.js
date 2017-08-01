@@ -45,6 +45,7 @@ export default class {
     this.out.action.start('Migrating Heroku CLI v5 plugins')
     debug('removing existing node_modules')
     for (let p of pljson) {
+      if (p.name === 'salesforcedx') continue
       debug(`installing ${p.name}`)
       await this._installPlugin(p.name, p.tag)
     }
