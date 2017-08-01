@@ -55,14 +55,12 @@ export default class Plugin {
 
   async findCommand (id: string): Promise<?Class<Command<*>>> {
     if (!id) return
-    // TODO: do we want aliases namespaced?
     let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
     if (!c) return
     let {topic, command} = c
     let p = await this.pluginPath.require()
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
-    // TODO: do we also want to check `p.namespace !== namespace`
     if (!Command) return
     return typeof Command === 'function' ? Command : convertFromV5((Command: any))
   }
@@ -70,16 +68,11 @@ export default class Plugin {
   async findTopic (id: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
+    let {topic} = t
     let plugin = await this.pluginPath.require()
-    let name
-    if (t.namespace) {
-      name = t.topic
-    } else {
-      name = id
-    }
     let Topic = (plugin.topics || [])
-      .find(t => [t.topic, t.name].includes(name))
-    if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === name ? plugin.topic : ''
+      .find(t => [t.topic, t.name].includes(topic))
+    if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === topic ? plugin.topic : ''
     if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
