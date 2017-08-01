@@ -64,6 +64,11 @@ export default class Help extends Command {
     }
 
     if (matchedCommand) {
+      const splitCmd = cmd.split(':')
+      if (this.plugins.findNamespaced(splitCmd[0]).length) {
+        // if namespaced, update topic name for proper help display
+        matchedCommand.topic = splitCmd.slice(0, 2).join(':')
+      }
       this.out.log(matchedCommand.buildHelp(this.config))
     }
 
