@@ -10,7 +10,7 @@ import fs from 'fs-extra'
 import Lock from '../lock'
 
 export type CachedCommand = {
-  cacheId: string,
+  id: string,
   namespace?: ?string,
   topic: string,
   command?: ?string,
@@ -24,7 +24,7 @@ export type CachedCommand = {
 }
 
 export type CachedTopic = {
-  cacheId: string,
+  id: string,
   namespace?: ?string,
   topic: string,
   description?: ?string,

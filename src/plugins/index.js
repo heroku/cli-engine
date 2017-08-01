@@ -87,7 +87,7 @@ export default class Plugins {
       try {
         return t.concat(p.commands
           .filter(c => c.topic === topic)
-          .map(c => (p.findCommand(c.cacheId): any)))
+          .map(c => (p.findCommand(c.id): any)))
       } catch (err) {
         this.out.warn(err, `error reading plugin ${p.name}`)
         return t
