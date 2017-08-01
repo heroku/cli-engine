@@ -59,7 +59,7 @@ test('linked plugin should be cached', async () => {
         'description': 'link',
         'flags': {},
         'hidden': false,
-        'id': 'foo',
+        'cacheId': 'foo',
         'topic': 'foo'
       }
     ],
@@ -67,6 +67,7 @@ test('linked plugin should be cached', async () => {
     'path': linkPath,
     'topics': [
       {
+        'cacheId': 'foo',
         'hidden': false,
         'topic': 'foo'
       }
@@ -110,7 +111,7 @@ test('linked plugin prepare should clear cache', async () => {
         'description': 'link',
         'flags': {},
         'hidden': false,
-        'id': 'foo',
+        'cacheId': 'foo',
         'topic': 'foo'
       }
     ],
@@ -118,6 +119,7 @@ test('linked plugin prepare should clear cache', async () => {
     'path': linkPath,
     'topics': [
       {
+        'cacheId': 'foo',
         'hidden': false,
         'topic': 'foo'
       }

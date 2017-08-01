@@ -177,9 +177,6 @@ export default class Plugins {
   }
 
   get topics (): CachedTopic[] {
-    return uniqby(this.plugins.reduce((t, p) => {
-      const topics = p.topics.map(t => t.cacheId)
-      return t.concat(topics)
-    }, []), 'topic')
+    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
   }
 }
