@@ -14,7 +14,7 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = {
-  id: string,
+  cacheId: string,
   namespace?: ?string,
   name?: ?string,
   topic?: ?string,
@@ -23,7 +23,7 @@ type ParsedTopic = {
 }
 
 type ParsedCommand = {
-  id: string,
+  cacheId: string,
   namespace?: ?string,
   topic: string,
   command?: string,
@@ -83,7 +83,7 @@ export class PluginPath {
 
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand) => ({
-        id: c.id,
+        cacheId: c.cacheId,
         namespace: c.namespace,
         topic: c.topic,
         command: c.command,
@@ -98,7 +98,7 @@ export class PluginPath {
       }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
       .map((t: ParsedTopic) => ({
-        id: t.id,
+        cacheId: t.cacheId,
         namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
@@ -108,7 +108,7 @@ export class PluginPath {
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
       let topic : CachedTopic = {
-        id: '',
+        cacheId: '',
         namespace: command.namespace,
         topic: command.topic,
         hidden: true
@@ -134,21 +134,21 @@ export class PluginPath {
     o.namespace = namespace
     const ns = o.namespace ? `${o.namespace}:` : ''
     const id = o.command ? `${o.topic}:${o.command}` : o.topic
-    o.id = `${ns}${id}`
+    o.cacheId = `${ns}${id}`
     return o
   }
 
   addCacheIdToCachedTopic (o: CachedTopic, namespace: ?string): CachedTopic {
     o.namespace = namespace
     const ns = o.namespace ? `${o.namespace}:` : ''
-    o.id = `${ns}${o.topic}`
+    o.cacheId = `${ns}${o.topic}`
     return o
   }
 
   addCacheIdToTopic (o: ParsedTopic, namespace: ?string): ParsedTopic {
     o.namespace = namespace
     const ns = o.namespace ? `${o.namespace}:` : ''
-    o.id = `${ns}${o.topic || o.name || ''}`
+    o.cacheId = `${ns}${o.topic || o.name || ''}`
     return o
   }
 

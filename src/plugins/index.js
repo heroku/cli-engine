@@ -88,8 +88,8 @@ export default class Plugins {
         return t.concat(p.commands
           .filter(c => c.topic === topic)
           .map(async (c) => {
-            let z : any = await p.findCommand(c.id)
-            if (z) return Object.assign(z, {uid: c.id})
+            let z : any = await p.findCommand(c.cacheId)
+            if (z) return Object.assign(z, {uid: c.cacheId})
           }))
       } catch (err) {
         this.out.warn(err, `error reading plugin ${p.name}`)
