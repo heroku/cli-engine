@@ -124,6 +124,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands: (get help with ${helpCmd})`)
     this.out.log(renderList(commands.map(c => {
       // if namespaced, update topic name for proper help display
+      // b/c these helpers are in cli-engine-command
       if (hasNamespace) c.topic = topic
       return c.buildHelpLine(this.config)
     })))

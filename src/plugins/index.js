@@ -69,15 +69,15 @@ export default class Plugins {
     return !!this.plugins.find(p => p.name === name)
   }
 
-  async findPluginWithCommand (cmd: string): Promise<?Plugin> {
+  async findPluginWithCommand (id: string): Promise<?Plugin> {
     for (let plugin of await this.list()) {
-      if (await plugin.findCommand(cmd)) return plugin
+      if (await plugin.findCommand(id)) return plugin
     }
   }
 
-  async findCommand (cmd: string): Promise<?Class<Command<*>>> {
+  async findCommand (id: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
-      let c = await plugin.findCommand(cmd)
+      let c = await plugin.findCommand(id)
       if (c) return c
     }
   }
@@ -87,20 +87,23 @@ export default class Plugins {
       try {
         return t.concat(p.commands
           .filter(c => c.topic === topic)
-          .map(c => (p.findCommand(c.id): any)))
+          .map(async (c) => {
+            let z : any = await p.findCommand(c.id)
+            if (z) return Object.assign(z, {uid: c.id})
+          }))
       } catch (err) {
         this.out.warn(err, `error reading plugin ${p.name}`)
         return t
       }
     }, [])
     commands = await Promise.all(commands)
-    return uniqby(commands, 'id')
+    return uniqby(commands, 'uid')
   }
 
-  async findTopic (cmd: string): Promise<?Class<Topic>> {
-    if (!cmd) return
+  async findTopic (id: string): Promise<?Class<Topic>> {
+    if (!id) return
     for (let plugin of this.plugins) {
-      let t = await plugin.findTopic(cmd)
+      let t = await plugin.findTopic(id)
       if (t) return t
     }
   }
@@ -177,6 +180,6 @@ export default class Plugins {
   }
 
   get topics (): CachedTopic[] {
-    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'topic')
+    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'id')
   }
 }

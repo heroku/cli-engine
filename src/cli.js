@@ -78,13 +78,14 @@ export default class Main {
       await plugins.load()
 
       debug('finding command')
-      let Command = await plugins.findCommand(this.argv[1] || this.config.defaultCommand)
+      const id = this.argv[1]
+      let Command = await plugins.findCommand(id || this.config.defaultCommand)
       if (!Command) return new NotFound(out, this.argv).run()
       debug('out.done()')
       await out.done()
       debug('recording analytics')
       let analytics = new Analytics({config: this.config, out, plugins})
-      await analytics.record(Command)
+      await analytics.record(id)
       debug('running cmd')
       await this.lock.unread()
       this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
