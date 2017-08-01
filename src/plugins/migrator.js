@@ -10,6 +10,13 @@ import Lock from '../lock'
 
 const debug = require('debug')('cli-engine:migrator')
 
+const SALESFORCE_BUILTINS = [
+  'salesforcedx',
+  'salesforce-alm',
+  'force-language-services',
+  'salesforce-lightning-cli'
+]
+
 export default class {
   userPlugins: UserPlugins
   linkedPlugins: LinkedPlugins
@@ -45,6 +52,7 @@ export default class {
     this.out.action.start('Migrating Heroku CLI v5 plugins')
     debug('removing existing node_modules')
     for (let p of pljson) {
+      if (SALESFORCE_BUILTINS.includes(p.name)) continue
       debug(`installing ${p.name}`)
       await this._installPlugin(p.name, p.tag)
     }

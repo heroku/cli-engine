@@ -68,7 +68,8 @@ export default class Help extends Command {
     }
 
     if (topic) {
-      this.listCommandsHelp(cmd, await this.plugins.commandsForTopic(topic.topic))
+      const cmds = await this.plugins.commandsForTopic(topic.topic)
+      if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
     }
 
     if (!matchedCommand && matchedNamespace.length) {
