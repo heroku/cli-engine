@@ -53,10 +53,10 @@ export default class Plugin {
     return this.cachedPlugin.namespace
   }
 
-  async findCommand (cacheId: string): Promise<?Class<Command<*>>> {
-    if (!cacheId) return
+  async findCommand (id: string): Promise<?Class<Command<*>>> {
+    if (!id) return
     // TODO: do we want aliases namespaced?
-    let c = this.commands.find(c => c.cacheId === cacheId || (c.aliases || []).includes(cacheId))
+    let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
     if (!c) return
     let {topic, command} = c
     let p = await this.pluginPath.require()
@@ -67,15 +67,15 @@ export default class Plugin {
     return typeof Command === 'function' ? Command : convertFromV5((Command: any))
   }
 
-  async findTopic (cacheId: string): Promise<?Class<Topic>> {
-    let t = this.topics.find(t => t.cacheId === cacheId)
+  async findTopic (id: string): Promise<?Class<Topic>> {
+    let t = this.topics.find(t => t.id === id)
     if (!t) return
     let plugin = await this.pluginPath.require()
     let name
     if (t.namespace) {
       name = t.topic
     } else {
-      name = cacheId
+      name = id
     }
     let Topic = (plugin.topics || [])
       .find(t => [t.topic, t.name].includes(name))

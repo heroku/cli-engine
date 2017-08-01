@@ -87,17 +87,14 @@ export default class Plugins {
       try {
         return t.concat(p.commands
           .filter(c => c.topic === topic)
-          .map(async (c) => {
-            let z : any = await p.findCommand(c.cacheId)
-            if (z) return Object.assign(z, {uid: c.cacheId})
-          }))
+          .map(c => p.findCommand(c.id)))
       } catch (err) {
         this.out.warn(err, `error reading plugin ${p.name}`)
         return t
       }
     }, [])
     commands = await Promise.all(commands)
-    return uniqby(commands, 'uid')
+    return uniqby(commands, 'id')
   }
 
   async findTopic (id: string): Promise<?Class<Topic>> {
