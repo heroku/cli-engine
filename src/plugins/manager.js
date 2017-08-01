@@ -1,10 +1,11 @@
 // @flow
 
 import {type Config} from 'cli-engine-config'
-import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
+import type {Arg} from 'cli-engine-command/lib/arg'
+import type {Flag} from 'cli-engine-command/lib/flags'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
-import {convertFlagsFromV5, type LegacyCommand} from './legacy'
+import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import Namespaces from '../namespaces'
 import path from 'path'
 
@@ -12,15 +13,29 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 
 const debug = require('debug')('cli-engine:plugins:manager')
 
-type ParsedTopic = | {
+type ParsedTopic = {
+  cacheId: string,
   namespace?: ?string,
   name?: ?string,
   topic?: ?string,
   description?: ?string,
   hidden?: ?boolean
-} | Class<Topic>
+}
 
-type ParsedCommand = | LegacyCommand | Class<Command<*>>
+type ParsedCommand = {
+  cacheId: string,
+  namespace?: ?string,
+  topic: string,
+  command?: string,
+  aliases?: string[],
+  variableArgs?: boolean,
+  args: Arg[],
+  flags: (LegacyFlag[] | {[name: string]: Flag<*>}),
+  description?: ?string,
+  help?: ?string,
+  usage?: ?string,
+  hidden?: ?boolean
+}
 
 type ParsedPlugin = {
   topic: ?ParsedTopic,
@@ -68,7 +83,7 @@ export class PluginPath {
 
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand) => ({
-        id: c.command ? `${c.topic}:${c.command}` : c.topic,
+        cacheId: c.cacheId,
         namespace: c.namespace,
         topic: c.topic,
         command: c.command,
@@ -83,6 +98,7 @@ export class PluginPath {
       }))
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
       .map((t: ParsedTopic) => ({
+        cacheId: t.cacheId,
         namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
@@ -91,11 +107,13 @@ export class PluginPath {
 
     for (let command of commands) {
       if (topics.find(t => t.topic === command.topic)) continue
-      topics.push({
+      let topic : CachedTopic = {
+        cacheId: '',
         namespace: command.namespace,
         topic: command.topic,
         hidden: true
-      })
+      }
+      topics.push(this.addCacheIdToCachedTopic(topic, command.namespace))
     }
 
     const {name, version} = this.pjson()
@@ -112,8 +130,25 @@ export class PluginPath {
     return (c: any)
   }
 
-  namespaceParsedObj (o: ParsedCommand | ParsedTopic, namespace: ?string): ParsedTopic | ParsedCommand {
+  addCacheIdToCmd (o: ParsedCommand, namespace: ?string): ParsedCommand {
     o.namespace = namespace
+    const ns = o.namespace ? `${o.namespace}:` : ''
+    const id = o.command ? `${o.topic}:${o.command}` : o.topic
+    o.cacheId = `${ns}${id}`
+    return o
+  }
+
+  addCacheIdToCachedTopic (o: CachedTopic, namespace: ?string): CachedTopic {
+    o.namespace = namespace
+    const ns = o.namespace ? `${o.namespace}:` : ''
+    o.cacheId = `${ns}${o.topic}`
+    return o
+  }
+
+  addCacheIdToTopic (o: ParsedTopic, namespace: ?string): ParsedTopic {
+    o.namespace = namespace
+    const ns = o.namespace ? `${o.namespace}:` : ''
+    o.cacheId = `${ns}${o.topic || o.name || ''}`
     return o
   }
 
@@ -132,12 +167,9 @@ export class PluginPath {
       namespace = nsMeta.namespace
     }
 
-    let topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
-    // make flow happy by
-    // namespacing topic this way
-    if (topic) topic.namespace = namespace
-    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.namespaceParsedObj(this.undefaultTopic(t), namespace))
-    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.namespaceParsedObj(this.undefaultCommand(t), namespace))
+    let topic: ParsedTopic = required.topic && this.addCacheIdToTopic(this.undefaultTopic(required.topic), namespace)
+    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.addCacheIdToTopic(this.undefaultTopic(t), namespace))
+    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.addCacheIdToCmd(this.undefaultCommand(t), namespace))
     return {topic, topics, commands, namespace}
   }
 

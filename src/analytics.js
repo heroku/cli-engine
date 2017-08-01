@@ -59,6 +59,7 @@ export default class AnalyticsCommand {
 
   async record (Command: Class<Command<*>>) {
     try {
+      // TODO: how do we want to handle namespace analytics?
       let plugin = await this.plugins.findPluginWithCommand(Command.id)
       if (!plugin) {
         this.out.debug('no plugin found for analytics')

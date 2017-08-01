@@ -19,8 +19,7 @@ export default class NotFound {
 
   allCommands (): string[] {
     return this.plugins.commands.reduce((commands, c) => {
-      const namespace = c.namespace ? `${c.namespace}:` : ''
-      return commands.concat([`${namespace}${c.id}`]).concat(c.aliases || [])
+      return commands.concat([c.cacheId]).concat(c.aliases || [])
     }, [])
   }
 
