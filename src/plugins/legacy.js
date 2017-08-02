@@ -41,6 +41,7 @@ export type LegacyCommand = {
 export function convertFromV5 (c: LegacyCommand) {
   if (!c.topic) throw new Error('command has no topic')
   class V5 extends Command {
+    static namespace = c.namespace
     static topic = c.topic
     static command = c.command
     static description = c.description

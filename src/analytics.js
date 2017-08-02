@@ -2,7 +2,6 @@
 
 import fs from 'fs-extra'
 import type {Config} from 'cli-engine-config'
-import Command from 'cli-engine-command'
 import HTTP from 'cli-engine-command/lib/http'
 import Netrc from 'netrc-parser'
 import Output from 'cli-engine-command/lib/output'
@@ -57,9 +56,9 @@ export default class AnalyticsCommand {
     }
   }
 
-  async record (Command: Class<Command<*>>) {
+  async record (id: string) {
     try {
-      let plugin = await this.plugins.findPluginWithCommand(Command.id)
+      let plugin = await this.plugins.findPluginWithCommand(id)
       if (!plugin) {
         this.out.debug('no plugin found for analytics')
         return
@@ -70,7 +69,7 @@ export default class AnalyticsCommand {
       let analyticsJSON = await this._readJSON()
 
       analyticsJSON.commands.push({
-        command: Command.id,
+        command: id,
         version: this.config.version,
         plugin: plugin.name,
         plugin_version: plugin.version,
