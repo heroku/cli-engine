@@ -2,7 +2,6 @@
 
 import { buildConfig } from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
-import Command from 'cli-engine-command'
 import nock from 'nock'
 import Plugins from './plugins'
 import AnalyticsCommand from './analytics'
@@ -81,11 +80,8 @@ function build (options = {}) {
   return command
 }
 
-function buildCommand () {
-  let cmd = class TestCommand extends Command {}
-  cmd.topic = 'fuzz'
-  cmd.command = 'fizz'
-  return cmd
+function cmdId () {
+  return 'fuzz:fizz'
 }
 
 describe('AnalyticsCommand', () => {
@@ -221,7 +217,7 @@ describe('AnalyticsCommand', () => {
         }]
       }
 
-      await command.record(buildCommand())
+      await command.record(cmdId())
 
       expect(command._writeJSON.mock.calls).toEqual([])
     })
@@ -230,7 +226,7 @@ describe('AnalyticsCommand', () => {
       let config = buildConfig({skipAnalytics: true})
       let command = build({config})
 
-      await command.record(buildCommand())
+      await command.record(cmdId())
 
       expect(command._writeJSON.mock.calls).toEqual([])
     })
@@ -240,7 +236,7 @@ describe('AnalyticsCommand', () => {
 
       let command = build()
 
-      await command.record(buildCommand())
+      await command.record(cmdId())
 
       expect(command._writeJSON.mock.calls).toEqual([])
     })
@@ -248,7 +244,7 @@ describe('AnalyticsCommand', () => {
     it('does not record if login is not set', async () => {
       let command = build({netrcLogin: null})
 
-      await command.record(buildCommand())
+      await command.record(cmdId())
 
       expect(command._writeJSON.mock.calls).toEqual([])
     })
@@ -268,7 +264,7 @@ describe('AnalyticsCommand', () => {
       })
 
       let command = build({json})
-      await command.record(buildCommand())
+      await command.record(cmdId())
       expect(command._writeJSON.mock.calls).toEqual([[expected]])
     })
   })

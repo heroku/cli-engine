@@ -24,6 +24,7 @@ export type CachedCommand = {
 }
 
 export type CachedTopic = {
+  id: string,
   namespace?: ?string,
   topic: string,
   description?: ?string,
