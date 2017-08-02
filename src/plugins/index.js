@@ -69,21 +69,15 @@ export default class Plugins {
     return !!this.plugins.find(p => p.name === name)
   }
 
-  async findPluginWithCommand (cmd: string): Promise<?Plugin> {
+  async findPluginWithCommand (id: string): Promise<?Plugin> {
     for (let plugin of await this.list()) {
-      if (await plugin.findCommand(cmd)) return plugin
+      if (await plugin.findCommand(id)) return plugin
     }
   }
 
-  async findCommand (cmd: string): Promise<?Class<Command<*>>> {
+  async findCommand (id: string): Promise<?Class<Command<*>>> {
     for (let plugin of this.plugins) {
-      let nsCmd
-      if (plugin.namespace) {
-        let split = cmd.split(':')
-        if (plugin.namespace !== split[0]) return
-        nsCmd = split.slice(1, split.length).join(':')
-      }
-      let c = await plugin.findCommand(nsCmd || cmd)
+      let c = await plugin.findCommand(id)
       if (c) return c
     }
   }
@@ -93,7 +87,7 @@ export default class Plugins {
       try {
         return t.concat(p.commands
           .filter(c => c.topic === topic)
-          .map(c => (p.findCommand(c.id): any)))
+          .map(c => p.findCommand(c.id)))
       } catch (err) {
         this.out.warn(err, `error reading plugin ${p.name}`)
         return t
@@ -103,16 +97,10 @@ export default class Plugins {
     return uniqby(commands, 'id')
   }
 
-  async findTopic (cmd: string): Promise<?Class<Topic>> {
-    if (!cmd) return
+  async findTopic (id: string): Promise<?Class<Topic>> {
+    if (!id) return
     for (let plugin of this.plugins) {
-      let nsCmd
-      if (plugin.namespace) {
-        let split = cmd.split(':')
-        if (plugin.namespace !== split[0]) return
-        nsCmd = split.slice(1, split.length).join(':')
-      }
-      let t = await plugin.findTopic(nsCmd || cmd)
+      let t = await plugin.findTopic(id)
       if (t) return t
     }
   }
@@ -189,12 +177,6 @@ export default class Plugins {
   }
 
   get topics (): CachedTopic[] {
-    return uniqby(this.plugins.reduce((t, p) => {
-      const topics = p.topics.map(t => {
-        if (p.namespace) return Object.assign(t, {topic: `${p.namespace}:${t.topic}`})
-        return t
-      })
-      return t.concat(topics)
-    }, []), 'topic')
+    return uniqby(this.plugins.reduce((t, p) => t.concat(p.topics), []), 'id')
   }
 }
