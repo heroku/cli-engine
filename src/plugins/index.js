@@ -159,8 +159,6 @@ export default class Plugins {
     let downgrade = await this.lock.upgrade()
 
     await this.load()
-    let name = this.linked.checkLinked(p)
-
     Namespaces.throwErrorIfNotPermitted(p, this.config)
 
     await this.linked.add(p)
