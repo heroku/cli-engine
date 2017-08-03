@@ -113,6 +113,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
         ))))
       }
     }
+    this.out.log()
   }
 
   listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
