@@ -22,12 +22,6 @@ export default class PluginsLink extends Command {
     this.plugins = new Plugins(this.out)
     let p = path.resolve(this.argv[0] || process.cwd())
     this.out.action.start(`Linking ${p}`)
-    try {
-      await this.plugins.addLinkedPlugin(p)
-    } catch (err) {
-      console.log('here')
-      let u = this.out.prompt('Uninstall? (y/N)')
-      console.log(u)
-    }
+    await this.plugins.addLinkedPlugin(p)
   }
 }
