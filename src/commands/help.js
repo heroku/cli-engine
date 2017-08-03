@@ -72,7 +72,7 @@ export default class Help extends Command {
       if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
     }
 
-    if (!matchedCommand && pluginsInNamespace.length) {
+    if (pluginsInNamespace.length) {
       this.listNamespaceHelp(cmd, pluginsInNamespace)
     }
   }
