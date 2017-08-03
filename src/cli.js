@@ -51,6 +51,9 @@ export default class Main {
     this.argv = options.argv
     this.config = buildConfig(options.config)
     out = new Output({config: this.config, mock: this.mock})
+    if (process.env.CLI_ENGINE_SHOW_CONFIG) {
+      out.inspect(this.config)
+    }
     this.lock = new Lock(out)
   }
 
