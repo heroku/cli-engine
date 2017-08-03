@@ -146,7 +146,9 @@ export default class Cache {
     for (let manager of managers) {
       let paths = await manager.list()
       for (let path of paths) {
-        plugins.push(new Plugin(this.out, path, await this.fetch(path)))
+        let plugin = await this.fetch(path)
+        if (plugins.find(p => p.name === plugin.name)) continue
+        plugins.push(new Plugin(this.out, path, plugin))
       }
     }
 
