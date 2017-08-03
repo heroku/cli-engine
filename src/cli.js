@@ -39,6 +39,8 @@ if (!global.testing) {
   process.stderr.on('error', handleEPIPE)
 }
 
+process.env.CLI_ENGINE_VERSION = require('../package.json').version
+
 export default class Main {
   mock: boolean
   argv: string[]
