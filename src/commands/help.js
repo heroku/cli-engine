@@ -56,10 +56,10 @@ export default class Help extends Command {
     }
 
     const topic = await this.plugins.findTopic(cmd)
-    let matchedCommand = await this.plugins.findCommand(cmd)
-    let matchedNamespace = this.plugins.findNamespaced(cmd)
+    const matchedCommand = await this.plugins.findCommand(cmd)
+    const pluginsInNamespace = this.plugins.findNamespaced(cmd)
 
-    if (!topic && !matchedCommand && !matchedNamespace.length) {
+    if (!topic && !matchedCommand && !pluginsInNamespace.length) {
       throw new Error(`command ${cmd} not found`)
     }
 
@@ -72,8 +72,8 @@ export default class Help extends Command {
       if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
     }
 
-    if (!matchedCommand && matchedNamespace.length) {
-      this.listNamespaceHelp(matchedNamespace)
+    if (pluginsInNamespace.length) {
+      this.listNamespaceHelp(cmd, pluginsInNamespace)
     }
   }
 
@@ -86,7 +86,7 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     let ns = uniqby(this.plugins.topics.map(t => t.namespace)).filter(t => t)
     topics = topics.map(t => (
       [
-        t.topic,
+        t.id,
         t.description ? this.out.color.dim(t.description) : null
       ]
     )).concat(ns.map(t => (
@@ -100,20 +100,20 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     this.out.log()
   }
 
-  listNamespaceHelp (plugins: Plugin[]) {
-    let namespace = plugins[0].namespace || ''
+  listNamespaceHelp (namespace: string, plugins: Plugin[]) {
     this.out.log(`Usage: ${this.config.bin} ${namespace}:TOPIC\n`)
     for (var i = 0; i < plugins.length; i++) {
       let plugin = plugins[i]
       if (plugin.topics) {
         this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
           [
-            plugin.namespace ? `${plugin.namespace}:${t.topic}` : t.topic,
+            t.id,
             t.description ? this.out.color.dim(t.description) : null
           ]
         ))))
       }
     }
+    this.out.log()
   }
 
   listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
