@@ -40,10 +40,10 @@ export default class Plugins {
   async load () {
     if (this.loaded) return
     this.plugins = await this.cache.fetchManagers(
-      this.builtin,
       this.linked,
       this.user,
-      this.core
+      this.core,
+      this.builtin
     )
     this.loaded = true
   }
