@@ -38,8 +38,10 @@ export default class NotFound {
     let id = this.argv[1]
     let closest
     let binHelp
-    if (await this.isTopic(id)) {
-      binHelp = `${this.config.bin} help ${id}`
+    let topic = id.split(':')
+    if (await this.isTopic(topic[0])) {
+      binHelp = `${this.config.bin} help ${topic[0]}`
+      if (topic[1]) closest = this.closest(id)
     } else {
       closest = this.closest(id)
       binHelp = `${this.config.bin} help`
