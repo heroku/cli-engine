@@ -28,23 +28,25 @@ export default class NotFound {
     return DCE.findBestMatch(cmd, this.allCommands()).bestMatch.target
   }
 
-  async isTopic (name: string) : Promise<boolean> {
+  async isValidTopic (name: string) : Promise<boolean> {
     let t = await this.plugins.findTopic(name)
     return !!t
   }
 
   async run () {
     await this.plugins.load()
-    let id = this.argv[1]
+
     let closest
-    let binHelp
-    let topic = id.split(':')
-    if (await this.isTopic(topic[0])) {
-      binHelp = `${this.config.bin} help ${topic[0]}`
-      if (topic[1]) closest = this.closest(id)
+    let binHelp = `${this.config.bin} help`
+    let id = this.argv[1]
+    let idSplit = id.split(':')
+    if (await this.isValidTopic(idSplit[0])) {
+      // if valid topic, update binHelp with topic
+      binHelp = `${binHelp} ${idSplit[0]}`
+      // if topic:COMMAND present, try closest for id
+      if (idSplit[1]) closest = this.closest(id)
     } else {
       closest = this.closest(id)
-      binHelp = `${this.config.bin} help`
     }
 
     let perhaps = closest ? `Perhaps you meant ${this.out.color.yellow(closest)}\n` : ''
