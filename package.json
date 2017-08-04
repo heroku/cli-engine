@@ -20,7 +20,6 @@
     "filesize": "^3.5.10",
     "fs-extra": "^4.0.0",
     "klaw-sync": "2.x",
-    "levenshtein": "1.x",
     "lodash.flatten": "4.x",
     "lodash.maxby": "4.x",
     "lodash.uniqby": "4.x",
@@ -30,6 +29,7 @@
     "node-gyp": "3.x",
     "rwlockfile": "^1.4.5",
     "string": "3.x",
+    "string-similarity": "^1.2.0",
     "tar-fs": "1.x",
     "tmp": "0.x"
   },
