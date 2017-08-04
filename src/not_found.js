@@ -28,7 +28,7 @@ export default class NotFound {
     return DCE.findBestMatch(cmd, this.allCommands()).bestMatch.target
   }
 
-  async isValidTopic (name: string) : Promise<boolean> {
+  async isValidTopic (name: string): Promise<boolean> {
     let t = await this.plugins.findTopic(name)
     return !!t
   }
