@@ -52,7 +52,7 @@ export default class Lock {
       debug('upgraded to writer lock')
     } catch (err) {
       if (err.message.match(/is locked with(.)+reader/)) {
-        throw new Error('Command timedout waiting for other active process to finish')
+        throw new Error('Command timed out waiting for other active process to finish')
       }
       throw(err)
     }
