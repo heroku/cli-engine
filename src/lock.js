@@ -54,7 +54,7 @@ export default class Lock {
       if (err.message.match(/is locked with(.)+reader/)) {
         throw new Error('Command timed out waiting for other active process to finish')
       }
-      throw(err)
+      throw (err)
     }
 
     // return downgrade function
