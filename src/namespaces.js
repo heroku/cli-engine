@@ -6,7 +6,6 @@ import {type Config} from 'cli-engine-config'
 
 export default class {
   static _installLevel (namespace: ?string, config: Config): string {
-    let cliBin = config.bin
     let namespaces = config.namespaces
     if (!namespace && !namespaces) namespace = namespaces = null
     if (namespaces && namespaces.includes(namespace)) {
