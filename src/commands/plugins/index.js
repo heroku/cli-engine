@@ -16,7 +16,7 @@ export default class extends Command {
 `
 
   async run () {
-    let plugins = await new Plugins(this.out).list()
+    let plugins = await new Plugins({output: this.out}).list()
     plugins = plugins.filter(p => p.type !== 'builtin')
     plugins.sort(compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')

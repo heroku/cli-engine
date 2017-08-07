@@ -44,7 +44,7 @@ export default class AnalyticsCommand {
 
   constructor (options: Options) {
     this.out = options.out
-    this.plugins = options.plugins || new Plugins(this.out)
+    this.plugins = options.plugins || new Plugins({output: this.out})
     this.http = new HTTP(this.out)
     this.config = options.config
   }
