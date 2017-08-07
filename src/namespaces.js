@@ -5,20 +5,6 @@ import path from 'path'
 import {type Config} from 'cli-engine-config'
 
 export default class {
-  static get notPermittedError () {
-    return new Error('Plugin\'s namespace not included in permitted namespaces')
-  }
-
-  static throwErrorIfNotPermitted (pluginPath: string, config: Config) {
-    if (this._permitted(pluginPath, config)) return
-    throw this.notPermittedError
-  }
-
-  static _permitted (pluginPath: string, config: Config): boolean {
-    let namespace = this._readNamespace(pluginPath)
-    return ['root', 'namespace'].includes(this._installLevel(namespace, config))
-  }
-
   static _installLevel (namespace: ?string, config: Config): string {
     let cliBin = config.bin
     let namespaces = config.namespaces
