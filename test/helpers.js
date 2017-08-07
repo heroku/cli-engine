@@ -30,7 +30,7 @@ export async function tmpDirs (cfg: any = {}) {
   let pjson = fs.readJSONSync(path.join(root, 'package.json'))
   let config = buildConfig(Object.assign({root, cacheDir, dataDir, pjson}, cfg))
   let output = new Output({config, mock: true})
-  let plugins = new Plugins(output)
+  let plugins = new Plugins({output})
   await plugins.load()
 
   let clean = function () {

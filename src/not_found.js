@@ -14,7 +14,7 @@ export default class NotFound {
     this.argv = argv
     this.out = output
     this.config = output.config
-    this.plugins = new Plugins(output)
+    this.plugins = new Plugins({output})
   }
 
   allCommands (): string[] {

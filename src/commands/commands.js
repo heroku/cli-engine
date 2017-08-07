@@ -13,7 +13,7 @@ export default class Commands extends Command {
   async run () {
     this.out.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
     await this.addV6Hack()
-    let plugins = new Plugins(this.out)
+    let plugins = new Plugins({output: this.out})
     await plugins.load()
     let topics = plugins.topics.filter(t => !t.hidden)
     let commands = plugins.commands.map(c => ({

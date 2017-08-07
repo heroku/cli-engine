@@ -45,7 +45,7 @@ export default class {
 
   async _createCommandsCache () {
     try {
-      const plugins = await new Plugins(this.out).list()
+      const plugins = await new Plugins({output: this.out}).list()
       await Promise.all(plugins.map(async (p) => {
         const hydrated = await p.pluginPath.require()
         const cmds = hydrated.commands || []
@@ -76,7 +76,7 @@ export default class {
 
   async _createCommandFuncsCache () {
     try {
-      const plugins = await new Plugins(this.out).list()
+      const plugins = await new Plugins({output: this.out}).list()
       // for every plugin
       await Promise.all(plugins.map(async (p) => {
         // re-hydrate

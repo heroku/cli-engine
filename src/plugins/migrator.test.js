@@ -73,7 +73,7 @@ test('linked plugins should be migrated', async () => {
     if (err.code !== 0) throw err
   }
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   let MigratorLinked = await plugins.findCommand('migrator')
   expect(MigratorLinked).toHaveProperty('description', 'link')
@@ -104,7 +104,7 @@ test('linked plugins that override core should be migrated', async () => {
     if (err.code !== 0) throw err
   }
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   let MigratorLinked = await plugins.findCommand('foo')
   expect(MigratorLinked).toHaveProperty('description', 'link')

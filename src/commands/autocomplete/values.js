@@ -31,7 +31,7 @@ export default class AutocompleteValues extends AutocompleteBase {
       if (!this.flags.resource) throw new Error('Missing required value for --resource')
 
       // find Command
-      const plugins = new Plugins(this.out)
+      const plugins = new Plugins({output: this.out})
       await plugins.load()
       let Command = await plugins.findCommand(this.flags.cmd)
       if (!Command) throw new Error(`Command ${this.flags.cmd} not found`)
