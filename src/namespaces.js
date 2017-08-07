@@ -23,12 +23,11 @@ export default class {
     let cliBin = config.bin
     let namespaces = config.namespaces
     if (!namespace && !namespaces) namespace = namespaces = null
-    if (cliBin === namespace || (!namespaces && !namespace)) {
-      return 'root'
-    } else if (namespaces && namespaces.includes(namespace)) {
+    if (namespaces && namespaces.includes(namespace)) {
       return 'namespace'
+    } else {
+      return 'root'
     }
-    return 'not-permitted-for-install'
   }
 
   static _readNamespace (pluginPath: string): ?string {
@@ -40,14 +39,12 @@ export default class {
 
   static metaData (pluginPath: string, config: Config): any {
     let pjsonNamespace = this._readNamespace(pluginPath)
-    let permitted = this._permitted(pluginPath, config)
     let installLevel = this._installLevel(pjsonNamespace, config)
 
     if (installLevel === 'not-permitted-for-install') installLevel = undefined
-    let namespace = (permitted && installLevel === 'namespace') ? pjsonNamespace : undefined
+    let namespace = installLevel === 'namespace' ? pjsonNamespace : undefined
 
     return {
-      permitted,
       installLevel,
       namespace,
       pjsonNamespace
