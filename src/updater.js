@@ -358,7 +358,7 @@ export default class Updater {
     this.out.exit(status)
   }
 
-  spawnBinPath (spawnFunc : Function, binPath : string, args : string[], options : Object) {
+  spawnBinPath (spawnFunc: Function, binPath: string, args: string[], options: Object) {
     if (this.config.windows) {
       args = ['/c', binPath].concat(args)
       return spawnFunc(process.env.comspec || 'cmd.exe', args, options)
