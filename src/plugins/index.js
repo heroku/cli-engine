@@ -93,6 +93,7 @@ export default class Plugins {
       }
     }, [])
     commands = await Promise.all(commands)
+    // console.log(commands)
     return uniqby(commands, 'id')
   }
 

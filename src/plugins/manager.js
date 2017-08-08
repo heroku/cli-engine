@@ -110,9 +110,10 @@ export class PluginPath {
       }))
 
     for (let command of commands) {
-      if (topics.find(t => t.topic === command.topic)) continue
+      if (!command.topic) continue
+      if (topics.find(t => t.id === command.topic)) continue
       let topic : CachedTopic = {
-        id: command.id,
+        id: command.topic,
         namespace: command.namespace,
         topic: command.topic,
         hidden: true
@@ -162,9 +163,33 @@ export class PluginPath {
     }
 
     let topic: ParsedTopic = required.topic && this.addNamespaceToTopic(this.undefaultTopic(required.topic), namespace)
-    const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.addNamespace(this.undefaultTopic(t), namespace))
+    const topics: Array<ParsedTopic> = this.parseTopics()
+    // const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.addNamespace(this.undefaultTopic(t), namespace))
     const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.addNamespace(this.undefaultCommand(t), namespace))
     return {topic, topics, commands, namespace}
+  }
+
+  parseTopics () {
+    const flatten = require('lodash.flatten')
+    // flow$ignore
+    const topics = (this.pjson()['cli-engine'] || {}).topics
+    return flatten([].concat(this.makeTopics(topics)))
+  }
+
+  makeTopics (topics: any, prefix: ?string) {
+    if (!topics) return []
+    return Object.keys(topics || {}).map(k => {
+      let t = topics[k]
+      let topic = {
+        id: prefix ? `${prefix}:${k}` : k,
+        topic: k,
+        description: t.description
+      }
+      if (t.topics) {
+        return [topic].concat(this.makeTopics(t.topics, topic.id))
+      }
+      return topic
+    })
   }
 
   pjson (): {name: string, version: string} {

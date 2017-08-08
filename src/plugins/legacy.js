@@ -44,7 +44,7 @@ export function convertFromV5 (c: LegacyCommand) {
     static topic = c.topic
     static command = c.command
     static description = c.description
-    static hidden = c.hidden
+    static hidden = !!c.hidden
     static args = c.args || []
     static flags = convertFlagsFromV5(c.flags)
     static variableArgs = !!c.variableArgs
