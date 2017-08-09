@@ -282,15 +282,22 @@ export default class Updater {
       await this.checkIfUpdating()
       await this.warnIfUpdateAvailable()
       if (!force && !this.autoupdateNeeded) return
+
       debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
+
       const binPath = this.binPath
-      if (!binPath) return debug('no binpath set')
+      if (!binPath) {
+        debug('no binpath set')
+        return
+      }
       debug(`spawning autoupdate on ${binPath}`)
+
       let fd = fs.openSync(this.autoupdatelogfile, 'a')
       fs.write(fd, timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`))
+
       const {spawn} = require('child_process')
-      spawn(binPath, ['update', '--autoupdate'], {
+      this.spawnBinPath(spawn, binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv
@@ -338,11 +345,25 @@ export default class Updater {
   async restartCLI () {
     let unread = await this.lock.read()
     await unread()
+
     const {spawnSync} = require('child_process')
     const binPath = this.binPath
-    if (!binPath) return debug('cannot restart CLI, no binpath')
+    if (!binPath) {
+      debug('cannot restart CLI, no binpath')
+      return
+    }
+
     debug('update complete, restarting CLI')
-    const {status} = spawnSync(binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    const {status} = this.spawnBinPath(spawnSync, binPath, process.argv.slice(2), {stdio: 'inherit'})
     this.out.exit(status)
+  }
+
+  spawnBinPath (spawnFunc: Function, binPath: string, args: string[], options: Object) {
+    if (this.config.windows) {
+      args = ['/c', binPath].concat(args)
+      return spawnFunc(process.env.comspec || 'cmd.exe', args, options)
+    } else {
+      return spawnFunc(binPath, args, options)
+    }
   }
 }
