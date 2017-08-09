@@ -91,7 +91,7 @@ export default class Main {
         await this.lock.unread()
         this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
       } else if (Topic) {
-        let topicHelp = await Help.run({argv: [Topic.topic], config: this.config, mock: this.mock})
+        await Help.run({argv: [Topic.topic], config: this.config, mock: this.mock})
       } else {
         return new NotFound(out, this.argv).run()
       }
