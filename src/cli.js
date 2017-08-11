@@ -48,7 +48,7 @@ export default class Main {
   cmd: Command<*>
   lock: Lock
 
-  constructor (options: {argv: string[], config?: ConfigOptions, mock?: boolean}) {
+  constructor (options: { argv: string[], config?: ConfigOptions, mock?: boolean }) {
     this.mock = !!options.mock
     this.argv = options.argv
     this.config = buildConfig(options.config)
@@ -85,15 +85,21 @@ export default class Main {
       debug('finding command')
       const id = this.argv[1]
       let Command = await plugins.findCommand(id || this.config.defaultCommand)
-      if (!Command) return new NotFound(out, this.argv).run()
-      debug('out.done()')
-      await out.done()
-      debug('recording analytics')
-      let analytics = new Analytics({config: this.config, out, plugins})
-      await analytics.record(id)
-      debug('running cmd')
-      await this.lock.unread()
-      this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
+      let Topic = await plugins.findTopic(id)
+      if (Command) {
+        debug('out.done()')
+        await out.done()
+        debug('recording analytics')
+        let analytics = new Analytics({config: this.config, out, plugins})
+        await analytics.record(id)
+        debug('running cmd')
+        await this.lock.unread()
+        this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
+      } else if (Topic) {
+        await Help.run({argv: [Topic.topic], config: this.config, mock: this.mock})
+      } else {
+        return new NotFound(out, this.argv).run()
+      }
     }
     debug('flushing stdout')
     await timeout(this.flush(), 10000)
