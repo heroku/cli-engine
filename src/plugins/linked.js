@@ -55,6 +55,7 @@ export default class LinkedPlugins extends Manager {
 
     let m = require(p)
     if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
+    if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
 
     this._data.plugins.push(p)
     this._save()
