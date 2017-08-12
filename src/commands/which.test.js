@@ -7,11 +7,17 @@ jest.mock('../plugins')
 
 const herokuApps = {
   type: 'user',
-  name: 'heroku-apps'
+  name: 'heroku-apps',
+  pluginPath: {
+    path: '/users/jeff/.local/share/heroku/plugins/node_modules/heroku-apps'
+  }
 }
 
 const builtin = {
-  type: 'builtin'
+  type: 'builtin',
+  pluginPath: {
+    path: '/usr/local/lib/heroku/node_modules/heroku-apps'
+  }
 }
 
 // flow$ignore
@@ -35,10 +41,10 @@ test('errors if not found', async () => {
 
 test('finds a user plugin', async () => {
   let cmd = await Which.mock('apps:info')
-  expect(cmd.out.stdout.output).toEqual('Command from user plugin heroku-apps\n')
+  expect(cmd.out.stdout.output).toContain('type: user\n')
 })
 
 test('finds a builtin command', async () => {
   let cmd = await Which.mock('plugins:install')
-  expect(cmd.out.stdout.output).toEqual('builtin command\n')
+  expect(cmd.out.stdout.output).toContain('type: builtin\n')
 })
