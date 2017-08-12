@@ -57,9 +57,8 @@ export default class Help extends Command {
 
     const topic = await this.plugins.findTopic(cmd)
     const matchedCommand = await this.plugins.findCommand(cmd)
-    const pluginsInNamespace = this.plugins.findNamespaced(cmd)
 
-    if (!topic && !matchedCommand && !pluginsInNamespace.length) {
+    if (!topic && !matchedCommand) {
       throw new Error(`command ${cmd} not found`)
     }
 
@@ -74,10 +73,6 @@ export default class Help extends Command {
       if (cmds) this.listCommandsHelp(cmd, cmds)
       // if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
     }
-
-    if (pluginsInNamespace.length) {
-      this.listNamespaceHelp(cmd, pluginsInNamespace)
-    }
   }
 
   topics () {
@@ -85,37 +80,15 @@ export default class Help extends Command {
     this.out.log(`${color.bold('Usage:')} ${this.config.bin} COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
-    let topics = this.plugins.topics.filter(t => !t.hidden).filter(t => !t.namespace)
-    let ns = uniqby(this.plugins.topics.map(t => t.namespace)).filter(t => t)
+    let topics = this.plugins.topics.filter(t => !t.hidden)
     topics = topics.map(t => (
       [
         t.id,
         t.description ? this.out.color.dim(t.description) : null
       ]
-    )).concat(ns.map(t => (
-      [
-        t,
-        this.out.color.dim(`topics for ${t}`)
-      ]
-    )))
+    ))
     topics.sort()
     this.out.log(renderList(topics))
-    this.out.log()
-  }
-
-  listNamespaceHelp (namespace: string, plugins: Plugin[]) {
-    this.out.log(`Usage: ${this.config.bin} ${namespace}:TOPIC\n`)
-    for (var i = 0; i < plugins.length; i++) {
-      let plugin = plugins[i]
-      if (plugin.topics) {
-        this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
-          [
-            t.id,
-            t.description ? this.out.color.dim(t.description) : null
-          ]
-        ))))
-      }
-    }
     this.out.log()
   }
 

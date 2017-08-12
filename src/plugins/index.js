@@ -105,10 +105,6 @@ export default class Plugins {
     }
   }
 
-  findNamespaced (namespace: string): Array<Plugin> {
-    return this.plugins.filter(p => p.namespace === namespace)
-  }
-
   async install (name: string, tag: string = 'latest') {
     let downgrade = await this.lock.upgrade()
 

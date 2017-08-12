@@ -6,7 +6,6 @@ import type {Arg} from 'cli-engine-command/lib/arg'
 import type {Flag} from 'cli-engine-command/lib/flags'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
-import Namespaces from '../namespaces'
 import path from 'path'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
@@ -15,7 +14,6 @@ const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = {
   id: string,
-  namespace?: ?string,
   name?: ?string,
   topic?: ?string,
   description?: ?string,
@@ -24,7 +22,6 @@ type ParsedTopic = {
 
 type ParsedCommand = {
   id: string,
-  namespace?: ?string,
   topic: string,
   command?: string,
   aliases?: string[],
@@ -40,8 +37,7 @@ type ParsedCommand = {
 type ParsedPlugin = {
   topic: ?ParsedTopic,
   topics: ?ParsedTopic[],
-  commands: ?ParsedCommand[],
-  namespace: ?string
+  commands: ?ParsedCommand[]
 }
 
 type PluginPathOptions = {
@@ -49,10 +45,6 @@ type PluginPathOptions = {
   type: PluginType,
   path: string,
   tag?: string
-}
-
-function makeID (o: any): string {
-  return [o.namespace, (o.topic || o.name), o.command].filter(s => s).join(':')
 }
 
 export class PluginPath {
@@ -88,7 +80,6 @@ export class PluginPath {
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand): CachedCommand => ({
         id: c.id,
-        namespace: c.namespace,
         topic: c.topic,
         command: c.command,
         description: c.description,
@@ -103,7 +94,6 @@ export class PluginPath {
     const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
       .map((t: ParsedTopic): CachedTopic => ({
         id: t.id,
-        namespace: t.namespace,
         topic: t.topic || t.name || '',
         description: t.description,
         hidden: !!t.hidden
@@ -114,7 +104,6 @@ export class PluginPath {
       if (topics.find(t => t.id === command.topic)) continue
       let topic : CachedTopic = {
         id: command.topic,
-        namespace: command.namespace,
         topic: command.topic,
         hidden: true
       }
@@ -122,7 +111,7 @@ export class PluginPath {
     }
 
     const {name, version} = this.pjson()
-    return {name, path: this.path, version, namespace: plugin.namespace, commands, topics}
+    return {name, path: this.path, version, commands, topics}
   }
 
   undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
@@ -135,18 +124,6 @@ export class PluginPath {
     return (c: any)
   }
 
-  addNamespace (p: ParsedCommand | ParsedTopic, namespace: ?string): ParsedCommand | ParsedTopic {
-    p.namespace = namespace
-    if (!p.id) p.id = makeID(p)
-    return p
-  }
-
-  addNamespaceToTopic (t: ParsedTopic, namespace: ?string): ParsedTopic {
-    t.namespace = namespace
-    if (!t.id) t.id = makeID(t)
-    return t
-  }
-
   async require (): Promise<ParsedPlugin> {
     let required
     try {
@@ -156,17 +133,10 @@ export class PluginPath {
       else throw err
     }
 
-    let namespace
-    if (required.type !== 'builtin' || !/(\\|\/)(src|lib)(\\|\/)commands$/.test(this.path)) {
-      const nsMeta = Namespaces.metaData(this.path, this.config)
-      namespace = nsMeta.namespace
-    }
-
-    let topic: ParsedTopic = required.topic && this.addNamespaceToTopic(this.undefaultTopic(required.topic), namespace)
+    let topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
     const topics: Array<ParsedTopic> = this.parseTopics()
-    // const topics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.addNamespace(this.undefaultTopic(t), namespace))
-    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.addNamespace(this.undefaultCommand(t), namespace))
-    return {topic, topics, commands, namespace}
+    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.undefaultCommand(t))
+    return {topic, topics, commands}
   }
 
   parseTopics () {

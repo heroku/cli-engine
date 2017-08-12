@@ -49,10 +49,6 @@ export default class Plugin {
     return this.cachedPlugin.topics
   }
 
-  get namespace (): ?string {
-    return this.cachedPlugin.namespace
-  }
-
   async findCommand (id: string): Promise<?Class<Command<*>>> {
     if (!id) return
     let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
