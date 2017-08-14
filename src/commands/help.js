@@ -63,15 +63,12 @@ export default class Help extends Command {
     }
 
     if (matchedCommand) {
-      // console.log(matchedCommand)
       this.out.log(matchedCommand.buildHelp(this.config))
     }
 
     if (topic) {
       const cmds = await this.plugins.commandsForTopic(topic.id)
-      // console.log(cmds)
       if (cmds) this.listCommandsHelp(cmd, cmds)
-      // if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
     }
   }
 

@@ -69,10 +69,8 @@ export default class Plugin {
     let plugin = await this.pluginPath.require()
     let Topic = (plugin.topics || [])
       .find(t => [t.id].includes(topic))
-      // console.log(topic)
     if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === topic ? plugin.topic : ''
     if (!Topic) return
-    // console.log(Topic)
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
 

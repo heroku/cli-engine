@@ -79,7 +79,7 @@ export class PluginPath {
 
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand): CachedCommand => ({
-        id: c.id,
+        id: c.id || this.makeID(c),
         topic: c.topic,
         command: c.command,
         description: c.description,
@@ -91,10 +91,11 @@ export class PluginPath {
         aliases: getAliases(c),
         flags: convertFlagsFromV5(c.flags)
       }))
-    const topics: CachedTopic[] = (plugin.topics || (plugin.topic ? [plugin.topic] : []))
+    const exportedTopics = plugin.topics && plugin.topics.length ? plugin.topics : (plugin.topic ? [plugin.topic] : [])
+    const topics: CachedTopic[] = exportedTopics
       .map((t: ParsedTopic): CachedTopic => ({
-        id: t.id,
-        topic: t.topic || t.name || '',
+        id: t.id || '',
+        topic: t.topic || '',
         description: t.description,
         hidden: !!t.hidden
       }))
@@ -115,7 +116,10 @@ export class PluginPath {
   }
 
   undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
-    if (t.default) return (t.default: any)
+    if (t.default) t = (t.default: any)
+    // normalize exported topic(s)
+    if (!t.topic) t.topic = t.name || ''
+    if (!t.id) t.id = t.topic
     return t
   }
 
@@ -133,20 +137,21 @@ export class PluginPath {
       else throw err
     }
 
-    let topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
-    const topics: Array<ParsedTopic> = this.parseTopics()
+    const topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
+    const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
+    const topics: Array<ParsedTopic> = (exportedTopics || []).concat(this.parsePjsonTopics())
     const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.undefaultCommand(t))
     return {topic, topics, commands}
   }
 
-  parseTopics () {
+  parsePjsonTopics () {
     const flatten = require('lodash.flatten')
     // flow$ignore
     const topics = (this.pjson()['cli-engine'] || {}).topics
-    return flatten([].concat(this.makeTopics(topics)))
+    return flatten([].concat(this.transformPjsonTopics(topics)))
   }
 
-  makeTopics (topics: any, prefix: ?string) {
+  transformPjsonTopics (topics: any, prefix: ?string) {
     if (!topics) return []
     return Object.keys(topics || {}).map(k => {
       let t = topics[k]
@@ -156,10 +161,14 @@ export class PluginPath {
         description: t.description
       }
       if (t.topics) {
-        return [topic].concat(this.makeTopics(t.topics, topic.id))
+        return [topic].concat(this.transformPjsonTopics(t.topics, topic.id))
       }
       return topic
     })
+  }
+
+  makeID (o: any): string {
+    return [(o.topic || o.name), o.command].filter(s => s).join(':')
   }
 
   pjson (): {name: string, version: string} {
