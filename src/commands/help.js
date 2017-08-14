@@ -4,8 +4,6 @@ import Command from 'cli-engine-command'
 import {compare} from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
-import type Plugin from '../plugins/plugin'
-import uniqby from 'lodash.uniqby'
 
 function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
