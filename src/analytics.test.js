@@ -35,7 +35,7 @@ function build (options = {}) {
     name: 'cli-engine'
   })
   let out = options.out || new Output({config, mock: true})
-  let plugins = options.plugins || new Plugins(out)
+  let plugins = options.plugins || new Plugins({output: out})
 
   // flow$ignore
   plugins.list = function () {
@@ -205,7 +205,7 @@ describe('AnalyticsCommand', () => {
     it('does not record if no plugin', async () => {
       let config = buildConfig()
       let out = new Output({config, mock: true})
-      let plugins = new Plugins(out)
+      let plugins = new Plugins({output: out})
 
       let command = build({config, out, plugins})
       // flow$ignore

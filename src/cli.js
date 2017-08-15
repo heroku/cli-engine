@@ -79,7 +79,7 @@ export default class Main {
       this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
     } else {
       debug('loading plugins')
-      let plugins = new Plugins(out)
+      let plugins = new Plugins({output: out})
       await plugins.load()
 
       debug('finding command')

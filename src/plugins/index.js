@@ -25,7 +25,7 @@ export default class Plugins {
   loaded: boolean
   config: Config
 
-  constructor (output: Output) {
+  constructor ({output}: {output: Output}) {
     this.out = output
     this.config = output.config
     this.cache = new Cache(output)

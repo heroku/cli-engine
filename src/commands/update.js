@@ -60,7 +60,7 @@ export default class Update extends Command {
     if (this.config.windows) {
       debug('skipping autocomplete on windows')
     } else {
-      const plugins = await new Plugins(this.out).list()
+      const plugins = await new Plugins({output: this.out}).list()
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
         let ac = new AutocompleteScripter(this)

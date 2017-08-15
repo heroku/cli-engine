@@ -45,7 +45,7 @@ test('linked plugin should be cached', async () => {
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   let FooLinked = await plugins.findCommand('foo')
   expect(FooLinked).toHaveProperty('description', 'link')
@@ -81,7 +81,7 @@ test('linked plugin should be cached', async () => {
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
-  plugins = new Plugins(tmpDir.output)
+  plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   FooCore = await plugins.findCommand('foo')
   expect(FooCore).toHaveProperty('description', 'core')
@@ -97,7 +97,7 @@ test('linked plugin prepare should clear cache', async () => {
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()
   expect(pluginsJson['plugins'][corePath]).toBeDefined()
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   let FooLinked = await plugins.findCommand('foo')
   expect(FooLinked).toHaveProperty('description', 'link')

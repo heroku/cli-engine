@@ -1,4 +1,4 @@
-/* globals test expect beforeEach */
+// @flow
 
 import Plugins from '../plugins'
 import {tmpDirs} from '../../test/helpers'
@@ -30,7 +30,7 @@ test('user plugin should be cached', async () => {
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   let DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
@@ -45,7 +45,7 @@ test('user plugin should be cached', async () => {
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 
-  plugins = new Plugins(tmpDir.output)
+  plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
   DebugUser = plugins.findCommand('debug')
   expect(DebugUser).toBeDefined()
@@ -132,7 +132,7 @@ test('problematic version of semver should be overwritten', async () => {
   let snappyBuild = path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'snappy', 'build')
   fs.removeSync(snappyBuild)
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
 
   let semverPath = path.join(tmpDir.dataDir, 'plugins', 'node_modules', 'semver')
@@ -168,7 +168,7 @@ test('problematic version of semver from previous release should be overwritten'
   let snappyBuild = path.join(pluginsDir, 'node_modules', 'snappy', 'build')
   fs.removeSync(snappyBuild)
 
-  let plugins = new Plugins(tmpDir.output)
+  let plugins = new Plugins({output: tmpDir.output})
   await plugins.load()
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
