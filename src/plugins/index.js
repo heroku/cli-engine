@@ -10,7 +10,6 @@ import BuiltinPlugins from './builtin'
 import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './cache'
-import Namespaces from '../namespaces'
 import Lock from '../lock'
 
 export default class Plugins {
@@ -159,8 +158,6 @@ export default class Plugins {
     let downgrade = await this.lock.upgrade()
 
     await this.load()
-    Namespaces.throwErrorIfNotPermitted(p, this.config)
-
     await this.linked.add(p)
     this.clearCache(p)
     await downgrade()

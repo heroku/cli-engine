@@ -22,25 +22,6 @@ async function runClosure (namespaces: ?(?string)[]) {
   return fn
 }
 
-// bin 'cli-engine'
-//   - cli namespaces undefined || null X
-//     - installs undefined namespaced X
-//       - user plugin undefined  X
-//       - linked plugin undefined  X
-//     - does not install defined namespaced X
-//       - user plugin  X
-//       - linked plugin  ?? << need a namespaced plugin
-//   - cli namespaces ['heroku'] X
-//     - installs permitted namespaced X
-//       - user plugin 'herkou' X
-//       - linked plugin 'herkou' ?? << need a namespaced plugin
-//     - does not install undefined namespaced X
-//       - user plugin  X
-//       - linked plugin  X
-//     - does not install unpermitted namespaced X
-//       - user plugin  X
-//       - linked plugin  ?? << need a namespaced plugin
-
 let dir = console.dir
 let mockDir
 
@@ -80,18 +61,18 @@ describe('CLI bin \'cli-engine\'', () => {
         await run('help', 'cli')
         await run('plugins:uninstall', 'cli-engine-example-plugin')
       })
-    })
 
-    describe('does not install unpermitted namespaced', () => {
-      test('user plugin heroku-debug with namespace \'heroku\'', async () => {
-        let msg
+      test('user plugin heroku-debug with namespace \'heroku\' into root', async () => {
+        expect.assertions(1)
+        await run('plugins:install', 'heroku-debug@5.0.2')
+        await run('debug')
+        await run('help', 'debug')
         try {
-          await run('plugins:install', 'heroku-debug')
+          await run('help', 'heroku:debug')
         } catch (err) {
-          msg = err.message
-        } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
+          expect(err.message).toEqual('command heroku:debug not found')
         }
+        await run('plugins:uninstall', 'heroku-debug')
       })
     })
   })
@@ -131,43 +112,6 @@ describe('CLI bin \'cli-engine\'', () => {
           expect(err.message).toEqual('command debug not found')
         }
         await run('plugins:uninstall', 'heroku-debug')
-      })
-    })
-
-    describe('does not install undefined namespaced', () => {
-      test('user plugin heroku-debug', async () => {
-        let msg
-        try {
-          await run('plugins:install', 'heroku-debug@4.0.0')
-        } catch (err) {
-          msg = err.message
-        } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
-        }
-      })
-
-      test('linked plugin cli-engine-example-plugin', async () => {
-        let msg
-        try {
-          await run('plugins:link', './example-plugin')
-        } catch (err) {
-          msg = err.message
-        } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
-        }
-      })
-    })
-
-    describe('does not install unpermitted namespaced', () => {
-      test('user plugin heroku-debug with namespace \'cowabunga\'', async () => {
-        let msg
-        try {
-          await run('plugins:install', 'heroku-debug@5.0.3')
-        } catch (err) {
-          msg = err.message
-        } finally {
-          expect(msg).toEqual('Plugin\'s namespace not included in permitted namespaces')
-        }
       })
     })
   })
