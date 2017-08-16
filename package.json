@@ -9,7 +9,7 @@
   },
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
-    "yarnDependency": "0.24.6"
+    "yarnDependency": "0.27.5"
   },
   "dependencies": {
     "ansi-escapes": "^2.0.0",
@@ -70,7 +70,6 @@
   },
   "enginestrict": true,
   "files": [
-    "autocomplete",
     "lib",
     "bin",
     "yarn"

@@ -5,7 +5,6 @@ import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
 import Analytics from '../analytics'
-import AutocompleteScripter from '../autocomplete'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -63,8 +62,8 @@ export default class Update extends Command {
       const plugins = await new Plugins(this.out).list()
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
-        let ac = new AutocompleteScripter(this)
-        await ac.createCaches()
+        let ac = await acPlugin.findCommand('autocomplete:init')
+        if (ac) await ac.run({config: this.config})
       } else {
         debug('skipping autocomplete, not installed')
       }

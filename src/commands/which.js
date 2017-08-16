@@ -17,10 +17,10 @@ export default class extends Command {
     const [command] = this.argv
     const plugin = await this.plugins.findPluginWithCommand(command)
     if (!plugin) throw new Error('not found')
-    if (plugin.type === 'builtin') {
-      this.out.log('builtin command')
-    } else {
-      this.out.log(`Command from ${plugin.type} plugin ${plugin.name}`)
-    }
+    this.out.styledHeader(`Plugin ${plugin.name}`)
+    this.out.styledObject({
+      type: plugin.type,
+      path: plugin.pluginPath.path
+    }, ['type', 'path'])
   }
 }
