@@ -59,7 +59,7 @@ test('tries to install a non-existant tag', async () => {
   try {
     await run('plugins:install', 'heroku-debug@not-found')
   } catch (err) {
-    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find any versions for \"heroku-debug\" that matches \"not-found\"\n')
+    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n')
   }
 })
 
