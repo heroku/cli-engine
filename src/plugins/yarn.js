@@ -90,9 +90,11 @@ export default class Yarn {
 
   async exec (args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    args = args.concat(['--non-interactive'])
-      .concat(Yarn.extraOpts)
-      .concat(this.proxyArgs())
+    args = args.concat([
+      '--non-interactive',
+      ...Yarn.extraOpts,
+      ...this.proxyArgs()
+    ])
     if (global.yarnCacheDir !== false) {
       let cacheDir = path.join(this.config.cacheDir, 'yarn')
       args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
