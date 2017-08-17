@@ -62,8 +62,7 @@
     "mock-fs": "4.4.1",
     "nock": "^9.0.14",
     "rimraf": "2.6.1",
-    "semver": "^5.4.1",
-    "uglify-js": "github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d"
+    "semver": "^5.4.1"
   },
   "engines": {
     "node": ">= 7.6.0"
