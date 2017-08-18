@@ -64,7 +64,6 @@ export default class Plugin {
   async findTopic (id: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
-    // let {topic} = t
     let topic = t.id
     let plugin = await this.pluginPath.require()
     let Topic = (plugin.topics || [])
