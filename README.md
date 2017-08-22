@@ -11,4 +11,4 @@ cli-engine
 
 A framework for building CLIs
 
-Actively used to build the [Heroku CLI](https://cli.heroku.com). This project is not yet ready to be used by others (see #169 for more information on what is missing).
+Actively used to build the [Heroku CLI](https://cli.heroku.com). This project is not yet ready to be used by others (see [#169](https://github.com/heroku/cli-engine/issues/169) for more information on what is missing).
