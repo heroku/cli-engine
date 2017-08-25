@@ -695,15 +695,15 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^5.1.15:
-  version "5.1.15"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-5.1.15.tgz#3f226f62c872fa17b767800ce80f8d6508ca9322"
+cli-engine-command@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-6.0.0.tgz#57fbb5809b0be460bc4656c38048887aa7456c4f"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
     chalk "^1.0.0"
-    fs-extra "^4.0.0"
-    http-call "^2.1.3"
+    fs-extra "^4.0.1"
+    http-call "^2.1.4"
     lodash.ary "^4.1.1"
     lodash.defaults "^4.2.0"
     lodash.get "^4.4.2"
@@ -716,7 +716,7 @@ cli-engine-command@^5.1.15:
     lodash.result "^4.5.2"
     moment "^2.18.1"
     string "3.x"
-    supports-color "^4.2.0"
+    supports-color "^4.2.1"
 
 cli-engine-config@^1.3.7:
   version "1.3.8"
@@ -908,6 +908,12 @@ debug@2.6.0:
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.0.tgz#bc596bcabe7617f11d9fa15361eded5608b8499b"
   dependencies:
     ms "0.7.2"
+
+debug@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-3.0.1.tgz#0564c612b521dc92d9f2988f0549e34f9c98db64"
+  dependencies:
+    ms "2.0.0"
 
 decamelize@^1.0.0, decamelize@^1.1.1:
   version "1.2.0"
@@ -1437,6 +1443,14 @@ fs-extra@^3.0.1:
 fs-extra@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-4.0.0.tgz#414fb4ca2d2170ba0014159d3a8aec3303418d9e"
+  dependencies:
+    graceful-fs "^4.1.2"
+    jsonfile "^3.0.0"
+    universalify "^0.1.0"
+
+fs-extra@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-4.0.1.tgz#7fc0c6c8957f983f57f306a24e5b9ddd8d0dd880"
   dependencies:
     graceful-fs "^4.1.2"
     jsonfile "^3.0.0"
@@ -2014,11 +2028,11 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@^2.1.3:
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-2.1.3.tgz#6c604f33aaa0d964fe1a9d236fec6bcb32db0418"
+http-call@^2.1.4:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-2.1.5.tgz#f54d71cd8a322432691c61977d6c69d6fdfef70b"
   dependencies:
-    debug "^2.6.8"
+    debug "^3.0.0"
     is-retry-allowed "^1.1.0"
     is-stream "^1.1.0"
     tunnel-agent "^0.6.0"
@@ -4251,9 +4265,15 @@ supports-color@^3.1.2:
   dependencies:
     has-flag "^1.0.0"
 
-supports-color@^4.0.0, supports-color@^4.2.0:
+supports-color@^4.0.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.2.0.tgz#ad986dc7eb2315d009b4d77c8169c2231a684037"
+  dependencies:
+    has-flag "^2.0.0"
+
+supports-color@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.2.1.tgz#65a4bb2631e90e02420dba5554c375a4754bb836"
   dependencies:
     has-flag "^2.0.0"
 
@@ -4423,7 +4443,7 @@ typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
 
-uglify-js@^2.6, "uglify-js@github:mishoo/UglifyJS2#73d6438773a40aa5aa06354781334af79a67e42d":
+uglify-js@^2.6:
   version "2.8.22"
   resolved "https://codeload.github.com/mishoo/UglifyJS2/tar.gz/73d6438773a40aa5aa06354781334af79a67e42d"
   dependencies:
