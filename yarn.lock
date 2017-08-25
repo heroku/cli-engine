@@ -724,9 +724,9 @@ cli-engine-config@^1.3.7:
   dependencies:
     uuid "^3.1.0"
 
-cli-engine-heroku@^1.1.4:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.5.tgz#44ec15a679d93b72e06977a1a9763d446bb98d11"
+cli-engine-heroku@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.7.tgz#33df17edb53491e4c47f5d9150cda5151e0b269d"
   dependencies:
     heroku-client "3.x"
     netrc-parser "2.0.2"
