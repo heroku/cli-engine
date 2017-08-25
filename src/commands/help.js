@@ -66,16 +66,21 @@ export default class Help extends Command {
 
     if (topic) {
       const cmds = await this.plugins.commandsForTopic(topic.id)
+      let subtopics = await this.plugins.subtopicsForTopic(topic.id)
+      if (subtopics && subtopics.length) this.topics(subtopics, topic.id, (topic.id.split(':').length + 1))
       if (cmds) this.listCommandsHelp(cmd, cmds)
     }
   }
 
-  topics () {
+  topics (ptopics: ?any[] = null, id: ?string, offset: number = 1) {
     let color = this.out.color
-    this.out.log(`${color.bold('Usage:')} ${this.config.bin} COMMAND
+    this.out.log(`${color.bold('Usage:')} ${this.config.bin} ${id || ''}${id ? ':' : ''}COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
-    let topics = this.plugins.topics.filter(t => !t.hidden)
+    let topics = (ptopics || this.plugins.topics).filter(t => {
+      const subtopic = t.id.split(':')[offset]
+      return !t.hidden && !subtopic
+    })
     topics = topics.map(t => (
       [
         t.id,

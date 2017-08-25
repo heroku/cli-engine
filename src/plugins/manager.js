@@ -35,7 +35,6 @@ type ParsedCommand = {
 }
 
 type ParsedPlugin = {
-  topic: ?ParsedTopic,
   topics: ?ParsedTopic[],
   commands: ?ParsedCommand[]
 }
@@ -91,8 +90,8 @@ export class PluginPath {
         aliases: getAliases(c),
         flags: convertFlagsFromV5(c.flags)
       }))
-    const exportedTopics = plugin.topics && plugin.topics.length ? plugin.topics : (plugin.topic ? [plugin.topic] : [])
-    const topics: CachedTopic[] = exportedTopics
+
+    const topics: CachedTopic[] = (plugin.topics || [])
       .map((t: ParsedTopic): CachedTopic => ({
         id: t.id || '',
         topic: t.topic || '',
@@ -101,7 +100,6 @@ export class PluginPath {
       }))
 
     for (let command of commands) {
-      if (!command.topic) continue
       if (topics.find(t => t.id === command.topic)) continue
       let topic : CachedTopic = {
         id: command.topic,
@@ -117,7 +115,7 @@ export class PluginPath {
 
   undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
     if (t.default) t = (t.default: any)
-    // normalize exported topic(s)
+    // normalize v5 exported topic
     if (!t.topic) t.topic = t.name || ''
     if (!t.id) t.id = t.topic
     return t
@@ -137,31 +135,32 @@ export class PluginPath {
       else throw err
     }
 
-    const topic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
+    const exportedTopic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
     const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
-    const topics: Array<ParsedTopic> = (exportedTopics || []).concat(this.parsePjsonTopics())
+    const topics: Array<ParsedTopic> = this.parsePjsonTopics().concat(exportedTopics || []).concat(exportedTopic || [])
     const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.undefaultCommand(t))
-    return {topic, topics, commands}
+    return {topics, commands}
   }
 
   parsePjsonTopics () {
-    const flatten = require('lodash.flatten')
     // flow$ignore
     const topics = (this.pjson()['cli-engine'] || {}).topics
-    return flatten([].concat(this.transformPjsonTopics(topics)))
+    return this.transformPjsonTopics(topics)
   }
 
   transformPjsonTopics (topics: any, prefix: ?string) {
+    const flatten = require('lodash.flatten')
+    return flatten(this._transformPjsonTopics(topics))
+  }
+
+  _transformPjsonTopics (topics: any, prefix: ?string) {
     if (!topics) return []
     return Object.keys(topics || {}).map(k => {
       let t = topics[k]
-      let topic = {
-        id: prefix ? `${prefix}:${k}` : k,
-        topic: k,
-        description: t.description
-      }
-      if (t.topics) {
-        return [topic].concat(this.transformPjsonTopics(t.topics, topic.id))
+      let id = prefix ? `${prefix}:${k}` : k
+      let topic = Object.assign(t, {id, topic: id})
+      if (t.subtopics) {
+        return [topic].concat(this._transformPjsonTopics(t.subtopics, topic.id))
       }
       return topic
     })
