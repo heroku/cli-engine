@@ -724,11 +724,11 @@ cli-engine-config@^1.3.7:
   dependencies:
     uuid "^3.1.0"
 
-cli-engine-heroku@^1.1.8:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.8.tgz#56a35a129fd0ad8e4de1b0b1fc050305ac78b428"
+cli-engine-heroku@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.9.tgz#5fe71fbb1fc69058a72f51e4b9b1e9e9e29798ea"
   dependencies:
-    heroku-client "3.x"
+    heroku-client "^3.0.3"
     netrc-parser "^2.0.3"
 
 cli-width@^2.0.0:
@@ -1905,13 +1905,21 @@ heroku-client@3.0.1:
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.4.0"
 
-heroku-client@3.0.2, heroku-client@3.x:
+heroku-client@3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.2.tgz#7e06f303ff18f7a0731725dcccbe210b76198657"
   dependencies:
     debug "^2.2.0"
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.4.0"
+
+heroku-client@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.3.tgz#302df7fe315f8fa0a98c1a6cbd22a5d81e1c5253"
+  dependencies:
+    debug "^3.0.0"
+    is-retry-allowed "^1.0.0"
+    tunnel-agent "^0.6.0"
 
 "heroku-debug-4.0.0@file:test/heroku-debug/4.0.0":
   version "0.0.0"
@@ -3214,10 +3222,11 @@ netrc-parser@2.0.1:
   dependencies:
     lex "^1.7.9"
 
-netrc-parser@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.2.tgz#6ca81104d84993f81ac9654c5d3f517897c1d2f7"
+netrc-parser@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.3.tgz#b8bdd1c7170d349daaf1f81e3ef436959aa5ee42"
   dependencies:
+    debug "^3.0.1"
     lex "^1.7.9"
 
 netrc-parser@^2.0.3:
