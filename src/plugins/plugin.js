@@ -49,10 +49,6 @@ export default class Plugin {
     return this.cachedPlugin.topics
   }
 
-  get namespace (): ?string {
-    return this.cachedPlugin.namespace
-  }
-
   async findCommand (id: string): Promise<?Class<Command<*>>> {
     if (!id) return
     let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
@@ -68,18 +64,16 @@ export default class Plugin {
   async findTopic (id: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
-    let {topic} = t
     let plugin = await this.pluginPath.require()
     let Topic = (plugin.topics || [])
-      .find(t => [t.topic, t.name].includes(topic))
-    if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === topic ? plugin.topic : ''
+      .find(t => [t.id].includes(id))
     if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
 
   buildTopic (t: CachedTopic): Class<Topic> {
     return class extends Topic {
-      static topic = t.topic
+      static topic = t.id
       static description = t.description
       static hidden = t.hidden
     }

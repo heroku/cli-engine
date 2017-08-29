@@ -96,16 +96,25 @@ export default class Plugins {
     return uniqby(commands, 'id')
   }
 
+  async subtopicsForTopic (id: string): Promise<?CachedTopic[]> {
+    if (!id) return
+    for (let plugin of this.plugins) {
+      let t = await plugin.findTopic(id)
+      if (t) {
+        return plugin.topics.filter(t => {
+          if (t.id === id) return false
+          return !!(t.id).match(id)
+        })
+      }
+    }
+  }
+
   async findTopic (id: string): Promise<?Class<Topic>> {
     if (!id) return
     for (let plugin of this.plugins) {
       let t = await plugin.findTopic(id)
       if (t) return t
     }
-  }
-
-  findNamespaced (namespace: string): Array<Plugin> {
-    return this.plugins.filter(p => p.namespace === namespace)
   }
 
   async install (name: string, tag: string = 'latest') {

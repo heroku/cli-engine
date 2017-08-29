@@ -20,7 +20,6 @@ export type LegacyFlag = {
 }
 
 export type LegacyCommand = {
-  namespace?: ?string,
   topic: string,
   command?: string,
   aliases?: string[],
@@ -40,11 +39,10 @@ export type LegacyCommand = {
 
 export function convertFromV5 (c: LegacyCommand) {
   class V5 extends Command {
-    static namespace = c.namespace
     static topic = c.topic
     static command = c.command
     static description = c.description
-    static hidden = c.hidden
+    static hidden = !!c.hidden
     static args = c.args || []
     static flags = convertFlagsFromV5(c.flags)
     static variableArgs = !!c.variableArgs

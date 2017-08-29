@@ -4,8 +4,6 @@ import Command from 'cli-engine-command'
 import {compare} from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
 import Plugins from '../plugins'
-import type Plugin from '../plugins/plugin'
-import uniqby from 'lodash.uniqby'
 
 function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
@@ -57,9 +55,8 @@ export default class Help extends Command {
 
     const topic = await this.plugins.findTopic(cmd)
     const matchedCommand = await this.plugins.findCommand(cmd)
-    const pluginsInNamespace = this.plugins.findNamespaced(cmd)
 
-    if (!topic && !matchedCommand && !pluginsInNamespace.length) {
+    if (!topic && !matchedCommand) {
       throw new Error(`command ${cmd} not found`)
     }
 
@@ -68,51 +65,30 @@ export default class Help extends Command {
     }
 
     if (topic) {
-      const cmds = await this.plugins.commandsForTopic(topic.topic)
-      if (!(cmds.length === 1 && matchedCommand)) this.listCommandsHelp(cmd, cmds)
-    }
-
-    if (pluginsInNamespace.length) {
-      this.listNamespaceHelp(cmd, pluginsInNamespace)
+      const cmds = await this.plugins.commandsForTopic(topic.id)
+      let subtopics = await this.plugins.subtopicsForTopic(topic.id)
+      if (subtopics && subtopics.length) this.topics(subtopics, topic.id, (topic.id.split(':').length + 1))
+      if (cmds) this.listCommandsHelp(cmd, cmds)
     }
   }
 
-  topics () {
+  topics (ptopics: ?any[] = null, id: ?string, offset: number = 1) {
     let color = this.out.color
-    this.out.log(`${color.bold('Usage:')} ${this.config.bin} COMMAND
+    this.out.log(`${color.bold('Usage:')} ${this.config.bin} ${id || ''}${id ? ':' : ''}COMMAND
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
-    let topics = this.plugins.topics.filter(t => !t.hidden).filter(t => !t.namespace)
-    let ns = uniqby(this.plugins.topics.map(t => t.namespace)).filter(t => t)
+    let topics = (ptopics || this.plugins.topics).filter(t => {
+      const subtopic = t.id.split(':')[offset]
+      return !t.hidden && !subtopic
+    })
     topics = topics.map(t => (
       [
         t.id,
         t.description ? this.out.color.dim(t.description) : null
       ]
-    )).concat(ns.map(t => (
-      [
-        t,
-        this.out.color.dim(`topics for ${t}`)
-      ]
-    )))
+    ))
     topics.sort()
     this.out.log(renderList(topics))
-    this.out.log()
-  }
-
-  listNamespaceHelp (namespace: string, plugins: Plugin[]) {
-    this.out.log(`Usage: ${this.config.bin} ${namespace}:TOPIC\n`)
-    for (var i = 0; i < plugins.length; i++) {
-      let plugin = plugins[i]
-      if (plugin.topics) {
-        this.out.log(renderList(plugin.topics.filter(t => !t.hidden).map(t => (
-          [
-            t.id,
-            t.description ? this.out.color.dim(t.description) : null
-          ]
-        ))))
-      }
-    }
     this.out.log()
   }
 
