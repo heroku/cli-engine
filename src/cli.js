@@ -13,6 +13,7 @@ import Analytics from './analytics'
 import Updater from './updater'
 import NotFound from './not_found'
 import Lock from './lock'
+import Hooks from './hooks'
 
 import MigrateV5Plugins from './plugins/migrator'
 
@@ -49,6 +50,7 @@ export default class CLI {
   config: Config
   cmd: Command<*>
   lock: Lock
+  hooks: Hooks
 
   constructor (options: { argv: string[], config?: ConfigOptions, mock?: boolean }) {
     this.mock = !!options.mock
@@ -67,6 +69,9 @@ export default class CLI {
     const updater = new Updater(out)
     debug('autoupdating')
     await updater.autoupdate()
+
+    this.hooks = new Hooks({config: this.config})
+    await this.hooks.run('init')
 
     try {
       const migrator = new MigrateV5Plugins(out)
@@ -94,9 +99,11 @@ export default class CLI {
         debug('recording analytics')
         let analytics = new Analytics({config: this.config, out, plugins})
         await analytics.record(id)
-        debug('running cmd')
         await this.lock.unread()
-        this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
+        let argv = this.argv.slice(2)
+        await this.hooks.run('prerun', {Command, argv})
+        debug('running cmd')
+        this.cmd = await Command.run({argv, config: this.config, mock: this.mock})
       } else if (Topic) {
         await Help.run({argv: [Topic.topic], config: this.config, mock: this.mock})
       } else {
