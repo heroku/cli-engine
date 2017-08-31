@@ -3,10 +3,6 @@
   "description": "Generic CLI Framework",
   "version": "4.0.2",
   "author": "Jeff Dickey @dickeyxxx",
-  "bin": {
-    "cli-build": "bin/cli-build",
-    "cli-release": "bin/cli-release"
-  },
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
     "yarnDependency": "0.27.5"
