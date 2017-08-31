@@ -5,6 +5,7 @@ import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
 import Analytics from '../analytics'
+import Hooks from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -65,6 +66,8 @@ export default class Update extends Command {
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
+    const hooks = new Hooks({config: this.config})
+    await hooks.run('update')
     if (this.config.windows) {
       debug('skipping autocomplete on windows')
     } else {
