@@ -8,6 +8,12 @@ import Analytics from '../analytics'
 
 const debug = require('debug')('cli-engine:update')
 
+function brew (...args) {
+  const cp = require('child_process')
+  debug('brew %o', args)
+  return cp.spawnSync('brew', args, {stdio: 'inherit'})
+}
+
 export default class Update extends Command {
   static topic = 'update'
   static description = 'update the Heroku CLI'
@@ -26,8 +32,11 @@ export default class Update extends Command {
       this.out.stderr.logfile = this.out.autoupdatelog
     }
     this.updater = new Updater(this.out)
-    if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
-    else {
+    if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
+      this.migrateBrew()
+    } else if (this.config.updateDisabled) {
+      this.out.warn(this.config.updateDisabled)
+    } else {
       this.out.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
@@ -76,5 +85,22 @@ export default class Update extends Command {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.out.errlog)
     } catch (e) { this.out.debug(e.message) }
+  }
+
+  migrateBrew () {
+    try {
+      debug('migrating from brew')
+      const fs = require('fs-extra')
+      let p = fs.realpathSync('/usr/local/bin/heroku')
+      if (p.match(/\/usr\/local\/Cellar\/heroku\/\d+\.\d+\.\d+\//)) {
+        // not on private tap, move to it
+        this.out.action.start('Upgrading homebrew formula')
+        brew('tap', 'heroku/brew')
+        brew('upgrade', 'heroku/brew/heroku')
+        this.out.action.stop()
+      }
+    } catch (err) {
+      debug(err)
+    }
   }
 }
