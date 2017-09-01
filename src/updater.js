@@ -85,9 +85,9 @@ export default class Updater {
     return v
   }
 
-  _catch (fn: Function) {
+  async _catch (fn: Function) {
     try {
-      return Promise.resolve(fn())
+      return await Promise.resolve(fn())
     } catch (err) {
       this.out.debug(err)
     }
