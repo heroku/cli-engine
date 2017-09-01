@@ -62,7 +62,7 @@
     "semver": "^5.4.1"
   },
   "engines": {
-    "node": ">= 7.6.0"
+    "node": ">= 8.3.0"
   },
   "enginestrict": true,
   "files": [
