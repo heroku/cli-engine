@@ -96,7 +96,7 @@
   "scripts": {
     "build": "babel src -d lib --ignore '*.test.js,**/__mocks__/*.js'",
     "clean": "rimraf lib tmp",
-    "download": "node ./bin/download-yarn",
+    "download": "./scripts/download-yarn",
     "precommit": "lint-staged",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
