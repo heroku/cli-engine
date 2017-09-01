@@ -2,15 +2,16 @@
 version: 2
 jobs:
   build:
+    working_directory: /cli
     docker:
       - image: node:8
     steps:
       - checkout
       - restore_cache:
           keys:
-            - v1-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
-            - v1-yarn-{{ .Branch }}
-            - v1-yarn-master
+            - v2-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
+            - v2-yarn-{{ .Branch }}
+            - v2-yarn-master
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn
       - run: |
@@ -20,9 +21,9 @@ jobs:
       - run: {command: "npx eslint .", when: always}
       - run: {command: "npx flow check", when: always}
       - save_cache:
-          key: v1-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
+          key: v2-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
-            - /tmp/cli-engine/node_modules
-            - /tmp/cli-engine/npm-packages-offline-cache
-            - /tmp/cli-engine/yarn
+            - /cli/node_modules
+            - /cli/npm-packages-offline-cache
+            - /cli/yarn
             - /usr/local/share/.cache/yarn
