@@ -41,7 +41,7 @@ if (!global.testing) {
 
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
-export default class Main {
+export default class CLI {
   mock: boolean
   argv: string[]
   config: Config
@@ -132,4 +132,14 @@ export default class Main {
     }
     return false
   }
+}
+
+export function run ({config}: {config?: ConfigOptions}) {
+  const cli = new CLI({
+    argv: process.argv.slice(1),
+    config: config || {
+      root: module.parent.path
+    }
+  })
+  return cli.run()
 }

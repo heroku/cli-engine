@@ -691,9 +691,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^6.0.1:
-  version "6.0.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-6.0.1.tgz#6fe545f371dadabefb811cfd242ba4301f76a36a"
+cli-engine-command@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-6.0.2.tgz#6cd6bdf4b0764fbd79c0862497e2230b028ba14a"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
@@ -712,17 +712,19 @@ cli-engine-command@^6.0.1:
     lodash.result "^4.5.2"
     moment "^2.18.1"
     string "3.x"
-    supports-color "^4.2.1"
+    supports-color "^4.4.0"
 
-cli-engine-config@^1.3.7:
-  version "1.3.8"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.3.8.tgz#a795cea9abf4e992765ad8c58bcd411cf1e470ed"
+cli-engine-config@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.6.1.tgz#87dc4114910f74073db97380ee56248d1d1f1702"
   dependencies:
+    fs-extra "^4.0.1"
+    jest-validate "^20.0.3"
     uuid "^3.1.0"
 
-cli-engine-heroku@^1.1.11:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.11.tgz#b47c32f19a01b411952cdcaf1009f20c647653f1"
+cli-engine-heroku@^1.1.12:
+  version "1.1.12"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.12.tgz#2008d40e26d06074ebbbfa09edba934609dd1269"
   dependencies:
     heroku-client "^3.0.3"
     netrc-parser "^2.0.3"
@@ -4260,7 +4262,7 @@ supports-color@^3.1.2:
   dependencies:
     has-flag "^1.0.0"
 
-supports-color@^4.0.0, supports-color@^4.2.1:
+supports-color@^4.0.0, supports-color@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.4.0.tgz#883f7ddabc165142b2a61427f3352ded195d1a3e"
   dependencies:
