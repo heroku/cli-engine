@@ -6,6 +6,8 @@ import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 import {timeout} from './util'
+import findUp from 'find-up'
+import path from 'path'
 
 import Analytics from './analytics'
 import Updater from './updater'
@@ -135,11 +137,15 @@ export default class CLI {
 }
 
 export function run ({config}: {config?: ConfigOptions}) {
+  if (!config) config = {}
+  if (!config.root) {
+    config.root = path.dirname(findUp.sync('package.json', {
+      cwd: module.parent.filename
+    }))
+  }
   const cli = new CLI({
     argv: process.argv.slice(1),
-    config: config || {
-      root: module.parent.path
-    }
+    config
   })
   return cli.run()
 }
