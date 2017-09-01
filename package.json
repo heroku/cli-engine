@@ -4,9 +4,6 @@
   "version": "4.1.2",
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/heroku/cli-engine/issues",
-  "cli-engine": {
-    "yarnDependency": "0.27.5"
-  },
   "dependencies": {
     "ansi-escapes": "^2.0.0",
     "cli-engine-command": "^6.0.2",
@@ -16,6 +13,7 @@
     "filesize": "^3.5.10",
     "find-up": "^2.1.0",
     "fs-extra": "^4.0.1",
+    "http-call": "^3.0.0",
     "klaw-sync": "^3.0.0",
     "lodash.flatten": "4.x",
     "lodash.maxby": "4.x",
@@ -40,13 +38,14 @@
     "babel-plugin-transform-flow-strip-types": "6.22.0",
     "eslint": "^4.5.0",
     "eslint-config-standard": "10.2.1",
-    "eslint-plugin-flowtype": "^2.35.0",
+    "eslint-plugin-flowtype": "^2.35.1",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-jest": "20.0.3",
     "eslint-plugin-node": "^5.1.1",
     "eslint-plugin-promise": "3.5.0",
     "eslint-plugin-standard": "3.0.1",
-    "flow-bin": "^0.53.1",
+    "execa": "^0.8.0",
+    "flow-bin": "^0.54.0",
     "flow-copy-source": "^1.2.1",
     "flow-typed": "^2.1.5",
     "got": "7.1.0",
@@ -69,7 +68,6 @@
   "enginestrict": true,
   "files": [
     "lib",
-    "bin",
     "yarn"
   ],
   "homepage": "https://github.com/heroku/cli-engine",

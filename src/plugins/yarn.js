@@ -20,8 +20,7 @@ export default class Yarn {
     this.cwd = cwd
   }
 
-  get version (): string { return require('../../package.json')['cli-engine']['yarnDependency'] }
-  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn-${this.version}.js`) }
+  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn.js`) }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
   pathKey (env: {[k: string]: ?string} = process.env): string {
