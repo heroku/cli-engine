@@ -9,16 +9,24 @@ import EventEmitter from 'events'
 jest.mock('child_process')
 
 let output
-let yarn
+let yarn: Yarn
 let cacheDir
 
-beforeEach(() => {
-  output = new Output({config: {}, mock: true})
+let init = (config = {}) => {
+  output = new Output({config, mock: true})
   yarn = new Yarn(output, '/foo/bar')
   cacheDir = path.join(yarn.config.cacheDir, 'yarn')
+  return yarn
+}
+beforeEach(() => {
+  if (!yarn) init()
 })
 
-afterEach(jest.resetAllMocks)
+afterEach(() => {
+  jest.resetAllMocks()
+  // flow$ignore
+  yarn = null
+})
 
 function mockFork (options: {
   code?: number,
@@ -125,17 +133,17 @@ describe('with checkForYarnLock stubbed out', () => {
   })
 
   test('emits stdout when debug is on', async () => {
+    init({debug: 1})
     expect.assertions(1)
     mockFork({code: 0, stdout: 'why hello there'})
-    yarn.config.debug = 1
     await yarn.exec()
     expect(yarn.out.stdout.output).toEqual('why hello there')
   })
 
   test('emits stderr when debug is on', async () => {
+    init({debug: 1})
     expect.assertions(1)
     mockFork({code: 0, stderr: 'why hello there'})
-    yarn.config.debug = 1
     await yarn.exec()
     expect(yarn.out.stderr.output).toEqual('why hello there')
   })
@@ -193,15 +201,13 @@ describe('with checkForYarnLock stubbed out', () => {
   })
 
   describe('windows', () => {
-    beforeEach(() => {
-      yarn.config.windows = true
-    })
-
     test('finds path case insensitively', () => {
+      init({windows: true})
       expect(yarn.pathKey({pATH: ''})).toEqual('pATH')
     })
 
     test('defaults to Path', () => {
+      init({windows: true})
       expect(yarn.pathKey({nothing_useful: ''})).toEqual('Path')
     })
   })
