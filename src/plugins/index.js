@@ -103,7 +103,8 @@ export default class Plugins {
       if (t) {
         return plugin.topics.filter(t => {
           if (t.id === id) return false
-          return !!(t.id).match(id)
+          let re = new RegExp(`^${id}`)
+          return !!(t.id).match(re)
         })
       }
     }
