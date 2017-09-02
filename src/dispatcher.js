@@ -12,19 +12,27 @@ export default class Dispatcher {
   }
 
   run (...argv: string[]) {
-    let commandsDir = this.config.commandsDir
+    let dir = this.config.commandsDir
     let argv0 = argv.shift()
     debug('argv0: %s', argv0)
     let commandID = argv.shift()
     let Command: ?Class<CommandBase<*>>
-    if (!commandID) {
-      debug('loading root command from %s', commandsDir)
-      // TODO: make flag parsing work here somehow
-      Command = require(commandsDir)
-    } else {
-      debug(`finding ${commandID} command`)
+    let p
+    try {
+      if (!commandID) {
+        debug('loading root command from %s', dir)
+        // TODO: make flag parsing work here somehow
+        p = require.resolve(dir)
+      } else {
+        debug(`finding ${commandID} command`)
+        p = require.resolve(path.join(dir, ...commandID.split(':')))
+      }
+    } catch (err) {
+      if (err.code !== 'MODULE_NOT_FOUND') throw err
     }
-    if (!Command) throw new Error(`${commandID} command not found`)
-    Command.run({config: this.config})
+    if (!p) throw new Error(`${commandID} command not found`)
+    debug('loading command from %s', p)
+    Command = require(p)
+    Command.run({config: this.config, argv})
   }
 }
