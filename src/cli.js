@@ -155,6 +155,9 @@ export function run ({config}: {config?: ConfigOptions} = {}) {
       cwd: module.parent.filename
     }))
   }
+  if (!config.initPath) {
+    config.initPath = module.parent.filename
+  }
   const cli = new CLI({
     argv: process.argv.slice(1),
     config

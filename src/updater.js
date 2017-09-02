@@ -51,7 +51,7 @@ export default class Updater {
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
-  get binPath (): ?string { return process.env.CLI_BINPATH }
+  get binPath (): ?string { return process.env.CLI_BINPATH || this.config.initPath }
   get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
   get versionFile (): string { return path.join(this.config.cacheDir, `${this.config.channel}.version`) }
 
