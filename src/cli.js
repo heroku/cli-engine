@@ -96,7 +96,7 @@ export default class CLI {
 
       debug('finding command')
       const id = this.argv[1]
-      let Command = await plugins.findCommand(id || this.config.defaultCommand)
+      let Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
       let Topic = await plugins.findTopic(id)
       if (Command) {
         debug('out.done()')

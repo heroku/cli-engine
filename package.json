@@ -6,8 +6,8 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "^2.0.0",
-    "cli-engine-command": "^7.0.4",
-    "cli-engine-config": "^1.6.4",
+    "cli-engine-command": "^7.0.5",
+    "cli-engine-config": "^1.7.0",
     "cli-engine-heroku": "^2.0.0",
     "debug": "^3.0.1",
     "filesize": "^3.5.10",
