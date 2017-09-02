@@ -14,8 +14,9 @@ export default class Dispatcher {
   run (...argv: string[]) {
     let commandsDir = this.config.commandsDir
     let argv0 = argv.shift()
+    debug('argv0: %s', argv0)
     let commandID = argv.shift()
-    let Command: Class<CommandBase<*>>
+    let Command: ?Class<CommandBase<*>>
     if (!commandID) {
       debug('loading root command from %s', commandsDir)
       // TODO: make flag parsing work here somehow
