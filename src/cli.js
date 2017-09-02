@@ -143,7 +143,7 @@ export default class CLI {
   }
 }
 
-export function run ({config}: {config?: ConfigOptions}) {
+export function run ({config}: {config?: ConfigOptions} = {}) {
   if (!config) config = {}
   if (!config.root) {
     config.root = path.dirname(findUp.sync('package.json', {
