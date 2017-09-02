@@ -17,12 +17,14 @@ jobs:
             - yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn
-      - run: |
-          npx jest --coverage --runInBand
-          bash <(curl -s https://codecov.io/bash)
       - run: {command: "./bin/run version", when: always}
       - run: {command: "npx eslint .", when: always}
       - run: {command: "npx flow check", when: always}
+      - run:
+          when: always
+          command: |
+            npx jest --coverage --runInBand
+            bash <(curl -s https://codecov.io/bash)
       - save_cache:
           key: v2-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
