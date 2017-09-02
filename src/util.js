@@ -27,3 +27,7 @@ export function timeout (p: Promise<*>, ms: number): Promise<void> {
     wait(ms, true).then(() => debug('timed out'))
   ])
 }
+
+export function undefault (m: any) {
+  return m.default ? m.default : m
+}
