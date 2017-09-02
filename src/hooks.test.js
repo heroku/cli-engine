@@ -18,7 +18,9 @@ test('fires a hook', async () => {
   let hooks = init({
     root: process.cwd(),
     hooks: {
-      prerun: 'test/fixtures/hooks/prerun.js'
+      prerun: [
+        'test/fixtures/hooks/prerun.js'
+      ]
     }
   })
   await hooks.run('prerun')
