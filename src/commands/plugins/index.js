@@ -4,7 +4,7 @@ import Command, {flags} from 'cli-engine-command'
 import {compare} from '../../util'
 import Plugins from '../../plugins'
 
-export default class extends Command {
+export default class extends Command<*> {
   static topic = 'plugins'
   static flags = {core: flags.boolean({description: 'show core plugins'})}
   static description = 'list installed plugins'

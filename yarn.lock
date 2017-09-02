@@ -699,15 +699,15 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-6.0.2.tgz#6cd6bdf4b0764fbd79c0862497e2230b028ba14a"
+cli-engine-command@^7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-7.0.4.tgz#92235edd173b707efc50494b58c3f98f2e7e7021"
   dependencies:
     ansi-escapes "2.x"
     cardinal "1.x"
     chalk "^1.0.0"
     fs-extra "^4.0.1"
-    http-call "^2.1.5"
+    http-call "^3.0.1"
     lodash.ary "^4.1.1"
     lodash.defaults "^4.2.0"
     lodash.get "^4.4.2"
@@ -722,19 +722,20 @@ cli-engine-command@^6.0.2:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^1.6.3:
-  version "1.6.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.6.3.tgz#e001b08a51036f9e7e2774fa4d31ee2bcb14c5a9"
+cli-engine-config@^1.6.4:
+  version "1.6.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-1.6.4.tgz#0eec451eb19bce7bcaf75d7e4d8bbeadde3e48f6"
   dependencies:
     fs-extra "^4.0.1"
     jest-validate "^20.0.3"
     uuid "^3.1.0"
 
-cli-engine-heroku@^1.1.12:
-  version "1.1.12"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-1.1.12.tgz#2008d40e26d06074ebbbfa09edba934609dd1269"
+cli-engine-heroku@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-2.0.0.tgz#8f626dc7d98792f7b336e18223d6b5972b2b5edd"
   dependencies:
     heroku-client "^3.0.3"
+    http-call "^3.0.1"
     netrc-parser "^2.0.3"
 
 cli-spinners@^0.1.2:
@@ -1156,9 +1157,9 @@ eslint-scope@^3.7.1:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint@^4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.5.0.tgz#bb75d3b8bde97fb5e13efcd539744677feb019c3"
+eslint@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.6.0.tgz#98ced4a706a87abbe63207895d0023a38e250bbe"
   dependencies:
     ajv "^5.2.0"
     babel-code-frame "^6.22.0"
@@ -2065,18 +2066,9 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@^2.1.5:
-  version "2.1.5"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-2.1.5.tgz#f54d71cd8a322432691c61977d6c69d6fdfef70b"
-  dependencies:
-    debug "^3.0.0"
-    is-retry-allowed "^1.1.0"
-    is-stream "^1.1.0"
-    tunnel-agent "^0.6.0"
-
-http-call@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-3.0.0.tgz#4ee926fdaf87ab3e25642ee9617a5143111a7ee1"
+http-call@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-3.0.1.tgz#906d7f4740ac9756c1e106c89cd0fb876fa1034a"
   dependencies:
     debug "^3.0.1"
     is-retry-allowed "^1.1.0"

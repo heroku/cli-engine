@@ -15,7 +15,7 @@ export type CachedCommand = {
   command?: ?string,
   aliases?: string[],
   args: Arg[],
-  flags: {[name: string]: Flag<*>},
+  flags: {[name: string]: Flag},
   description: ?string,
   help?: ?string,
   usage?: ?string,

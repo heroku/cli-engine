@@ -15,7 +15,7 @@ function brew (...args) {
   return cp.spawnSync('brew', args, {stdio: 'inherit'})
 }
 
-export default class Update extends Command {
+export default class Update extends Command<*> {
   static topic = 'update'
   static description = 'update the Heroku CLI'
   static args = [

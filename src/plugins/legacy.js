@@ -102,11 +102,11 @@ export function convertFromV5 (c: LegacyCommand) {
   return V5
 }
 
-export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Flag<*>})): {[name: string]: Flag<*>} {
+export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Flag})): {[name: string]: any} {
   if (!flags) return {}
   if (!Array.isArray(flags)) return flags
   return flags.reduce((flags, flag) => {
-    let opts: Flag<*> = {
+    let opts: Flag = {
       char: (flag.char: any),
       description: flag.description,
       hidden: flag.hidden,

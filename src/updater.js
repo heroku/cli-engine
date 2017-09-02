@@ -2,7 +2,7 @@
 
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
-import HTTP from 'cli-engine-command/lib/http'
+import HTTP from 'http-call'
 import path from 'path'
 import Lock from './lock'
 import fs from 'fs-extra'
@@ -41,13 +41,11 @@ function timestamp (msg: string): string {
 export default class Updater {
   config: Config
   out: Output
-  http: HTTP
   lock: Lock
 
   constructor (output: Output) {
     this.out = output
     this.config = output.config
-    this.http = new HTTP(output)
     this.lock = new Lock(output)
   }
 
@@ -64,7 +62,7 @@ export default class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      return await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      return await HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
@@ -79,7 +77,7 @@ export default class Updater {
       if (err.code !== 'ENOENT') throw err
     }
     if (!v) {
-      v = await this.http.get(this.s3url(channel, 'version'))
+      v = await HTTP.get(this.s3url(channel, 'version'))
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
     return v
@@ -100,7 +98,7 @@ export default class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let stream = await this.http.stream(url)
+    let stream = await HTTP.stream(url)
 
     if (this.out.action.frames) { // if spinner action
       let total = stream.headers['content-length']

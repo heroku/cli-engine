@@ -27,7 +27,7 @@ type ParsedCommand = {
   aliases?: string[],
   variableArgs?: boolean,
   args: Arg[],
-  flags: (LegacyFlag[] | {[name: string]: Flag<*>}),
+  flags: (LegacyFlag[] | {[name: string]: Flag}),
   description?: ?string,
   help?: ?string,
   usage?: ?string,

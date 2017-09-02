@@ -4,7 +4,7 @@ import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 import path from 'path'
 
-export default class PluginsLink extends Command {
+export default class PluginsLink extends Command<*> {
   static topic = 'plugins'
   static command = 'link'
   static args = [

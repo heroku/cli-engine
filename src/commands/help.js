@@ -38,7 +38,7 @@ function linewrap (length: number, s: string): string {
   })(s).trim()
 }
 
-export default class Help extends Command {
+export default class Help extends Command<*> {
   static topic = 'help'
   static description = 'display help'
   static variableArgs = true

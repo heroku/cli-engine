@@ -2,7 +2,7 @@
 
 import fs from 'fs-extra'
 import type {Config} from 'cli-engine-config'
-import HTTP from 'cli-engine-command/lib/http'
+import HTTP from 'http-call'
 import Netrc from 'netrc-parser'
 import Output from 'cli-engine-command/lib/output'
 import path from 'path'
@@ -40,12 +40,10 @@ export default class AnalyticsCommand {
   out: Output
   plugins: Plugins
   config: Config
-  http: HTTP
 
   constructor (options: Options) {
     this.out = options.out
     this.plugins = options.plugins || new Plugins(this.out)
-    this.http = new HTTP(this.out)
     this.config = options.config
   }
 
@@ -101,7 +99,7 @@ export default class AnalyticsCommand {
         cli: this.config.name
       }
 
-      await this.http.post(this.url, {body})
+      await HTTP.post(this.url, {body})
 
       local.commands = []
       await this._writeJSON(local)
