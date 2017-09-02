@@ -9,11 +9,10 @@ import {timeout} from './util'
 import findUp from 'find-up'
 import path from 'path'
 
-import Analytics from './analytics'
 import Updater from './updater'
 import NotFound from './not_found'
 import Lock from './lock'
-import Hooks from './hooks'
+import Hooks, {type InitOptions, type PreRunOptions} from './hooks'
 
 import MigrateV5Plugins from './plugins/migrator'
 
@@ -71,7 +70,8 @@ export default class CLI {
     await updater.autoupdate()
 
     this.hooks = new Hooks({config: this.config})
-    await this.hooks.run('init')
+    let opts: InitOptions = {argv: this.argv}
+    await this.hooks.run('init', opts)
 
     try {
       const migrator = new MigrateV5Plugins(out)
@@ -101,12 +101,14 @@ export default class CLI {
       if (Command) {
         debug('out.done()')
         await out.done()
-        debug('recording analytics')
-        let analytics = new Analytics({config: this.config, out, plugins})
-        await analytics.record(id)
         await this.lock.unread()
         let argv = this.argv.slice(2)
-        await this.hooks.run('prerun', {Command, argv})
+        let opts: PreRunOptions = {
+          Command,
+          plugin: await plugins.findPluginWithCommand(id),
+          argv
+        }
+        await this.hooks.run('prerun', opts)
         debug('running cmd')
         this.cmd = await Command.run({argv, config: this.config, mock: this.mock})
       } else if (Topic) {

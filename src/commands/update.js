@@ -4,7 +4,6 @@ import Command, {flags} from 'cli-engine-command'
 import Updater from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
-import Analytics from '../analytics'
 import Hooks from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
@@ -58,9 +57,9 @@ export default class Update extends Command<*> {
     }
     debug('fetch version')
     await this.updater.fetchVersion(this.config.channel, true)
-    debug('analytics')
-    let analytics = new Analytics({out: this.out, config: this.config})
-    await analytics.submit()
+    // debug('analytics')
+    // let analytics = new Analytics({out: this.out, config: this.config})
+    // await analytics.submit()
     debug('plugins update')
     await PluginsUpdate.run({config: this.config, output: this.out})
     debug('log chop')

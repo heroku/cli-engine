@@ -27,18 +27,6 @@ jest.mock('../updater', () => {
   }
 })
 
-let mockAnalytics
-
-jest.mock('../analytics', () => {
-  return class {
-    submit = mockAnalytics
-  }
-})
-
-beforeEach(() => {
-  mockAnalytics = jest.fn()
-})
-
 describe('with no update available', () => {
   test('updates plugins only', async () => {
     mockManifest.version = '1.0.0'
@@ -46,7 +34,6 @@ describe('with no update available', () => {
     expect(cmd.out.stdout.output).toEqual('')
     expect(cmd.out.stderr.output).toEqual(`cli-engine: Updating CLI... already on latest version: 1.0.0\n`)
     expect(PluginsUpdate.run).toBeCalled()
-    expect(mockAnalytics).toBeCalled()
     expect(mockFetchVersion).toBeCalled()
   })
 })
