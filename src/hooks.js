@@ -17,11 +17,13 @@ export default class Hooks {
       config: this.config,
       ...options
     }
-    let script = this.config.hooks[event]
-    if (!script) return
-    script = path.join(this.config.root, script)
-    debug(`%s %s`, event, script)
-    const m = require(script)
-    await m(options)
+    let scripts = this.config.hooks[event]
+    if (!scripts) return
+    for (let script of scripts) {
+      script = path.join(this.config.root, script)
+      debug(`%s %s`, event, script)
+      const m = require(script)
+      await m(options)
+    }
   }
 }
