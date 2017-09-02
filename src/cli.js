@@ -116,7 +116,7 @@ export default class CLI {
     out.exit(0)
   }
 
-  flush (): Promise<> {
+  flush (): Promise<void> {
     if (global.testing) return Promise.resolve()
     let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')

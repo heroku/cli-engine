@@ -132,7 +132,7 @@ export default class Updater {
     this._cleanupDirs(dirs)
   }
 
-  extract (stream: stream$Readable, dir: string, sha: string) {
+  extract (stream: stream$Readable, dir: string, sha: string): Promise<void> {
     const zlib = require('zlib')
     const tar = require('tar-fs')
     const crypto = require('crypto')

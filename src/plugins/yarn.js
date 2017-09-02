@@ -49,7 +49,7 @@ export default class Yarn {
     return env
   }
 
-  fork (modulePath: string, args: string[] = [], options: any = {}) {
+  fork (modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
     const {fork} = require('child_process')
     return new Promise((resolve, reject) => {
       let forked = fork(modulePath, args, options)
