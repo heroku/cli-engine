@@ -5,7 +5,7 @@ import type Output from 'cli-engine-command/lib/output'
 import lock from 'rwlockfile'
 import path from 'path'
 
-const debug = require('debug')('cli-engine:lock')
+const debug = require('debug')('cli:lock')
 
 export default class Lock {
   config: Config

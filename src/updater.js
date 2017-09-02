@@ -9,7 +9,7 @@ import fs from 'fs-extra'
 import moment from 'moment'
 import {wait} from './util'
 
-const debug = require('debug')('cli-engine:updater')
+const debug = require('debug')('cli:updater')
 
 type Version = {
   version: string,

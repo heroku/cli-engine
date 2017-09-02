@@ -19,7 +19,7 @@ import MigrateV5Plugins from './plugins/migrator'
 
 import Help from './commands/help'
 
-const debug = require('debug')('cli-engine:cli')
+const debug = require('debug')('cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 let out: Output
@@ -67,7 +67,7 @@ export default class CLI {
     debug('starting run')
 
     const updater = new Updater(out)
-    debug('autoupdating')
+    debug('checking autoupdater')
     await updater.autoupdate()
 
     this.hooks = new Hooks({config: this.config})
@@ -81,7 +81,12 @@ export default class CLI {
       out.warn(err)
     }
 
-    if (this.cmdAskingForHelp) {
+    if (this.config.commandsDir) {
+      debug('using new dispatcher')
+      const Dispatcher = require('./dispatcher').default
+      const dispatcher = new Dispatcher(this.config)
+      await dispatcher.run(...this.argv)
+    } else if (this.cmdAskingForHelp) {
       debug('running help')
       this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
     } else {
