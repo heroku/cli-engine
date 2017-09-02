@@ -12,6 +12,9 @@ jobs:
             - v2-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
             - v2-yarn-{{ .Branch }}
             - v2-yarn-master
+      - restore_cache:
+          keys:
+            - yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn
       - run: |
@@ -25,5 +28,8 @@ jobs:
           paths:
             - /cli/node_modules
             - /cli/npm-packages-offline-cache
-            - /cli/yarn
             - /usr/local/share/.cache/yarn
+      - save_cache:
+          key: yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
+          paths:
+            - /cli/yarn
