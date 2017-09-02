@@ -62,7 +62,8 @@ export default class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      return await HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let {body} = await HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
@@ -77,7 +78,8 @@ export default class Updater {
       if (err.code !== 'ENOENT') throw err
     }
     if (!v) {
-      v = await HTTP.get(this.s3url(channel, 'version'))
+      let {body} = await HTTP.get(this.s3url(channel, 'version'))
+      v = body
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
     return v
@@ -98,7 +100,7 @@ export default class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let stream = await HTTP.stream(url)
+    let {response: stream} = await HTTP.stream(url)
 
     if (this.out.action.frames) { // if spinner action
       let total = stream.headers['content-length']
