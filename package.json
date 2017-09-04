@@ -88,7 +88,7 @@
   "scripts": {
     "build": "babel src -d lib --ignore '*.test.js,**/__mocks__/*.js'",
     "clean": "rimraf lib tmp",
-    "download": "./scripts/download-yarn",
+    "download": "node ./scripts/download-yarn",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
     "test": "npm run download && jest -i && flow && eslint .",
