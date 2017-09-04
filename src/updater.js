@@ -105,9 +105,13 @@ export default class Updater {
     if (this.out.action.frames) { // if spinner action
       let total = stream.headers['content-length']
       let current = 0
+      const throttle = require('lodash.throttle')
+      const updateStatus = throttle(newStatus => {
+        this.out.action.status = newStatus
+      }, 500)
       stream.on('data', data => {
         current += data.length
-        this.out.action.status = `${filesize(current)}/${filesize(total)}`
+        updateStatus(`${filesize(current)}/${filesize(total)}`)
       })
     }
 
