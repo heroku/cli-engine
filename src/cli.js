@@ -131,20 +131,9 @@ export default class CLI {
   }
 
   get cmdAskingForHelp (): boolean {
-    if (this.isCmdEdgeCase) return false
-    if (this.argv.find(arg => ['--help', '-h'].includes(arg))) {
-      return true
-    }
-    return false
-  }
-
-  get isCmdEdgeCase (): boolean {
-    let j = this.argv.indexOf('--')
-    if (j !== -1) {
-      for (var i = 0; i < j; i++) {
-        if (['--help', '-h'].includes(this.argv[i])) return false
-      }
-      return true
+    for (let arg of this.argv) {
+      if (['--help', '-h'].includes(arg)) return true
+      if (arg === '--') return false
     }
     return false
   }
