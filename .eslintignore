@@ -3,7 +3,6 @@ example
 example-plugin
 flow-typed
 lib
-src/linewrap.js
 yarn
 test/roots
 test/links

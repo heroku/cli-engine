@@ -32,7 +32,7 @@ function renderList (items: [string, ?string][]): string {
 }
 
 function linewrap (length: number, s: string): string {
-  const linewrap = require('../linewrap')
+  const linewrap = require('@heroku/linewrap')
   return linewrap(length, stdtermwidth, {
     skipScheme: 'ansi-color'
   })(s).trim()
