@@ -81,6 +81,10 @@ ansi-escapes@2.x, ansi-escapes@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-2.0.0.tgz#5bae52be424878dd9783e8910e3fc2922e83c81b"
 
+ansi-escapes@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-3.0.0.tgz#ec3e8b4e9f8064fc02c3ac9b65f1c275bda8ef92"
+
 ansi-regex@^2.0.0, ansi-regex@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
@@ -4023,9 +4027,9 @@ run-async@^2.2.0:
   dependencies:
     is-promise "^2.1.0"
 
-rwlockfile@^1.4.5:
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.5.tgz#9a5f9fc10d3fe61dbb5f8278571f3d155d59e379"
+rwlockfile@^1.4.6:
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.6.tgz#7257a5bd6c34a0f03cbc1b09515423344f839942"
   dependencies:
     debug "2.x"
     graceful-fs "4.x"

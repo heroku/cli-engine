@@ -5,7 +5,7 @@
   "author": "Jeff Dickey @dickeyxxx",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
-    "ansi-escapes": "^2.0.0",
+    "ansi-escapes": "^3.0.0",
     "cli-engine-command": "^7.0.6",
     "cli-engine-config": "^2.0.1",
     "cli-engine-heroku": "^2.0.0",
@@ -23,7 +23,7 @@
     "moment": "^2.18.1",
     "netrc-parser": "^2.0.3",
     "node-gyp": "3.x",
-    "rwlockfile": "^1.4.5",
+    "rwlockfile": "^1.4.6",
     "string": "3.x",
     "string-similarity": "^1.2.0",
     "tar-fs": "1.x",
