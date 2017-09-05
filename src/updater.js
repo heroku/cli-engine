@@ -340,7 +340,7 @@ export default class Updater {
   async checkIfUpdating () {
     debug('check if updating')
     if (!(await this.lock.canRead())) {
-      debug('update in process')
+      this.out.warn('update in process')
       await this.restartCLI()
     } else await this.lock.read()
     debug('done checking if updating')
