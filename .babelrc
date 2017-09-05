@@ -1,5 +1,5 @@
 {
-  "ignore": ["yarn/yarn-*.js"],
+  "ignore": ["yarn/yarn.js"],
   "plugins": [
     "transform-es2015-modules-commonjs",
     "transform-flow-strip-types",
