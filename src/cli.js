@@ -1,12 +1,11 @@
 // @flow
 
 import './fs'
-import Command from 'cli-engine-command'
+import {type Command} from 'cli-engine-command'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 import {timeout} from './util'
-import findUp from 'find-up'
 import path from 'path'
 
 import Updater from './updater'
@@ -81,14 +80,14 @@ export default class CLI {
       out.warn(err)
     }
 
-    if (this.config.commandsDir) {
+    if (this.cmdAskingForHelp) {
+      debug('running help')
+      this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
+    } else if (this.config.commandsDir) {
       debug('using new dispatcher')
       const Dispatcher = require('./dispatcher').default
       const dispatcher = new Dispatcher(this.config)
       await dispatcher.run(...this.argv)
-    } else if (this.cmdAskingForHelp) {
-      debug('running help')
-      this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
     } else {
       debug('loading plugins')
       let plugins = new Plugins(out)
@@ -142,6 +141,7 @@ export default class CLI {
 export function run ({config}: {config?: ConfigOptions} = {}) {
   if (!config) config = {}
   if (!config.root) {
+    const findUp = require('find-up')
     config.root = path.dirname(findUp.sync('package.json', {
       cwd: module.parent.filename
     }))
