@@ -711,9 +711,9 @@ cli-engine-command@^7.0.6:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-2.0.0.tgz#c4f576c7f3148b09de18b364d16d45da0802b033"
+cli-engine-config@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-2.0.1.tgz#d5a9a34d993ac59e88e6a5f115fa9acdbe28f9e7"
   dependencies:
     fs-extra "^4.0.1"
     jest-validate "^20.0.3"
@@ -2031,6 +2031,15 @@ html-encoding-sniffer@^1.0.1:
 http-call@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/http-call/-/http-call-3.0.1.tgz#906d7f4740ac9756c1e106c89cd0fb876fa1034a"
+  dependencies:
+    debug "^3.0.1"
+    is-retry-allowed "^1.1.0"
+    is-stream "^1.1.0"
+    tunnel-agent "^0.6.0"
+
+http-call@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-3.0.2.tgz#5e3be641449b13546480f651f095b693e22e59a8"
   dependencies:
     debug "^3.0.1"
     is-retry-allowed "^1.1.0"
