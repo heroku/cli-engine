@@ -130,14 +130,14 @@ describe('fetchVersion', () => {
         'stable.version': {channel: 'stable', version: '1.2.3-b2ea476'}
       }
     })
-    let v = await updater.fetchVersion('stable', false)
+    let v = await updater.fetchVersion(false)
     expect(v.version).toEqual('1.2.3-b2ea476')
   })
 
   it('gets the version from the API', async () => {
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
-    let v = await updater.fetchVersion('stable', true)
+    let v = await updater.fetchVersion(true)
     expect(v.version).toEqual('1.2.3-b2ea476')
   })
 
@@ -152,14 +152,14 @@ describe('fetchVersion', () => {
     })
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '2.0.0-b2ea476'})
-    let v = await updater.fetchVersion('stable', true)
+    let v = await updater.fetchVersion(true)
     expect(v.version).toEqual('2.0.0-b2ea476')
   })
 
   it('saves the version to disk', async () => {
     assets.get('/cli-engine/channels/stable/version')
       .reply(200, {channel: 'stable', version: '1.2.3-b2ea476'})
-    await updater.fetchVersion('stable', true)
+    await updater.fetchVersion(true)
     expect(fs.writeJSON).toBeCalledWith(path.join(config.cacheDir, 'stable.version'), {channel: 'stable', version: '1.2.3-b2ea476'})
   })
 })

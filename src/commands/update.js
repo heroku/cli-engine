@@ -56,7 +56,7 @@ export default class Update extends Command<*> {
       }
     }
     debug('fetch version')
-    await this.updater.fetchVersion(this.config.channel, true)
+    await this.updater.fetchVersion(true)
     debug('plugins update')
     await PluginsUpdate.run({config: this.config, output: this.out})
     debug('log chop')

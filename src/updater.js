@@ -70,7 +70,7 @@ export default class Updater {
     }
   }
 
-  async fetchVersion (channel: string, download: boolean): Promise<Version> {
+  async fetchVersion (download: boolean): Promise<Version> {
     let v
     try {
       if (!download) v = await fs.readJSON(this.versionFile)
@@ -78,7 +78,8 @@ export default class Updater {
       if (err.code !== 'ENOENT') throw err
     }
     if (!v) {
-      let {body} = await HTTP.get(this.s3url(channel, 'version'))
+      debug('fetching latest %s version', this.config.channel)
+      let {body} = await HTTP.get(this.s3url(this.config.channel, 'version'))
       v = body
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
@@ -89,7 +90,7 @@ export default class Updater {
     try {
       return await Promise.resolve(fn())
     } catch (err) {
-      this.out.debug(err)
+      debug(err)
     }
   }
 
@@ -243,7 +244,7 @@ export default class Updater {
   }
 
   _rename (src: string, dst: string) {
-    this.out.debug(`rename ${src} to ${dst}`)
+    debug(`rename ${src} to ${dst}`)
     // moveSync tries to do a rename first then falls back to copy & delete
     // on windows the delete would error on node.exe so we explicitly rename
     let rename = this.config.windows ? fs.renameSync : fs.moveSync
@@ -253,7 +254,7 @@ export default class Updater {
   _remove (dir: string) {
     this._catch(() => {
       if (fs.existsSync(dir)) {
-        this.out.debug(`remove ${dir}`)
+        debug(`remove ${dir}`)
         fs.removeSync(dir)
       }
     })
@@ -325,7 +326,7 @@ export default class Updater {
 
   async warnIfUpdateAvailable () {
     await this._catch(async () => {
-      let v = await this.fetchVersion(this.config.channel, false)
+      let v = await this.fetchVersion(false)
       let local = this.config.version.split('.')
       let remote = v.version.split('.')
       if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
