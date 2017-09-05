@@ -20,7 +20,6 @@ export default class Lock {
 
   // get read lock
   async read () {
-    debug('read()')
     return lock.read(this.updatelockfile)
   }
 
@@ -29,7 +28,6 @@ export default class Lock {
   }
 
   async canRead () {
-    debug('canRead()')
     let hasWriter = await lock.hasWriter(this.updatelockfile)
     return !hasWriter
   }
