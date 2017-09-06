@@ -51,7 +51,7 @@ export class Updater {
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
-  get binPath (): ?string { return process.env.CLI_BINPATH || this.config.initPath }
+  get binPath (): ?string { return process.env.CLI_BINPATH }
   get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
   get versionFile (): string { return path.join(this.config.cacheDir, `${this.config.channel}.version`) }
 
@@ -326,6 +326,7 @@ export class Updater {
 
   async warnIfUpdateAvailable () {
     await this._catch(async () => {
+      if (!this.config.s3) return
       let v = await this.fetchVersion(false)
       let local = this.config.version.split('.')
       let remote = v.version.split('.')
@@ -339,12 +340,10 @@ export class Updater {
   }
 
   async checkIfUpdating () {
-    debug('check if updating')
     if (!(await this.lock.canRead())) {
       debug('update in process')
       await this.restartCLI()
     } else await this.lock.read()
-    debug('done checking if updating')
   }
 
   async restartCLI () {
@@ -352,14 +351,20 @@ export class Updater {
     await unread()
 
     const {spawnSync} = require('child_process')
-    const binPath = this.binPath
-    if (!binPath) {
-      debug('cannot restart CLI, no binpath')
-      return
+    let bin = this.binPath
+    let args = process.argv.slice(2)
+    if (!bin) {
+      if (this.config.initPath) {
+        bin = process.argv[0]
+        args.unshift(this.config.initPath)
+      } else {
+        debug('cannot restart CLI, no binpath')
+        return
+      }
     }
 
     debug('update complete, restarting CLI')
-    const {status} = this.spawnBinPath(spawnSync, binPath, process.argv.slice(2), {stdio: 'inherit'})
+    const {status} = this.spawnBinPath(spawnSync, bin, args, {stdio: 'inherit'})
     this.out.exit(status)
   }
 
