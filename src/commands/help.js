@@ -78,6 +78,7 @@ export default class Help extends Command<*> {
 
 Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
     let topics = (ptopics || this.plugins.topics).filter(t => {
+      if (!t.id) return
       const subtopic = t.id.split(':')[offset]
       return !t.hidden && !subtopic
     })
