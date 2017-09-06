@@ -5,8 +5,6 @@ import type Output from 'cli-engine-command/lib/output'
 import lock from 'rwlockfile'
 import path from 'path'
 
-const debug = require('debug')('cli:lock')
-
 export default class Lock {
   config: Config
   out: Output
@@ -34,7 +32,6 @@ export default class Lock {
 
   // upgrade to writer
   async upgrade () {
-    debug('upgrading to writer lock')
     // take off reader
     await this.unread()
 
@@ -45,11 +42,9 @@ export default class Lock {
 
     // grab writer lock
     let unlock = await lock.write(this.updatelockfile)
-    debug('upgraded to writer lock')
 
     // return downgrade function
     return async () => {
-      debug('downgrading to reader lock')
       // turn back into reader when unlocking
       await unlock()
       return lock.read(this.updatelockfile)
