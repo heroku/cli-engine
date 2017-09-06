@@ -28,6 +28,7 @@ jobs:
           paths:
             - /cli/node_modules
             - /usr/local/share/.cache/yarn
+            - /root/.cache/cli-engine/yarn
       - save_cache:
           key: yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
           paths:
