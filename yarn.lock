@@ -740,10 +740,6 @@ cli-engine-heroku@^3.0.2:
     http-call "^3.0.2"
     netrc-parser "^2.0.3"
 
-cli-engine-stub-plugin@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/cli-engine-stub-plugin/-/cli-engine-stub-plugin-1.0.4.tgz#d5485bf8631887a81985e878d7aa1b29884c059e"
-
 cli-spinners@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/cli-spinners/-/cli-spinners-0.1.2.tgz#bb764d88e185fb9e1e6a2a1f19772318f605e31c"

@@ -38,7 +38,6 @@
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
     "babel-plugin-transform-flow-strip-types": "6.22.0",
-    "cli-engine-stub-plugin": "^1.0.4",
     "eslint": "^4.6.1",
     "eslint-config-standard": "10.2.1",
     "eslint-plugin-flowtype": "^2.35.1",
