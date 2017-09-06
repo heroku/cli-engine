@@ -700,14 +700,14 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^8.0.3:
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.3.tgz#242975626d80fa293e450ed090608b64825c644e"
+cli-engine-command@^8.0.5:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.5.tgz#4db87c18826b1cd75e80ad9e36043e3e15fa4c37"
   dependencies:
+    "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "^1.0.0"
-    cli-engine-config "^3.0.0"
     fs-extra "^4.0.1"
     http-call "^3.0.2"
     lodash.ary "^4.1.1"
@@ -724,18 +724,18 @@ cli-engine-command@^8.0.3:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.0.0.tgz#599a3e6d042c519ef2fff3df97b473eb1fb64f0b"
+cli-engine-config@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.0.tgz#04bf34ca9f81ae9046ef858836a59aa7e4594035"
   dependencies:
     fs-extra "^4.0.1"
     uuid "^3.1.0"
 
-cli-engine-heroku@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-3.0.1.tgz#8c1d31aa3584df829836443487845d3eedec9991"
+cli-engine-heroku@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-3.0.2.tgz#d48ea468cceee121790a6c7c165852c14562a39e"
   dependencies:
-    cli-engine-command "^8.0.3"
+    cli-engine-config "^3.1.0"
     heroku-client "^3.0.3"
     http-call "^3.0.2"
     netrc-parser "^2.0.3"
@@ -1420,9 +1420,9 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flow-bin@^0.54.0:
-  version "0.54.0"
-  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.54.0.tgz#f2fb0478e9e99702b623c9ed84079a39903bba77"
+flow-bin@^0.54.1:
+  version "0.54.1"
+  resolved "https://registry.yarnpkg.com/flow-bin/-/flow-bin-0.54.1.tgz#7101bcccf006dc0652714a8aef0c72078a760510"
 
 flow-copy-source@^1.2.1:
   version "1.2.1"
@@ -2007,9 +2007,9 @@ heroku-hello-world-build@0.0.0:
   dependencies:
     bindings "~1.2.1"
 
-heroku-kafka@^2.9.10:
-  version "2.9.11"
-  resolved "https://registry.yarnpkg.com/heroku-kafka/-/heroku-kafka-2.9.11.tgz#31602d96840653a7d1dcf1da73752b71ea76c8e7"
+heroku-kafka@^2.9.12:
+  version "2.9.12"
+  resolved "https://registry.yarnpkg.com/heroku-kafka/-/heroku-kafka-2.9.12.tgz#b80c2d95f0b6633d70572d063dc7b6f2d07d1dfc"
   dependencies:
     co "4.6.0"
     co-wait "0.0.0"
