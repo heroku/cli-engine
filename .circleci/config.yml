@@ -16,7 +16,7 @@ jobs:
           keys:
             - yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
       - run: git submodule sync && git submodule update --init --recursive --remote
-      - run: yarn
+      - run: yarn --pure-lockfile
       - run: {command: "./bin/run version", when: always}
       - run: {command: "npx eslint .", when: always}
       - run: {command: "npx flow check", when: always}
