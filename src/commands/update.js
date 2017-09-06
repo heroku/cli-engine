@@ -5,7 +5,6 @@ import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
 import {Hooks} from '../hooks'
-import {buildConfig} from 'cli-engine-config'
 
 const debug = require('debug')('cli-engine:update')
 
