@@ -5,6 +5,7 @@ import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
 import {Hooks} from '../hooks'
+import {buildConfig} from 'cli-engine-config'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -58,7 +59,7 @@ export default class Update extends Command<*> {
     debug('fetch version')
     await this.updater.fetchVersion(true)
     debug('plugins update')
-    await PluginsUpdate.run(this.config)
+    await PluginsUpdate.run({...this.config, argv: []})
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
