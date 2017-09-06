@@ -7,5 +7,5 @@ process.setMaxListeners(0)
 global.columns = 80
 global.testing = true
 global.yarnCacheDir = path.join(defaultConfig.cacheDir, 'yarn')
-console.dir(global.yarnCacheDir)
+console.log(global.yarnCacheDir)
 nock.disableNetConnect()
