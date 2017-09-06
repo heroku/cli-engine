@@ -59,7 +59,7 @@ test('user plugin should be cached', async () => {
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 })
 
-test.only('plugins should be reloaded when node_version null', async () => {
+test.skip('plugins should be reloaded when node_version null', async () => {
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
@@ -76,16 +76,13 @@ test.only('plugins should be reloaded when node_version null', async () => {
   let buildDir = path.join(plugins, 'node_modules', 'heroku-hello-world-build', 'build')
   fs.removeSync(buildDir)
 
-  // drop in v5 plugins.json
-  let json = [{name: 'heroku-hello-world-build'}]
-  fs.writeJSONSync(path.join(dataDir, 'plugins', 'plugins.json'), json)
+  await tmpDir.plugins.update()
 
   let config = {
     ...tmpDir.config,
     argv: ['cli', 'hello'],
     mock: true
   }
-  console.log(config)
   let cli = new CLI({config})
   try {
     await cli.run()
@@ -114,7 +111,12 @@ test('plugins should be reloaded when node_version changed', async () => {
   let buildDir = path.join(plugins, 'node_modules', 'heroku-hello-world-build', 'build')
   fs.removeSync(buildDir)
 
-  let cli = new CLI({argv: ['cli', 'hello'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'hello'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {
@@ -199,7 +201,12 @@ test('plugins should be loaded when things cannot be rebuilt', async () => {
   let packageJsonPath = path.join(plugins, 'package.json')
   fs.writeFileSync(packageJsonPath, '')
 
-  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'foo'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {
