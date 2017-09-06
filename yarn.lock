@@ -731,6 +731,13 @@ cli-engine-config@^3.1.0:
     fs-extra "^4.0.1"
     uuid "^3.1.0"
 
+cli-engine-config@^3.1.1:
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.1.tgz#c3be73841811e30773645c0da4189b13ea7c6f56"
+  dependencies:
+    fs-extra "^4.0.1"
+    uuid "^3.1.0"
+
 cli-engine-heroku@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-3.0.2.tgz#d48ea468cceee121790a6c7c165852c14562a39e"
