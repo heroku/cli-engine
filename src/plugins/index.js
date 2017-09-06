@@ -102,6 +102,7 @@ export default class Plugins {
       let t = await plugin.findTopic(id)
       if (t) {
         return plugin.topics.filter(t => {
+          if (!t.id) return false
           if (t.id === id) return false
           let re = new RegExp(`^${id}`)
           return !!(t.id).match(re)
