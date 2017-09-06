@@ -59,7 +59,7 @@ test('user plugin should be cached', async () => {
   expect(pluginsJson['plugins'][userPath]).toBeUndefined()
 })
 
-test('plugins should be reloaded when node_version null', async () => {
+test.only('plugins should be reloaded when node_version null', async () => {
   await tmpDir.plugins.install('heroku-hello-world-build', '0.0.0')
 
   let dataDir = tmpDir.dataDir
@@ -80,7 +80,13 @@ test('plugins should be reloaded when node_version null', async () => {
   let json = [{name: 'heroku-hello-world-build'}]
   fs.writeJSONSync(path.join(dataDir, 'plugins', 'plugins.json'), json)
 
-  let cli = new CLI({argv: ['cli', 'hello'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'hello'],
+    mock: true
+  }
+  console.log(config)
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {

@@ -19,11 +19,13 @@ const mockFetchVersion = jest.fn()
 const mockAutoupdate = jest.fn()
 
 jest.mock('../updater', () => {
-  return class {
-    fetchManifest () { return mockManifest }
-    fetchVersion = mockFetchVersion
-    update = mockUpdate
-    autoupdate = mockAutoupdate
+  return {
+    Updater: class mockUpdater {
+      fetchManifest () { return mockManifest }
+      fetchVersion = mockFetchVersion
+      update = mockUpdate
+      autoupdate = mockAutoupdate
+    }
   }
 })
 

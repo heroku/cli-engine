@@ -90,7 +90,11 @@ export default class CLI {
         if (!Command._version) {
           // old style command
           // flow$ignore
-          this.cmd = await Command.run({config: this.config})
+          this.cmd = await Command.run({
+            argv: this.config.argv.slice(2),
+            config: this.config,
+            mock: this.config.mock
+          })
         } else {
           this.cmd = await Command.run(this.config)
         }
