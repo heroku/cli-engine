@@ -1,6 +1,6 @@
 // @flow
 
-import Hooks from './hooks'
+import {Hooks} from './hooks'
 import {buildConfig} from 'cli-engine-config'
 
 let init = (options = {}) => {

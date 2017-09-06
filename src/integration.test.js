@@ -19,7 +19,12 @@ afterEach(async () => {
 })
 
 async function run (...argv: string[]) {
-  let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli'].concat(argv),
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {

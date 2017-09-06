@@ -1,7 +1,7 @@
 // @flow
 
 import Output from 'cli-engine-command/lib/output'
-import NotFound from './not_found'
+import {NotFound} from './not_found'
 
 jest.unmock('fs-extra')
 

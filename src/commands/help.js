@@ -48,7 +48,7 @@ export default class Help extends Command<*> {
   async run () {
     this.plugins = new Plugins(this.out)
     await this.plugins.load()
-    let cmd = this.argv.find(arg => !['-h', '--help'].includes(arg))
+    let cmd = this.config.argv.slice(1).find(arg => !['help', '-h', '--help'].includes(arg))
     if (!cmd) {
       return this.topics()
     }

@@ -2,6 +2,7 @@
 
 import {type Config} from 'cli-engine-config'
 import {type Command} from 'cli-engine-command'
+import type Plugin from './plugins/plugin'
 import path from 'path'
 import {undefault} from './util'
 const debug = require('debug')('cli:dispatcher')
@@ -11,65 +12,83 @@ class CommandManagerBase {
   constructor (config: Config) {
     this.config = config
   }
-  findCommand (cmd: string): ?Class<Command<*>> {
+  async findCommand (id: string): Promise<?Class<Command<*>>> {
     return null
+  }
+
+  require (p: string): ?Class<Command<*>> {
+    return undefault(require(p))
   }
 }
 
 class BuiltinCommandManager extends CommandManagerBase {
-  findCommand (cmd) {
+  async findCommand (id) {
     const builtins = {
       version: 'version',
       help: 'help'
     }
 
-    let p = builtins[cmd]
+    let p = builtins[id]
     if (p) {
       p = path.join(__dirname, 'commands', p)
-      return require(p)
+      return this.require(p)
     }
   }
 }
 
 class CLICommandManager extends CommandManagerBase {
-  findCommand (cmd) {
+  async findCommand (id) {
     let root = this.config.commandsDir
+    if (!root) return
     let p
     try {
-      debug(`finding ${cmd} command`)
-      p = require.resolve(path.join(root, ...cmd.split(':')))
+      debug(`finding ${id} command`)
+      p = require.resolve(path.join(root, ...id.split(':')))
     } catch (err) {
       if (err.code !== 'MODULE_NOT_FOUND') throw err
     }
-    if (p) return require(p)
+    if (p) return this.require(p)
   }
 }
 
-export default class Dispatcher {
+class PluginCommandManager extends CommandManagerBase {
+  async findCommand (id) {
+    const {default: Output} = require('cli-engine-command/lib/output')
+    const {default: Plugins} = require('./plugins')
+    let out = new Output(this.config)
+    let plugins = new Plugins(out)
+    await plugins.load()
+    return plugins.findCommand(id || this.config.defaultCommand || 'help')
+  }
+}
+
+export class Dispatcher {
   config: Config
-  cmd: string
   managers: CommandManagerBase[]
+
   constructor (config: Config) {
     this.config = config
     this.managers = [
-      new BuiltinCommandManager(config),
-      new CLICommandManager(config)
+      new PluginCommandManager(config),
+      new CLICommandManager(config),
+      new BuiltinCommandManager(config)
     ]
   }
 
-  run (...argv: string[]) {
-    let argv0 = argv.shift()
-    debug('argv0: %s', argv0)
-    this.cmd = argv.shift()
-    let command = this.findCommand()
-    if (!command) throw new Error(`${this.cmd} command not found`)
-    return command.run({config: this.config, argv})
+  async findCommand (id: string): {
+    Command?: ?Class<Command<*>>,
+    plugin?: ?Plugin
+  } {
+    if (!id) return {}
+    for (let manager of this.managers) {
+      let Command = await manager.findCommand(id)
+      if (Command) return {Command}
+    }
+    return {}
   }
 
-  findCommand () {
-    for (let manager of this.managers) {
-      let command = manager.findCommand(this.cmd)
-      if (command) return undefault(command)
-    }
+  findTopic (id: string) {
+    return null
+    // let Topic = await plugins.findTopic(id)
   }
 }

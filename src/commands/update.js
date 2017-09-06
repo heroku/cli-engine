@@ -1,10 +1,10 @@
 // @flow
 
 import Command, {flags} from 'cli-engine-command'
-import Updater from '../updater'
+import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
-import Hooks from '../hooks'
+import {Hooks} from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -58,7 +58,7 @@ export default class Update extends Command<*> {
     debug('fetch version')
     await this.updater.fetchVersion(true)
     debug('plugins update')
-    await PluginsUpdate.run({config: this.config, output: this.out})
+    await PluginsUpdate.run(this.config)
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
@@ -71,7 +71,7 @@ export default class Update extends Command<*> {
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
         let ac = await acPlugin.findCommand('autocomplete:init')
-        if (ac) await ac.run({config: this.config})
+        if (ac) await ac.run(this.config)
       } else {
         debug('skipping autocomplete, not installed')
       }

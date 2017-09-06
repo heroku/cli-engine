@@ -3,20 +3,17 @@
 import Command from './help'
 
 import {buildConfig} from 'cli-engine-config'
-import Output from 'cli-engine-command/lib/output'
 
 const path = require('path')
 const fs = require('fs-extra')
 
 jest.unmock('fs-extra')
 
-function mockOutput () {
+function testFooConfig () {
   let testDir = path.join(path.dirname(__filename), '..', '..', 'test')
   let root = path.join(testDir, 'roots', 'test-foo')
   let pjson = fs.readJSONSync(path.join(root, 'package.json'))
-  let config = buildConfig({root, pjson})
-
-  return new Output({config, mock: true})
+  return buildConfig({root, pjson, mock: true})
 }
 
 test('shows the topics', async function () {
@@ -30,11 +27,11 @@ test('shows help about plugins', async function () {
 })
 
 test('help should show usage in topics', async () => {
-  let cmd = await Command.run({argv: ['foo'], output: mockOutput()})
+  let cmd = await Command.run({...testFooConfig(), argv: ['foo']})
   expect(cmd.out.stdout.output).toMatch(/^ fuzz:bar \[FUZZ|BAR\] # usage description$/m)
 })
 
 test('help should show usage in commands', async () => {
-  let cmd = await Command.run({argv: ['foo:usage'], output: mockOutput()})
+  let cmd = await Command.run({...testFooConfig(), argv: ['foo:usage']})
   expect(cmd.out.stdout.output).toMatch(/^ fuzz:bar \[FUZZ|BAR\]$/m)
 })

@@ -81,7 +81,7 @@ ansi-escapes@1.4.0, ansi-escapes@^1.1.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-1.4.0.tgz#d3a8a83b319aa67793662b13e761c7911422306e"
 
-ansi-escapes@2.x, ansi-escapes@^2.0.0:
+ansi-escapes@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-2.0.0.tgz#5bae52be424878dd9783e8910e3fc2922e83c81b"
 
@@ -89,7 +89,7 @@ ansi-escapes@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/ansi-escapes/-/ansi-escapes-3.0.0.tgz#ec3e8b4e9f8064fc02c3ac9b65f1c275bda8ef92"
 
-ansi-regex@^2.0.0, ansi-regex@^2.1.1:
+ansi-regex@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-2.1.1.tgz#c3b33ab5ee360d86e0e628f0468ae7ef27d654df"
 
@@ -101,7 +101,7 @@ ansi-styles@^2.2.1:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
-ansi-styles@^3.0.0, ansi-styles@^3.1.0, ansi-styles@^3.2.0:
+ansi-styles@^3.1.0, ansi-styles@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.0.tgz#c159b8d5be0f9e5a6f346dab94f16ce022161b88"
   dependencies:
@@ -696,15 +696,16 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^7.0.6:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-7.0.6.tgz#d3429ea91cf6324542f29c2a26626a2152954d68"
+cli-engine-command@^8.0.3:
+  version "8.0.3"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.3.tgz#242975626d80fa293e450ed090608b64825c644e"
   dependencies:
-    ansi-escapes "2.x"
+    ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "^1.0.0"
+    cli-engine-config "^3.0.0"
     fs-extra "^4.0.1"
-    http-call "^3.0.1"
+    http-call "^3.0.2"
     lodash.ary "^4.1.1"
     lodash.defaults "^4.2.0"
     lodash.get "^4.4.2"
@@ -719,20 +720,20 @@ cli-engine-command@^7.0.6:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-2.0.1.tgz#d5a9a34d993ac59e88e6a5f115fa9acdbe28f9e7"
+cli-engine-config@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.0.0.tgz#599a3e6d042c519ef2fff3df97b473eb1fb64f0b"
   dependencies:
     fs-extra "^4.0.1"
-    jest-validate "^20.0.3"
     uuid "^3.1.0"
 
-cli-engine-heroku@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-2.0.0.tgz#8f626dc7d98792f7b336e18223d6b5972b2b5edd"
+cli-engine-heroku@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-3.0.1.tgz#8c1d31aa3584df829836443487845d3eedec9991"
   dependencies:
+    cli-engine-command "^8.0.3"
     heroku-client "^3.0.3"
-    http-call "^3.0.1"
+    http-call "^3.0.2"
     netrc-parser "^2.0.3"
 
 cli-width@^2.0.0:
@@ -1980,9 +1981,9 @@ heroku-kafka@^2.9.10:
     no-kafka "github:hunterloftis/kafka"
     node-spinner "0.0.4"
 
-heroku-pg-extras@1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/heroku-pg-extras/-/heroku-pg-extras-1.0.11.tgz#c0ab6ca3e7296faaecc604cf937468a6795419e5"
+heroku-pg-extras@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/heroku-pg-extras/-/heroku-pg-extras-1.1.0.tgz#f0c6ec7dcafa366311e734a3e5c28e76fba9c435"
   dependencies:
     co "4.6.0"
     debug "2.2.0"
@@ -2035,15 +2036,6 @@ html-encoding-sniffer@^1.0.1:
   resolved "https://registry.yarnpkg.com/html-encoding-sniffer/-/html-encoding-sniffer-1.0.1.tgz#79bf7a785ea495fe66165e734153f363ff5437da"
   dependencies:
     whatwg-encoding "^1.0.1"
-
-http-call@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-3.0.1.tgz#906d7f4740ac9756c1e106c89cd0fb876fa1034a"
-  dependencies:
-    debug "^3.0.1"
-    is-retry-allowed "^1.1.0"
-    is-stream "^1.1.0"
-    tunnel-agent "^0.6.0"
 
 http-call@^3.0.2:
   version "3.0.2"
@@ -2514,13 +2506,6 @@ jest-jasmine2@^21.0.0:
     jest-snapshot "^21.0.0"
     p-cancelable "^0.3.0"
 
-jest-matcher-utils@^20.0.3:
-  version "20.0.3"
-  resolved "https://registry.yarnpkg.com/jest-matcher-utils/-/jest-matcher-utils-20.0.3.tgz#b3a6b8e37ca577803b0832a98b164f44b7815612"
-  dependencies:
-    chalk "^1.1.3"
-    pretty-format "^20.0.3"
-
 jest-matcher-utils@^21.0.0:
   version "21.0.0"
   resolved "https://registry.yarnpkg.com/jest-matcher-utils/-/jest-matcher-utils-21.0.0.tgz#493dc25b9ed6a23a61802ca20656f0f1c16f15b1"
@@ -2618,15 +2603,6 @@ jest-util@^21.0.0:
     jest-mock "^21.0.0"
     jest-validate "^21.0.0"
     mkdirp "^0.5.1"
-
-jest-validate@^20.0.3:
-  version "20.0.3"
-  resolved "https://registry.yarnpkg.com/jest-validate/-/jest-validate-20.0.3.tgz#d0cfd1de4f579f298484925c280f8f1d94ec3cab"
-  dependencies:
-    chalk "^1.1.3"
-    jest-matcher-utils "^20.0.3"
-    leven "^2.1.0"
-    pretty-format "^20.0.3"
 
 jest-validate@^21.0.0:
   version "21.0.0"
@@ -3741,13 +3717,6 @@ prepend-http@^1.0.1:
 preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
-
-pretty-format@^20.0.3:
-  version "20.0.3"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-20.0.3.tgz#020e350a560a1fe1a98dc3beb6ccffb386de8b14"
-  dependencies:
-    ansi-regex "^2.1.1"
-    ansi-styles "^3.0.0"
 
 pretty-format@^21.0.0:
   version "21.0.0"

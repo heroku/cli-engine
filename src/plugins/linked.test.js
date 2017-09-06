@@ -154,7 +154,12 @@ test('plugins should be reloaded when node_version changed', async () => {
   let buildDir = path.join(linkPath, 'build')
   fs.removeSync(buildDir)
 
-  let cli = new CLI({argv: ['cli', 'hello'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'hello'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {
@@ -177,7 +182,12 @@ test('plugins should be loaded when things cannot be rebuilt', async () => {
   let packageJsonPath = path.join(linkPath, 'package.json')
   fs.writeFileSync(packageJsonPath, '')
 
-  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'foo'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {

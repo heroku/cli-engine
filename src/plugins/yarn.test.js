@@ -13,7 +13,7 @@ let yarn: Yarn
 let cacheDir
 
 let init = (config = {}) => {
-  output = new Output({config, mock: true})
+  output = new Output({mock: true, ...config})
   yarn = new Yarn(output, '/foo/bar')
   cacheDir = path.join(yarn.config.cacheDir, 'yarn')
   return yarn

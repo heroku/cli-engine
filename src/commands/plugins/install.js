@@ -2,7 +2,7 @@
 
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
-import Hooks from '../../hooks'
+import {Hooks} from '../../hooks'
 
 export default class PluginsInstall extends Command<*> {
   static topic = 'plugins'

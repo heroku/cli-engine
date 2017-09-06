@@ -4,7 +4,7 @@ import type {Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
 
-export default class NotFound {
+export class NotFound {
   argv: string[]
   config: Config
   out: Output

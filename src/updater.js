@@ -38,7 +38,7 @@ function timestamp (msg: string): string {
   return `[${moment().format()}] ${msg}`
 }
 
-export default class Updater {
+export class Updater {
   config: Config
   out: Output
   lock: Lock

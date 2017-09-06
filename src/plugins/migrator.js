@@ -1,5 +1,6 @@
 // @flow
 
+import type {Config} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
 import UserPlugins from './user'
 import LinkedPlugins from './linked'
@@ -23,7 +24,8 @@ export default class {
   out: Output
   lock: Lock
 
-  constructor (out: Output) {
+  constructor (config: Config) {
+    let out = new Output(config)
     let cache = new PluginCache(out)
     this.userPlugins = new UserPlugins({out, config: out.config, cache})
     this.linkedPlugins = new LinkedPlugins({out, config: out.config, cache})

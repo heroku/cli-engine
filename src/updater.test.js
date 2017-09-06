@@ -2,7 +2,7 @@
 
 import {type Config, buildConfig} from 'cli-engine-config'
 import Output from 'cli-engine-command/lib/output'
-import Updater from './updater'
+import {Updater} from './updater'
 import nock from 'nock'
 import fs from 'fs-extra'
 import path from 'path'
@@ -18,10 +18,11 @@ let updater: Updater
 beforeEach(() => {
   fs.__files()
   config = buildConfig({
+    mock: true,
     version: '1.2.3-b2ea476',
     s3: {host: 'cli-engine.heroku.com'}
   })
-  output = new Output({config, mock: true})
+  output = new Output(config)
   updater = new Updater(output)
   nock.cleanAll()
 })

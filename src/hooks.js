@@ -7,17 +7,12 @@ import path from 'path'
 
 const debug = require('debug')('cli-engine:hooks')
 
-export type InitOptions = {
-  argv: string[]
-}
-
 export type PreRunOptions = {
   plugin: ?Plugin,
-  Command: Class<Command<*>>,
-  argv: string[]
+  Command: Class<Command<*>>
 }
 
-export default class Hooks {
+export class Hooks {
   config: Config
 
   constructor ({config}: {config: Config}) {
