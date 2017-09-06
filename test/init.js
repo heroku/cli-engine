@@ -1,8 +1,11 @@
 import '../src/fs'
+import {defaultConfig} from 'cli-engine-config'
 import nock from 'nock'
+import path from 'path'
 
 process.setMaxListeners(0)
 global.columns = 80
 global.testing = true
-global.yarnCacheDir = false
+global.yarnCacheDir = path.join(defaultConfig.cacheDir, 'yarn')
+console.dir(global.yarnCacheDir)
 nock.disableNetConnect()

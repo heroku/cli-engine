@@ -5,7 +5,7 @@ import {type Config} from 'cli-engine-config'
 import path from 'path'
 import fs from 'fs-extra'
 
-const debug = require('debug')('cli-engine:plugins:yarn')
+const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
   config: Config
@@ -95,7 +95,7 @@ export default class Yarn {
       ...this.proxyArgs()
     ])
     if (global.yarnCacheDir !== false) {
-      let cacheDir = path.join(this.config.cacheDir, 'yarn')
+      let cacheDir = global.yarnCacheDir || path.join(this.config.cacheDir, 'yarn')
       args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
     }
 

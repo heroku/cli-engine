@@ -69,10 +69,12 @@ export class Dispatcher {
   constructor (config: Config) {
     this.config = config
     this.managers = [
-      new PluginCommandManager(config),
       new CLICommandManager(config),
       new BuiltinCommandManager(config)
     ]
+    if (this.config.userPlugins) {
+      this.managers.unshift(new PluginCommandManager(config))
+    }
   }
 
   async findCommand (id: string): {

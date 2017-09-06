@@ -56,11 +56,20 @@ describe('checkForYarnLock', () => {
     expect.assertions(2)
 
     mockFork({}, (module, args, options) => {
-      expect(args).toEqual(['--non-interactive'])
+      expect(args).toEqual([
+        '--non-interactive',
+        `--mutex=file:${cacheDir}`,
+        `--cache-folder=${cacheDir}`
+      ])
     })
 
     mockFork({}, (module, args, options) => {
-      expect(args).toEqual(['foo', '--non-interactive'])
+      expect(args).toEqual([
+        'foo',
+        '--non-interactive',
+        `--mutex=file:${cacheDir}`,
+        `--cache-folder=${cacheDir}`
+      ])
     })
 
     await yarn.exec(['foo'])
@@ -84,7 +93,9 @@ describe('with checkForYarnLock stubbed out', () => {
       expect(args).toEqual([
         'foo',
         'bar',
-        '--non-interactive'
+        '--non-interactive',
+        `--mutex=file:${cacheDir}`,
+        `--cache-folder=${cacheDir}`
       ])
     })
 

@@ -11,7 +11,7 @@ import Yarn from '../src/plugins/yarn'
 import {buildConfig} from 'cli-engine-config'
 
 export async function tmpDirs (cfg: any = {}) {
-  Yarn.extraOpts = ['--prefer-offline']
+  Yarn.extraOpts = ['--offline']
 
   let testDir = path.join(path.dirname(__filename))
 

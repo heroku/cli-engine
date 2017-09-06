@@ -1,7 +1,7 @@
 {
   "name": "test-cli",
   "cli-engine": {
-    "node": "7.7.2",
+    "userPlugins": true,
     "defaultCommand": "foo",
     "plugins": [
       "test-foo"

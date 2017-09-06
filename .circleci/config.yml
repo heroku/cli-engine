@@ -23,10 +23,9 @@ jobs:
       - run: {command: "npx jest --coverage --runInBand", when: always}
       - run: {command: "bash <(curl -s https://codecov.io/bash)"}
       - save_cache:
-          key: v2-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
+          key: v2-debug0-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
             - /cli/node_modules
-            - /cli/npm-packages-offline-cache
             - /usr/local/share/.cache/yarn
       - save_cache:
           key: yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
