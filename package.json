@@ -87,7 +87,6 @@
   "license": "ISC",
   "lint-staged": {
     "src/**/*.js": [
-      "flow",
       "eslint --fix",
       "git add"
     ]
@@ -98,7 +97,7 @@
     "build": "babel src -d lib --ignore '*.test.js,**/__mocks__/*.js'",
     "clean": "rimraf lib tmp",
     "download": "node ./scripts/download-yarn",
-    "precommit": "lint-staged",
+    "precommit": "flow && lint-staged",
     "prepare": "npm run clean && npm run build && npm run download",
     "release": "np",
     "test": "npm run download && jest -i && flow && eslint .",
