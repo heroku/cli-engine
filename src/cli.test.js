@@ -7,7 +7,7 @@ jest.unmock('fs-extra')
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
 async function run (...argv: string[]) {
-  let cli = new CLI({config: {argv: ['heroku'].concat(argv), mock: true}})
+  let cli = new CLI({config: {...global.exampleConfig, argv: ['heroku'].concat(argv), mock: true}})
   try {
     await cli.run()
     return cli
