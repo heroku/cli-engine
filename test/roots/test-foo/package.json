@@ -3,8 +3,13 @@
   "cli-engine": {
     "userPlugins": true,
     "defaultCommand": "foo",
+    "legacyConverter": "./lib/legacy",
     "plugins": [
-      "test-foo"
+      "cli-engine-test-foo"
     ]
+  },
+  "dependencies": {
+    "cli-engine-heroku": "^3.0.2",
+    "cli-engine-test-foo": "^0.0.0"
   }
 }

@@ -18,6 +18,7 @@ jobs:
       - run: git submodule sync && git submodule update --init --recursive --remote
       - run: yarn --pure-lockfile
       - run: cd example && yarn --pure-lockfile
+      - run: cd test/roots/test-foo && yarn --pure-lockfile
       - run: {command: "./bin/run version", when: always}
       - run: {command: "npx eslint .", when: always}
       - run: {command: "npx flow check", when: always}

@@ -4,9 +4,11 @@ import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
 import {PluginPath} from './manager'
+import path from 'path'
 
-import {convertFromV5} from './legacy'
 import {type CachedCommand, type CachedPlugin, type CachedTopic} from './cache'
+
+const debug = require('debug')('cli:plugins')
 
 export default class Plugin {
   constructor (out: Output, pluginPath: PluginPath, cachedPlugin: CachedPlugin) {
@@ -58,7 +60,7 @@ export default class Plugin {
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
-    return typeof Command === 'function' ? Command : convertFromV5((Command: any))
+    return typeof Command === 'function' ? Command : this.convertFromV5((Command: any))
   }
 
   async findTopic (id: string): Promise<?Class<Topic>> {
@@ -77,5 +79,14 @@ export default class Plugin {
       static description = t.description
       static hidden = t.hidden
     }
+  }
+
+  convertFromV5 (command: any): Class<Command<*>> {
+    if (!this.config.legacyConverter) {
+      debug(command)
+      throw new Error('received v5 command but no legacyConverter was specified')
+    }
+    const converter = require(path.join(this.config.root, this.config.legacyConverter))
+    return converter.convertFromV5(command)
   }
 }

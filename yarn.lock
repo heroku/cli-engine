@@ -736,21 +736,12 @@ cli-engine-command@^8.0.5:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^3.1.0, cli-engine-config@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.1.tgz#c3be73841811e30773645c0da4189b13ea7c6f56"
+cli-engine-config@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.2.tgz#ccef9a6a1ae27d13ce23acbd8fa22d9bfad5f5e7"
   dependencies:
     fs-extra "^4.0.1"
     uuid "^3.1.0"
-
-cli-engine-heroku@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-3.0.2.tgz#d48ea468cceee121790a6c7c165852c14562a39e"
-  dependencies:
-    cli-engine-config "^3.1.0"
-    heroku-client "^3.0.3"
-    http-call "^3.0.2"
-    netrc-parser "^2.0.3"
 
 cli-spinners@^0.1.2:
   version "0.1.2"
@@ -955,7 +946,7 @@ debug@2.6.0:
   dependencies:
     ms "0.7.2"
 
-debug@^3.0.0, debug@^3.0.1:
+debug@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.0.1.tgz#0564c612b521dc92d9f2988f0549e34f9c98db64"
   dependencies:
@@ -1969,14 +1960,6 @@ heroku-client@3.0.2:
     debug "^2.2.0"
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.4.0"
-
-heroku-client@^3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.3.tgz#302df7fe315f8fa0a98c1a6cbd22a5d81e1c5253"
-  dependencies:
-    debug "^3.0.0"
-    is-retry-allowed "^1.0.0"
-    tunnel-agent "^0.6.0"
 
 "heroku-debug-4.0.0@file:test/heroku-debug/4.0.0":
   version "0.0.0"
