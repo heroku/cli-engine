@@ -1,13 +1,21 @@
 // @flow
 
+import path from 'path'
+import fs from 'fs-extra'
+
+import type Lock from './lock'
+import type HTTP from 'http-call'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
-import HTTP from 'http-call'
-import path from 'path'
-import Lock from './lock'
-import fs from 'fs-extra'
-import moment from 'moment'
-import {wait} from './util'
+import type {wait} from './util'
+
+const deps = {
+  get Lock () { return this._lock || (this._lock = require('./lock').default) },
+  get HTTP (): Class<HTTP> { return this._http || (this._http = require('http-call').default) },
+  get moment () { return this._moment || (this._moment = require('moment')) },
+  get util (): {wait: wait} { return this._util || (this._util = require('./util')) },
+  get wait (): wait { return this.util.wait }
+}
 
 const debug = require('debug')('cli:updater')
 
@@ -31,11 +39,11 @@ type TmpDirs = {
 }
 
 function mtime (f) {
-  return moment(fs.statSync(f).mtime)
+  return deps.moment(fs.statSync(f).mtime)
 }
 
 function timestamp (msg: string): string {
-  return `[${moment().format()}] ${msg}`
+  return `[${deps.moment().format()}] ${msg}`
 }
 
 export class Updater {
@@ -46,7 +54,7 @@ export class Updater {
   constructor (output: Output) {
     this.out = output
     this.config = output.config
-    this.lock = new Lock(output)
+    this.lock = new deps.Lock(output)
   }
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
@@ -62,7 +70,7 @@ export class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      let {body} = await HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let {body} = await deps.HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
       return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
@@ -129,7 +137,7 @@ export class Updater {
 
     let downgrade = await this.lock.upgrade()
     // wait 1000ms for any commands that were partially loaded to finish loading
-    await wait(1000)
+    await deps.wait(1000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
@@ -209,7 +217,7 @@ export class Updater {
 
           this._remove(dirs.node)
 
-          if (mtime(dirs.dir).isBefore(moment().subtract(24, 'hours'))) {
+          if (mtime(dirs.dir).isBefore(deps.moment().subtract(24, 'hours'))) {
             this._cleanupDirs(dirs)
           } else {
             this._removeIfEmpty(dirs)
@@ -275,7 +283,7 @@ export class Updater {
 
   get autoupdateNeeded (): boolean {
     try {
-      return mtime(this.autoupdatefile).isBefore(moment().subtract(5, 'hours'))
+      return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       return true
