@@ -16,6 +16,10 @@ class CommandManagerBase {
     return null
   }
 
+  async listTopics (prefix?: string) {
+    return []
+  }
+
   require (p: string): ?Class<Command<*>> {
     return undefault(require(p))
   }
@@ -25,7 +29,7 @@ class BuiltinCommandManager extends CommandManagerBase {
   async findCommand (id) {
     const builtins = {
       version: 'version',
-      help: 'help'
+      help: 'newhelp'
     }
 
     let p = builtins[id]
@@ -92,5 +96,18 @@ export class Dispatcher {
   findTopic (id: string) {
     return null
     // let Topic = await plugins.findTopic(id)
+  }
+
+  async listTopics (prefix?: string) {
+    let arrs = await Promise.all(this.managers.map(m => m.listTopics(prefix)))
+    return arrs.reduce((next, res) => res.concat(next), [])
+  }
+
+  get cmdAskingForHelp (): boolean {
+    for (let arg of this.config.argv) {
+      if (['--help', '-h'].includes(arg)) return true
+      if (arg === '--') return false
+    }
+    return false
   }
 }

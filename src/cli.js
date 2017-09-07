@@ -66,8 +66,8 @@ export default class CLI {
     await this.hooks.run('init')
 
     if (this.cmdAskingForHelp) {
-      debug('running help')
-      const {default: Help} = require('./commands/help')
+      const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
+      debug('running help command')
       this.cmd = await Help.run(this.config)
     } else {
       debug('dispatcher')
@@ -101,7 +101,7 @@ export default class CLI {
       } else {
         let topic = await dispatcher.findTopic(id)
         if (topic) {
-          const {default: Help} = require('./commands/help')
+          const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
           await Help.run(this.config)
         } else {
           const {NotFound} = require('./not_found')
