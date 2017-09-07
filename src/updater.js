@@ -7,14 +7,13 @@ import type Lock from './lock'
 import type HTTP from 'http-call'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
-import type {wait} from './util'
 
 const deps = {
   get Lock () { return this._lock || (this._lock = require('./lock').default) },
   get HTTP (): Class<HTTP> { return this._http || (this._http = require('http-call').default) },
   get moment () { return this._moment || (this._moment = require('moment')) },
-  get util (): {wait: wait} { return this._util || (this._util = require('./util')) },
-  get wait (): wait { return this.util.wait }
+  get util () { return this._util || (this._util = require('./util')) },
+  get wait () { return this.util.wait }
 }
 
 const debug = require('debug')('cli:updater')
@@ -87,7 +86,7 @@ export class Updater {
     }
     if (!v) {
       debug('fetching latest %s version', this.config.channel)
-      let {body} = await HTTP.get(this.s3url(this.config.channel, 'version'))
+      let {body} = await deps.HTTP.get(this.s3url(this.config.channel, 'version'))
       v = body
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
@@ -109,7 +108,7 @@ export class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let {response: stream} = await HTTP.stream(url)
+    let {response: stream} = await deps.HTTP.stream(url)
 
     if (this.out.action.frames) { // if spinner action
       let total = stream.headers['content-length']
