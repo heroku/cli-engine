@@ -66,9 +66,8 @@ export default class CLI {
     await this.hooks.run('init')
 
     if (this.cmdAskingForHelp) {
-      const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
       debug('running help command')
-      this.cmd = await Help.run(this.config)
+      this.cmd = await this.Help.run(this.config)
     } else {
       debug('dispatcher')
       const id = this.config.argv[1]
@@ -101,8 +100,7 @@ export default class CLI {
       } else {
         let topic = await dispatcher.findTopic(id)
         if (topic) {
-          const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
-          await Help.run(this.config)
+          await this.Help.run(this.config)
         } else {
           const {NotFound} = require('./not_found')
           return new NotFound(out, this.config.argv).run()
@@ -130,6 +128,11 @@ export default class CLI {
       if (arg === '--') return false
     }
     return false
+  }
+
+  get Help () {
+    const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
+    return Help
   }
 }
 
