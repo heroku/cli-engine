@@ -87,6 +87,7 @@
   "license": "ISC",
   "lint-staged": {
     "src/**/*.js": [
+      "flow",
       "eslint --fix",
       "git add"
     ]
