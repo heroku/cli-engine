@@ -4,6 +4,17 @@
   "version": "0.0.1",
   "author": "Jeff Dickey @dickeyxxx",
   "cli-engine": {
+    "topics": {
+      "foo": {
+        "description": "description for foo"
+      },
+      "foo:bar": {
+        "description": "description for foo:bar"
+      },
+      "foo:bar:hidden": {
+        "hidden": true
+      }
+    },
     "commands": "./lib/commands"
   }
 }

@@ -1,7 +1,6 @@
 // @flow
 
-import {type Flag, type Arg} from 'cli-engine-command'
-import {type Config} from 'cli-engine-config'
+import type {Config, Flag, Arg} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 import Plugin from './plugin'
 import {Manager, type PluginPath} from './manager'
@@ -113,7 +112,6 @@ export default class Cache {
       this.updatePlugin(pluginPath.path, cachedPlugin)
       return cachedPlugin
     } catch (err) {
-      if (pluginPath.type === 'builtin') throw err
       if (await pluginPath.repair(err)) return this.fetch(pluginPath)
       this.out.warn(`Error parsing plugin ${pluginPath.path}`)
       this.out.warn(err)

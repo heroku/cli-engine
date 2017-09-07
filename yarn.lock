@@ -712,9 +712,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^8.0.5:
-  version "8.0.5"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.5.tgz#4db87c18826b1cd75e80ad9e36043e3e15fa4c37"
+cli-engine-command@^8.0.12:
+  version "8.0.12"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.12.tgz#af1b87480ea202715808552c9134e28e71b40454"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
@@ -736,9 +736,9 @@ cli-engine-command@^8.0.5:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.2.tgz#ccef9a6a1ae27d13ce23acbd8fa22d9bfad5f5e7"
+cli-engine-config@^3.1.7:
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.1.7.tgz#5f706030e3e6a99ba920d9874acbcdc35a24db0c"
   dependencies:
     fs-extra "^4.0.1"
     uuid "^3.1.0"
@@ -1688,7 +1688,7 @@ got@^6.3.0:
     unzip-response "^2.0.1"
     url-parse-lax "^1.0.0"
 
-graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.4, graceful-fs@^4.1.6:
+graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.4, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
@@ -2822,6 +2822,12 @@ klaw-sync@^3.0.0:
   dependencies:
     graceful-fs "^4.1.11"
 
+klaw@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/klaw/-/klaw-2.1.0.tgz#694a269019f4321d9233fb1b9abdae21e38259fb"
+  dependencies:
+    graceful-fs "^4.1.9"
+
 lazy-cache@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/lazy-cache/-/lazy-cache-1.0.4.tgz#a1d78fc3a50474cb80845d3b3b6e1da49a446e8e"
@@ -3190,9 +3196,13 @@ lodash.sortby@4.6.1:
   version "4.6.1"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.6.1.tgz#d957dc76b3994b2288ff2086d58e6e3e115dbf6f"
 
-lodash.sortby@4.7.0:
+lodash.sortby@4.7.0, lodash.sortby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.sortby/-/lodash.sortby-4.7.0.tgz#edd14c824e2cc9c1e0b0a1b42bb5210516a42438"
+
+lodash.sorteduniqby@^4.7.0:
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/lodash.sorteduniqby/-/lodash.sorteduniqby-4.7.0.tgz#6793fd3f51bc66ba5c1811492f9e5931887b300f"
 
 lodash.throttle@^4.1.1:
   version "4.1.1"
@@ -3210,7 +3220,11 @@ lodash.tostring@^4.0.0:
   version "4.1.4"
   resolved "https://registry.yarnpkg.com/lodash.tostring/-/lodash.tostring-4.1.4.tgz#560c27d1f8eadde03c2cce198fef5c031d8298fb"
 
-lodash.uniqby@4.7.0, lodash.uniqby@4.x:
+lodash.uniq@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
+
+lodash.uniqby@4.7.0, lodash.uniqby@^4.7.0:
   version "4.7.0"
   resolved "https://registry.yarnpkg.com/lodash.uniqby/-/lodash.uniqby-4.7.0.tgz#d99c07a669e9e6d24e1362dfe266c67616af1302"
 
@@ -4227,9 +4241,9 @@ run-async@^2.2.0:
   dependencies:
     is-promise "^2.1.0"
 
-rwlockfile@^1.4.7:
-  version "1.4.7"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.7.tgz#4d7ba1096842d943eba82d60c9b2de9d781e74bd"
+rwlockfile@^1.4.8:
+  version "1.4.8"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.8.tgz#2814e82ac3afe63483b359a0fd8d2cc00d0a29dd"
   dependencies:
     debug "^3.0.1"
     fs-extra "^4.0.1"

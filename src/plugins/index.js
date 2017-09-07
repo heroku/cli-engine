@@ -6,14 +6,12 @@ import type Output from 'cli-engine-command/lib/output'
 import Plugin from './plugin'
 import LinkedPlugins from './linked'
 import UserPlugins from './user'
-import BuiltinPlugins from './builtin'
 import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './cache'
 import Lock from '../lock'
 
 export default class Plugins {
-  builtin: BuiltinPlugins
   linked: LinkedPlugins
   user: UserPlugins
   core: CorePlugins
@@ -29,7 +27,6 @@ export default class Plugins {
     this.config = output.config
     this.cache = new Cache(output)
 
-    this.builtin = new BuiltinPlugins(this)
     this.linked = new LinkedPlugins(this)
     this.user = new UserPlugins(this)
     this.core = new CorePlugins(this)
@@ -41,8 +38,7 @@ export default class Plugins {
     this.plugins = await this.cache.fetchManagers(
       this.linked,
       this.user,
-      this.core,
-      this.builtin
+      this.core
     )
     this.loaded = true
   }

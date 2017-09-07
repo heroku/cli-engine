@@ -1,20 +1,12 @@
 // @flow
 
-import path from 'path'
-import fs from 'fs-extra'
-
 import type Lock from './lock'
-import type HTTP from 'http-call'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
 
-const deps = {
-  get Lock () { return this._lock || (this._lock = require('./lock').default) },
-  get HTTP (): Class<HTTP> { return this._http || (this._http = require('http-call').default) },
-  get moment () { return this._moment || (this._moment = require('moment')) },
-  get util () { return this._util || (this._util = require('./util')) },
-  get wait () { return this.util.wait }
-}
+import path from 'path'
+import fs from 'fs-extra'
+import deps from './deps'
 
 const debug = require('debug')('cli:updater')
 
@@ -136,7 +128,7 @@ export class Updater {
 
     let downgrade = await this.lock.upgrade()
     // wait 1000ms for any commands that were partially loaded to finish loading
-    await deps.wait(1000)
+    await deps.util.wait(1000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()

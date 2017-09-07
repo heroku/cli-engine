@@ -1,6 +1,7 @@
 // @flow
 
-import {type Flag, flags as Flags} from 'cli-engine-command'
+import type {Flag} from 'cli-engine-config'
+import {flags as Flags} from 'cli-engine-command'
 
 export type LegacyFlag = {
   name: string,

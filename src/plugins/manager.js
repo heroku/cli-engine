@@ -1,14 +1,12 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
+import type {Config, Flag, Arg} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
-import type {Arg} from 'cli-engine-command/lib/arg'
-import type {Flag} from 'cli-engine-command/lib/flags'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 
-export type PluginType = | "builtin" | "core" | "user" | "link"
+export type PluginType = | "core" | "user" | "link"
 
 const debug = require('debug')('cli-engine:plugins:manager')
 
@@ -171,10 +169,6 @@ export class PluginPath {
   }
 
   pjson (): {name: string, version: string} {
-    if (this.type === 'builtin') {
-      return {name: 'builtin', version: this.config.version}
-    }
-
     return require(path.join(this.path, 'package.json'))
   }
 

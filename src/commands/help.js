@@ -1,9 +1,11 @@
 // @flow
 
 import Command from 'cli-engine-command'
-import {compare} from '../util'
+import type {ICommand} from 'cli-engine-config'
 import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
-import Plugins from '../plugins'
+import {CommandManager} from '../command_managers'
+import deps from '../deps'
+import {compare} from '../util'
 
 function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
@@ -38,68 +40,102 @@ function linewrap (length: number, s: string): string {
   })(s).trim()
 }
 
+function topicSort (a, b) {
+  if (a[0] < b[0]) return -1
+  if (a[0] > b[0]) return 1
+  return 0
+}
+
 export default class Help extends Command<*> {
   static topic = 'help'
   static description = 'display help'
   static variableArgs = true
 
-  plugins: Plugins
+  commandManager: CommandManager
 
   async run () {
-    this.plugins = new Plugins(this.out)
-    await this.plugins.load()
-    let cmd = this.config.argv.slice(1).find(arg => !['help', '-h', '--help'].includes(arg))
-    if (!cmd) {
-      return this.topics()
+    this.commandManager = new CommandManager({config: this.config, out: this.out})
+    let subject = this.config.argv.slice(1).find(arg => !['help', '-h', '--help'].includes(arg))
+    if (!subject) {
+      let topics = await this.topics()
+      let cmds = await this.commandManager.listRootCommands()
+      cmds = cmds.filter(c => !topics.find(t => c.id.startsWith(t[0])))
+      if (cmds) this.listCommandsHelp(cmds)
+      return
     }
 
-    const topic = await this.plugins.findTopic(cmd)
-    const matchedCommand = await this.plugins.findCommand(cmd)
+    const topic = await this.commandManager.findTopic(subject)
+    const matchedCommand = await this.commandManager.findCommand(subject)
 
     if (!topic && !matchedCommand) {
-      throw new Error(`command ${cmd} not found`)
+      await deps.NotFound.run({...this.config, argv: [this.config.argv[0], subject]})
+      return
     }
 
     if (matchedCommand) {
-      this.out.log(matchedCommand.buildHelp(this.config))
+      this.out.log(this.buildHelp(matchedCommand))
     }
 
     if (topic) {
-      const cmds = await this.plugins.commandsForTopic(topic.id)
-      let subtopics = await this.plugins.subtopicsForTopic(topic.id)
-      if (subtopics && subtopics.length) this.topics(subtopics, topic.id, (topic.id.split(':').length + 1))
-      if (cmds) this.listCommandsHelp(cmd, cmds)
+      await this.topics(topic.name)
+      const cmds = await this.commandManager.commandsForTopic(topic.name)
+      if (cmds) this.listCommandsHelp(cmds, subject)
     }
   }
 
-  topics (ptopics: ?any[] = null, id: ?string, offset: number = 1) {
-    let color = this.out.color
-    this.out.log(`${color.bold('Usage:')} ${this.config.bin} ${id || ''}${id ? ':' : ''}COMMAND
-
-Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
-    let topics = (ptopics || this.plugins.topics).filter(t => {
-      if (!t.id) return
-      const subtopic = t.id.split(':')[offset]
-      return !t.hidden && !subtopic
-    })
-    topics = topics.map(t => (
-      [
-        t.id,
+  async topics (prefix?: string) {
+    const idPrefix = prefix ? `${prefix}:` : ''
+    // fetch topics
+    let topics = (await this.commandManager.listTopics())
+      .filter(t => !t.hidden)
+      // only get from the prefix
+      .filter(t => t.name.startsWith(idPrefix))
+      // only get topics 1 level deep
+      .filter(t => t.name.split(':').length <= (prefix || '').split(':').length + 1)
+      .map(t => [
+        t.name,
         t.description ? this.out.color.dim(t.description) : null
-      ]
-    ))
-    topics.sort()
+      ])
+    topics.sort(topicSort)
+    if (!topics.length) return topics
+
+    // header
+    let color = this.out.color
+    this.out.log(`${color.bold('Usage:')} ${this.config.bin} ${idPrefix}COMMAND
+
+Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for more details:`)
+
+    // display topics
     this.out.log(renderList(topics))
+
+    this.out.log()
+    return topics
+  }
+
+  listCommandsHelp (commands: ICommand[], topic?: string) {
+    commands = commands.filter(c => !c.hidden)
+    if (commands.length === 0) return
+    commands.sort(compare('id'))
+    let helpCmd = this.out.color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
+    if (topic) {
+      this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands: (get help with ${helpCmd})`)
+    } else {
+      this.out.log('Root commands:')
+    }
+    let helpLines = commands.map(c => this.buildHelpLine(c))
+    this.out.log(renderList(helpLines))
     this.out.log()
   }
 
-  listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
-    commands = commands.filter(c => !c.hidden)
-    if (commands.length === 0) return
-    commands.sort(compare('command'))
-    let helpCmd = this.out.color.cmd(`${this.config.bin} help ${topic}:COMMAND`)
-    this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands: (get help with ${helpCmd})`)
-    this.out.log(renderList(commands.map(c => c.buildHelpLine(this.config))))
-    this.out.log()
+  buildHelp (c: ICommand): string {
+    if (c.buildHelp) return c.buildHelp(this.config)
+    let help = new deps.CLICommandHelp(this.config)
+    return help.command(c)
+  }
+
+  buildHelpLine (c: ICommand): [string, ?string] {
+    if (c.buildHelpLine) return c.buildHelpLine(this.config)
+    let help = new deps.CLICommandHelp(this.config)
+    return help.commandLine(c)
   }
 }

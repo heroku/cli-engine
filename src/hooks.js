@@ -1,15 +1,13 @@
 // @flow
 
-import type {Config} from 'cli-engine-config'
-import type {Command} from 'cli-engine-command'
-import type Plugin from './plugins/plugin'
+import type {Config, ICommand, Plugin} from 'cli-engine-config'
 import path from 'path'
 
 const debug = require('debug')('cli-engine:hooks')
 
 export type PreRunOptions = {
   plugin: ?Plugin,
-  Command: Class<Command<*>>
+  Command: ICommand
 }
 
 export class Hooks {

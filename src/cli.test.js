@@ -1,57 +1,29 @@
 // @flow
 
-import CLI from './cli'
+const run = require('../test/run').example
 
 jest.unmock('fs-extra')
 
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
-async function run (...argv: string[]) {
-  let cli = new CLI({config: {...global.exampleConfig, argv: ['heroku'].concat(argv), mock: true}})
-  try {
-    await cli.run()
-    return cli
-  } catch (err) {
-    if (err.code !== 0) throw err
-    return cli
-  }
-}
-
 test('runs the version command', async function () {
-  expect.assertions(1)
-  let cli = new CLI({config: {argv: ['heroku', 'version'], mock: true}})
-  try {
-    await cli.run()
-  } catch (err) {
-    expect(err.code).toBe(0)
-  }
+  let {stdout} = await run(['version'])
+  expect(stdout).toContain('cli-engine-example/1.')
 })
 
 test('errors with invalid arguments', async function () {
-  expect.assertions(1)
-  let cli = new CLI({config: {argv: ['heroku', 'version', '--invalid-flag'], mock: true}})
-  try {
-    await cli.run()
-  } catch (err) {
-    expect(err.message).toContain('Unexpected argument --invalid-flag')
-  }
+  let {stderr} = await run(['version', '--invalid-flag'])
+  expect(stderr).toContain('Unexpected argument --invalid-flag')
 })
 
 test('errors when command not found', async function () {
-  expect.assertions(1)
-  let cli = new CLI({config: {argv: ['heroku', 'foobar12345'], mock: true}})
-  try {
-    await cli.run()
-  } catch (err) {
-    if (!err.code) throw err
-    expect(err.code).toEqual(127)
-  }
+  await run(['foobar12345'], {code: 127})
 })
 
 describe('edge cases', () => {
   test('shows help for `help` command itself', async function () {
-    let cli = await run('help')
-    expect(cli.cmd.out.stdout.output).toMatch(/Usage: cli-engine COMMAND/)
+    let {stdout} = await run(['help'])
+    expect(stdout).toMatch(/Usage: cli-engine COMMAND/)
   })
 })
 
@@ -60,20 +32,20 @@ describe('cli help', () => {
     let globalHelpOutput = /^Usage: \S+ COMMAND/m
 
     test('shows help when no arguments given', async function () {
-      let cli = await run()
-      expect(cli.cmd.out.stdout.output).toMatch(globalHelpOutput)
+      let {stdout} = await run()
+      expect(stdout).toMatch(globalHelpOutput)
     })
 
     test('shows help for `help` command and no additonal arguments', async function () {
-      let cli = await run('help')
-      expect(cli.cmd.out.stdout.output).toMatch(globalHelpOutput)
+      let {stdout} = await run(['help'])
+      expect(stdout).toMatch(globalHelpOutput)
     })
 
     test('shows help for `--help` or `-h` flag and no additonal arguments', async function () {
-      let cli = await run('--help')
-      let clid = await run('-h')
-      expect(cli.cmd.out.stdout.output).toMatch(globalHelpOutput)
-      expect(clid.cmd.out.stdout.output).toMatch(globalHelpOutput)
+      let {stdout} = await run(['--help'])
+      expect(stdout).toMatch(globalHelpOutput)
+      let {stdout: stdout2} = await run(['-h'])
+      expect(stdout2).toMatch(globalHelpOutput)
     })
   })
 
@@ -111,31 +83,31 @@ Example:
 `
 
     test('shows help for plugins', async function () {
-      let cli = await run('plugins', '--help')
-      let clid = await run('plugins', '-h')
-      expect(cli.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
-      expect(clid.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
+      let {stdout} = await run(['plugins', '--help'])
+      let {stdout: stdout2} = await run(['plugins', '-h'])
+      expect(stdout).toEqual(pluginsHelpOutput)
+      expect(stdout2).toEqual(pluginsHelpOutput)
     })
 
     test('shows help for plugins (prefixed)', async function () {
-      let cli = await run('--help', 'plugins')
-      let clid = await run('-h', 'plugins')
-      expect(cli.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
-      expect(clid.cmd.out.stdout.output).toEqual(pluginsHelpOutput)
+      let {stdout} = await run(['--help', 'plugins'])
+      let {stdout: stdout2} = await run(['-h', 'plugins'])
+      expect(stdout).toEqual(pluginsHelpOutput)
+      expect(stdout2).toEqual(pluginsHelpOutput)
     })
 
     test('shows help for plugins:install', async function () {
-      let cli = await run('plugins:install', 'heroku-sudo', '--help')
-      let clid = await run('plugins:install', 'heroku-sudo', '-h')
-      expect(cli.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
-      expect(clid.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
+      let {stdout} = await run(['plugins:install', 'heroku-sudo', '--help'])
+      let {stdout: stdout2} = await run(['plugins:install', 'heroku-sudo', '-h'])
+      expect(stdout).toEqual(pluginsInstallHelpOutput)
+      expect(stdout2).toEqual(pluginsInstallHelpOutput)
     })
 
     test('shows help for plugins:install (prefixed)', async function () {
-      let cli = await run('--help', 'plugins:install', 'heroku-sudo')
-      let clid = await run('-h', 'plugins:install', 'heroku-sudo')
-      expect(cli.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
-      expect(clid.cmd.out.stdout.output).toEqual(pluginsInstallHelpOutput)
+      let {stdout} = await run(['--help', 'plugins:install', 'heroku-sudo'])
+      let {stdout: stdout2} = await run(['-h', 'plugins:install', 'heroku-sudo'])
+      expect(stdout).toEqual(pluginsInstallHelpOutput)
+      expect(stdout2).toEqual(pluginsInstallHelpOutput)
     })
   })
 })

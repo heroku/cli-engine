@@ -18,7 +18,7 @@ export default class Update extends Command<*> {
   static topic = 'update'
   static description = 'update the Heroku CLI'
   static args = [
-    {name: 'channel', optional: true}
+    {name: 'channel', optional: true, description: 'channel to update to [stable|beta]'}
   ]
   static flags = {
     autoupdate: flags.boolean({hidden: true})

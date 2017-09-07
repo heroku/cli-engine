@@ -1,6 +1,7 @@
 [ignore]
 <PROJECT_ROOT>/tmp/.*
 <PROJECT_ROOT>/lib/.*
+<PROJECT_ROOT>/test/roots/.*
 .*/node_modules/nock.*
 
 [include]
