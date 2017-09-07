@@ -15,7 +15,7 @@ jobs:
       - restore_cache:
           keys:
             - yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
-      - run: git submodule sync && git submodule update --init --recursive --remote
+      - run: git submodule sync && git submodule update --init --recursive
       - run: yarn --pure-lockfile
       - run: cd example && yarn --pure-lockfile
       - run: cd test/roots/test-foo && yarn --pure-lockfile
