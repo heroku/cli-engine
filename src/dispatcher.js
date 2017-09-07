@@ -16,7 +16,7 @@ class CommandManagerBase {
     return null
   }
 
-  async listTopics (prefix?: string) {
+  async listTopics () {
     return []
   }
 
@@ -98,8 +98,8 @@ export class Dispatcher {
     // let Topic = await plugins.findTopic(id)
   }
 
-  async listTopics (prefix?: string) {
-    let arrs = await Promise.all(this.managers.map(m => m.listTopics(prefix)))
+  async listTopics () {
+    let arrs = await Promise.all(this.managers.map(m => m.listTopics()))
     return arrs.reduce((next, res) => res.concat(next), [])
   }
 
