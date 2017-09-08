@@ -1,5 +1,5 @@
-// flow-typed signature: 18b0758a665cf7eb72bdb60fb6713aca
-// flow-typed version: 5eb011abdd/moment_v2.x.x/flow_>=v0.34.x
+// flow-typed signature: 97b6c70aea8e71ff15a576064d0b48e0
+// flow-typed version: 468280fffb/moment_v2.x.x/flow_>=v0.28.x
 
 type moment$MomentOptions = {
   y?: number|string,
@@ -101,6 +101,7 @@ declare class moment$MomentDuration {
   get(unit: string): number;
   toJSON(): string;
   toISOString(): string;
+  isValid(): bool;
 }
 declare class moment$Moment {
   static ISO_8601: string;
@@ -118,6 +119,7 @@ declare class moment$Moment {
   static utc(moment: moment$Moment): moment$Moment;
   static utc(date: Date): moment$Moment;
   static parseZone(rawDate: string): moment$Moment;
+  parseZone(): moment$Moment;
   isValid(): bool;
   invalidAt(): 0|1|2|3|4|5|6;
   creationData(): moment$MomentCreationData;
@@ -217,8 +219,8 @@ declare class moment$Moment {
   clone(): moment$Moment;
   static isMoment(obj: any): bool;
   static isDate(obj: any): bool;
-  static locale(locale: string, localeData?: Object): string;
   static updateLocale(locale: string, localeData?: ?Object): void;
+  static locale(locale?: string, localeData?: Object): string;
   static locale(locales: Array<string>): string;
   locale(locale: string, customization?: Object|null): moment$Moment;
   locale(): string;

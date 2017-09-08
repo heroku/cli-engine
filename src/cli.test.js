@@ -7,7 +7,7 @@ jest.unmock('fs-extra')
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
 
 async function run (...argv: string[]) {
-  let cli = new CLI({argv: ['heroku'].concat(argv), mock: true})
+  let cli = new CLI({config: {...global.exampleConfig, argv: ['heroku'].concat(argv), mock: true}})
   try {
     await cli.run()
     return cli
@@ -19,7 +19,7 @@ async function run (...argv: string[]) {
 
 test('runs the version command', async function () {
   expect.assertions(1)
-  let cli = new CLI({argv: ['heroku', 'version'], mock: true})
+  let cli = new CLI({config: {argv: ['heroku', 'version'], mock: true}})
   try {
     await cli.run()
   } catch (err) {
@@ -29,7 +29,7 @@ test('runs the version command', async function () {
 
 test('errors with invalid arguments', async function () {
   expect.assertions(1)
-  let cli = new CLI({argv: ['heroku', 'version', '--invalid-flag'], mock: true})
+  let cli = new CLI({config: {argv: ['heroku', 'version', '--invalid-flag'], mock: true}})
   try {
     await cli.run()
   } catch (err) {
@@ -39,10 +39,11 @@ test('errors with invalid arguments', async function () {
 
 test('errors when command not found', async function () {
   expect.assertions(1)
-  let cli = new CLI({argv: ['heroku', 'foobar12345'], mock: true})
+  let cli = new CLI({config: {argv: ['heroku', 'foobar12345'], mock: true}})
   try {
     await cli.run()
   } catch (err) {
+    if (!err.code) throw err
     expect(err.code).toEqual(127)
   }
 })

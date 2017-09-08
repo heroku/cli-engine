@@ -1,22 +1,12 @@
 // @flow
 
-import './fs'
-import Command from 'cli-engine-command'
+import type {Command} from 'cli-engine-command'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
-import Output from 'cli-engine-command/lib/output'
-import Plugins from './plugins'
-import {timeout} from './util'
+import type Output from 'cli-engine-command/lib/output'
+import path from 'path'
+import type {Hooks, PreRunOptions} from './hooks'
 
-import Analytics from './analytics'
-import Updater from './updater'
-import NotFound from './not_found'
-import Lock from './lock'
-
-import MigrateV5Plugins from './plugins/migrator'
-
-import Help from './commands/help'
-
-const debug = require('debug')('cli-engine:cli')
+const debug = require('debug')('cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 let out: Output
@@ -39,64 +29,93 @@ if (!global.testing) {
   process.stderr.on('error', handleEPIPE)
 }
 
-export default class Main {
-  mock: boolean
-  argv: string[]
+process.env.CLI_ENGINE_VERSION = require('../package.json').version
+
+export default class CLI {
   config: Config
   cmd: Command<*>
-  lock: Lock
+  hooks: Hooks
 
-  constructor (options: {argv: string[], config?: ConfigOptions, mock?: boolean}) {
-    this.mock = !!options.mock
-    this.argv = options.argv
-    this.config = buildConfig(options.config)
-    out = new Output({config: this.config, mock: this.mock})
-    this.lock = new Lock(out)
+  constructor ({config}: {|config?: ConfigOptions|} = {}) {
+    if (!config) config = {}
+    if (!config.initPath) {
+      config.initPath = module.parent.filename
+    }
+    if (!config.root) {
+      const findUp = require('find-up')
+      config.root = path.dirname(findUp.sync('package.json', {
+        cwd: module.parent.filename
+      }))
+    }
+    this.config = buildConfig(config)
   }
 
   async run () {
     debug('starting run')
 
+    require('./fs')
+    const {default: Output} = require('cli-engine-command/lib/output')
+    out = new Output(this.config)
+    const {Updater} = require('./updater')
     const updater = new Updater(out)
-    debug('autoupdating')
+    debug('checking autoupdater')
     await updater.autoupdate()
 
-    try {
-      const migrator = new MigrateV5Plugins(out)
-      await migrator.run()
-    } catch (err) {
-      out.warn('Error migrating v5 plugins')
-      out.warn(err)
-    }
+    const {Hooks} = require('./hooks')
+    this.hooks = new Hooks({config: this.config})
+    await this.hooks.run('init')
 
     if (this.cmdAskingForHelp) {
-      debug('running help')
-      this.cmd = await Help.run({argv: this.argv.slice(1), config: this.config, mock: this.mock})
+      debug('running help command')
+      this.cmd = await this.Help.run(this.config)
     } else {
-      debug('loading plugins')
-      let plugins = new Plugins(out)
-      await plugins.load()
+      debug('dispatcher')
+      const id = this.config.argv[1]
+      const {Dispatcher} = require('./dispatcher')
+      const dispatcher = new Dispatcher(this.config)
+      let {Command, plugin} = await dispatcher.findCommand(id || this.config.defaultCommand || 'help')
 
-      debug('finding command')
-      const id = this.argv[1]
-      let Command = await plugins.findCommand(id || this.config.defaultCommand)
-      if (!Command) return new NotFound(out, this.argv).run()
-      debug('out.done()')
-      await out.done()
-      debug('recording analytics')
-      let analytics = new Analytics({config: this.config, out, plugins})
-      await analytics.record(id)
-      debug('running cmd')
-      await this.lock.unread()
-      this.cmd = await Command.run({argv: this.argv.slice(2), config: this.config, mock: this.mock})
+      if (Command) {
+        let {default: Lock} = require('./lock')
+        let lock = new Lock(out)
+        await lock.unread()
+        let opts: PreRunOptions = {
+          Command,
+          plugin,
+          argv: this.config.argv.slice(2)
+        }
+        await this.hooks.run('prerun', opts)
+        debug('running cmd')
+        if (!Command._version) {
+          // old style command
+          // flow$ignore
+          this.cmd = await Command.run({
+            argv: this.config.argv.slice(2),
+            config: this.config,
+            mock: this.config.mock
+          })
+        } else {
+          this.cmd = await Command.run(this.config)
+        }
+      } else {
+        let topic = await dispatcher.findTopic(id)
+        if (topic) {
+          await this.Help.run(this.config)
+        } else {
+          const {NotFound} = require('./not_found')
+          return new NotFound(out, this.config.argv).run()
+        }
+      }
     }
+
     debug('flushing stdout')
+    const {timeout} = require('./util')
     await timeout(this.flush(), 10000)
     debug('exiting')
     out.exit(0)
   }
 
-  flush (): Promise<> {
+  flush (): Promise<void> {
     if (global.testing) return Promise.resolve()
     let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
@@ -104,21 +123,21 @@ export default class Main {
   }
 
   get cmdAskingForHelp (): boolean {
-    if (this.isCmdEdgeCase) return false
-    if (this.argv.find(arg => ['--help', '-h'].includes(arg))) {
-      return true
+    for (let arg of this.config.argv) {
+      if (['--help', '-h'].includes(arg)) return true
+      if (arg === '--') return false
     }
     return false
   }
 
-  get isCmdEdgeCase (): boolean {
-    let j = this.argv.indexOf('--')
-    if (j !== -1) {
-      for (var i = 0; i < j; i++) {
-        if (['--help', '-h'].includes(this.argv[i])) return false
-      }
-      return true
-    }
-    return false
+  get Help () {
+    const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
+    return Help
   }
+}
+
+export function run ({config}: {config?: ConfigOptions} = {}) {
+  if (!config) config = {}
+  const cli = new CLI({config})
+  return cli.run()
 }

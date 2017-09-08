@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -eu
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && cd .. && pwd)"
+
+if [ ! -z "${DEBUG:-}" ]; then
+  DEBUG="$DEBUG,-babel"
+fi
+
+"$ROOT_DIR/node_modules/.bin/babel-node" -- "$ROOT_DIR/bin/joe-dev.js" "$@"

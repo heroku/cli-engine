@@ -5,7 +5,7 @@ import {type Config} from 'cli-engine-config'
 import path from 'path'
 import fs from 'fs-extra'
 
-const debug = require('debug')('cli-engine:plugins:yarn')
+const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
   config: Config
@@ -20,8 +20,7 @@ export default class Yarn {
     this.cwd = cwd
   }
 
-  get version (): string { return require('../../package.json')['cli-engine']['yarnDependency'] }
-  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn-${this.version}.js`) }
+  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn.js`) }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
   pathKey (env: {[k: string]: ?string} = process.env): string {
@@ -50,7 +49,7 @@ export default class Yarn {
     return env
   }
 
-  fork (modulePath: string, args: string[] = [], options: any = {}) {
+  fork (modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
     const {fork} = require('child_process')
     return new Promise((resolve, reject) => {
       let forked = fork(modulePath, args, options)
@@ -90,9 +89,13 @@ export default class Yarn {
 
   async exec (args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    args = args.concat(['--non-interactive']).concat(Yarn.extraOpts)
+    args = args.concat([
+      '--non-interactive',
+      ...Yarn.extraOpts,
+      ...this.proxyArgs()
+    ])
     if (global.yarnCacheDir !== false) {
-      let cacheDir = path.join(this.config.cacheDir, 'yarn')
+      let cacheDir = global.yarnCacheDir || path.join(this.config.cacheDir, 'yarn')
       args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
     }
 
@@ -105,10 +108,12 @@ export default class Yarn {
     debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
     try {
       await this.fork(this.bin, args, options)
+      debug('done')
     } catch (err) {
       // TODO: https://github.com/yarnpkg/yarn/issues/2191
       let networkConcurrency = '--network-concurrency=1'
       if (err.message.includes('EAI_AGAIN') && !args.includes(networkConcurrency)) {
+        debug('EAI_AGAIN')
         return this.exec(args.concat(networkConcurrency))
       } else throw err
     }
@@ -119,5 +124,14 @@ export default class Yarn {
     if (this.cwd && !fs.existsSync(path.join(this.cwd, 'yarn.lock'))) {
       await this.exec()
     }
+  }
+
+  proxyArgs (): string[] {
+    let args = []
+    let http = process.env.http_proxy || process.env.HTTP_PROXY
+    let https = process.env.https_proxy || process.env.HTTPS_PROXY
+    if (http) args.push(`--proxy=${http}`)
+    if (https) args.push(`--https-proxy=${https}`)
+    return args
   }
 }

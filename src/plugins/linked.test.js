@@ -36,9 +36,9 @@ test('linked plugin should be cached', async () => {
   let FooCore = await tmpDir.plugins.findCommand('foo')
   expect(FooCore).toHaveProperty('description', 'core')
 
-  let corePath = path.normalize(path.join(tmpDir.root, 'node_modules', 'test-foo'))
+  let corePath = path.normalize(path.join(tmpDir.root, 'node_modules', 'cli-engine-test-foo'))
 
-  let linkPath = copyLink('test-foo')
+  let linkPath = copyLink('cli-engine-test-foo')
   await tmpDir.plugins.addLinkedPlugin(linkPath)
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
@@ -63,7 +63,7 @@ test('linked plugin should be cached', async () => {
         'topic': 'foo'
       }
     ],
-    'name': 'test-foo',
+    'name': 'cli-engine-test-foo',
     'path': linkPath,
     'topics': [
       {
@@ -75,7 +75,7 @@ test('linked plugin should be cached', async () => {
     'version': '0.0.0'
   })
 
-  await plugins.uninstall('test-foo')
+  await plugins.uninstall('cli-engine-test-foo')
 
   pluginsJson = fs.readJSONSync(pluginsJsonPath)
   expect(pluginsJson['plugins'][linkPath]).toBeUndefined()
@@ -88,9 +88,9 @@ test('linked plugin should be cached', async () => {
 })
 
 test('linked plugin prepare should clear cache', async () => {
-  let corePath = path.normalize(path.join(tmpDir.root, 'node_modules', 'test-foo'))
+  let corePath = path.normalize(path.join(tmpDir.root, 'node_modules', 'cli-engine-test-foo'))
 
-  let linkPath = copyLink('test-foo')
+  let linkPath = copyLink('cli-engine-test-foo')
   await tmpDir.plugins.addLinkedPlugin(linkPath)
 
   let pluginsJson = fs.readJSONSync(pluginsJsonPath)
@@ -115,7 +115,7 @@ test('linked plugin prepare should clear cache', async () => {
         'topic': 'foo'
       }
     ],
-    'name': 'test-foo',
+    'name': 'cli-engine-test-foo',
     'path': linkPath,
     'topics': [
       {
@@ -154,7 +154,12 @@ test('plugins should be reloaded when node_version changed', async () => {
   let buildDir = path.join(linkPath, 'build')
   fs.removeSync(buildDir)
 
-  let cli = new CLI({argv: ['cli', 'hello'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'hello'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {
@@ -177,7 +182,12 @@ test('plugins should be loaded when things cannot be rebuilt', async () => {
   let packageJsonPath = path.join(linkPath, 'package.json')
   fs.writeFileSync(packageJsonPath, '')
 
-  let cli = new CLI({argv: ['cli', 'foo'], mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli', 'foo'],
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {

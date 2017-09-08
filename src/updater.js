@@ -1,15 +1,22 @@
 // @flow
 
+import path from 'path'
+import fs from 'fs-extra'
+
+import type Lock from './lock'
+import type HTTP from 'http-call'
 import {type Config} from 'cli-engine-config'
 import type Output from 'cli-engine-command/lib/output'
-import HTTP from 'cli-engine-command/lib/http'
-import path from 'path'
-import Lock from './lock'
-import fs from 'fs-extra'
-import moment from 'moment'
-import {wait} from './util'
 
-const debug = require('debug')('cli-engine:updater')
+const deps = {
+  get Lock () { return this._lock || (this._lock = require('./lock').default) },
+  get HTTP (): Class<HTTP> { return this._http || (this._http = require('http-call').default) },
+  get moment () { return this._moment || (this._moment = require('moment')) },
+  get util () { return this._util || (this._util = require('./util')) },
+  get wait () { return this.util.wait }
+}
+
+const debug = require('debug')('cli:updater')
 
 type Version = {
   version: string,
@@ -31,24 +38,22 @@ type TmpDirs = {
 }
 
 function mtime (f) {
-  return moment(fs.statSync(f).mtime)
+  return deps.moment(fs.statSync(f).mtime)
 }
 
 function timestamp (msg: string): string {
-  return `[${moment().format()}] ${msg}`
+  return `[${deps.moment().format()}] ${msg}`
 }
 
-export default class Updater {
+export class Updater {
   config: Config
   out: Output
-  http: HTTP
   lock: Lock
 
   constructor (output: Output) {
     this.out = output
     this.config = output.config
-    this.http = new HTTP(output)
-    this.lock = new Lock(output)
+    this.lock = new deps.Lock(output)
   }
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
@@ -64,14 +69,15 @@ export default class Updater {
 
   async fetchManifest (channel: string): Promise<Manifest> {
     try {
-      return await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let {body} = await deps.HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
       throw err
     }
   }
 
-  async fetchVersion (channel: string, download: boolean): Promise<Version> {
+  async fetchVersion (download: boolean): Promise<Version> {
     let v
     try {
       if (!download) v = await fs.readJSON(this.versionFile)
@@ -79,17 +85,19 @@ export default class Updater {
       if (err.code !== 'ENOENT') throw err
     }
     if (!v) {
-      v = await this.http.get(this.s3url(channel, 'version'))
+      debug('fetching latest %s version', this.config.channel)
+      let {body} = await deps.HTTP.get(this.s3url(this.config.channel, 'version'))
+      v = body
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
     return v
   }
 
-  _catch (fn: Function) {
+  async _catch (fn: Function) {
     try {
-      return Promise.resolve(fn())
+      return await Promise.resolve(fn())
     } catch (err) {
-      this.out.debug(err)
+      debug(err)
     }
   }
 
@@ -100,14 +108,18 @@ export default class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let stream = await this.http.stream(url)
+    let {response: stream} = await deps.HTTP.stream(url)
 
     if (this.out.action.frames) { // if spinner action
       let total = stream.headers['content-length']
       let current = 0
+      const throttle = require('lodash.throttle')
+      const updateStatus = throttle(newStatus => {
+        this.out.action.status = newStatus
+      }, 500)
       stream.on('data', data => {
         current += data.length
-        this.out.action.status = `${filesize(current)}/${filesize(total)}`
+        updateStatus(`${filesize(current)}/${filesize(total)}`)
       })
     }
 
@@ -124,7 +136,7 @@ export default class Updater {
 
     let downgrade = await this.lock.upgrade()
     // wait 1000ms for any commands that were partially loaded to finish loading
-    await wait(1000)
+    await deps.wait(1000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
@@ -132,7 +144,7 @@ export default class Updater {
     this._cleanupDirs(dirs)
   }
 
-  extract (stream: stream$Readable, dir: string, sha: string) {
+  extract (stream: stream$Readable, dir: string, sha: string): Promise<void> {
     const zlib = require('zlib')
     const tar = require('tar-fs')
     const crypto = require('crypto')
@@ -204,7 +216,7 @@ export default class Updater {
 
           this._remove(dirs.node)
 
-          if (mtime(dirs.dir).isBefore(moment().subtract(24, 'hours'))) {
+          if (mtime(dirs.dir).isBefore(deps.moment().subtract(24, 'hours'))) {
             this._cleanupDirs(dirs)
           } else {
             this._removeIfEmpty(dirs)
@@ -239,7 +251,7 @@ export default class Updater {
   }
 
   _rename (src: string, dst: string) {
-    this.out.debug(`rename ${src} to ${dst}`)
+    debug(`rename ${src} to ${dst}`)
     // moveSync tries to do a rename first then falls back to copy & delete
     // on windows the delete would error on node.exe so we explicitly rename
     let rename = this.config.windows ? fs.renameSync : fs.moveSync
@@ -249,7 +261,7 @@ export default class Updater {
   _remove (dir: string) {
     this._catch(() => {
       if (fs.existsSync(dir)) {
-        this.out.debug(`remove ${dir}`)
+        debug(`remove ${dir}`)
         fs.removeSync(dir)
       }
     })
@@ -270,7 +282,7 @@ export default class Updater {
 
   get autoupdateNeeded (): boolean {
     try {
-      return mtime(this.autoupdatefile).isBefore(moment().subtract(5, 'hours'))
+      return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       return true
@@ -282,15 +294,22 @@ export default class Updater {
       await this.checkIfUpdating()
       await this.warnIfUpdateAvailable()
       if (!force && !this.autoupdateNeeded) return
+
       debug('autoupdate running')
       fs.outputFileSync(this.autoupdatefile, '')
+
       const binPath = this.binPath
-      if (!binPath) return debug('no binpath set')
+      if (!binPath) {
+        debug('no binpath set')
+        return
+      }
       debug(`spawning autoupdate on ${binPath}`)
+
       let fd = fs.openSync(this.autoupdatelogfile, 'a')
       fs.write(fd, timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`))
+
       const {spawn} = require('child_process')
-      spawn(binPath, ['update', '--autoupdate'], {
+      this.spawnBinPath(spawn, binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv
@@ -314,7 +333,8 @@ export default class Updater {
 
   async warnIfUpdateAvailable () {
     await this._catch(async () => {
-      let v = await this.fetchVersion(this.config.channel, false)
+      if (!this.config.s3) return
+      let v = await this.fetchVersion(false)
       let local = this.config.version.split('.')
       let remote = v.version.split('.')
       if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
@@ -327,22 +347,40 @@ export default class Updater {
   }
 
   async checkIfUpdating () {
-    debug('check if updating')
     if (!(await this.lock.canRead())) {
       debug('update in process')
       await this.restartCLI()
     } else await this.lock.read()
-    debug('done checking if updating')
   }
 
   async restartCLI () {
     let unread = await this.lock.read()
     await unread()
+
     const {spawnSync} = require('child_process')
-    const binPath = this.binPath
-    if (!binPath) return debug('cannot restart CLI, no binpath')
+    let bin = this.binPath
+    let args = process.argv.slice(2)
+    if (!bin) {
+      if (this.config.initPath) {
+        bin = process.argv[0]
+        args.unshift(this.config.initPath)
+      } else {
+        debug('cannot restart CLI, no binpath')
+        return
+      }
+    }
+
     debug('update complete, restarting CLI')
-    const {status} = spawnSync(binPath, process.argv.slice(2), {stdio: 'inherit', shell: true})
+    const {status} = this.spawnBinPath(spawnSync, bin, args, {stdio: 'inherit'})
     this.out.exit(status)
+  }
+
+  spawnBinPath (spawnFunc: Function, binPath: string, args: string[], options: Object) {
+    if (this.config.windows) {
+      args = ['/c', binPath].concat(args)
+      return spawnFunc(process.env.comspec || 'cmd.exe', args, options)
+    } else {
+      return spawnFunc(binPath, args, options)
+    }
   }
 }

@@ -9,14 +9,15 @@ import path from 'path'
 import fs from 'fs-extra'
 import Lock from '../lock'
 
+const debug = require('debug')('cli:plugincache')
+
 export type CachedCommand = {
   id: string,
-  namespace?: ?string,
   topic: string,
   command?: ?string,
   aliases?: string[],
   args: Arg[],
-  flags: {[name: string]: Flag<*>},
+  flags: {[name: string]: Flag},
   description: ?string,
   help?: ?string,
   usage?: ?string,
@@ -25,7 +26,6 @@ export type CachedCommand = {
 
 export type CachedTopic = {
   id: string,
-  namespace?: ?string,
   topic: string,
   description?: ?string,
   hidden: boolean
@@ -33,7 +33,6 @@ export type CachedTopic = {
 
 export type CachedPlugin = {
   name: string,
-  namespace?: ?string,
   path: string,
   version: string,
   commands: CachedCommand[],
@@ -98,7 +97,7 @@ export default class Cache {
 
   deletePlugin (...paths: string[]) {
     for (let path of paths) {
-      this.out.debug(`clearing cache for ${path}`)
+      debug(`clearing cache for ${path}`)
       this.constructor.updated = true
       delete this.cache.plugins[path]
     }
@@ -109,7 +108,7 @@ export default class Cache {
     let c = this.plugin(pluginPath.path)
     if (c) return c
     try {
-      this.out.debug('updating cache for ' + pluginPath.path)
+      debug('updating cache for ' + pluginPath.path)
       let cachedPlugin = await pluginPath.convertToCached()
       this.updatePlugin(pluginPath.path, cachedPlugin)
       return cachedPlugin

@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+const fs = require('fs-extra')
+const http = require('http-call')
+const path = require('path')
+const execa = require('execa')
+
+const YARN_VERSION = '0.27.5'
+const YARN_URL = `https://github.com/yarnpkg/yarn/releases/download/v${YARN_VERSION}/yarn-${YARN_VERSION}.js`
+const YARN_FILE = `yarn.js`
+const YARN_DIR = path.join(__dirname, '..', 'yarn')
+const YARN_PATH = path.join(YARN_DIR, YARN_FILE)
+
+function needsUpdate () {
+  if (!fs.existsSync(YARN_PATH)) return true
+  const {stdout} = execa.sync(YARN_PATH, ['--version'])
+  console.log(`Yarn version: ${stdout}`)
+  return stdout !== YARN_VERSION
+}
+
+async function download () {
+  console.log(`Downloading ${YARN_URL} to ${YARN_PATH}`)
+
+  await fs.mkdirs(YARN_DIR)
+  let output = fs.createWriteStream(YARN_PATH)
+  fs.chmodSync(YARN_PATH, 0o777)
+  let {response} = await http.stream(YARN_URL)
+  response.pipe(output)
+  return new Promise((resolve, reject) => {
+    response.on('error', reject)
+    response.on('end', () => {
+      output.close()
+      resolve()
+    })
+  })
+}
+
+async function run () {
+  try {
+    if (needsUpdate()) {
+      await download()
+      if (needsUpdate()) {
+        throw new Error('something went wrong')
+      }
+    }
+  } catch (err) {
+    console.error(err)
+    process.exit(1)
+  }
+}
+run()

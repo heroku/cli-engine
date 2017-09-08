@@ -1,15 +1,20 @@
 // @flow
 
 import Command, {flags} from 'cli-engine-command'
-import Updater from '../updater'
+import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import Plugins from '../plugins'
-import Analytics from '../analytics'
-import AutocompleteScripter from '../autocomplete'
+import {Hooks} from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
 
-export default class Update extends Command {
+function brew (...args) {
+  const cp = require('child_process')
+  debug('brew %o', args)
+  return cp.spawnSync('brew', args, {stdio: 'inherit'})
+}
+
+export default class Update extends Command<*> {
   static topic = 'update'
   static description = 'update the Heroku CLI'
   static args = [
@@ -30,8 +35,11 @@ export default class Update extends Command {
       this.out.stderr.logfile = this.out.autoupdatelog
     }
     this.updater = new Updater(this.out)
-    if (this.config.updateDisabled) this.out.warn(this.config.updateDisabled)
-    else {
+    if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
+      this.migrateBrew()
+    } else if (this.config.updateDisabled) {
+      this.out.warn(this.config.updateDisabled)
+    } else {
       this.out.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
@@ -51,23 +59,22 @@ export default class Update extends Command {
       }
     }
     debug('fetch version')
-    await this.updater.fetchVersion(this.config.channel, true)
-    debug('analytics')
-    let analytics = new Analytics({out: this.out, config: this.config})
-    await analytics.submit()
+    await this.updater.fetchVersion(true)
     debug('plugins update')
-    await PluginsUpdate.run({config: this.config, output: this.out})
+    await PluginsUpdate.run({...this.config, argv: []})
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
+    const hooks = new Hooks({config: this.config})
+    await hooks.run('update')
     if (this.config.windows) {
       debug('skipping autocomplete on windows')
     } else {
       const plugins = await new Plugins(this.out).list()
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
-        let ac = new AutocompleteScripter(this)
-        await ac.createCaches()
+        let ac = await acPlugin.findCommand('autocomplete:init')
+        if (ac) await ac.run(this.config)
       } else {
         debug('skipping autocomplete, not installed')
       }
@@ -80,5 +87,22 @@ export default class Update extends Command {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.out.errlog)
     } catch (e) { this.out.debug(e.message) }
+  }
+
+  migrateBrew () {
+    try {
+      debug('migrating from brew')
+      const fs = require('fs-extra')
+      let p = fs.realpathSync('/usr/local/bin/heroku')
+      if (p.match(/\/usr\/local\/Cellar\/heroku\/\d+\.\d+\.\d+\//)) {
+        // not on private tap, move to it
+        this.out.action.start('Upgrading homebrew formula')
+        brew('tap', 'heroku/brew')
+        brew('upgrade', 'heroku/brew/heroku')
+        this.out.action.stop()
+      }
+    } catch (err) {
+      debug(err)
+    }
   }
 }

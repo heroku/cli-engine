@@ -19,7 +19,12 @@ afterEach(async () => {
 })
 
 async function run (...argv: string[]) {
-  let cli = new CLI({argv: ['cli'].concat(argv), mock: true, config: tmpDir.config})
+  let config = {
+    ...tmpDir.config,
+    argv: ['cli'].concat(argv),
+    mock: true
+  }
+  let cli = new CLI({config})
   try {
     await cli.run()
   } catch (err) {
@@ -59,7 +64,7 @@ test('tries to install a non-existant tag', async () => {
   try {
     await run('plugins:install', 'heroku-debug@not-found')
   } catch (err) {
-    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find package "heroku-debug" on the "npm" registry.\n')
+    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n')
   }
 })
 

@@ -3,7 +3,7 @@
 import Command from 'cli-engine-command'
 import Plugins from '../plugins'
 
-export default class extends Command {
+export default class extends Command<*> {
   static topic = 'which'
   static description = 'show which plugin a command is from'
   static args = [
@@ -23,10 +23,10 @@ export default class extends Command {
     const [command] = this.argv
     const plugin = await this.plugins.findPluginWithCommand(command)
     if (!plugin) throw new Error('not found')
-    if (plugin.type === 'builtin') {
-      this.out.log('builtin command')
-    } else {
-      this.out.log(`Command from ${plugin.type} plugin ${plugin.name}`)
-    }
+    this.out.styledHeader(`Plugin ${plugin.name}`)
+    this.out.styledObject({
+      type: plugin.type,
+      path: plugin.pluginPath.path
+    }, ['type', 'path'])
   }
 }

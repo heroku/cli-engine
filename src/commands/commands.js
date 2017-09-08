@@ -5,7 +5,7 @@ import Plugins from '../plugins'
 import fs from 'fs-extra'
 import path from 'path'
 
-export default class Commands extends Command {
+export default class Commands extends Command<*> {
   static topic = 'commands'
   static hidden = true
   static flags = {json: flags.boolean()}

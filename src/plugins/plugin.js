@@ -4,9 +4,11 @@ import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
 import type Output from 'cli-engine-command/lib/output'
 import {PluginPath} from './manager'
+import path from 'path'
 
-import {convertFromV5} from './legacy'
 import {type CachedCommand, type CachedPlugin, type CachedTopic} from './cache'
+
+const debug = require('debug')('cli:plugins')
 
 export default class Plugin {
   constructor (out: Output, pluginPath: PluginPath, cachedPlugin: CachedPlugin) {
@@ -49,10 +51,6 @@ export default class Plugin {
     return this.cachedPlugin.topics
   }
 
-  get namespace (): ?string {
-    return this.cachedPlugin.namespace
-  }
-
   async findCommand (id: string): Promise<?Class<Command<*>>> {
     if (!id) return
     let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
@@ -62,26 +60,33 @@ export default class Plugin {
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
-    return typeof Command === 'function' ? Command : convertFromV5((Command: any))
+    return typeof Command === 'function' ? Command : this.convertFromV5((Command: any))
   }
 
   async findTopic (id: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
-    let {topic} = t
     let plugin = await this.pluginPath.require()
     let Topic = (plugin.topics || [])
-      .find(t => [t.topic, t.name].includes(topic))
-    if (!Topic && plugin.topic) Topic = (plugin.topic.topic || plugin.topic.name) === topic ? plugin.topic : ''
+      .find(t => [t.id].includes(id))
     if (!Topic) return
     return typeof Topic === 'function' ? Topic : this.buildTopic(t)
   }
 
   buildTopic (t: CachedTopic): Class<Topic> {
     return class extends Topic {
-      static topic = t.topic
+      static topic = t.id
       static description = t.description
       static hidden = t.hidden
     }
+  }
+
+  convertFromV5 (command: any): Class<Command<*>> {
+    if (!this.config.legacyConverter) {
+      debug(command)
+      throw new Error('received v5 command but no legacyConverter was specified')
+    }
+    const converter = require(path.join(this.config.root, this.config.legacyConverter))
+    return converter.convertFromV5(command)
   }
 }

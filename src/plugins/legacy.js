@@ -1,12 +1,6 @@
 // @flow
 
-import {type Arg, type Flag} from 'cli-engine-command'
-import {Command, flags as Flags} from 'cli-engine-heroku'
-import vars from 'cli-engine-heroku/lib/vars'
-
-export type LegacyContext = {
-  supportsColor: boolean
-}
+import {type Flag, flags as Flags} from 'cli-engine-command'
 
 export type LegacyFlag = {
   name: string,
@@ -19,97 +13,11 @@ export type LegacyFlag = {
   parse?: any
 }
 
-export type LegacyCommand = {
-  namespace?: ?string,
-  topic: string,
-  command?: string,
-  aliases?: string[],
-  variableArgs?: boolean,
-  args: Arg[],
-  flags: LegacyFlag[],
-  description?: ?string,
-  help?: ?string,
-  usage?: ?string,
-  needsApp?: ?boolean,
-  needsAuth?: ?boolean,
-  needsOrg?: ?boolean,
-  hidden?: ?boolean,
-  default?: ?boolean,
-  run: (ctx: LegacyContext) => Promise<any>
-}
-
-export function convertFromV5 (c: LegacyCommand) {
-  if (!c.topic) throw new Error('command has no topic')
-  class V5 extends Command {
-    static namespace = c.namespace
-    static topic = c.topic
-    static command = c.command
-    static description = c.description
-    static hidden = c.hidden
-    static args = c.args || []
-    static flags = convertFlagsFromV5(c.flags)
-    static variableArgs = !!c.variableArgs
-    static help = c.help
-    static usage = c.usage
-    static aliases = c.aliases || []
-
-    run () {
-      let flags: any = this.flags
-      let args: (string[] | {[k: string]: string}) = this.argv
-      if (!c.variableArgs) {
-        // turn args into object v5 expects
-        args = {}
-        for (let i = 0; i < this.argv.length; i++) {
-          args[this.constructor.args[i].name] = this.argv[i]
-        }
-      }
-      const ctx = {
-        version: this.config.userAgent,
-        supportsColor: this.out.color.enabled,
-        auth: {},
-        debug: this.config.debug,
-        debugHeaders: this.config.debug > 1 || ['1', 'true'].includes(process.env.HEROKU_DEBUG_HEADERS),
-        flags,
-        args,
-        app: flags.app,
-        org: flags.org,
-        team: flags.team,
-        config: this.config,
-        apiUrl: vars.apiUrl,
-        herokuDir: this.config.cacheDir,
-        apiToken: this.heroku.auth,
-        apiHost: vars.apiHost,
-        gitHost: vars.gitHost,
-        httpGitHost: vars.httpGitHost,
-        cwd: process.cwd()
-      }
-      ctx.auth.password = ctx.apiToken
-      const ansi = require('ansi-escapes')
-      process.once('exit', () => {
-        if (process.stderr.isTTY) {
-          process.stderr.write(ansi.cursorShow)
-        }
-      })
-      return c.run(ctx)
-    }
-  }
-
-  if (c.needsApp || c.wantsApp) {
-    V5.flags.app = Flags.app({required: !!c.needsApp})
-    V5.flags.remote = Flags.remote()
-  }
-  if (c.needsOrg || c.wantsOrg) {
-    let opts = {required: !!c.needsOrg, hidden: false, description: 'organization to use'}
-    V5.flags.org = Flags.org(opts)
-  }
-  return V5
-}
-
-export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Flag<*>})): {[name: string]: Flag<*>} {
+export function convertFlagsFromV5 (flags: ?(LegacyFlag[] | {[name: string]: Flag})): {[name: string]: any} {
   if (!flags) return {}
   if (!Array.isArray(flags)) return flags
   return flags.reduce((flags, flag) => {
-    let opts: Flag<*> = {
+    let opts: Flag = {
       char: (flag.char: any),
       description: flag.description,
       hidden: flag.hidden,

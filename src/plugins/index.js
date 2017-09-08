@@ -10,7 +10,6 @@ import BuiltinPlugins from './builtin'
 import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './cache'
-import Namespaces from '../namespaces'
 import Lock from '../lock'
 
 export default class Plugins {
@@ -40,10 +39,10 @@ export default class Plugins {
   async load () {
     if (this.loaded) return
     this.plugins = await this.cache.fetchManagers(
-      this.builtin,
       this.linked,
       this.user,
-      this.core
+      this.core,
+      this.builtin
     )
     this.loaded = true
   }
@@ -97,16 +96,27 @@ export default class Plugins {
     return uniqby(commands, 'id')
   }
 
+  async subtopicsForTopic (id: string): Promise<?CachedTopic[]> {
+    if (!id) return
+    for (let plugin of this.plugins) {
+      let t = await plugin.findTopic(id)
+      if (t) {
+        return plugin.topics.filter(t => {
+          if (!t.id) return false
+          if (t.id === id) return false
+          let re = new RegExp(`^${id}`)
+          return !!(t.id).match(re)
+        })
+      }
+    }
+  }
+
   async findTopic (id: string): Promise<?Class<Topic>> {
     if (!id) return
     for (let plugin of this.plugins) {
       let t = await plugin.findTopic(id)
       if (t) return t
     }
-  }
-
-  findNamespaced (namespace: string): Array<Plugin> {
-    return this.plugins.filter(p => p.namespace === namespace)
   }
 
   async install (name: string, tag: string = 'latest') {
@@ -159,14 +169,6 @@ export default class Plugins {
     let downgrade = await this.lock.upgrade()
 
     await this.load()
-    let name = this.linked.checkLinked(p)
-
-    if (this.plugins.find(p => p.type === 'user' && p.name === name)) {
-      throw new Error(`${name} is already installed.\nUninstall with ${this.out.color.cmd(this.config.bin + ' plugins:uninstall ' + name)}`)
-    }
-
-    Namespaces.throwErrorIfNotPermitted(p, this.config)
-
     await this.linked.add(p)
     this.clearCache(p)
     await downgrade()
