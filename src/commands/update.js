@@ -18,6 +18,9 @@ export default class Update extends Command {
   static flags = {
     autoupdate: flags.boolean({hidden: true})
   }
+  static help = `Example:
+
+    $ heroku plugins:update`
   updater: Updater
 
   async run () {

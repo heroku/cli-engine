@@ -9,6 +9,12 @@ export default class extends Command {
   static args = [
     {name: 'command'}
   ]
+  static help = `Example:
+
+    $ heroku which which
+    === Plugin builtin
+    type: builtin
+    path: /home/selfuser/.local/share/heroku/client/node_modules/cli-engine/lib/command`
 
   plugins: Plugins
 
