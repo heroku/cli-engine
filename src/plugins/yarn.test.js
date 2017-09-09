@@ -1,20 +1,18 @@
 // @flow
 
 import Yarn from './yarn'
-import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import cp from 'child_process'
 import EventEmitter from 'events'
+import {buildConfig} from 'cli-engine-config'
 
 jest.mock('child_process')
 
-let output
 let yarn: Yarn
 let cacheDir
 
 let init = (config = {}) => {
-  output = new Output({mock: true, ...config})
-  yarn = new Yarn(output, '/foo/bar')
+  yarn = new Yarn(buildConfig({mock: true, ...config}), '/foo/bar')
   cacheDir = path.join(yarn.config.cacheDir, 'yarn')
   return yarn
 }
@@ -140,7 +138,7 @@ describe('with checkForYarnLock stubbed out', () => {
     expect.assertions(1)
     mockFork({code: 0, stdout: 'why hello there'})
     await yarn.exec()
-    expect(yarn.out.stdout.output).toEqual('')
+    expect(yarn.cli.stdout.output).toEqual('')
   })
 
   test('emits stdout when debug is on', async () => {
@@ -148,7 +146,7 @@ describe('with checkForYarnLock stubbed out', () => {
     expect.assertions(1)
     mockFork({code: 0, stdout: 'why hello there'})
     await yarn.exec()
-    expect(yarn.out.stdout.output).toEqual('why hello there')
+    expect(yarn.cli.stdout.output).toEqual('why hello there')
   })
 
   test('emits stderr when debug is on', async () => {
@@ -156,7 +154,7 @@ describe('with checkForYarnLock stubbed out', () => {
     expect.assertions(1)
     mockFork({code: 0, stderr: 'why hello there'})
     await yarn.exec()
-    expect(yarn.out.stderr.output).toEqual('why hello there')
+    expect(yarn.cli.stderr.output).toEqual('why hello there')
   })
 
   test('raises error', async () => {

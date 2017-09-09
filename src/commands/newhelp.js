@@ -2,7 +2,7 @@
 
 import Command from 'cli-engine-command'
 // import {compare} from '../util'
-import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
+import {stdtermwidth} from 'cli-engine-command/lib/screen'
 import {Dispatcher} from '../dispatcher'
 
 function trimToMaxLeft (n: number): number {

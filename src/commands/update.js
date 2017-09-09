@@ -31,7 +31,7 @@ export default class Update extends Command<*> {
       this.out.stdout.logfile = this.out.autoupdatelog
       this.out.stderr.logfile = this.out.autoupdatelog
     }
-    this.updater = new Updater(this.out)
+    this.updater = new Updater(this.config)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
       this.migrateBrew()
     } else if (this.config.updateDisabled) {
@@ -67,7 +67,7 @@ export default class Update extends Command<*> {
     if (this.config.windows) {
       debug('skipping autocomplete on windows')
     } else {
-      const plugins = await new Plugins(this.out).list()
+      const plugins = await new Plugins(this.config).list()
       const acPlugin = plugins.find(p => p.name === 'heroku-cli-autocomplete')
       if (acPlugin) {
         let ac = await acPlugin.findCommand('autocomplete:init')
@@ -83,7 +83,7 @@ export default class Update extends Command<*> {
     try {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.out.errlog)
-    } catch (e) { this.out.debug(e.message) }
+    } catch (e) { debug(e.message) }
   }
 
   migrateBrew () {

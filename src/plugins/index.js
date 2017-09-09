@@ -2,7 +2,6 @@
 
 import {type Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
-import type Output from 'cli-engine-command/lib/output'
 import Plugin from './plugin'
 import LinkedPlugins from './linked'
 import UserPlugins from './user'
@@ -11,6 +10,7 @@ import CorePlugins from './core'
 import uniqby from 'lodash.uniqby'
 import Cache, {type CachedCommand, type CachedTopic} from './cache'
 import Lock from '../lock'
+import {CLI} from 'cli-ux'
 
 export default class Plugins {
   builtin: BuiltinPlugins
@@ -19,21 +19,21 @@ export default class Plugins {
   core: CorePlugins
   plugins: Plugin[]
   cache: Cache
-  out: Output
   lock: Lock
   loaded: boolean
   config: Config
+  cli: CLI
 
-  constructor (output: Output) {
-    this.out = output
-    this.config = output.config
-    this.cache = new Cache(output)
+  constructor (config: Config) {
+    this.config = config
+    this.cache = new Cache(config)
+    this.cli = new CLI({mock: config.mock})
 
     this.builtin = new BuiltinPlugins(this)
     this.linked = new LinkedPlugins(this)
     this.user = new UserPlugins(this)
     this.core = new CorePlugins(this)
-    this.lock = new Lock(this.out)
+    this.lock = new Lock(this.config)
   }
 
   async load () {
@@ -53,7 +53,7 @@ export default class Plugins {
       try {
         commands = commands.concat(plugin.commands)
       } catch (err) {
-        this.out.warn(err, `error reading plugin ${plugin.name}`)
+        this.cli.warn(err, `error reading plugin ${plugin.name}`)
       }
     }
     return commands
@@ -88,7 +88,7 @@ export default class Plugins {
           .filter(c => c.topic === topic)
           .map(c => p.findCommand(c.id)))
       } catch (err) {
-        this.out.warn(err, `error reading plugin ${p.name}`)
+        this.cli.warn(err, `error reading plugin ${p.name}`)
         return t
       }
     }, [])
@@ -132,7 +132,7 @@ export default class Plugins {
 
   async update () {
     if (this.user.list().length === 0) return
-    this.out.action.start(`${this.config.name}: Updating plugins`)
+    this.cli.action.start(`${this.config.name}: Updating plugins`)
     let downgrade = await this.lock.upgrade()
     await this.user.update()
     this.clearCache(...(await this.user.list()).map(p => p.path))
@@ -146,19 +146,19 @@ export default class Plugins {
     let downgrade = await this.lock.upgrade()
     switch (plugin.type) {
       case 'user': {
-        if (!this.config.debug) this.out.action.start(`Uninstalling plugin ${name}`)
+        if (!this.config.debug) this.cli.action.start(`Uninstalling plugin ${name}`)
         await this.user.remove(name)
         break
       }
       case 'link': {
-        if (!this.config.debug) this.out.action.start(`Unlinking plugin ${name}`)
+        if (!this.config.debug) this.cli.action.start(`Unlinking plugin ${name}`)
         this.linked.remove(plugin.path)
         break
       }
     }
     this.clearCache(plugin.path)
     await downgrade()
-    this.out.action.stop()
+    this.cli.action.stop()
   }
 
   addPackageToPJSON (name: string, version: string = '*') {

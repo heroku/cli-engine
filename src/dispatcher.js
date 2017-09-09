@@ -57,10 +57,8 @@ class CLICommandManager extends CommandManagerBase {
 
 class PluginCommandManager extends CommandManagerBase {
   async findCommand (id) {
-    const {default: Output} = require('cli-engine-command/lib/output')
     const {default: Plugins} = require('./plugins')
-    let out = new Output(this.config)
-    let plugins = new Plugins(out)
+    let plugins = new Plugins(this.config)
     await plugins.load()
     return plugins.findCommand(id || this.config.defaultCommand || 'help')
   }

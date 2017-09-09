@@ -1,20 +1,21 @@
 // @flow
 
 import type {Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
 import Plugins from './plugins'
+import {CLI} from 'cli-ux'
+import {color} from 'cli-engine-command/lib/color'
 
 export class NotFound {
   argv: string[]
   config: Config
-  out: Output
+  cli: CLI
   plugins: Plugins
 
-  constructor (output: Output, argv: string[]) {
+  constructor (config: Config, argv: string[]) {
     this.argv = argv
-    this.out = output
-    this.config = output.config
-    this.plugins = new Plugins(output)
+    this.config = config
+    this.cli = new CLI({mock: config.mock})
+    this.plugins = new Plugins(config)
   }
 
   allCommands (): string[] {
@@ -49,8 +50,8 @@ export class NotFound {
       closest = this.closest(id)
     }
 
-    let perhaps = closest ? `Perhaps you meant ${this.out.color.yellow(closest)}\n` : ''
-    this.out.error(`${this.out.color.yellow(this.argv[1])} is not a ${this.config.bin} command.
-${perhaps}Run ${this.out.color.cmd(binHelp)} for a list of available commands.`, 127)
+    let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''
+    this.cli.error(`${color.yellow(this.argv[1])} is not a ${this.config.bin} command.
+${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`, 127)
   }
 }

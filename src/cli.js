@@ -1,27 +1,28 @@
 // @flow
 
 import type {Command} from 'cli-engine-command'
+import {color} from 'cli-engine-command/lib/color'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
+import {CLI as CLIUX} from 'cli-ux'
 import path from 'path'
 import type {Hooks, PreRunOptions} from './hooks'
 
 const debug = require('debug')('cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
-let out: Output
+let cli: CLIUX = new CLIUX()
 if (!global.testing) {
   process.once('SIGINT', () => {
-    if (out) {
-      if (out.action.task) out.action.stop(out.color.red('ctrl-c'))
-      out.exit(1)
+    if (cli) {
+      if (cli.action.task) cli.action.stop(color.red('ctrl-c'))
+      cli.exit(1)
     } else {
       process.exit(1)
     }
   })
   let handleErr = err => {
-    if (!out) throw err
-    out.error(err)
+    if (!cli) throw err
+    cli.error(err)
   }
   process.once('uncaughtException', handleErr)
   process.once('unhandledRejection', handleErr)
@@ -48,16 +49,15 @@ export default class CLI {
       }))
     }
     this.config = buildConfig(config)
+    cli = new CLIUX({mock: this.config.mock})
   }
 
   async run () {
     debug('starting run')
 
     require('./fs')
-    const {default: Output} = require('cli-engine-command/lib/output')
-    out = new Output(this.config)
     const {Updater} = require('./updater')
-    const updater = new Updater(out)
+    const updater = new Updater(this.config)
     debug('checking autoupdater')
     await updater.autoupdate()
 
@@ -77,7 +77,7 @@ export default class CLI {
 
       if (Command) {
         let {default: Lock} = require('./lock')
-        let lock = new Lock(out)
+        let lock = new Lock(this.config)
         await lock.unread()
         let opts: PreRunOptions = {
           Command,
@@ -103,7 +103,7 @@ export default class CLI {
           await this.Help.run(this.config)
         } else {
           const {NotFound} = require('./not_found')
-          return new NotFound(out, this.config.argv).run()
+          return new NotFound(this.config, this.config.argv).run()
         }
       }
     }
@@ -112,7 +112,7 @@ export default class CLI {
     const {timeout} = require('./util')
     await timeout(this.flush(), 10000)
     debug('exiting')
-    out.exit(0)
+    cli.exit(0)
   }
 
   flush (): Promise<void> {

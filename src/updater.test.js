@@ -1,7 +1,6 @@
 // @flow
 
 import {type Config, buildConfig} from 'cli-engine-config'
-import Output from 'cli-engine-command/lib/output'
 import {Updater} from './updater'
 import nock from 'nock'
 import fs from 'fs-extra'
@@ -12,7 +11,6 @@ jest.mock('fs-extra')
 
 let assets = nock('https://cli-engine.heroku.com')
 let config: Config
-let output: Output
 let updater: Updater
 
 beforeEach(() => {
@@ -22,8 +20,7 @@ beforeEach(() => {
     version: '1.2.3-b2ea476',
     s3: {host: 'cli-engine.heroku.com'}
   })
-  output = new Output(config)
-  updater = new Updater(output)
+  updater = new Updater(config)
   nock.cleanAll()
 })
 
@@ -38,7 +35,7 @@ describe('warnIfUpdateAvailable', () => {
       assets.get('/cli-engine/channels/stable/version')
         .reply(200, {channel: 'stable', version: '1.3.0-b2ea476'})
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
+      expect(updater.cli.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
     })
   })
 
@@ -53,25 +50,25 @@ describe('warnIfUpdateAvailable', () => {
     it('shows warning when minor is greater', async () => {
       version('1.3.0-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
+      expect(updater.cli.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 1.3.0-b2ea476\n')
     })
 
     it('shows warning when major is greater', async () => {
       version('2.0.0-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 2.0.0-b2ea476\n')
+      expect(updater.cli.stderr.output).toContain('cli-engine: update available from 1.2.3-b2ea476 to 2.0.0-b2ea476\n')
     })
 
     it('shows nothing when minor is less', async () => {
       version('1.1.0-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toEqual('')
+      expect(updater.cli.stderr.output).toEqual('')
     })
 
     it('shows nothing when patch is greater', async () => {
       version('1.2.4-b2ea476')
       await updater.warnIfUpdateAvailable()
-      expect(output.stderr.output).toEqual('')
+      expect(updater.cli.stderr.output).toEqual('')
     })
   })
 })

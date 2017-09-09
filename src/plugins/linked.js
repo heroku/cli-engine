@@ -1,7 +1,6 @@
 // @flow
 
 import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import Yarn from './yarn'
 import klaw from 'klaw-sync'
@@ -29,8 +28,9 @@ export default class LinkedPlugins extends Manager {
     plugins: string[]
   }
 
-  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
-    super({out, config, cache})
+  constructor ({config, cache}: {config: Config, cache: Cache}) {
+    if (!config._version) throw new Error('config object invalid')
+    super({config, cache})
     try {
       this._data = fs.readJSONSync(this.file)
       this._data.updated_at = new Date(this._data.updated_at || 0)
@@ -49,7 +49,7 @@ export default class LinkedPlugins extends Manager {
    * @param {string} p - path of plugin
    */
   async add (p: string) {
-    if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
+    if (!this.config.debug) this.cli.action.start(`Running prepare script for ${p}`)
 
     await this.prepare(p)
 
@@ -60,7 +60,7 @@ export default class LinkedPlugins extends Manager {
     this._data.plugins.push(p)
     this._save()
 
-    this.out.action.stop()
+    this.cli.action.stop()
   }
 
   /**
@@ -80,10 +80,10 @@ export default class LinkedPlugins extends Manager {
     try {
       await this.load()
       return this._data.plugins.map(p => {
-        return new PluginPath({output: this.out, type: 'link', path: p})
+        return new PluginPath({config: this.config, type: 'link', path: p})
       })
     } catch (err) {
-      this.out.warn(err, 'Error loading linked plugins')
+      this.cli.warn(err, 'Error loading linked plugins')
       return []
     }
   }
@@ -105,8 +105,8 @@ export default class LinkedPlugins extends Manager {
           paths.push(plugin)
         }
       } catch (err) {
-        this.out.warn(`Error refreshing ${plugin}`)
-        this.out.warn(err)
+        this.cli.warn(`Error refreshing ${plugin}`)
+        this.cli.warn(err)
       }
     }
     if (paths.length > 0) {
@@ -128,10 +128,10 @@ export default class LinkedPlugins extends Manager {
     if (!this._needsPrepare(p, main)) return false
 
     if (pjson.scripts && pjson.scripts.prepare) {
-      if (!this.config.debug) this.out.action.start(`Running prepare script for ${p}`)
-      let yarn = new Yarn(this.out, p)
+      if (!this.config.debug) this.cli.action.start(`Running prepare script for ${p}`)
+      let yarn = new Yarn(this.config, p)
       await yarn.exec(['run', 'prepare'])
-      this.out.action.stop()
+      this.cli.action.stop()
     }
 
     return true
@@ -162,11 +162,11 @@ export default class LinkedPlugins extends Manager {
 
   async _install (p: string, force: boolean = false) {
     if (!force && !this._needsInstall(p)) return
-    if (!this.config.debug) this.out.action.start(`Installing dependencies for ${p}`)
-    let yarn = new Yarn(this.out, p)
+    if (!this.config.debug) this.cli.action.start(`Installing dependencies for ${p}`)
+    let yarn = new Yarn(this.config, p)
     await yarn.exec()
     touch(path.join(p, 'node_modules'))
-    this.out.action.stop()
+    this.cli.action.stop()
   }
 
   async handleNodeVersionChange () {
@@ -174,7 +174,7 @@ export default class LinkedPlugins extends Manager {
       try {
         await this._install(p, true)
       } catch (err) {
-        this.out.warn(err)
+        this.cli.warn(err)
       }
     }
   }

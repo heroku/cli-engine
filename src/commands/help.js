@@ -2,7 +2,7 @@
 
 import Command from 'cli-engine-command'
 import {compare} from '../util'
-import {stdtermwidth} from 'cli-engine-command/lib/output/screen'
+import {stdtermwidth} from 'cli-engine-command/lib/screen'
 import Plugins from '../plugins'
 
 function trimToMaxLeft (n: number): number {
@@ -46,7 +46,7 @@ export default class Help extends Command<*> {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this.out)
+    this.plugins = new Plugins(this.config)
     await this.plugins.load()
     let cmd = this.config.argv.slice(1).find(arg => !['help', '-h', '--help'].includes(arg))
     if (!cmd) {

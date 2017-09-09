@@ -1,7 +1,6 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
+import type {Config} from 'cli-engine-config'
 import type Cache from './cache'
 
 import path from 'path'
@@ -19,26 +18,26 @@ class UserPluginPath extends PluginPath {
   userPlugins: UserPlugins
   repairAttempted = false
 
-  constructor ({output, type, path, tag, userPlugins}: {
-    output: Output,
+  constructor ({config, type, path, tag, userPlugins}: {
+    config: Config,
       type: PluginType,
       tag: string,
       path: string,
       userPlugins: UserPlugins
   }) {
-    super({output, type, path, tag})
+    super({config, type, path, tag})
     this.userPlugins = userPlugins
   }
 
   async repair (err: Error): Promise<boolean> {
     if (err.code !== 'MODULE_NOT_FOUND') return false
     if (this.repairAttempted) return false
-    this.out.warn(err)
-    this.out.action.start(`Repairing plugin ${this.path}`)
+    this.cli.warn(err)
+    this.cli.action.start(`Repairing plugin ${this.path}`)
     this.repairAttempted = true
 
     await this.userPlugins.installForce()
-    this.out.action.stop()
+    this.cli.action.stop()
     return true
   }
 }
@@ -46,9 +45,9 @@ class UserPluginPath extends PluginPath {
 export default class UserPlugins extends Manager {
   hardcodedDepFixes: Object
 
-  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
-    super({out, config, cache})
-    this.yarn = new Yarn(this.out, this.userPluginsDir)
+  constructor ({config, cache}: {config: Config, cache: Cache}) {
+    super({config, cache})
+    this.yarn = new Yarn(this.config, this.userPluginsDir)
 
     /**
      * There is a bug with snappy & node-gyp & semver that causes issues when
@@ -83,10 +82,10 @@ export default class UserPlugins extends Manager {
           return !this.hardcodedDepFixes[name]
         })
         .map(([name, tag]) => {
-          return new UserPluginPath({output: this.out, type: 'user', path: this.userPluginPath(name), tag: tag, userPlugins: this})
+          return new UserPluginPath({config: this.config, type: 'user', path: this.userPluginPath(name), tag: tag, userPlugins: this})
         })
     } catch (err) {
-      this.out.warn(err, 'error loading user plugins')
+      this.cli.warn(err, 'error loading user plugins')
       return []
     }
   }
@@ -127,7 +126,7 @@ export default class UserPlugins extends Manager {
     try {
       await this.installForce()
     } catch (err) {
-      this.out.warn(err)
+      this.cli.warn(err)
     }
   }
 
@@ -142,7 +141,7 @@ export default class UserPlugins extends Manager {
       return path
     } catch (err) {
       this.removePackageFromPJSON(name)
-      this.out.error(err)
+      this.cli.error(err)
       throw new Error('unreachable')
     }
   }

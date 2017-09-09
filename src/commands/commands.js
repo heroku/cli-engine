@@ -5,6 +5,8 @@ import Plugins from '../plugins'
 import fs from 'fs-extra'
 import path from 'path'
 
+const debug = require('debug')('cli:commands')
+
 export default class Commands extends Command<*> {
   static topic = 'commands'
   static hidden = true
@@ -13,7 +15,7 @@ export default class Commands extends Command<*> {
   async run () {
     this.out.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
     await this.addV6Hack()
-    let plugins = new Plugins(this.out)
+    let plugins = new Plugins(this.config)
     await plugins.load()
     let topics = plugins.topics.filter(t => !t.hidden)
     let commands = plugins.commands.map(c => ({
@@ -53,7 +55,7 @@ end
       if (contents.startsWith('### begin v6 v.1')) return
       await fs.outputFile(cliRB, hack + contents)
     } catch (err) {
-      this.out.debug(err)
+      debug(err)
     }
   }
 }

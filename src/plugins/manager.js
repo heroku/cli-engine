@@ -1,12 +1,10 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
-import type {Arg} from 'cli-engine-command/lib/arg'
-import type {Flag} from 'cli-engine-command/lib/flags'
+import type {Config, Arg, Flag} from 'cli-engine-config'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
+import {CLI} from 'cli-ux'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -40,7 +38,7 @@ type ParsedPlugin = {
 }
 
 type PluginPathOptions = {
-  output: Output,
+  config: Config,
   type: PluginType,
   path: string,
   tag?: string
@@ -48,15 +46,14 @@ type PluginPathOptions = {
 
 export class PluginPath {
   constructor (options: PluginPathOptions) {
-    this.out = options.output
+    this.config = options.config
     this.path = options.path
     this.type = options.type
     this.tag = options.tag
-
-    this.config = this.out.config
+    this.cli = new CLI({mock: this.config.mock})
   }
 
-  out: Output
+  cli: CLI
   config: Config
   path: string
   type: PluginType
@@ -68,7 +65,7 @@ export class PluginPath {
     const getAliases = (c: ParsedCommand) => {
       let aliases = c.aliases || []
       if (c.default) {
-        this.out.warn(`default setting on ${c.topic} is deprecated`)
+        this.cli.warn(`default setting on ${c.topic} is deprecated`)
         aliases.push(c.topic)
       }
       return aliases
@@ -185,14 +182,14 @@ export class PluginPath {
 }
 
 export class Manager {
-  out: Output
+  cli: CLI
   config: Config
   cache: Cache
 
-  constructor ({out, config, cache}: {out: Output, config: Config, cache: Cache}) {
-    this.out = out
+  constructor ({config, cache}: {config: Config, cache: Cache}) {
     this.config = config
     this.cache = cache
+    this.cli = new CLI({mock: config.mock})
   }
 
   async list (): Promise<PluginPath[]> {

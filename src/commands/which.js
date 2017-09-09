@@ -13,7 +13,7 @@ export default class extends Command<*> {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this.out)
+    this.plugins = new Plugins(this.config)
     const [command] = this.argv
     const plugin = await this.plugins.findPluginWithCommand(command)
     if (!plugin) throw new Error('not found')

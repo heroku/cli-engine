@@ -1,13 +1,12 @@
 // @flow
 
-import {type Flag, type Arg} from 'cli-engine-command'
-import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
+import type {Config, Flag, Arg} from 'cli-engine-config'
 import Plugin from './plugin'
 import {Manager, type PluginPath} from './manager'
 import path from 'path'
 import fs from 'fs-extra'
 import Lock from '../lock'
+import {CLI} from 'cli-ux'
 
 const debug = require('debug')('cli:plugincache')
 
@@ -48,12 +47,12 @@ type CacheData = {
 export default class Cache {
   static updated = false
   config: Config
-  out: Output
+  cli: CLI
   _cache: CacheData
 
-  constructor (output: Output) {
-    this.out = output
-    this.config = output.config
+  constructor (config: Config) {
+    this.config = config
+    this.cli = new CLI({mock: config.mock})
   }
 
   initialize () {
@@ -79,7 +78,7 @@ export default class Cache {
     try {
       this._cache = fs.readJSONSync(this.file)
     } catch (err) {
-      if (err.code !== 'ENOENT') this.out.debug(err)
+      if (err.code !== 'ENOENT') debug(err)
       this.initialize()
     }
     if (this._cache.version !== this.config.version) {
@@ -115,8 +114,8 @@ export default class Cache {
     } catch (err) {
       if (pluginPath.type === 'builtin') throw err
       if (await pluginPath.repair(err)) return this.fetch(pluginPath)
-      this.out.warn(`Error parsing plugin ${pluginPath.path}`)
-      this.out.warn(err)
+      this.cli.warn(`Error parsing plugin ${pluginPath.path}`)
+      this.cli.warn(err)
       return {
         name: pluginPath.path,
         path: pluginPath.path,
@@ -130,7 +129,7 @@ export default class Cache {
   async fetchManagers (...managers: Manager[]): Promise<Plugin[]> {
     let plugins = []
     if (this.cache.node_version !== process.version) {
-      let lock = new Lock(this.out)
+      let lock = new Lock(this.config)
 
       let downgrade = await lock.upgrade()
       for (let manager of managers) {
@@ -147,7 +146,7 @@ export default class Cache {
       for (let path of paths) {
         let plugin = await this.fetch(path)
         if (plugins.find(p => p.name === plugin.name)) continue
-        plugins.push(new Plugin(this.out, path, plugin))
+        plugins.push(new Plugin(this.config, path, plugin))
       }
     }
 
@@ -161,7 +160,7 @@ export default class Cache {
     try {
       fs.writeJSONSync(this.file, this.cache)
     } catch (err) {
-      this.out.warn(err)
+      this.cli.warn(err)
     }
   }
 }

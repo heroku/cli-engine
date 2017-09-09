@@ -1,13 +1,13 @@
 // @flow
 
 import type {Config} from 'cli-engine-config'
-import Output from 'cli-engine-command/lib/output'
 import UserPlugins from './user'
 import LinkedPlugins from './linked'
 import PluginCache from './cache'
 import path from 'path'
 import fs from 'fs-extra'
 import Lock from '../lock'
+import {CLI} from 'cli-ux'
 
 const debug = require('debug')('cli-engine:migrator')
 
@@ -21,16 +21,15 @@ const SALESFORCE_BUILTINS = [
 export default class {
   userPlugins: UserPlugins
   linkedPlugins: LinkedPlugins
-  out: Output
+  cli: CLI
   lock: Lock
 
   constructor (config: Config) {
-    let out = new Output(config)
-    let cache = new PluginCache(out)
-    this.userPlugins = new UserPlugins({out, config: out.config, cache})
-    this.linkedPlugins = new LinkedPlugins({out, config: out.config, cache})
-    this.out = out
-    this.lock = new Lock(this.out)
+    let cache = new PluginCache(config)
+    this.userPlugins = new UserPlugins({config, cache})
+    this.linkedPlugins = new LinkedPlugins({config, cache})
+    this.cli = new CLI({mock: config.mock})
+    this.lock = new Lock(config)
   }
 
   async run () {
@@ -51,14 +50,14 @@ export default class {
     if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return
 
     debug('has existing plugins')
-    this.out.action.start('Migrating Heroku CLI v5 plugins')
+    this.cli.action.start('Migrating Heroku CLI v5 plugins')
     debug('removing existing node_modules')
     for (let p of pljson) {
       if (SALESFORCE_BUILTINS.includes(p.name)) continue
       debug(`installing ${p.name}`)
       await this._installPlugin(p.name, p.tag)
     }
-    this.out.action.stop()
+    this.cli.action.stop()
   }
 
   async _readPluginsJSON () {
@@ -66,7 +65,7 @@ export default class {
       let pljsonPath = path.join(this.userPlugins.userPluginsDir, 'plugins.json')
       return fs.readJSONSync(pljsonPath)
     } catch (err) {
-      this.out.debug(err.message)
+      debug(err.message)
     }
   }
 
@@ -79,7 +78,7 @@ export default class {
         await this.userPlugins.install(name)
       }
     } catch (err) {
-      this.out.warn(err)
+      this.cli.warn(err)
     }
   }
 

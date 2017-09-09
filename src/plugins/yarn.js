@@ -1,7 +1,7 @@
 // @flow
 
-import type Output from 'cli-engine-command/lib/output'
-import {type Config} from 'cli-engine-config'
+import type {Config} from 'cli-engine-config'
+import {CLI} from 'cli-ux'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -9,14 +9,14 @@ const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
   config: Config
-  out: Output
+  cli: CLI
   cwd: string
 
   static extraOpts: string[] = []
 
-  constructor (output: Output, cwd: string) {
-    this.out = output
-    this.config = output.config
+  constructor (config: Config, cwd: string) {
+    this.config = config
+    this.cli = new CLI({mock: config.mock})
     this.cwd = cwd
   }
 
@@ -58,14 +58,14 @@ export default class Yarn {
       forked.stdout.setEncoding('utf8')
       forked.stdout.on('data', (data) => {
         if (this.config.debug) {
-          this.out.stdout.write(data)
+          this.cli.stdout.write(data)
         }
       })
 
       forked.stderr.setEncoding('utf8')
       forked.stderr.on('data', (data) => {
         if (this.config.debug) {
-          this.out.stderr.write(data)
+          this.cli.stderr.write(data)
         }
 
         error += data

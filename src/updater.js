@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 import type Lock from './lock'
 import type HTTP from 'http-call'
 import {type Config} from 'cli-engine-config'
-import type Output from 'cli-engine-command/lib/output'
+import {CLI} from 'cli-ux'
 
 const deps = {
   get Lock () { return this._lock || (this._lock = require('./lock').default) },
@@ -47,13 +47,13 @@ function timestamp (msg: string): string {
 
 export class Updater {
   config: Config
-  out: Output
+  cli: CLI
   lock: Lock
 
-  constructor (output: Output) {
-    this.out = output
-    this.config = output.config
-    this.lock = new deps.Lock(output)
+  constructor (config: Config) {
+    this.config = config
+    this.cli = new CLI({mock: config.mock})
+    this.lock = new deps.Lock(config)
   }
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
@@ -110,12 +110,12 @@ export class Updater {
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let {response: stream} = await deps.HTTP.stream(url)
 
-    if (this.out.action.frames) { // if spinner action
+    if (this.cli.action.frames) { // if spinner action
       let total = stream.headers['content-length']
       let current = 0
       const throttle = require('lodash.throttle')
       const updateStatus = throttle(newStatus => {
-        this.out.action.status = newStatus
+        this.cli.action.status = newStatus
       }, 500)
       stream.on('data', data => {
         current += data.length
@@ -314,9 +314,9 @@ export class Updater {
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv
       })
-        .on('error', e => this.out.warn(e, 'autoupdate:'))
+        .on('error', e => this.cli.warn(e, 'autoupdate:'))
         .unref()
-    } catch (e) { this.out.warn(e, 'autoupdate:') }
+    } catch (e) { this.cli.warn(e, 'autoupdate:') }
   }
 
   get timestampEnvVar (): string {
@@ -338,10 +338,10 @@ export class Updater {
       let local = this.config.version.split('.')
       let remote = v.version.split('.')
       if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
-        this.out.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
+        this.cli.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
       }
       if (v.message) {
-        this.out.warn(`${this.config.name}: ${v.message}`)
+        this.cli.warn(`${this.config.name}: ${v.message}`)
       }
     })
   }
@@ -372,7 +372,7 @@ export class Updater {
 
     debug('update complete, restarting CLI')
     const {status} = this.spawnBinPath(spawnSync, bin, args, {stdio: 'inherit'})
-    this.out.exit(status)
+    this.cli.exit(status)
   }
 
   spawnBinPath (spawnFunc: Function, binPath: string, args: string[], options: Object) {

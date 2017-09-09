@@ -1,38 +1,30 @@
 // @flow
 
 import Cache from './cache'
-import Output from 'cli-engine-command/lib/output'
 import path from 'path'
 import fs from 'fs-extra'
+import {defaultConfig as config} from 'cli-engine-config'
 
 jest.mock('fs-extra')
 
 const myplugin = {name: 'myplugin', path: 'myplugin', version: '1.0.0', topics: [], commands: []}
-
-let output
-let config
-
-beforeEach(() => {
-  output = new Output()
-  config = output.config
-})
 
 afterEach(() => {
   jest.resetAllMocks()
 })
 
 test('new Cache(output)', () => {
-  let cache = new Cache(output)
+  let cache = new Cache(config)
   expect(cache.cache.node_version).toBeNull()
 })
 
 test('updatePlugin', () => {
-  let cache = new Cache(output)
+  let cache = new Cache(config)
   cache.updatePlugin('myplugin', myplugin)
   cache.save()
   expect(fs.writeJSONSync).toBeCalledWith(
-    path.join(config.cacheDir, 'plugins.json'),
-    {node_version: null, plugins: {myplugin}, version: config.version}
+    path.join(cache.config.cacheDir, 'plugins.json'),
+    {node_version: null, plugins: {myplugin}, version: cache.config.version}
   )
 })
 
@@ -49,12 +41,12 @@ describe('with existing file', () => {
   })
 
   test('reads existing plugin data', () => {
-    let cache = new Cache(output)
+    let cache = new Cache(config)
     expect(cache.plugin('myplugin')).toMatchObject({version: '1.0.0'})
   })
 
   test('deletePlugin', () => {
-    let cache = new Cache(output)
+    let cache = new Cache(config)
     cache.deletePlugin('myplugin')
     expect(fs.writeJSONSync).toBeCalledWith(
       path.join(config.cacheDir, 'plugins.json'),
@@ -77,7 +69,7 @@ describe('with existing for a previous version', () => {
   })
 
   test('does not clear node_version', () => {
-    let cache = new Cache(output)
+    let cache = new Cache(config)
     expect(cache.cache).toEqual({node_version: '2.0.0', plugins: {}, version: config.version})
   })
 })

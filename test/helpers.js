@@ -4,7 +4,6 @@ import path from 'path'
 import tmp from 'tmp'
 import fs from 'fs-extra'
 
-import Output from 'cli-engine-command/lib/output'
 import Plugins from '../src/plugins'
 import Yarn from '../src/plugins/yarn'
 
@@ -28,8 +27,7 @@ export async function tmpDirs (cfg: any = {}) {
 
   let root = path.join(testDir, 'roots', 'test-foo')
   let config = buildConfig(Object.assign({mock: true, root, cacheDir, dataDir}, cfg))
-  let output = new Output(config)
-  let plugins = new Plugins(output)
+  let plugins = new Plugins(config)
   await plugins.load()
 
   let clean = function () {
@@ -41,5 +39,5 @@ export async function tmpDirs (cfg: any = {}) {
     }
   }
 
-  return { clean, plugins, output, config, cacheDir, dataDir, root }
+  return { clean, plugins, config, cacheDir, dataDir, root }
 }

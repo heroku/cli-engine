@@ -10,6 +10,6 @@ export default class BuiltinPlugins extends Manager {
    */
   async list (): Promise<PluginPath[]> {
     let commandsPath = path.resolve(path.join(__dirname, '..', 'commands'))
-    return [new PluginPath({output: this.out, type: 'builtin', path: commandsPath})]
+    return [new PluginPath({config: this.config, type: 'builtin', path: commandsPath})]
   }
 }

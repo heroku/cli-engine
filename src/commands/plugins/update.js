@@ -11,7 +11,7 @@ export default class PluginsUpdate extends Command<*> {
   plugins: Plugins
 
   async run () {
-    this.plugins = new Plugins(this.out)
+    this.plugins = new Plugins(this.config)
     await this.plugins.update()
   }
 }

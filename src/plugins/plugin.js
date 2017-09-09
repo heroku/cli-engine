@@ -1,19 +1,19 @@
 // @flow
 
-import {type Config} from 'cli-engine-config'
+import type {Config} from 'cli-engine-config'
 import Command, {Topic} from 'cli-engine-command'
-import type Output from 'cli-engine-command/lib/output'
 import {PluginPath} from './manager'
 import path from 'path'
+import {CLI} from 'cli-ux'
 
 import {type CachedCommand, type CachedPlugin, type CachedTopic} from './cache'
 
 const debug = require('debug')('cli:plugins')
 
 export default class Plugin {
-  constructor (out: Output, pluginPath: PluginPath, cachedPlugin: CachedPlugin) {
-    this.config = out.config
-    this.out = out
+  constructor (config: Config, pluginPath: PluginPath, cachedPlugin: CachedPlugin) {
+    this.config = config
+    this.cli = new CLI({mock: config.mock})
     this.pluginPath = pluginPath
     this.cachedPlugin = cachedPlugin
   }
@@ -21,7 +21,7 @@ export default class Plugin {
   pluginPath: PluginPath
   cachedPlugin: CachedPlugin
   config: Config
-  out: Output
+  cli: CLI
 
   get tag (): string | void {
     return this.pluginPath.tag
