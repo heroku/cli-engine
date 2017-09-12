@@ -64,7 +64,6 @@ export default class Update extends Command<*> {
     debug('autocomplete')
     const hooks = new Hooks({config: this.config})
     await hooks.run('update')
-    await hooks.run('precache')
     debug('done')
   }
 
