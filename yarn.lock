@@ -733,8 +733,8 @@ cli-engine-command@^8.0.15:
     supports-color "^4.4.0"
 
 cli-engine-config@^3.2.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.2.0.tgz#5b1af55e64c1ef680e298ec6c1fab649c1d1e80c"
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-3.3.0.tgz#3524c2df644204a6c7be60d3281a705faaf18fec"
   dependencies:
     fs-extra "^4.0.1"
     uuid "^3.1.0"
@@ -4255,8 +4255,8 @@ run-async@^2.2.0:
     is-promise "^2.1.0"
 
 rwlockfile@^1.4.8:
-  version "1.4.8"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.8.tgz#2814e82ac3afe63483b359a0fd8d2cc00d0a29dd"
+  version "1.4.9"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.9.tgz#cca787f097ad37772ffc6dd510e6c03fc8b7ecc6"
   dependencies:
     debug "^3.0.1"
     fs-extra "^4.0.1"

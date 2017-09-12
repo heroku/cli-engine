@@ -82,7 +82,7 @@ export default class Update extends Command<*> {
   async logChop () {
     try {
       const logChopper = require('log-chopper').default
-      await logChopper.chop(this.out.errlog)
+      await logChopper.chop(this.config.errlog)
     } catch (e) { debug(e.message) }
   }
 
