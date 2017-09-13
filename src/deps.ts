@@ -1,28 +1,29 @@
-import Lock = require('./lock')
-import Moment = require('moment')
+import lock = require('./lock')
+import updater = require('./updater')
 import util = require('./util')
+import commandManager = require('./command_managers')
+import help = require('./commands/help')
+import notFound = require('./not_found')
+
+import Moment = require('moment')
+import CLICommandHelp = require('cli-engine-command/lib/help')
 
 import HTTP = require('http-call')
 
 export const deps = {
   // local
-  get Lock(): typeof Lock.Lock {
-    return fetch('./lock').Lock
-  },
-  get util(): typeof util {
-    return fetch('./util')
-  },
+  get Lock(): typeof lock.Lock { return fetch('./lock').Lock },
+  get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
+  get util(): typeof util { return fetch('./util') },
+  get CommandManager(): typeof commandManager.CommandManager { return fetch('./command_managers').CommandManager },
+  get Help(): typeof help { return fetch('./commands/help') },
+  get NotFound(): typeof notFound { return fetch('./not_found') },
 
   // remote
-  get RWLockFile(): any {
-    return fetch('rwlockfile')
-  },
-  get HTTP(): typeof HTTP.HTTP {
-    return fetch('http-call').HTTP
-  },
-  get moment(): typeof Moment {
-    return fetch('moment')
-  },
+  get RWLockFile(): any { return fetch('rwlockfile') },
+  get HTTP(): typeof HTTP.HTTP { return fetch('http-call').HTTP },
+  get moment(): typeof Moment { return fetch('moment') },
+  get CLICommandHelp (): typeof CLICommandHelp.Help { return require('cli-engine-command/lib/help').Help },
 }
 
 const cache: any = {}

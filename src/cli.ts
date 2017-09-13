@@ -1,9 +1,10 @@
 import { Command } from 'cli-engine-command'
-import { buildConfig, Config, ConfigOptions } from 'cli-engine-config'
+import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { CLI as CLIUX } from 'cli-ux'
 import * as path from 'path'
 // import {Hooks, PreRunOptions} from './hooks'
 import * as chalk from 'chalk'
+import {deps} from './deps'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: any) => {
@@ -57,66 +58,72 @@ export default class CLI {
 
   async run() {
     debug('starting run')
+    const config = this.config
 
     require('./fs')
-    const { Updater } = require('./updater')
-    const updater = new Updater(this.config)
+    cli = new CLIUX({debug: !!config.debug, mock: config.mock})
+    const updater = new deps.Updater(config, cli)
     debug('checking autoupdater')
     await updater.autoupdate()
 
-    // const {Hooks} = require('./hooks')
-    // this.hooks = new Hooks({config: this.config})
+    // this.hooks = new deps.Hooks({config: this.config})
     // await this.hooks.run('init')
 
+    debug('command_manager')
+    const id = this.config.argv[1]
+    const commandManager = new deps.CommandManager(config, cli)
+    let command
     if (this.cmdAskingForHelp) {
-      debug('running help command')
-      this.cmd = await this.Help.run(this.config)
+      debug('asking for help')
+      command = new deps.Help()
     } else {
-      debug('dispatcher')
-      const id = this.config.argv[1]
-      const { Dispatcher } = require('./dispatcher')
-      const dispatcher = new Dispatcher(this.config)
-      let { Command, plugin } = await dispatcher.findCommand(id || this.config.defaultCommand || 'help')
-      console.dir(plugin)
+      command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
+    }
 
-      if (Command) {
-        let { default: Lock } = require('./lock')
-        let lock = new Lock(this.config)
-        await lock.unread()
-        // let opts: PreRunOptions = {
-        //   Command,
-        //   plugin,
-        //   argv: this.config.argv.slice(2)
-        // }
-        // await this.hooks.run('prerun', opts)
-        debug('running cmd')
-        if (!Command._version) {
-          // old style command
-          // flow$ignore
-          this.cmd = await Command.run({
-            argv: this.config.argv.slice(2),
-            config: this.config,
-            mock: this.config.mock,
-          })
-        } else {
-          this.cmd = await Command.run(this.config)
-        }
+    if (!command) {
+      let topic = await commandManager.findTopic(id)
+      if (topic) {
+        debug('showing help for %s topic', id)
+        command = new deps.Help()
       } else {
-        let topic = await dispatcher.findTopic(id)
-        if (topic) {
-          await this.Help.run(this.config)
-        } else {
-          const { NotFound } = require('./not_found')
-          return new NotFound(this.config, this.config.argv).run()
-        }
+        debug('no command found')
+        command = new deps.NotFound()
       }
     }
 
+    // let opts: PreRunOptions = {
+    //   Command,
+    //   plugin: Command.plugin,
+    //   argv: this.config.argv.slice(2)
+    // }
+    // await this.hooks.run('prerun', opts)
+
+    let lock = new deps.Lock(config, cli)
+    await lock.unread()
+    debug('running cmd')
+    this.cmd = await Command.run(this.commandRunArgs(command))
+
+    await this.exitAfterStdoutFlush()
+  }
+
+  commandRunArgs (command: ICommand): ConfigOptions {
+    if (command._version) return this.config
+    else {
+      debug('old style command received')
+      return <any> {
+        argv: this.config.argv.slice(2),
+        config: this.config,
+        mock: this.config.mock
+      }
+    }
+  }
+
+  async exitAfterStdoutFlush () {
     debug('flushing stdout')
-    const { timeout } = require('./util')
+    const {timeout} = deps.util
+    cli.done()
     await timeout(this.flush(), 10000)
     debug('exiting')
-    cli.exit(0)
   }
 
   flush(): Promise<any> {
@@ -132,11 +139,6 @@ export default class CLI {
       if (arg === '--') return false
     }
     return false
-  }
-
-  get Help() {
-    const { default: Help } = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
-    return Help
   }
 }
 

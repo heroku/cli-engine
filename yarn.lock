@@ -22,6 +22,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/lodash@^4.14.74":
+  version "4.14.74"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.74.tgz#ac3bd8db988e7f7038e5d22bd76a7ba13f876168"
+
 "@types/node@*", "@types/node@^8.0.28":
   version "8.0.28"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.28.tgz#86206716f8d9251cf41692e384264cbd7058ad60"
@@ -537,9 +541,9 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^9.0.0-ts.1:
-  version "9.0.0-ts.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-9.0.0-ts.1.tgz#ff527a4c471509313eb5d95a88cbb967931d74ca"
+cli-engine-command@^9.0.0-ts.5:
+  version "9.0.0-ts.5"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-9.0.0-ts.5.tgz#447f8e1f8787325891a256ad3560fba9bcca0899"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
@@ -553,15 +557,15 @@ cli-engine-command@^9.0.0-ts.1:
     string "3.x"
     supports-color "^4.4.0"
 
-cli-engine-config@^4.0.1-ts.5:
-  version "4.0.1-ts.5"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.0.1-ts.5.tgz#bcabdd58ca3cb816c911fdb6c670698d3e4fc997"
+cli-engine-config@^4.0.1-ts.7:
+  version "4.0.1-ts.7"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.0.1-ts.7.tgz#2b00094b0f7dd69339839cd7be46c5db2dd17a2e"
   dependencies:
-    cli-flags "^1.0.6"
-    fs-extra "^4.0.1"
+    cli-flags "^1.0.7"
+    fs-extra "^4.0.2"
     uuid "^3.1.0"
 
-cli-flags@^1.0.6, cli-flags@^1.0.7:
+cli-flags@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-1.0.7.tgz#bd039f0bfe761163364a22f8948fd7789c67008d"
   dependencies:

@@ -4,13 +4,7 @@ import { CLI } from 'cli-ux'
 import { deps } from './deps'
 
 export class Lock {
-  config: Config
-  cli: CLI
-
-  constructor(config: Config) {
-    this.config = config
-    this.cli = new CLI({ mock: config.mock })
-  }
+  constructor(readonly config: Config, readonly cli: CLI) {}
 
   get updatelockfile(): string {
     return path.join(this.config.cacheDir, 'update.lock')
