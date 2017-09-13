@@ -9,30 +9,23 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 
 const debug = require('debug')('cli-engine:plugins:manager')
 
-type ParsedTopic = {
-  name?: ?string,
-  topic?: ?string,
-  description?: string,
-  hidden?: ?boolean
-}
-
 type ParsedCommand = {
   id: string,
-  topic: string,
+  topic?: string,
   command?: string,
   aliases?: string[],
   variableArgs?: boolean,
   args: IArg[],
   flags: (LegacyFlag[] | {[name: string]: IFlag<any>}),
   description?: string,
-  help?: ?string,
-  usage?: ?string,
-  hidden?: ?boolean
+  help?: string,
+  usage?: string,
+  hidden?: boolean
 }
 
 type ParsedPlugin = {
-  topics: ?ParsedTopic[],
-  commands: ?ParsedCommand[]
+  topics: Topic[],
+  commands: ParsedCommand[]
 }
 
 type PluginPathOptions = {
@@ -69,7 +62,7 @@ export class PluginPath {
 
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand): CachedCommand => ({
-        id: c.id || this.makeID(c),
+        id: this.makeID(c),
         description: c.description,
         args: c.args,
         // variableArgs: c.variableArgs,
@@ -80,37 +73,20 @@ export class PluginPath {
         flags: convertFlagsFromV5(c.flags)
       }))
 
-    const topics: Topic[] = (plugin.topics || [])
-      .map((t: ParsedTopic): Topic => ({
-        name: t.topic || '',
-        description: t.description,
-        hidden: !!t.hidden
-      }))
-
-    for (let command of commands) {
-      if (topics.find(t => t.name === command.topic)) continue
-      let topic: Topic = {
-        name: command.topic,
-        hidden: true
-      }
-      topics.push(topic)
-    }
-
     const {name, version} = this.pjson()
-    return {name, path: this.path, version, commands, topics}
+    return {name, path: this.path, version, commands, topics: plugin.topics}
   }
 
-  undefaultTopic (t: (ParsedTopic | {default: ParsedTopic})): ParsedTopic {
-    if (t.default) t = (t.default: any)
+  undefaultTopic (t: any): Topic {
+    if (t.default) t = (t).default
     // normalize v5 exported topic
-    if (!t.topic) t.topic = t.name || ''
-    if (!t.id) t.id = t.topic
+    t.name = t.name || t.topic || t.id
     return t
   }
 
-  undefaultCommand (c: (ParsedCommand | {default: ParsedCommand})): ParsedCommand {
-    if (c.default && typeof c.default !== 'boolean') return (c.default: any)
-    return (c: any)
+  undefaultCommand (c: any): ParsedCommand {
+    if (c.default && typeof c.default !== 'boolean') return c.default
+    return c
   }
 
   async require (): Promise<ParsedPlugin> {
@@ -122,39 +98,39 @@ export class PluginPath {
       else throw err
     }
 
-    const exportedTopic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
-    const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
-    const topics: Array<ParsedTopic> = this.parsePjsonTopics().concat(exportedTopics || []).concat(exportedTopic || [])
-    const commands : Array<ParsedCommand> = required.commands && required.commands.map(t => this.undefaultCommand(t))
+    const exportedTopic: Topic = required.topic && this.undefaultTopic(required.topic)
+    const exportedTopics: Array<Topic> = required.topics && required.topics.map((t: any) => this.undefaultTopic(t))
+    // const topics: Array<Topic> = this.parsePjsonTopics().concat(exportedTopics || []).concat(exportedTopic || [])
+    const topics: Array<Topic> = (exportedTopics || []).concat(exportedTopic || [])
+    const commands: Array<ParsedCommand> = required.commands && required.commands.map((t: any) => this.undefaultCommand(t))
     return {topics, commands}
   }
 
-  parsePjsonTopics () {
-    // flow$ignore
-    const topics = (this.pjson()['cli-engine'] || {}).topics
-    return this.transformPjsonTopics(topics)
-  }
+  // parsePjsonTopics () {
+  //   const topics = (this.pjson()['cli-engine'] || {}).topics
+  //   return this.transformPjsonTopics(topics)
+  // }
 
-  transformPjsonTopics (topics: any, prefix: ?string) {
-    const flatten = require('lodash.flatten')
-    return flatten(this._transformPjsonTopics(topics))
-  }
+  // transformPjsonTopics (topics: any, prefix: ?string) {
+  //   const flatten = require('lodash.flatten')
+  //   return flatten(this._transformPjsonTopics(topics))
+  // }
 
-  _transformPjsonTopics (topics: any, prefix: ?string): ParsedTopic[] {
-    if (!topics) return []
-    return Object.keys(topics || {}).map(k => {
-      let t = topics[k]
-      let id = prefix ? `${prefix}:${k}` : k
-      let topic = Object.assign(t, {id, topic: id})
-      if (t.subtopics) {
-        return [topic].concat(this._transformPjsonTopics(t.subtopics, topic.id))
-      }
-      return topic
-    })
-  }
+  // _transformPjsonTopics (topics: any, prefix: ?string): ParsedTopic[] {
+  //   if (!topics) return []
+  //   return Object.keys(topics || {}).map(k => {
+  //     let t = topics[k]
+  //     let id = prefix ? `${prefix}:${k}` : k
+  //     let topic = Object.assign(t, {id, topic: id})
+  //     if (t.subtopics) {
+  //       return [topic].concat(this._transformPjsonTopics(t.subtopics, topic.id))
+  //     }
+  //     return topic
+  //   })
+  // }
 
   makeID (o: any): string {
-    return [(o.topic || o.name), o.command].filter(s => s).join(':')
+    return o.id || [(o.topic || o.name), o.command].filter(s => s).join(':')
   }
 
   pjson (): {name: string, version: string} {
@@ -171,20 +147,18 @@ export class PluginPath {
   }
 }
 
-export class Manager {
+export abstract class Manager {
   cli: CLI
   config: Config
   cache: Cache
 
-  constructor ({config, cache}: {config: Config, cache: Cache}) {
+  constructor ({config, cache, cli}: {config: Config, cache: Cache, cli: CLI}) {
     this.config = config
     this.cache = cache
-    this.cli = new CLI({mock: config.mock})
+    this.cli = cli
   }
 
-  async list (): Promise<PluginPath[]> {
-    throw new Error('abstract method Manager.list')
-  }
+  abstract list(): Promise<PluginPath[]>
 
   async handleNodeVersionChange () {
     // user and linked will override

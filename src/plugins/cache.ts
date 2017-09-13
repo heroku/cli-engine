@@ -1,5 +1,5 @@
 import {IFlag, IArg} from 'cli-flags'
-import {Config} from 'cli-engine-config'
+import {Config, Topic} from 'cli-engine-config'
 import {Plugin} from './plugin'
 import {Manager, PluginPath} from './manager'
 import * as path from 'path'
@@ -11,12 +11,10 @@ const debug = require('debug')('cli:plugincache')
 
 export type CachedCommand = {
   id: string,
-  topic: string,
-  command?: string,
   aliases?: string[],
   args: IArg[],
   flags: {[name: string]: IFlag<any>},
-  description: string,
+  description?: string,
   help?: string,
   usage?: string,
   hidden: boolean

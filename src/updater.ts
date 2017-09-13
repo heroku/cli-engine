@@ -36,10 +36,12 @@ function timestamp(msg: string): string {
 }
 
 export class Updater {
+  cli: CLI
   lock: Lock
 
-  constructor(readonly config: Config, readonly cli: CLI) {
-    this.lock = new deps.Lock(config, cli)
+  constructor(readonly config: Config, cli?: CLI) {
+    this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
+    this.lock = new deps.Lock(config, this.cli)
   }
 
   get autoupdatefile(): string {

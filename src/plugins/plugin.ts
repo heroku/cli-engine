@@ -50,23 +50,26 @@ export class Plugin {
 
   async findCommand (id: string): Promise<ICommand | undefined> {
     if (!id) return
-    let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
+    let c = this.commands.find(c => c.id === id)
     if (!c) return
-    let {topic, command} = c
     let p = await this.pluginPath.require()
-    let Command = (p.commands || [])
-      .find(d => topic === d.topic && command === d.command)
+    let Command = p.commands.find(c => c.id === id)
     if (!Command) return
     return typeof Command === 'function' ? Command : this.convertFromV5(Command)
   }
 
   async findTopic (id: string): Promise<Topic | undefined> {
-    let t = this.topics.find(t => t.id === id)
+    let t = this.topics.find(t => t.name === id)
     if (!t) return
     let plugin = await this.pluginPath.require()
     let topic = (plugin.topics || [])
-      .find(t => [t.id].includes(id))
-    return topic
+      .find(t => [t.name].includes(id))
+    if (!topic) return
+    return {
+      name: topic.name,
+      description: topic.description,
+      hidden: topic.hidden,
+    }
   }
 
   convertFromV5 (command: any): ICommand {

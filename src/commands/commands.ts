@@ -19,8 +19,8 @@ export default class Commands extends Command {
     let commandIDs = await commandManager.listCommandIDs()
     let commandInstances = await Promise.all(commandIDs.map(c => commandManager.findCommand(c)))
     let commands = _.compact(commandInstances).map(c => ({
-      command: c.id.split(':', 1),
-      topic: c.id.split(':').slice(1).join(':'),
+      command: c.id.split(':').slice(1).join(':') || null,
+      topic: c.id.split(':', 1).join(),
       usage: c.usage,
       description: c.description,
       help: c.help,
