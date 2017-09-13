@@ -1,4 +1,3 @@
-import { Command } from 'cli-engine-command'
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { CLI as CLIUX } from 'cli-ux'
 import * as path from 'path'
@@ -36,7 +35,7 @@ process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
   config: Config
-  cmd: Command
+  cmd?: ICommand
   // hooks: Hooks
 
   constructor(config: ConfigOptions = {}) {
@@ -70,24 +69,23 @@ export default class CLI {
     // await this.hooks.run('init')
 
     debug('command_manager')
-    const id = this.config.argv[1]
+    const id = this.config.argv[2]
     const commandManager = new deps.CommandManager(config, cli)
-    let command
     if (this.cmdAskingForHelp) {
       debug('asking for help')
-      command = new deps.Help()
+      this.cmd = new deps.Help(config)
     } else {
-      command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
+      this.cmd = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
     }
 
-    if (!command) {
+    if (!this.cmd) {
       let topic = await commandManager.findTopic(id)
       if (topic) {
         debug('showing help for %s topic', id)
-        command = new deps.Help()
+        this.cmd = new deps.Help(config)
       } else {
         debug('no command found')
-        command = new deps.NotFound()
+        this.cmd = new deps.NotFound(config)
       }
     }
 
@@ -100,22 +98,10 @@ export default class CLI {
 
     let lock = new deps.Lock(config, cli)
     await lock.unread()
-    debug('running cmd')
-    this.cmd = await Command.run(this.commandRunArgs(command))
+    debug('running %s', this.cmd.id)
+    await this.cmd._run(config.argv.slice(3))
 
     await this.exitAfterStdoutFlush()
-  }
-
-  commandRunArgs (command: ICommand): ConfigOptions {
-    if (command._version) return this.config
-    else {
-      debug('old style command received')
-      return <any> {
-        argv: this.config.argv.slice(2),
-        config: this.config,
-        mock: this.config.mock
-      }
-    }
   }
 
   async exitAfterStdoutFlush () {

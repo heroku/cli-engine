@@ -24,7 +24,7 @@ export class CommandManager {
   constructor (readonly config: Config, cli?: CLI) {
     // const {ConventionalCommandManager} = require('./conventional')
     const {BuiltinCommandManager} = require('./builtin')
-    this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
+    this.cli = cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
     this.managers = []
     // if (this.config.userPlugins) {
     //   const {PluginCommandManager} = require('./plugin')

@@ -1,8 +1,11 @@
+import {Command as CommandBase} from 'cli-engine-command'
 import { Config, Topic, ICommand } from 'cli-engine-config'
 import { CLI } from 'cli-ux'
 import { inspect } from 'util'
 import { deps } from '../deps'
 import _ from '../lodash'
+
+const debug = require('debug')('cli:commands')
 
 export abstract class CommandManagerBase {
   config: Config
@@ -18,19 +21,21 @@ export abstract class CommandManagerBase {
   abstract listCommandIDs(): Promise<string[]>
 
   require(p: string, id: string): ICommand | undefined {
-    const command = deps.util.undefault(require(p))
-    if (!command || !command.run) {
-      let extra = deps.util.isEmpty(command)
+    debug('Reading command %s at %s', id, p)
+    let Command: undefined | typeof CommandBase
+    try {
+      Command = deps.util.undefault(require(p))
+    } catch (err) {
+      this.cli.warn(err, {context: `Error reading command from ${p}`})
+    }
+    if (!Command || !(Command.prototype instanceof CommandBase)) {
+      let extra = deps.util.isEmpty(Command)
         ? 'Does the command have `module.exports = MyCommand`?'
-        : `Received: ${inspect(command)}`
+        : `Received: ${inspect(Command)}`
       throw new Error(`${p} does not appear to be a valid command.\n${extra}`)
     }
-    command.topic = id
-      .split(':')
-      .slice(0, -1)
-      .join(':')
-    command.command = id.split(':').pop()
-    if (!command.id) command.id = id
+    const command = new Command(this.config)
+    command.name = id
     return command
   }
 
@@ -68,6 +73,7 @@ export abstract class CommandManagerBase {
 
   async listRootCommands(): Promise<ICommand[]> {
     const ids = await this.listRootCommandIDs()
+    console.dir(ids)
     let commands = await Promise.all(ids.map(id => this.findCommand(id)))
     return _.compact(commands)
   }

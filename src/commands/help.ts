@@ -22,7 +22,7 @@ function buildHelpLine (config: Config, c: ICommand): [string, string | undefine
   return help.commandLine(c)
 }
 
-class Help extends Command {
+export default class Help extends Command {
   description = 'display help'
   strict = true
 
@@ -30,7 +30,7 @@ class Help extends Command {
 
   async run () {
     this.commandManager = new CommandManager(this.config)
-    let subject = this.config.argv.slice(1).find(arg => !['help', '-h', '--help'].includes(arg))
+    let subject = this.config.argv.slice(2).find(arg => !['help', '-h', '--help'].includes(arg))
     if (!subject) {
       let topics = await this.topics()
       let cmds = await this.commandManager.listRootCommands()
@@ -95,14 +95,13 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
     commands.sort(deps.util.compare('id'))
     let helpCmd = this.color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
-      this.out.log(`${this.config.bin} ${this.color.bold(topic)} commands: (get help with ${helpCmd})`)
+      this.cli.log(`${this.config.bin} ${this.color.bold(topic)} commands: (get help with ${helpCmd})`)
     } else {
-      this.out.log('Root commands:')
+      this.cli.log('Root commands:')
     }
     let helpLines = commands.map(c => buildHelpLine(this.config, c))
-    this.out.log(renderList(helpLines))
-    this.out.log()
+    this.cli.log(renderList(helpLines))
+    this.cli.log()
   }
 
 }
-export = Help

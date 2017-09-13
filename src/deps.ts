@@ -16,8 +16,8 @@ export const deps = {
   get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
   get util(): typeof util { return fetch('./util') },
   get CommandManager(): typeof commandManager.CommandManager { return fetch('./command_managers').CommandManager },
-  get Help(): typeof help { return fetch('./commands/help') },
-  get NotFound(): typeof notFound { return fetch('./not_found') },
+  get Help(): typeof help.default { return fetch('./commands/help').default },
+  get NotFound(): typeof notFound.default { return fetch('./not_found').default },
 
   // remote
   get RWLockFile(): any { return fetch('rwlockfile') },

@@ -1,5 +1,3 @@
-// @flow
-
 import Command from 'cli-engine-command'
 
 export default class Version extends Command<*> {

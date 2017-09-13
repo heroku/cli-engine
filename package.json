@@ -6,8 +6,8 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "ansi-escapes": "^3.0.0",
-    "cli-engine-command": "^9.0.0-ts.5",
-    "cli-engine-config": "^4.0.1-ts.7",
+    "cli-engine-command": "^9.0.0-ts.7",
+    "cli-engine-config": "^4.0.1-ts.11",
     "debug": "^3.0.1",
     "filesize": "^3.5.10",
     "find-up": "^2.1.0",
@@ -27,7 +27,8 @@
     "string": "3.x",
     "string-similarity": "^1.2.0",
     "tar-fs": "1.x",
-    "tmp": "^0.0.33"
+    "tmp": "^0.0.33",
+    "ts-lodash": "^4.0.5"
   },
   "devDependencies": {
     "@types/chalk": "^0.4.31",
@@ -35,6 +36,7 @@
     "@types/graceful-fs": "^4.1.0",
     "@types/lodash": "^4.14.74",
     "@types/node": "^8.0.28",
+    "babel-core": "^6.26.0",
     "del": "*",
     "execa": "^0.8.0",
     "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",

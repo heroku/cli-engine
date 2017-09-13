@@ -1,5 +1,3 @@
-// @flow
-
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 

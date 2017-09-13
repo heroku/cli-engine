@@ -1,7 +1,7 @@
 import {CommandManager} from './command_managers'
 import {Command} from 'cli-engine-command'
 
-class NotFound extends Command {
+export default class NotFound extends Command {
   variableArgs = true
   commandManager: CommandManager
 
@@ -30,7 +30,7 @@ class NotFound extends Command {
 
     let closest
     let binHelp = `${this.config.bin} help`
-    let id = this.config.argv[1]
+    let id = this.config.argv[2]
     let idSplit = id.split(':')
     if (await this.isValidTopic(idSplit[0])) {
       // if valid topic, update binHelp with topic
@@ -46,4 +46,3 @@ class NotFound extends Command {
 ${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`, {exitCode: 127})
   }
 }
-export = NotFound
