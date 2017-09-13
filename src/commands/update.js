@@ -3,7 +3,6 @@
 import Command, {flags} from 'cli-engine-command'
 import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
-import Plugins from '../plugins'
 import {Hooks} from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
