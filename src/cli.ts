@@ -52,7 +52,7 @@ export default class CLI {
       )
     }
     this.config = buildConfig(config)
-    cli = new CLIUX({ mock: this.config.mock })
+    cli = new CLIUX({ mock: this.config.mock, debug: !!this.config.debug, errlog: this.config.errlog })
   }
 
   async run() {
@@ -60,7 +60,6 @@ export default class CLI {
     const config = this.config
 
     require('./fs')
-    cli = new CLIUX({debug: !!config.debug, mock: config.mock})
     const updater = new deps.Updater(config, cli)
     debug('checking autoupdater')
     await updater.autoupdate()
@@ -98,7 +97,7 @@ export default class CLI {
 
     let lock = new deps.Lock(config, cli)
     await lock.unread()
-    debug('running %s', this.cmd.id)
+    debug('running %s', this.cmd.__config.id)
     await this.cmd._run(config.argv.slice(3))
 
     await this.exitAfterStdoutFlush()

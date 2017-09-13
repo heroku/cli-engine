@@ -7,9 +7,10 @@ import _ from 'ts-lodash'
 const debug = require('debug')('cli:commands')
 
 export default class Commands extends Command {
-  static topic = 'commands'
-  static hidden = true
-  static flags = {json: flags.boolean()}
+  hidden = true
+  parse = {
+    flags: {json: flags.boolean()}
+  }
 
   async run () {
     this.cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
@@ -18,14 +19,14 @@ export default class Commands extends Command {
     let topics = (await commandManager.listTopics()).filter(t => !t.hidden)
     let commandIDs = await commandManager.listCommandIDs()
     let commandInstances = await Promise.all(commandIDs.map(c => commandManager.findCommand(c)))
-    let commands = _.compact(commandInstances).map(c => ({
-      command: c.id.split(':').slice(1).join(':') || null,
-      topic: c.id.split(':', 1).join(),
-      usage: c.usage,
-      description: c.description,
-      help: c.help,
-      fullHelp: c.help,
-      hidden: c.hidden
+    let commands = _.compact(commandInstances).filter(c => c.__config.id).map(c => ({
+      command: c.__config.id!.split(':').slice(1).join(':') || null,
+      topic: c.__config.id!.split(':', 1).join(),
+      usage: c.options.usage,
+      description: c.options.description,
+      help: c.options.help,
+      fullHelp: c.options.help,
+      hidden: c.options.hidden
     }))
     this.cli.styledJSON({topics, commands})
   }

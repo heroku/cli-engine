@@ -2,7 +2,7 @@ import {ICommand, Config, Topic} from 'cli-engine-config'
 import {Plugin} from './plugin'
 // import LinkedPlugins from './linked'
 // import UserPlugins from './user'
-// import CorePlugins from './core'
+import CorePlugins from './core'
 import {Cache, CachedCommand} from './cache'
 import {CLI} from 'cli-ux'
 import { Lock } from '../lock'
@@ -11,7 +11,7 @@ import _ from 'ts-lodash'
 export default class Plugins {
   // linked: LinkedPlugins
   // user: UserPlugins
-  // core: CorePlugins
+  core: CorePlugins
   plugins: Plugin[]
   cache: Cache
   lock: Lock
@@ -19,15 +19,15 @@ export default class Plugins {
   config: Config
   cli: CLI
 
-  constructor (config: Config) {
+  constructor (config: Config, cli?: CLI) {
     this.config = config
     this.cache = new Cache(config)
-    this.cli = new CLI({mock: config.mock})
+    this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
 
     // this.builtin = new BuiltinPlugins(this)
     // this.linked = new LinkedPlugins(this)
     // this.user = new UserPlugins(this)
-    // this.core = new CorePlugins(this)
+    this.core = new CorePlugins(this)
     this.lock = new Lock(this.config, this.cli)
   }
 
@@ -36,7 +36,7 @@ export default class Plugins {
     this.plugins = await this.cache.fetchManagers(
       // this.linked,
       // this.user,
-      // this.core,
+      this.core,
       // this.builtin
     )
     this.loaded = true

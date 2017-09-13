@@ -4,6 +4,7 @@ import util = require('./util')
 import commandManager = require('./command_managers')
 import help = require('./commands/help')
 import notFound = require('./not_found')
+import plugins = require('./plugins')
 
 import Moment = require('moment')
 import CLICommandHelp = require('cli-engine-command/lib/help')
@@ -18,6 +19,7 @@ export const deps = {
   get CommandManager(): typeof commandManager.CommandManager { return fetch('./command_managers').CommandManager },
   get Help(): typeof help.default { return fetch('./commands/help').default },
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },
+  get Plugins(): typeof plugins.default { return fetch('./plugins').default },
 
   // remote
   get RWLockFile(): any { return fetch('rwlockfile') },

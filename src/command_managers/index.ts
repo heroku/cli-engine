@@ -26,10 +26,10 @@ export class CommandManager {
     const {BuiltinCommandManager} = require('./builtin')
     this.cli = cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
     this.managers = []
-    // if (this.config.userPlugins) {
-    //   const {PluginCommandManager} = require('./plugin')
-    //   this.managers.push(new PluginCommandManager({config, cli}))
-    // }
+    if (true || this.config.userPlugins) {
+      const {PluginCommandManager} = require('./plugin')
+      this.managers.push(new PluginCommandManager({config, cli}))
+    }
     // if (config.commandsDir) this.managers.push(new ConventionalCommandManager({config, cli, commandsDir: config.commandsDir}))
     this.managers.push(new BuiltinCommandManager({config, cli}))
   }
@@ -61,16 +61,16 @@ export class CommandManager {
   async commandsForTopic (topic: string): Promise<ICommand[]> {
     let arrs = await Promise.all(this.managers.map(m => m.commandsForTopic(topic)))
     let commands = arrs.reduce((next, res) => next.concat(res), [])
-    commands = _.sortBy(commands, c => c.id)
-    commands = _.sortedUniqBy(commands, c => c.id)
+    commands = _.sortBy(commands, c => c.__config.id)
+    commands = _.sortedUniqBy(commands, c => c.__config.id)
     return commands
   }
 
   async listRootCommands (): Promise<ICommand[]> {
     let arrs = await Promise.all(this.managers.map(m => m.listRootCommands()))
     let commands = arrs.reduce((next, res) => next.concat(res), [])
-    commands = _.sortBy(commands, c => c.id)
-    commands = _.sortedUniqBy(commands, c => c.id)
+    commands = _.sortBy(commands, c => c.__config.id)
+    commands = _.sortedUniqBy(commands, c => c.__config.id)
     return commands
   }
 

@@ -35,7 +35,7 @@ export abstract class CommandManagerBase {
       throw new Error(`${p} does not appear to be a valid command.\n${extra}`)
     }
     const command = new Command(this.config)
-    command.name = id
+    command.__config.id = id
     return command
   }
 
@@ -73,7 +73,6 @@ export abstract class CommandManagerBase {
 
   async listRootCommands(): Promise<ICommand[]> {
     const ids = await this.listRootCommandIDs()
-    console.dir(ids)
     let commands = await Promise.all(ids.map(id => this.findCommand(id)))
     return _.compact(commands)
   }

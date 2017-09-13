@@ -23,8 +23,10 @@ function buildHelpLine (config: Config, c: ICommand): [string, string | undefine
 }
 
 export default class Help extends Command {
-  description = 'display help'
-  strict = true
+  options = {
+    description: 'display help',
+    strict: false,
+  }
 
   commandManager: CommandManager
 
@@ -34,7 +36,7 @@ export default class Help extends Command {
     if (!subject) {
       let topics = await this.topics()
       let cmds = await this.commandManager.listRootCommands()
-      cmds = cmds.filter(c => !topics.find(t => c.id.startsWith(t[0])))
+      cmds = cmds.filter(c => !topics.find(t => c.__config.id!.startsWith(t[0])))
       if (cmds) this.listCommandsHelp(cmds)
       return
     }
@@ -90,7 +92,7 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
   }
 
   private listCommandsHelp (commands: ICommand[], topic?: string) {
-    commands = commands.filter(c => !c.hidden)
+    commands = commands.filter(c => !c.options.hidden)
     if (commands.length === 0) return
     commands.sort(deps.util.compare('id'))
     let helpCmd = this.color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)

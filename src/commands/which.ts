@@ -14,8 +14,8 @@ export default class extends Command {
     const [id] = this.argv
     const command = await commandManager.findCommand(id)
     if (!command) throw new Error('not found')
-    if (!command.plugin) throw new Error('command not in a plugin')
-    this.cli.styledHeader(`Plugin ${command.plugin.name}`)
+    if (!command.__config.plugin) throw new Error('command not in a plugin')
+    this.cli.styledHeader(`Plugin ${command.__config.plugin.name}`)
     // this.cli.styledObject({
     //   type: command.plugin.type,
     //   path: command.plugin.pluginPath.path
