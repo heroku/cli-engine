@@ -1,32 +1,24 @@
-// @flow
-
-import type {Config, Flag, Arg} from 'cli-engine-config'
-import Plugin from './plugin'
-import {Manager, type PluginPath} from './manager'
-import path from 'path'
-import fs from 'fs-extra'
-import Lock from '../lock'
+import {IFlag, IArg} from 'cli-flags'
+import {Config} from 'cli-engine-config'
+import {Plugin} from './plugin'
+import {Manager, PluginPath} from './manager'
+import * as path from 'path'
+import * as fs from 'fs-extra'
 import {CLI} from 'cli-ux'
+import {deps} from '../deps'
 
 const debug = require('debug')('cli:plugincache')
 
 export type CachedCommand = {
   id: string,
   topic: string,
-  command?: ?string,
+  command?: string,
   aliases?: string[],
-  args: Arg[],
-  flags: {[name: string]: Flag},
-  description: ?string,
-  help?: ?string,
-  usage?: ?string,
-  hidden: boolean
-}
-
-export type CachedTopic = {
-  id: string,
-  topic: string,
-  description?: ?string,
+  args: IArg[],
+  flags: {[name: string]: IFlag<any>},
+  description: string,
+  help?: string,
+  usage?: string,
   hidden: boolean
 }
 
@@ -35,16 +27,16 @@ export type CachedPlugin = {
   path: string,
   version: string,
   commands: CachedCommand[],
-  topics: CachedTopic[]
+  topics: Topic[]
 }
 
 type CacheData = {
   version: string,
-  node_version?: ?string,
+  node_version?: string,
   plugins: {[path: string]: CachedPlugin}
 }
 
-export default class Cache {
+export class Cache {
   static updated = false
   config: Config
   cli: CLI
@@ -59,7 +51,6 @@ export default class Cache {
     this._cache = {
       version: this.config.version,
       plugins: {},
-      node_version: null
     }
   }
 
@@ -87,17 +78,17 @@ export default class Cache {
     return this._cache
   }
 
-  plugin (path: string): ?CachedPlugin { return this.cache.plugins[path] }
+  plugin (path: string): CachedPlugin | undefined { return this.cache.plugins[path] }
 
   updatePlugin (path: string, plugin: CachedPlugin) {
-    this.constructor.updated = true
+    Cache.updated = true
     this.cache.plugins[path] = plugin
   }
 
   deletePlugin (...paths: string[]) {
     for (let path of paths) {
       debug(`clearing cache for ${path}`)
-      this.constructor.updated = true
+      Cache.updated = true
       delete this.cache.plugins[path]
     }
     this.save()
@@ -127,9 +118,9 @@ export default class Cache {
   }
 
   async fetchManagers (...managers: Manager[]): Promise<Plugin[]> {
-    let plugins = []
+    let plugins: Plugin[] = []
     if (this.cache.node_version !== process.version) {
-      let lock = new Lock(this.config)
+      let lock = new deps.Lock(this.config, this.cli)
 
       let downgrade = await lock.upgrade()
       for (let manager of managers) {
@@ -138,7 +129,7 @@ export default class Cache {
       await downgrade()
 
       this.cache.node_version = process.version
-      this.constructor.updated = true
+      Cache.updated = true
     }
 
     for (let manager of managers) {
@@ -156,7 +147,7 @@ export default class Cache {
   }
 
   save () {
-    if (!this.constructor.updated) return
+    if (!Cache.updated) return
     try {
       fs.writeJSONSync(this.file, this.cache)
     } catch (err) {

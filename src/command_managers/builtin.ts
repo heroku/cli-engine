@@ -16,7 +16,7 @@ export class BuiltinCommandManager extends CommandManagerBase {
       which: 'which'
     }
     this.topics = []
-    if (this.config.userPlugins) {
+    if (true || this.config.userPlugins) {
       this.commands = {
         'plugins': 'plugins',
         'plugins:install': 'plugins/install',

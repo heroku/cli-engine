@@ -1,16 +1,13 @@
-// @flow
-
-import type {Config} from 'cli-engine-config'
-import Command, {Topic} from 'cli-engine-command'
+import {Config, ICommand, Topic} from 'cli-engine-config'
 import {PluginPath} from './manager'
-import path from 'path'
+import * as path from 'path'
 import {CLI} from 'cli-ux'
 
-import {type CachedCommand, type CachedPlugin, type CachedTopic} from './cache'
+import {CachedCommand, CachedPlugin} from './cache'
 
 const debug = require('debug')('cli:plugins')
 
-export default class Plugin {
+export class Plugin {
   constructor (config: Config, pluginPath: PluginPath, cachedPlugin: CachedPlugin) {
     this.config = config
     this.cli = new CLI({mock: config.mock})
@@ -47,11 +44,11 @@ export default class Plugin {
     return this.cachedPlugin.commands
   }
 
-  get topics (): CachedTopic[] {
+  get topics (): Topic[] {
     return this.cachedPlugin.topics
   }
 
-  async findCommand (id: string): Promise<?Class<Command<*>>> {
+  async findCommand (id: string): Promise<ICommand | undefined> {
     if (!id) return
     let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
     if (!c) return
@@ -60,28 +57,19 @@ export default class Plugin {
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
     if (!Command) return
-    return typeof Command === 'function' ? Command : this.convertFromV5((Command: any))
+    return typeof Command === 'function' ? Command : this.convertFromV5(Command)
   }
 
-  async findTopic (id: string): Promise<?Class<Topic>> {
+  async findTopic (id: string): Promise<Topic | undefined> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
     let plugin = await this.pluginPath.require()
-    let Topic = (plugin.topics || [])
+    let topic = (plugin.topics || [])
       .find(t => [t.id].includes(id))
-    if (!Topic) return
-    return typeof Topic === 'function' ? Topic : this.buildTopic(t)
+    return topic
   }
 
-  buildTopic (t: CachedTopic): Class<Topic> {
-    return class extends Topic {
-      static topic = t.id
-      static description = t.description
-      static hidden = t.hidden
-    }
-  }
-
-  convertFromV5 (command: any): Class<Command<*>> {
+  convertFromV5 (command: any): ICommand {
     if (!this.config.legacyConverter) {
       debug(command)
       throw new Error('received v5 command but no legacyConverter was specified')

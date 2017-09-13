@@ -1,11 +1,10 @@
-import Command from 'cli-engine-command'
+import {Command} from 'cli-engine-command'
 
-export default class Version extends Command<*> {
-  static topic = 'version'
-  static description = 'show CLI version'
-  static aliases = ['-v', 'v', '--version']
+export default class Version extends Command {
+  description = 'show CLI version'
+  aliases = ['-v', 'v', '--version']
 
   async run () {
-    this.out.log(this.config.userAgent)
+    this.cli.log(this.config.userAgent)
   }
 }

@@ -1,25 +1,19 @@
-// @flow
-
-import {type Config} from 'cli-engine-config'
-import Command, {Topic} from 'cli-engine-command'
+import {ICommand, Config, Topic} from 'cli-engine-config'
 import Plugin from './plugin'
-import LinkedPlugins from './linked'
-import UserPlugins from './user'
-import BuiltinPlugins from './builtin'
-import CorePlugins from './core'
-import uniqby from 'lodash.uniqby'
-import Cache, {type CachedCommand, type CachedTopic} from './cache'
-import Lock from '../lock'
+// import LinkedPlugins from './linked'
+// import UserPlugins from './user'
+// import CorePlugins from './core'
+import {Cache, CachedCommand, CachedTopic} from './cache'
 import {CLI} from 'cli-ux'
+import {deps} from '../deps'
 
 export default class Plugins {
-  builtin: BuiltinPlugins
-  linked: LinkedPlugins
-  user: UserPlugins
+  // linked: LinkedPlugins
+  // user: UserPlugins
   core: CorePlugins
   plugins: Plugin[]
   cache: Cache
-  lock: Lock
+  lock: typeof deps.Lock
   loaded: boolean
   config: Config
   cli: CLI

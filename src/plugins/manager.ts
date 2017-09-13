@@ -1,9 +1,8 @@
-// @flow
-
-import type {Config, Arg, Flag} from 'cli-engine-config'
-import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
-import {convertFlagsFromV5, type LegacyFlag} from './legacy'
-import path from 'path'
+import {IFlag, IArg} from 'cli-flags'
+import {Config, Topic} from 'cli-engine-config'
+import {Cache, CachedPlugin, CachedCommand} from './cache'
+import {convertFlagsFromV5, LegacyFlag} from './legacy'
+import * as path from 'path'
 import {CLI} from 'cli-ux'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
@@ -11,10 +10,9 @@ export type PluginType = | "builtin" | "core" | "user" | "link"
 const debug = require('debug')('cli-engine:plugins:manager')
 
 type ParsedTopic = {
-  id: string,
   name?: ?string,
   topic?: ?string,
-  description?: ?string,
+  description?: string,
   hidden?: ?boolean
 }
 
@@ -24,9 +22,9 @@ type ParsedCommand = {
   command?: string,
   aliases?: string[],
   variableArgs?: boolean,
-  args: Arg[],
-  flags: (LegacyFlag[] | {[name: string]: Flag}),
-  description?: ?string,
+  args: IArg[],
+  flags: (LegacyFlag[] | {[name: string]: IFlag<any>}),
+  description?: string,
   help?: ?string,
   usage?: ?string,
   hidden?: ?boolean
@@ -64,10 +62,6 @@ export class PluginPath {
 
     const getAliases = (c: ParsedCommand) => {
       let aliases = c.aliases || []
-      if (c.default) {
-        this.cli.warn(`default setting on ${c.topic} is deprecated`)
-        aliases.push(c.topic)
-      }
       return aliases
     }
 
@@ -76,11 +70,9 @@ export class PluginPath {
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand): CachedCommand => ({
         id: c.id || this.makeID(c),
-        topic: c.topic,
-        command: c.command,
         description: c.description,
         args: c.args,
-        variableArgs: c.variableArgs,
+        // variableArgs: c.variableArgs,
         help: c.help,
         usage: c.usage,
         hidden: !!c.hidden,
@@ -88,19 +80,17 @@ export class PluginPath {
         flags: convertFlagsFromV5(c.flags)
       }))
 
-    const topics: CachedTopic[] = (plugin.topics || [])
-      .map((t: ParsedTopic): CachedTopic => ({
-        id: t.id || '',
-        topic: t.topic || '',
+    const topics: Topic[] = (plugin.topics || [])
+      .map((t: ParsedTopic): Topic => ({
+        name: t.topic || '',
         description: t.description,
         hidden: !!t.hidden
       }))
 
     for (let command of commands) {
-      if (topics.find(t => t.id === command.topic)) continue
-      let topic : CachedTopic = {
-        id: command.topic,
-        topic: command.topic,
+      if (topics.find(t => t.name === command.topic)) continue
+      let topic: Topic = {
+        name: command.topic,
         hidden: true
       }
       topics.push(topic)
@@ -150,7 +140,7 @@ export class PluginPath {
     return flatten(this._transformPjsonTopics(topics))
   }
 
-  _transformPjsonTopics (topics: any, prefix: ?string) {
+  _transformPjsonTopics (topics: any, prefix: ?string): ParsedTopic[] {
     if (!topics) return []
     return Object.keys(topics || {}).map(k => {
       let t = topics[k]
