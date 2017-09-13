@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "./lib",
+    "removeComments": true,
+    "strict": true,
+    "target": "es6",
+    "lib": [
+      "es2016",
+      "es2017.object"
+    ]
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}
+
