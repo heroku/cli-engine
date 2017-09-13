@@ -15,6 +15,7 @@ export abstract class CommandManagerBase {
 
   abstract findCommand(id: string): Promise<ICommand | undefined>
   abstract listTopics(): Promise<Topic[]>
+  abstract listCommandIDs(): Promise<string[]>
 
   require(p: string, id: string): ICommand | undefined {
     const command = deps.util.undefault(require(p))
@@ -32,8 +33,6 @@ export abstract class CommandManagerBase {
     if (!command.id) command.id = id
     return command
   }
-
-  abstract listCommandIDs(): Promise<string[]>
 
   async findTopic(id: string): Promise<Topic | undefined> {
     let topics = await this.listTopics()
