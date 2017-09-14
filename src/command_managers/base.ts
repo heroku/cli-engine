@@ -20,9 +20,9 @@ function uniqCommandIDs (ids: string[]): string[] {
 }
 
 export abstract class CommandManagerBase {
-  config: Config
-  cli: CLI
-  submanagers: CommandManagerBase[] = []
+  protected config: Config
+  protected cli: CLI
+  protected submanagers: CommandManagerBase[] = []
 
   constructor({ config, cli }: { config: Config; cli?: CLI }) {
     this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})

@@ -6,8 +6,16 @@ import * as path from 'path'
 import _ from 'ts-lodash'
 
 export class Plugins extends CommandManagerBase {
+  protected plugins: Plugin[]
+
+  public async listPlugins (): Promise<Plugin[]> {
+    await this.init()
+    return this.plugins
+  }
+
   protected async init () {
-    if (this.submanagers.length) return
+    if (this.plugins) return
+    this.plugins = []
     const cli = this.config.pjson['cli-engine']
     if (cli.plugins) {
       let pluginOpts = {cli: this.cli, config: this.config}
@@ -18,8 +26,10 @@ export class Plugins extends CommandManagerBase {
           root: path.join(this.config.root, 'node_modules', p)
         })
       })
-      this.submanagers = this.submanagers.concat(plugins)
+      this.plugins = this.plugins.concat(plugins)
     }
+    this.submanagers = this.submanagers.concat(this.plugins)
+    await super.init()
   }
 }
 
@@ -27,6 +37,7 @@ type PluginTypes = 'core' | 'user' | 'link'
 type PluginOptions = {
   type: PluginTypes
   root: string
+  tag?: string
   config: Config
   cli: CLI
 }
@@ -47,15 +58,19 @@ type PluginModule = {
 }
 
 class Plugin extends CommandManagerBase {
+  public name: string
+  public version: string
   public type: PluginTypes
   public root: string
   public pjson: PluginPJSON
+  public tag?: string
   public module?: PluginModule
 
   constructor (options: PluginOptions) {
     super(options)
     this.type = options.type
     this.root = options.root
+    this.tag = options.tag
   }
 
   public async listCommandIDs (): Promise<string[]> {
@@ -68,6 +83,8 @@ class Plugin extends CommandManagerBase {
 
   protected async init () {
     this.pjson = await fs.readJSON(path.join(this.root, 'package.json'))
+    this.name = this.pjson.name
+    this.version = this.pjson.version
     if (this.pjson.main) {
       const m = require(path.join(this.root, this.pjson.main))
       if (!m.commands) m.commands = []
@@ -75,6 +92,7 @@ class Plugin extends CommandManagerBase {
       if (m.topic) m.topics.push(m.topic)
       this.module = m
     }
+    await super.init()
   }
 
   private makeID (c: PluginCommand): string {
