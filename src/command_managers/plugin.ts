@@ -1,12 +1,12 @@
 import {Config, Topic} from 'cli-engine-config'
-import Plugins from '../plugins'
+import plugins = require('../plugins')
 import {CLI} from 'cli-ux'
 
 import {CommandManagerBase} from './base'
 import {deps} from '../deps'
 
 export class PluginCommandManager extends CommandManagerBase {
-  plugins: Plugins
+  plugins: plugins.Plugins
 
   constructor ({config, cli}: {config: Config, cli: CLI}) {
     super({config, cli})
@@ -14,17 +14,23 @@ export class PluginCommandManager extends CommandManagerBase {
   }
 
   async listCommandIDs (): Promise<string[]> {
-    await this.plugins.load()
-    return this.plugins.commands.map(c => c.id)
+    let ids = await this.plugins.listCommandIDs()
+    console.dir(ids)
+    return []
+    // await this.plugins.load()
+    // return this.plugins.commands.map(c => c.id)
   }
 
   async findCommand (id: string) {
-    await this.plugins.load()
-    return this.plugins.findCommand(id)
+    if (id) return undefined
+    return undefined
+    // await this.plugins.load()
+    // return this.plugins.findCommand(id)
   }
 
   async listTopics (): Promise<Topic[]> {
-    await this.plugins.load()
-    return this.plugins.topics
+    return []
+    // await this.plugins.load()
+    // return this.plugins.topics
   }
 }

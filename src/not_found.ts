@@ -2,7 +2,9 @@ import {CommandManager} from './command_managers'
 import {Command} from 'cli-engine-command'
 
 export default class NotFound extends Command {
-  variableArgs = true
+  options = {
+    strict: false
+  }
   commandManager: CommandManager
 
   async allCommands (): Promise<string[]> {

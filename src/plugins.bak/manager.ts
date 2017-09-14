@@ -5,7 +5,7 @@ import {convertFlagsFromV5, LegacyFlag} from './legacy'
 import * as path from 'path'
 import {CLI} from 'cli-ux'
 
-export type PluginType = | "builtin" | "core" | "user" | "link"
+export type PluginType = | "core" | "user" | "link"
 
 const debug = require('debug')('cli-engine:plugins:manager')
 
@@ -41,7 +41,7 @@ export class PluginPath {
     this.path = options.path
     this.type = options.type
     this.tag = options.tag
-    this.cli = new CLI({mock: this.config.mock})
+    this.cli = new CLI({mock: this.config.mock, debug: !!this.config.debug, errlog: this.config.errlog})
   }
 
   cli: CLI
@@ -134,10 +134,6 @@ export class PluginPath {
   }
 
   pjson (): {name: string, version: string} {
-    if (this.type === 'builtin') {
-      return {name: 'builtin', version: this.config.version}
-    }
-
     return require(path.join(this.path, 'package.json'))
   }
 

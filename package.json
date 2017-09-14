@@ -12,7 +12,7 @@
     "filesize": "^3.5.10",
     "find-up": "^2.1.0",
     "fs-extra": "^4.0.1",
-    "http-call": "4.0.0-ts2",
+    "http-call": "^4.0.0-ts2.0",
     "klaw-sync": "^3.0.0",
     "lodash": "^4.17.4",
     "lodash.flatten": "4.x",

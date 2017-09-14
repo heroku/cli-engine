@@ -1,3 +1,4 @@
+require('./fs')
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { CLI as CLIUX } from 'cli-ux'
 import * as path from 'path'
@@ -59,7 +60,6 @@ export default class CLI {
     debug('starting run')
     const config = this.config
 
-    require('./fs')
     const updater = new deps.Updater(config, cli)
     debug('checking autoupdater')
     await updater.autoupdate()

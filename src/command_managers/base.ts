@@ -20,7 +20,7 @@ export abstract class CommandManagerBase {
   abstract listTopics(): Promise<Topic[]>
   abstract listCommandIDs(): Promise<string[]>
 
-  require(p: string, id: string): ICommand | undefined {
+  require(p: string, id: string): ICommand {
     debug('Reading command %s at %s', id, p)
     let Command: undefined | typeof CommandBase
     try {

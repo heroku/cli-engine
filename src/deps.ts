@@ -19,7 +19,7 @@ export const deps = {
   get CommandManager(): typeof commandManager.CommandManager { return fetch('./command_managers').CommandManager },
   get Help(): typeof help.default { return fetch('./commands/help').default },
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },
-  get Plugins(): typeof plugins.default { return fetch('./plugins').default },
+  get Plugins(): typeof plugins.Plugins { return fetch('./plugins').Plugins },
 
   // remote
   get RWLockFile(): any { return fetch('rwlockfile') },
