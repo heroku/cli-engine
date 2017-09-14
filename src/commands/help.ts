@@ -1,23 +1,23 @@
-import {Command, flags} from 'cli-engine-command'
-import {Config, ICommand} from 'cli-engine-config'
-import {renderList} from 'cli-ux/lib/list'
-import {CommandManager} from '../command_managers'
-import {deps} from '../deps'
+import { Command, flags } from 'cli-engine-command'
+import { Config, ICommand } from 'cli-engine-config'
+import { renderList } from 'cli-ux/lib/list'
+import { CommandManager } from '../command_managers'
+import { deps } from '../deps'
 import _ from 'ts-lodash'
 
-function topicSort (a: any, b: any) {
+function topicSort(a: any, b: any) {
   if (a[0] < b[0]) return -1
   if (a[0] > b[0]) return 1
   return 0
 }
 
-function buildHelp (config: Config, c: ICommand): string {
+function buildHelp(config: Config, c: ICommand): string {
   if (c.buildHelp) return c.buildHelp(config)
   let help = new deps.CLICommandHelp(config)
   return help.command(c)
 }
 
-function buildHelpLine (config: Config, c: ICommand): [string, string | undefined] {
+function buildHelpLine(config: Config, c: ICommand): [string, string | undefined] {
   if (c.buildHelpLine) return c.buildHelpLine(config)
   let help = new deps.CLICommandHelp(config)
   return help.commandLine(c)
@@ -28,15 +28,16 @@ export default class Help extends Command {
     description: 'display help',
     strict: false,
     flags: {
-      all: flags.boolean({description: 'show all commands'})
-    }
+      all: flags.boolean({ description: 'show all commands' }),
+    },
   }
 
   commandManager: CommandManager
 
-  async run () {
+  async run() {
     this.commandManager = new CommandManager(this.config)
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
+    if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
       let topics = await this.topics()
       if (this.flags.all) {
@@ -65,11 +66,11 @@ export default class Help extends Command {
     }
   }
 
-  private async notFound (subject: string) {
-    await deps.NotFound.run({...this.config, argv: this.config.argv.slice(2).concat([subject])})
+  private async notFound(subject: string) {
+    await deps.NotFound.run({ ...this.config, argv: this.config.argv.slice(2).concat([subject]) })
   }
 
-  private async topics (prefix?: string) {
+  private async topics(prefix?: string) {
     const idPrefix = prefix ? `${prefix}:` : ''
     // fetch topics
     let topics = (await this.commandManager.listTopics())
@@ -78,10 +79,7 @@ export default class Help extends Command {
       .filter(t => t.name.startsWith(idPrefix))
       // only get topics 1 level deep
       .filter(t => t.name.split(':').length <= (prefix || '').split(':').length + 1)
-      .map(t => [
-        ` ${t.name}`,
-        t.description ? this.color.dim(t.description) : null
-      ] as [string, string])
+      .map(t => [` ${t.name}`, t.description ? this.color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
     if (!topics.length) return topics
 
@@ -97,7 +95,7 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
     return topics
   }
 
-  private listCommandsHelp (commands: ICommand[], topic?: string) {
+  private listCommandsHelp(commands: ICommand[], topic?: string) {
     commands = commands.filter(c => !c.options.hidden)
     if (commands.length === 0) return
     _.sortBy(commands, 'id')
@@ -107,8 +105,7 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
     } else {
       this.cli.log('Root commands:')
     }
-    let helpLines = commands.map(c => buildHelpLine(this.config, c))
-    .map(([a, b]) => [` ${a}`, b] as [string, string])
+    let helpLines = commands.map(c => buildHelpLine(this.config, c)).map(([a, b]) => [` ${a}`, b] as [string, string])
     this.cli.log(renderList(helpLines))
     this.cli.log()
   }
