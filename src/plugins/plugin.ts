@@ -99,6 +99,7 @@ function isV5Command (c: PluginCommand): c is V5Command {
 // }
 
 function fixCommand (config: Config, c: PluginCommand, id: string): ICommand {
+  console.dir(c)
   let options: ICommand['options'] = {
     description: c.description
   }

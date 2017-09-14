@@ -1,4 +1,4 @@
-import {Command} from 'cli-engine-command'
+import {Command, flags} from 'cli-engine-command'
 import {Config, ICommand} from 'cli-engine-config'
 import {renderList} from 'cli-ux/lib/list'
 import {CommandManager} from '../command_managers'
@@ -27,18 +27,23 @@ export default class Help extends Command {
   options = {
     description: 'display help',
     strict: false,
+    flags: {
+      all: flags.boolean({description: 'show all commands'})
+    }
   }
 
   commandManager: CommandManager
 
   async run () {
     this.commandManager = new CommandManager(this.config)
-    let subject = this.config.argv.slice(2).find(arg => !['help', '-h', '--help'].includes(arg))
+    let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject) {
       let topics = await this.topics()
-      let cmds = await this.commandManager.listRootCommands()
-      cmds = cmds.filter(c => !topics.find(t => c.__config.id!.startsWith(t[0])))
-      if (cmds) this.listCommandsHelp(cmds)
+      if (this.flags.all) {
+        let cmds = await this.commandManager.listRootCommands()
+        cmds = cmds.filter(c => !topics.find(t => c.__config.id!.startsWith(t[0])))
+        if (cmds) this.listCommandsHelp(cmds)
+      }
       return
     }
 
