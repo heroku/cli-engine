@@ -3,6 +3,7 @@ import {Config, ICommand} from 'cli-engine-config'
 import {renderList} from 'cli-ux/lib/list'
 import {CommandManager} from '../command_managers'
 import {deps} from '../deps'
+import _ from 'ts-lodash'
 
 function topicSort (a: any, b: any) {
   if (a[0] < b[0]) return -1
@@ -73,7 +74,7 @@ export default class Help extends Command {
       // only get topics 1 level deep
       .filter(t => t.name.split(':').length <= (prefix || '').split(':').length + 1)
       .map(t => [
-        t.name,
+        ` ${t.name}`,
         t.description ? this.color.dim(t.description) : null
       ] as [string, string])
     topics.sort(topicSort)
@@ -94,7 +95,7 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
   private listCommandsHelp (commands: ICommand[], topic?: string) {
     commands = commands.filter(c => !c.options.hidden)
     if (commands.length === 0) return
-    commands.sort(deps.util.compare('id'))
+    _.sortBy(commands, 'id')
     let helpCmd = this.color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
       this.cli.log(`${this.config.bin} ${this.color.bold(topic)} commands: (get help with ${helpCmd})`)
@@ -102,8 +103,8 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
       this.cli.log('Root commands:')
     }
     let helpLines = commands.map(c => buildHelpLine(this.config, c))
+    .map(([a, b]) => [` ${a}`, b] as [string, string])
     this.cli.log(renderList(helpLines))
     this.cli.log()
   }
-
 }

@@ -8,7 +8,6 @@ import {Config} from 'cli-engine-config'
 export class Plugins extends CommandManagerBase {
   public user: UserPlugins
   public core: CorePlugins
-  protected plugins: Plugin[]
 
   constructor (options: {config: Config, cli?: CLI}) {
     super(options)
@@ -21,13 +20,12 @@ export class Plugins extends CommandManagerBase {
     return this.plugins
   }
 
+  get plugins () { return this.core ? this.core.plugins.concat(this.user.plugins) : [] }
+  get submanagers () { return this.plugins }
+
   protected async init () {
-    if (this.plugins) return
-    await Promise.all([this.core.init(), this.user.init()])
-    this.plugins = []
-    this.plugins = this.plugins.concat(this.core.plugins)
-    this.plugins = this.plugins.concat(this.user.plugins)
-    this.submanagers = this.submanagers.concat(this.plugins)
+    await this.core.init()
+    await this.user.init()
     await super.init()
   }
 }

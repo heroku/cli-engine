@@ -13,6 +13,11 @@ export class CorePlugins {
     this.cli = cli
   }
 
+  public async list (): Promise<Plugin[]> {
+    await this.init()
+    return this.plugins
+  }
+
   public async init () {
     if (this.plugins) return
     this.plugins = []

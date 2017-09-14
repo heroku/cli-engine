@@ -26,6 +26,7 @@
     "rwlockfile": "^1.4.8",
     "string": "3.x",
     "string-similarity": "^1.2.0",
+    "supports-color": "^4.4.0",
     "tar-fs": "1.x",
     "tmp": "^0.0.33",
     "ts-lodash": "^4.0.5"
@@ -36,6 +37,7 @@
     "@types/graceful-fs": "^4.1.0",
     "@types/lodash": "^4.14.74",
     "@types/node": "^8.0.28",
+    "@types/supports-color": "^3.1.0",
     "babel-core": "^6.26.0",
     "del": "*",
     "execa": "^0.8.0",

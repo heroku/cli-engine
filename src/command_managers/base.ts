@@ -22,11 +22,12 @@ function uniqCommandIDs (ids: string[]): string[] {
 export abstract class CommandManagerBase {
   protected config: Config
   protected cli: CLI
-  protected submanagers: CommandManagerBase[] = []
+  protected submanagers: CommandManagerBase[]
 
   constructor({ config, cli }: { config: Config; cli?: CLI }) {
     this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
     this.config = config
+    if (!this.submanagers) this.submanagers = []
   }
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
@@ -67,6 +68,15 @@ export abstract class CommandManagerBase {
     return commands
   }
 
+  public async commandsForTopic(topic: string): Promise<ICommand[]> {
+    await this.init()
+    let ids = await this.commandIDsForTopic(topic)
+    let commands = _.compact(await Promise.all(ids.map(id => this.findCommand(id))))
+    commands = _.sortBy(commands, c => c.__config.id)
+    commands = _.sortedUniqBy(commands, c => c.__config.id)
+    return commands
+  }
+
   protected async init (): Promise<void> {
     await Promise.all(this.submanagers.map(m => m.init()))
   }
@@ -90,14 +100,6 @@ export abstract class CommandManagerBase {
         return _.uniq(arr)
       }, [])
     return topics
-  }
-
-  protected async commandsForTopic(topic: string): Promise<ICommand[]> {
-    let ids = await this.commandIDsForTopic(topic)
-    let commands = _.compact(await Promise.all(ids.map(id => this.findCommand(id))))
-    commands = _.sortBy(commands, c => c.__config.id)
-    commands = _.sortedUniqBy(commands, c => c.__config.id)
-    return commands
   }
 
   protected async commandIDsForTopic(topic: string): Promise<string[]> {
