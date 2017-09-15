@@ -71,7 +71,7 @@
   "scripts": {
     "clean": "del lib tmp",
     "download": "node ./scripts/download-yarn",
-    "posttest": "pretter -l 'src/**/*.ts'",
+    "posttest": "prettier -l 'src/**/*.ts'",
     "precommit": "lint-staged",
     "prepare": "npm run clean && tsc && npm run download",
     "pretest": "npm run download && tsc --sourcemap",
