@@ -52,6 +52,6 @@ export class NotFound {
 
     let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''
     this.cli.error(`${color.yellow(this.argv[1])} is not a ${this.config.bin} command.
-${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`, 127)
+${perhaps}Run ${color.cmd(binHelp)} for a list of available topics.`, 127)
   }
 }
