@@ -2,9 +2,9 @@ require('./fs')
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { CLI as CLIUX } from 'cli-ux'
 import * as path from 'path'
-// import {Hooks, PreRunOptions} from './hooks'
+import { Hooks, PreRunOptions } from './hooks'
 import * as chalk from 'chalk'
-import {deps} from './deps'
+import { deps } from './deps'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: any) => {
@@ -37,7 +37,7 @@ process.env.CLI_ENGINE_VERSION = require('../package.json').version
 export default class CLI {
   config: Config
   cmd?: ICommand
-  // hooks: Hooks
+  hooks: Hooks
 
   constructor(config: ConfigOptions = {}) {
     if (!config) config = {}
@@ -64,8 +64,8 @@ export default class CLI {
     debug('checking autoupdater')
     await updater.autoupdate()
 
-    // this.hooks = new deps.Hooks({config: this.config})
-    // await this.hooks.run('init')
+    this.hooks = new deps.Hooks({ config: this.config })
+    await this.hooks.run('init')
 
     debug('command_manager')
     const id = this.config.argv[2]
@@ -88,12 +88,11 @@ export default class CLI {
       }
     }
 
-    // let opts: PreRunOptions = {
-    //   Command,
-    //   plugin: Command.plugin,
-    //   argv: this.config.argv.slice(2)
-    // }
-    // await this.hooks.run('prerun', opts)
+    let opts: PreRunOptions = {
+      command: this.cmd,
+      argv: this.config.argv.slice(2),
+    }
+    await this.hooks.run('prerun', opts)
 
     let lock = new deps.Lock(config, cli)
     await lock.unread()
@@ -103,9 +102,9 @@ export default class CLI {
     await this.exitAfterStdoutFlush()
   }
 
-  async exitAfterStdoutFlush () {
+  async exitAfterStdoutFlush() {
     debug('flushing stdout')
-    const {timeout} = deps.util
+    const { timeout } = deps.util
     cli.done()
     await timeout(this.flush(), 10000)
     debug('exiting')
