@@ -1,3 +1,4 @@
+import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { Config, ICommand } from 'cli-engine-config'
 import { renderList } from 'cli-ux/lib/list'
@@ -28,7 +29,7 @@ export default class Help extends Command {
     description: 'display help',
     strict: false,
     flags: {
-      all: flags.boolean({ description: 'show all commands' }),
+      all: flags.boolean({ description: 'show all commands' }) as IBooleanFlag,
     },
   }
 

@@ -1,3 +1,4 @@
+import { IBooleanFlag } from 'cli-flags'
 import * as path from 'path'
 import { Command, flags } from 'cli-engine-command'
 import { Updater } from '../updater'
@@ -17,7 +18,7 @@ export default class Update extends Command {
     description: 'update the Heroku CLI',
     args: [{ name: 'channel', optional: true }],
     flags: {
-      autoupdate: flags.boolean({ hidden: true }),
+      autoupdate: flags.boolean({ hidden: true }) as IBooleanFlag,
     },
   }
   updater: Updater

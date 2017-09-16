@@ -8,19 +8,19 @@ import { CLI } from 'cli-ux'
 
 const debug = require('debug')('cli:updater')
 
-type Version = {
+export type Version = {
   version: string
   channel: string
   message?: string
 }
 
-type Manifest = {
+export type Manifest = {
   version: string
   channel: string
   sha256gz: string
 }
 
-type TmpDirs = {
+export type TmpDirs = {
   dir: string
   node: string
   client: string
@@ -40,7 +40,7 @@ export class Updater {
   lock: Lock
 
   constructor(readonly config: Config, cli?: CLI) {
-    this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
+    this.cli = cli || new CLI({ debug: !!config.debug, mock: config.mock, errlog: config.errlog })
     this.lock = new deps.Lock(config, this.cli)
   }
 

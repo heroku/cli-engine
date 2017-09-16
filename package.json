@@ -78,5 +78,6 @@
     "prepare": "npm run clean && tsc && npm run download",
     "pretest": "npm run download && tsc --sourcemap",
     "test": "jest -i"
-  }
+  },
+  "types": "./lib/cli.d.ts"
 }

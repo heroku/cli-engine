@@ -8,8 +8,8 @@ import * as path from 'path'
 import _ from 'ts-lodash'
 import * as supportsColor from 'supports-color'
 
-type PluginTypes = 'core' | 'user' | 'link'
-type PluginOptions = {
+export type PluginTypes = 'core' | 'user' | 'link'
+export type PluginOptions = {
   type: PluginTypes
   root: string
   tag?: string
@@ -17,7 +17,7 @@ type PluginOptions = {
   cli: CLI
 }
 
-type PluginPJSON = {
+export type PluginPJSON = {
   name: string
   version: string
   main?: string
@@ -73,7 +73,7 @@ export type V5Command = {
   run: (ctx: V5Context) => Promise<void>
 }
 
-type FlowCommand = {
+export type FlowCommand = {
   topic?: string
   command?: string
   description?: string
@@ -81,9 +81,9 @@ type FlowCommand = {
   run: (options: { argv: string[]; config: Config }) => Promise<void>
 }
 
-type PluginCommand = FlowCommand | V5Command
+export type PluginCommand = FlowCommand | V5Command
 
-type PluginTopic = {
+export type PluginTopic = {
   id?: string
   name?: string
   topic?: string
@@ -91,7 +91,7 @@ type PluginTopic = {
   hidden?: boolean
 }
 
-type PluginModule = {
+export type PluginModule = {
   commands: PluginCommand[]
   topics: PluginTopic[]
 }
