@@ -1,4 +1,4 @@
-import {Command} from 'cli-engine-command'
+import { Command } from 'cli-engine-command'
 
 export default class Version extends Command {
   options = {
@@ -6,7 +6,7 @@ export default class Version extends Command {
     aliases: ['-v', 'v', '--version'],
   }
 
-  async run () {
+  async run() {
     this.cli.log(this.config.userAgent)
   }
 }

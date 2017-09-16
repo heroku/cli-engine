@@ -1,5 +1,5 @@
-import {CLI} from 'cli-ux'
-import {Config} from 'cli-engine-config'
+import { CLI } from 'cli-ux'
+import { Config } from 'cli-engine-config'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 
@@ -12,16 +12,18 @@ export default class Yarn {
 
   static extraOpts: string[] = []
 
-  constructor ({config, cli, cwd}: {config: Config, cli: CLI, cwd: string}) {
+  constructor({ config, cli, cwd }: { config: Config; cli: CLI; cwd: string }) {
     this.config = config
     this.cli = cli
     this.cwd = cwd
   }
 
-  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn.js`) }
+  get bin(): string {
+    return path.join(__dirname, '..', '..', 'yarn', `yarn.js`)
+  }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
-  pathKey (env: {[k: string]: string | undefined} = process.env): string {
+  pathKey(env: { [k: string]: string | undefined } = process.env): string {
     let pathKey = 'PATH'
 
     // windows calls its path "Path" usually, but this is not guaranteed.
@@ -37,18 +39,18 @@ export default class Yarn {
   }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/util/execute-lifecycle-script.js#L130-L154
-  pathEnv (): {[k: string]: string} {
+  pathEnv(): { [k: string]: string } {
     let pathKey = this.pathKey()
     const pathParts = (process.env[pathKey] || '').split(path.delimiter)
     pathParts.unshift(path.dirname(process.execPath))
 
     return {
-      pathKey: pathParts.join(path.delimiter)
+      pathKey: pathParts.join(path.delimiter),
     }
   }
 
-  fork (modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
-    const {fork} = require('child_process')
+  fork(modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
+    const { fork } = require('child_process')
     return new Promise((resolve, reject) => {
       let forked = fork(modulePath, args, options)
       let error = ''
@@ -85,20 +87,16 @@ export default class Yarn {
     })
   }
 
-  async exec (args: string[] = []): Promise<void> {
+  async exec(args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    args = args.concat([
-      '--non-interactive',
-      ...Yarn.extraOpts,
-      ...this.proxyArgs()
-    ])
+    args = args.concat(['--non-interactive', ...Yarn.extraOpts, ...this.proxyArgs()])
     let cacheDir = path.join(this.config.cacheDir, 'yarn')
     args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
 
     let options = {
       cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
-      env: Object.assign({}, process.env, this.pathEnv())
+      env: Object.assign({}, process.env, this.pathEnv()),
     }
 
     debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
@@ -115,14 +113,14 @@ export default class Yarn {
     }
   }
 
-  async checkForYarnLock () {
+  async checkForYarnLock() {
     // add yarn lockfile if it does not exist
     if (this.cwd && !fs.existsSync(path.join(this.cwd, 'yarn.lock'))) {
       await this.exec()
     }
   }
 
-  proxyArgs (): string[] {
+  proxyArgs(): string[] {
     let args = []
     let http = process.env.http_proxy || process.env.HTTP_PROXY
     let https = process.env.https_proxy || process.env.HTTPS_PROXY

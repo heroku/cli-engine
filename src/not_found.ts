@@ -1,13 +1,13 @@
-import {CommandManager} from './command_managers'
-import {Command} from 'cli-engine-command'
+import { CommandManager } from './command_managers'
+import { Command } from 'cli-engine-command'
 
 export default class NotFound extends Command {
   options = {
-    strict: false
+    strict: false,
   }
   commandManager: CommandManager
 
-  async allCommands (): Promise<string[]> {
+  async allCommands(): Promise<string[]> {
     let ids = await this.commandManager.listCommandIDs()
     return ids
     // TODO add aliases
@@ -16,18 +16,18 @@ export default class NotFound extends Command {
     // }, [])
   }
 
-  async closest (cmd: string) {
+  async closest(cmd: string) {
     const DCE = require('string-similarity')
     return DCE.findBestMatch(cmd, await this.allCommands()).bestMatch.target
   }
 
-  async isValidTopic (name: string): Promise<boolean> {
+  async isValidTopic(name: string): Promise<boolean> {
     let t = await this.commandManager.findTopic(name)
     return !!t
   }
 
-  async run () {
-    const {color} = this
+  async run() {
+    const { color } = this
     this.commandManager = new CommandManager(this.config, this.cli)
 
     let closest
@@ -44,7 +44,10 @@ export default class NotFound extends Command {
     }
 
     let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''
-    this.cli.error(`${color.yellow(id)} is not a ${this.config.bin} command.
-${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`, {exitCode: 127})
+    this.cli.error(
+      `${color.yellow(id)} is not a ${this.config.bin} command.
+${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`,
+      { exitCode: 127 },
+    )
   }
 }

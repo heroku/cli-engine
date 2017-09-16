@@ -1,6 +1,6 @@
-import {Config} from 'cli-engine-config'
-import {CLI} from 'cli-ux'
-import {Plugin} from './plugin'
+import { Config } from 'cli-engine-config'
+import { CLI } from 'cli-ux'
+import { Plugin } from './plugin'
 import * as path from 'path'
 
 export class CorePlugins {
@@ -8,17 +8,17 @@ export class CorePlugins {
   protected config: Config
   protected cli: CLI
 
-  constructor ({config, cli}: {config: Config, cli: CLI}) {
+  constructor({ config, cli }: { config: Config; cli: CLI }) {
     this.config = config
     this.cli = cli
   }
 
-  public async list (): Promise<Plugin[]> {
+  public async list(): Promise<Plugin[]> {
     await this.init()
     return this.plugins
   }
 
-  public async init () {
+  public async init() {
     if (this.plugins) return
     this.plugins = []
     const cli = this.config.pjson['cli-engine']
@@ -28,7 +28,7 @@ export class CorePlugins {
           cli: this.cli,
           config: this.config,
           type: 'core',
-          root: path.join(this.config.root, 'node_modules', p)
+          root: path.join(this.config.root, 'node_modules', p),
         })
       })
       this.plugins = this.plugins.concat(plugins)

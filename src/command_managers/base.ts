@@ -1,4 +1,4 @@
-import {Command as CommandBase} from 'cli-engine-command'
+import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic, ICommand } from 'cli-engine-config'
 import { CLI } from 'cli-ux'
 import { inspect } from 'util'
@@ -7,13 +7,13 @@ import _ from '../lodash'
 
 const debug = require('debug')('cli:commands')
 
-function uniqTopics (topics: Topic[]): Topic[] {
+function uniqTopics(topics: Topic[]): Topic[] {
   topics = _.sortBy(topics, t => [t.name, t.hidden, t.description])
   topics = _.sortedUniqBy(topics, t => t.name)
   return topics
 }
 
-function uniqCommandIDs (ids: string[]): string[] {
+function uniqCommandIDs(ids: string[]): string[] {
   ids = ids.sort()
   ids = _.sortedUniqBy(ids, t => t)
   return ids
@@ -25,7 +25,7 @@ export abstract class CommandManagerBase {
   protected submanagers: CommandManagerBase[]
 
   constructor({ config, cli }: { config: Config; cli?: CLI }) {
-    this.cli = cli || new CLI({debug: !!config.debug, mock: config.mock, errlog: config.errlog})
+    this.cli = cli || new CLI({ debug: !!config.debug, mock: config.mock, errlog: config.errlog })
     this.config = config
     if (!this.submanagers) this.submanagers = []
   }
@@ -77,7 +77,7 @@ export abstract class CommandManagerBase {
     return commands
   }
 
-  protected async init (): Promise<void> {
+  protected async init(): Promise<void> {
     await Promise.all(this.submanagers.map(m => m.init()))
   }
 
@@ -122,7 +122,7 @@ export abstract class CommandManagerBase {
     try {
       Command = deps.util.undefault(require(p))
     } catch (err) {
-      this.cli.warn(err, {context: `Error reading command from ${p}`})
+      this.cli.warn(err, { context: `Error reading command from ${p}` })
     }
     if (!Command || !(Command.prototype instanceof CommandBase)) {
       let extra = deps.util.isEmpty(Command)

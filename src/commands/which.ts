@@ -1,15 +1,13 @@
-import {Command} from 'cli-engine-command'
-import {CommandManager} from '../command_managers'
+import { Command } from 'cli-engine-command'
+import { CommandManager } from '../command_managers'
 
 export default class extends Command {
   description = 'show which plugin a command is from'
   parse = {
-    args: [
-      {name: 'command'}
-    ]
+    args: [{ name: 'command' }],
   }
 
-  async run () {
+  async run() {
     const commandManager = new CommandManager(this.config)
     const [id] = this.argv
     const command = await commandManager.findCommand(id)
