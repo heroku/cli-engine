@@ -126,12 +126,11 @@ function convertFlagsFromV5(
         char: flag.char as any,
         description: flag.description,
         hidden: flag.hidden,
-        required: flag.required,
-        optional: flag.optional,
+        required: flag.required || flag.optional === false,
         parse: flag.parse,
       }
       if (flag.hasValue) {
-        flags[flag.name] = Flags.string({ ...opts, parse: flag.parse })
+        flags[flag.name] = Flags.string(opts)
       } else {
         flags[flag.name] = Flags.boolean(opts)
       }
