@@ -67,7 +67,8 @@ export default class Help extends Command {
   }
 
   private async notFound(subject: string) {
-    await deps.NotFound.run({ ...this.config, argv: this.config.argv.slice(2).concat([subject]) })
+    const nf = new deps.NotFound(this.config)
+    await nf._run([subject])
   }
 
   private async topics(prefix?: string) {
