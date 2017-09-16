@@ -771,6 +771,23 @@ cli-ux@^1.0.1:
     strip-ansi "^4.0.0"
     supports-color "^4.4.0"
 
+cli-ux@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-1.1.9.tgz#d5552429c0077d5982bcfb33c86b3b0165de9bba"
+  dependencies:
+    "@heroku/linewrap" "^1.0.0"
+    ansi-escapes "^3.0.0"
+    ansi-styles "^3.2.0"
+    cardinal "^1.0.0"
+    chalk "^2.1.0"
+    fs-extra "^4.0.2"
+    lodash "^4.17.4"
+    moment "^2.18.1"
+    password-prompt "^1.0.3"
+    strip-ansi "^4.0.0"
+    supports-color "^4.4.0"
+    ts-lodash "^4.0.5"
+
 cli-width@^2.0.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.2.0.tgz#ff19ede8a9a5e579324147b0c11f0fbcbabed639"
@@ -4743,6 +4760,12 @@ trim-right@^1.0.1:
 tryit@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tryit/-/tryit-1.0.3.tgz#393be730a9446fd1ead6da59a014308f36c289cb"
+
+ts-lodash@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.5.tgz#1d0a74de2758df43a821d176e2cc85c50925ee67"
+  dependencies:
+    lodash "^4.17.4"
 
 tunnel-agent@^0.4.0, tunnel-agent@^0.4.3:
   version "0.4.3"
