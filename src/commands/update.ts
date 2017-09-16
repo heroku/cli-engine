@@ -1,31 +1,32 @@
 import * as path from 'path'
-import {Command, flags} from 'cli-engine-command'
-import {Updater} from '../updater'
+import { Command, flags } from 'cli-engine-command'
+import { Updater } from '../updater'
 // import PluginsUpdate from './plugins/update'
 // import {Hooks} from '../hooks'
 
 const debug = require('debug')('cli-engine:update')
 
-function brew (...args: string[]) {
+function brew(...args: string[]) {
   const cp = require('child_process')
   debug('brew %o', args)
-  return cp.spawnSync('brew', args, {stdio: 'inherit'})
+  return cp.spawnSync('brew', args, { stdio: 'inherit' })
 }
 
 export default class Update extends Command {
-  static topic = 'update'
-  static description = 'update the Heroku CLI'
-  static args = [
-    {name: 'channel', optional: true}
-  ]
-  static flags = {
-    autoupdate: flags.boolean({hidden: true})
+  options = {
+    description: 'update the Heroku CLI',
+    args: [{ name: 'channel', optional: true }],
+    flags: {
+      autoupdate: flags.boolean({ hidden: true }),
+    },
   }
   updater: Updater
 
-  get autoupdatelog () { return path.join(this.config.cacheDir, 'autoupdate.log') }
+  get autoupdatelog() {
+    return path.join(this.config.cacheDir, 'autoupdate.log')
+  }
 
-  async run () {
+  async run() {
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
       this.cli.stdout.logfile = this.autoupdatelog
@@ -43,15 +44,19 @@ export default class Update extends Command {
       if (this.config.version === manifest.version && channel === this.config.channel) {
         this.cli.action.stop(`already on latest version: ${this.config.version}`)
       } else {
-        let {yellow, green} = this.color
-        this.cli.action.start(`${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(manifest.version)}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`)
+        let { yellow, green } = this.color
+        this.cli.action.start(
+          `${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(
+            manifest.version,
+          )}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`,
+        )
         await this.updater.update(manifest)
         this.cli.action.stop()
         try {
           await this.updater.autoupdate(true)
           this.cli.exit(0)
         } catch (err) {
-          this.cli.warn(err, {context: 'post-install autoupdate failed'})
+          this.cli.warn(err, { context: 'post-install autoupdate failed' })
         }
       }
     }
@@ -67,14 +72,16 @@ export default class Update extends Command {
     debug('done')
   }
 
-  async logChop () {
+  async logChop() {
     try {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.config.errlog)
-    } catch (e) { debug(e.message) }
+    } catch (e) {
+      debug(e.message)
+    }
   }
 
-  migrateBrew () {
+  migrateBrew() {
     try {
       debug('migrating from brew')
       const fs = require('fs-extra')
