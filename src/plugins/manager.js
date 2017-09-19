@@ -5,7 +5,7 @@ import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
-const { Hooks } = require('../hooks')
+import {Hooks} from '../hooks'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
