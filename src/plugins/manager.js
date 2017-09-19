@@ -127,12 +127,13 @@ export class PluginPath {
   async require (): Promise<ParsedPlugin> {
     let required
     try {
-      let hooks = new Hooks({ config: this.config })
-      required = await hooks.run('plugins:parse', {module: require(this.path)}) || require(this.path)
+      required = require(this.path)
     } catch (err) {
       if (await this.repair(err)) return this.require()
       else throw err
     }
+    const hooks = new Hooks({ config: this.config })
+    await hooks.run('plugins:parse', {module: required})
 
     const exportedTopic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
     const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
