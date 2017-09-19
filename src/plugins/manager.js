@@ -5,6 +5,7 @@ import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
+const { Hooks } = require('../hooks')
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -126,7 +127,8 @@ export class PluginPath {
   async require (): Promise<ParsedPlugin> {
     let required
     try {
-      required = require(this.path)
+      let hooks = new Hooks({ config: this.config })
+      required = await hooks.run('plugins:parse', {module: require(this.path)}) || require(this.path)
     } catch (err) {
       if (await this.repair(err)) return this.require()
       else throw err
