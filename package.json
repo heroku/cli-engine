@@ -9,7 +9,7 @@
     "ansi-escapes": "^3.0.0",
     "cli-engine-command": "^8.0.15",
     "cli-engine-config": "^3.3.1",
-    "cli-ux": "^1.1.9",
+    "cli-ux": "^1.1.10",
     "debug": "^3.0.1",
     "filesize": "^3.5.10",
     "find-up": "^2.1.0",
