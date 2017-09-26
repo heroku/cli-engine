@@ -19,12 +19,14 @@ const SALESFORCE_BUILTINS = [
 ]
 
 export default class {
+  config: Config
   userPlugins: UserPlugins
   linkedPlugins: LinkedPlugins
   cli: CLI
   lock: Lock
 
   constructor (config: Config) {
+    this.config = config
     let cache = new PluginCache(config)
     this.userPlugins = new UserPlugins({config, cache})
     this.linkedPlugins = new LinkedPlugins({config, cache})
@@ -50,7 +52,7 @@ export default class {
     if (fs.existsSync(this.userPlugins.userPluginsPJSONPath)) return
 
     debug('has existing plugins')
-    this.cli.action.start('Migrating Heroku CLI v5 plugins')
+    this.cli.action.start(`Migrating ${this.config.bin} CLI v5 plugins`)
     debug('removing existing node_modules')
     for (let p of pljson) {
       if (SALESFORCE_BUILTINS.includes(p.name)) continue

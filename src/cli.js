@@ -49,6 +49,7 @@ export default class CLI {
       }))
     }
     this.config = buildConfig(config)
+    global.config = this.config
     cli = new CLIUX({mock: this.config.mock})
   }
 

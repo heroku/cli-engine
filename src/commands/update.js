@@ -13,9 +13,11 @@ function brew (...args) {
   return cp.spawnSync('brew', args, {stdio: 'inherit'})
 }
 
+const cli = global.config ? global.config.bin : 'heroku'
+
 export default class Update extends Command<*> {
   static topic = 'update'
-  static description = 'update the Heroku CLI'
+  static description = `update the ${cli} CLI`
   static args = [
     {name: 'channel', optional: true}
   ]
