@@ -3,13 +3,23 @@
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 
+let examplePlugin = 'heroku-production-status'
+let cli = 'heroku'
+if (global.config) {
+  cli = global.config.bin
+  let pjson = global.config.pjson['cli-engine']
+  if (pjson['help'] && pjson['help']['plugins']) {
+    examplePlugin = Object.keys(pjson['help']['plugins'])[0]
+  }
+}
+
 export default class PluginsInstall extends Command<*> {
   static topic = 'plugins'
   static command = 'install'
   static description = 'installs a plugin into the CLI'
   static help = `
   Example:
-    $ heroku plugins:install heroku-production-status
+    $ ${cli} plugins:install ${examplePlugin}
   `
   static args = [
     {name: 'plugin', description: 'plugin to install'}
