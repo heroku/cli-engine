@@ -12,6 +12,7 @@ export default class PluginsUninstall extends Command<*> {
   static aliases = ['plugins:unlink']
   static description = 'uninstalls or unlinks a plugin'
   static help = `Example:
+  
     $ heroku plugins:uninstall heroku-accounts
 `
 

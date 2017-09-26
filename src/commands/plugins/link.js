@@ -12,6 +12,7 @@ export default class PluginsLink extends Command<*> {
   ]
   static description = 'links a local plugin to the CLI for development'
   static help = `Example:
+
     $ heroku plugins:link .
     Installing dependencies for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done
     Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`

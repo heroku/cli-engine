@@ -42,6 +42,9 @@ export default class Help extends Command<*> {
   static topic = 'help'
   static description = 'display help'
   static variableArgs = true
+  static help = `Example:
+
+    $ heroku help login`
 
   plugins: Plugins
 

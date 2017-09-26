@@ -9,6 +9,7 @@ export default class PluginsInstall extends Command<*> {
   static description = 'installs a plugin into the CLI'
   static help = `
   Example:
+
     $ heroku plugins:install heroku-production-status
   `
   static args = [
