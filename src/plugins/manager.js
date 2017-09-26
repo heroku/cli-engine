@@ -5,6 +5,7 @@ import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
+import {Hooks} from '../hooks'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -131,6 +132,8 @@ export class PluginPath {
       if (await this.repair(err)) return this.require()
       else throw err
     }
+    const hooks = new Hooks({ config: this.config })
+    await hooks.run('plugins:parse', {module: required})
 
     const exportedTopic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
     const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
