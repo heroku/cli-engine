@@ -3,6 +3,8 @@
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 
+const cli = global.config ? global.config.bin : 'heroku'
+
 export default class PluginsUninstall extends Command<*> {
   static topic = 'plugins'
   static command = 'uninstall'
@@ -12,7 +14,7 @@ export default class PluginsUninstall extends Command<*> {
   static aliases = ['plugins:unlink']
   static description = 'uninstalls or unlinks a plugin'
   static help = `Example:
-    $ cli-engine plugins:uninstall heroku-accounts
+    $ ${cli} plugins:uninstall heroku-accounts
 `
 
   plugins: Plugins
