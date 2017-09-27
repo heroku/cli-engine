@@ -116,7 +116,7 @@ export class Updater {
       const throttle = require('lodash.throttle')
       const updateStatus = throttle(newStatus => {
         this.cli.action.status = newStatus
-      }, 500)
+      }, 500, {leading: true, trailing: false})
       stream.on('data', data => {
         current += data.length
         updateStatus(`${filesize(current)}/${filesize(total)}`)
@@ -134,9 +134,10 @@ export class Updater {
 
     this._cleanup()
 
+    this.cli.action.status = 'finishing up'
     let downgrade = await this.lock.upgrade()
-    // wait 1000ms for any commands that were partially loaded to finish loading
-    await deps.wait(1000)
+    // wait 2000ms for any commands that were partially loaded to finish loading
+    await deps.wait(2000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
