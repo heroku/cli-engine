@@ -66,6 +66,7 @@ export default class Update extends Command<*> {
     const hooks = new Hooks({config: this.config})
     await hooks.run('update')
     debug('done')
+    this.cli.action.stop()
   }
 
   async logChop () {

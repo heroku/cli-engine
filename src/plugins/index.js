@@ -137,6 +137,7 @@ export default class Plugins {
     await this.user.update()
     this.clearCache(...(await this.user.list()).map(p => p.path))
     await downgrade()
+    this.cli.action.stop()
   }
 
   async uninstall (name: string) {
