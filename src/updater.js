@@ -50,9 +50,9 @@ export class Updater {
   cli: CLI
   lock: Lock
 
-  constructor (config: Config) {
+  constructor (config: Config, cli: ?CLI) {
     this.config = config
-    this.cli = new CLI({mock: config.mock})
+    this.cli = cli || new CLI({mock: config.mock})
     this.lock = new deps.Lock(config)
   }
 

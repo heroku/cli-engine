@@ -32,7 +32,7 @@ export default class Update extends Command<*> {
       this.out.stdout.logfile = this.out.autoupdatelog
       this.out.stderr.logfile = this.out.autoupdatelog
     }
-    this.updater = new Updater(this.config)
+    this.updater = new Updater(this.config, this.cli)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
       this.migrateBrew()
     } else if (this.config.updateDisabled) {
