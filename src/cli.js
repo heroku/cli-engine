@@ -74,15 +74,14 @@ export default class CLI {
       const id = this.config.argv[1]
       const {Dispatcher} = require('./dispatcher')
       const dispatcher = new Dispatcher(this.config)
-      let {Command, plugin} = await dispatcher.findCommand(id || this.config.defaultCommand || 'help')
+      let Command = await dispatcher.findCommand(id || this.config.defaultCommand || 'help')
 
       if (Command) {
         let {default: Lock} = require('./lock')
         let lock = new Lock(this.config)
         await lock.unread()
         let opts: PreRunOptions = {
-          Command,
-          plugin,
+          Command: (Command: any),
           argv: this.config.argv.slice(2)
         }
         await this.hooks.run('prerun', opts)
