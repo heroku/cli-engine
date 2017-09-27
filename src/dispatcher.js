@@ -60,7 +60,10 @@ class PluginCommandManager extends CommandManagerBase {
     const {default: Plugins} = require('./plugins')
     let plugins = new Plugins(this.config)
     await plugins.load()
-    return plugins.findCommand(id || this.config.defaultCommand || 'help')
+    let Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
+    if (!Command) return
+    Command.plugin = await plugins.findPluginWithCommand(Command.id)
+    return Command
   }
 }
 
