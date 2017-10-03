@@ -779,15 +779,15 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^8.0.18:
-  version "8.0.18"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-8.0.18.tgz#032ca59f4975ff770a018bdbed7d6ed5950a3a83"
+cli-engine-command@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-9.0.0.tgz#63ce9b5039b824ae171bb491d662c2cb2106fa88"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "^2.1.0"
-    cli-ux "^1.1.11"
+    cli-ux "^2.0.0"
     fs-extra "^4.0.2"
     http-call "^3.0.2"
     lodash.maxby "^4.6.0"
@@ -814,26 +814,9 @@ cli-truncate@^0.2.1:
     slice-ansi "0.0.4"
     string-width "^1.0.1"
 
-cli-ux@^1.1.11:
-  version "1.1.11"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-1.1.11.tgz#8cf2bec2f7cd05c5af9b545cdd10e741cb7ee5a7"
-  dependencies:
-    "@heroku/linewrap" "^1.0.0"
-    ansi-escapes "^3.0.0"
-    ansi-styles "^3.2.0"
-    cardinal "^1.0.0"
-    chalk "^2.1.0"
-    fs-extra "^4.0.2"
-    lodash "^4.17.4"
-    moment "^2.18.1"
-    password-prompt "^1.0.3"
-    strip-ansi "^4.0.0"
-    supports-color "^4.4.0"
-    ts-lodash "^4.0.5"
-
-cli-ux@^1.1.13:
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-1.1.13.tgz#886fe08daaee9d246489a74d468e1f7a33ec3878"
+cli-ux@^2.0.0, cli-ux@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.1.tgz#24cde45b405de39c527de8deb877c7a47ddba3d2"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
@@ -1217,9 +1200,9 @@ eslint-module-utils@^2.1.1:
     debug "^2.6.8"
     pkg-dir "^1.0.0"
 
-eslint-plugin-flowtype@^2.36.0:
-  version "2.36.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-2.36.0.tgz#ec21cf685dc270c2b24a99bdba1a57999c1040ec"
+eslint-plugin-flowtype@^2.37.0:
+  version "2.37.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-2.37.0.tgz#2b09694deea6efdd8354eccd328db134b2d8b6d5"
   dependencies:
     lodash "^4.15.0"
 
@@ -1266,9 +1249,9 @@ eslint-scope@^3.7.1:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint@^4.7.2:
-  version "4.7.2"
-  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.7.2.tgz#ff6f5f5193848a27ee9b627be3e73fb9cb5e662e"
+eslint@^4.8.0:
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/eslint/-/eslint-4.8.0.tgz#229ef0e354e0e61d837c7a80fdfba825e199815e"
   dependencies:
     ajv "^5.2.0"
     babel-code-frame "^6.22.0"

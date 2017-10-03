@@ -4,6 +4,8 @@ import Command, {flags} from 'cli-engine-command'
 import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import {Hooks} from '../hooks'
+import cli from 'cli-ux'
+import path from 'path'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -13,11 +15,11 @@ function brew (...args) {
   return cp.spawnSync('brew', args, {stdio: 'inherit'})
 }
 
-const cli = global.config ? global.config.bin : 'heroku'
+const cliBin = global.config ? global.config.bin : 'heroku'
 
 export default class Update extends Command<*> {
   static topic = 'update'
-  static description = `update the ${cli} CLI`
+  static description = `update the ${cliBin} CLI`
   static args = [
     {name: 'channel', optional: true}
   ]
@@ -29,8 +31,7 @@ export default class Update extends Command<*> {
   async run () {
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
-      this.out.stdout.logfile = this.out.autoupdatelog
-      this.out.stderr.logfile = this.out.autoupdatelog
+      cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
     this.updater = new Updater(this.config, this.cli)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
