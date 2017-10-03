@@ -3,7 +3,7 @@
 import type {Command} from 'cli-engine-command'
 import {color} from 'cli-engine-command/lib/color'
 import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
-import type {CLI as CLIUX} from 'cli-ux'
+import {default as cli} from 'cli-ux'
 import path from 'path'
 import type {Hooks, PreRunOptions} from './hooks'
 
@@ -12,12 +12,10 @@ const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
 
 if (!global.testing) {
   process.once('SIGINT', () => {
-    const cli: CLIUX = require('cli-ux').default
     if (cli.action.task) cli.action.stop(color.red('ctrl-c'))
     cli.exit(1)
   })
   let handleErr = err => {
-    const cli: CLIUX = require('cli-ux').default
     cli.error(err)
   }
   process.once('uncaughtException', handleErr)
@@ -32,7 +30,6 @@ export default class CLI {
   config: Config
   cmd: Command<*>
   hooks: Hooks
-  cli: CLIUX
 
   constructor ({config}: {|config?: ConfigOptions|} = {}) {
     if (!config) config = {}
@@ -51,7 +48,6 @@ export default class CLI {
       debug: this.config.debug,
       mock: this.config.mock
     }
-    this.cli = require('cli-ux').default
   }
 
   async run () {
@@ -113,7 +109,7 @@ export default class CLI {
     const {timeout} = require('./util')
     await timeout(this.flush(), 10000)
     debug('exiting')
-    this.cli.exit(0)
+    cli.exit(0)
   }
 
   flush (): Promise<void> {
