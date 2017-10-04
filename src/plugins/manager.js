@@ -51,6 +51,8 @@ function makeID (o: any): string {
 }
 
 function buildHelp (c: ParsedCommand, config: Config): string {
+  if (!c.id) c.id = makeID(c)
+  c.flags = convertFlagsFromV5(c.flags)
   if ((c: any).buildHelp) return (c: any).buildHelp(config)
   const help = new Help(config)
   return help.command((c: any))
@@ -58,6 +60,7 @@ function buildHelp (c: ParsedCommand, config: Config): string {
 
 function buildHelpLine (c: ParsedCommand, config: Config): [string, ?string] {
   if (!c.id) c.id = makeID(c)
+  c.flags = convertFlagsFromV5(c.flags)
   if ((c: any).buildHelpLine) return (c: any).buildHelpLine(config)
   const help = new Help(config)
   return help.commandLine((c: any))
