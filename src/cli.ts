@@ -52,6 +52,7 @@ export default class CLI {
       )
     }
     this.config = buildConfig(config)
+    ;(<any>global).config = this.config
     cli.config.debug = this.config.debug
     cli.config.errlog = this.config.errlog
   }
@@ -60,7 +61,7 @@ export default class CLI {
     debug('starting run')
     const config = this.config
 
-    const updater = new deps.Updater(config, cli)
+    const updater = new deps.Updater(config)
     debug('checking autoupdater')
     await updater.autoupdate()
 
@@ -94,7 +95,7 @@ export default class CLI {
     }
     await this.hooks.run('prerun', opts)
 
-    let lock = new deps.Lock(config, cli)
+    let lock = new deps.Lock(config)
     await lock.unread()
     debug('running %s', this.cmd.__config.id)
     await this.cmd._run(config.argv.slice(3))

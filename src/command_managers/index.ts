@@ -4,7 +4,7 @@ import { CLI } from 'cli-ux'
 
 export class CommandManager extends CommandManagerBase {
   constructor(config: Config, cli?: CLI) {
-    super({ config, cli })
+    super({ config })
     // const {ConventionalCommandManager} = require('./conventional')
     const { BuiltinCommandManager } = require('./builtin')
     if (true || this.config.userPlugins) {

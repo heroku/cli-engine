@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import { IBooleanFlag } from 'cli-flags'
 import * as path from 'path'
 import { Command, flags } from 'cli-engine-command'
@@ -30,8 +31,7 @@ export default class Update extends Command {
   async run() {
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
-      this.cli.stdout.logfile = this.autoupdatelog
-      this.cli.stderr.logfile = this.autoupdatelog
+      cli.config.errlog = this.autoupdatelog
     }
     this.updater = new Updater(this.config)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
