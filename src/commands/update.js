@@ -4,6 +4,8 @@ import Command, {flags} from 'cli-engine-command'
 import {Updater} from '../updater'
 import PluginsUpdate from './plugins/update'
 import {Hooks} from '../hooks'
+import cli from 'cli-ux'
+import path from 'path'
 
 const debug = require('debug')('cli-engine:update')
 
@@ -13,9 +15,11 @@ function brew (...args) {
   return cp.spawnSync('brew', args, {stdio: 'inherit'})
 }
 
+const cliBin = global.config ? global.config.bin : 'heroku'
+
 export default class Update extends Command<*> {
   static topic = 'update'
-  static description = 'update the Heroku CLI'
+  static description = `update the ${cliBin} CLI`
   static args = [
     {name: 'channel', optional: true}
   ]
@@ -27,10 +31,9 @@ export default class Update extends Command<*> {
   async run () {
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
-      this.out.stdout.logfile = this.out.autoupdatelog
-      this.out.stderr.logfile = this.out.autoupdatelog
+      cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
-    this.updater = new Updater(this.config)
+    this.updater = new Updater(this.config, this.cli)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
       this.migrateBrew()
     } else if (this.config.updateDisabled) {
@@ -40,7 +43,9 @@ export default class Update extends Command<*> {
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
-        this.out.action.stop(`already on latest version: ${this.config.version}`)
+        if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
+          this.out.action.stop(`already on latest version: ${this.config.version}`)
+        }
       } else {
         let {yellow, green} = this.out.color
         this.out.action.start(`${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(manifest.version)}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`)
@@ -64,6 +69,7 @@ export default class Update extends Command<*> {
     const hooks = new Hooks({config: this.config})
     await hooks.run('update')
     debug('done')
+    this.cli.action.stop()
   }
 
   async logChop () {

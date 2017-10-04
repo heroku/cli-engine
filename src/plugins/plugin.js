@@ -51,11 +51,15 @@ export default class Plugin {
     return this.cachedPlugin.topics
   }
 
-  async findCommand (id: string): Promise<?Class<Command<*>>> {
+  async findCachedCommand (id: string): Promise<?CachedCommand> {
     if (!id) return
-    let c = this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
-    if (!c) return
-    let {topic, command} = c
+    return this.commands.find(c => c.id === id || (c.aliases || []).includes(id))
+  }
+
+  async findCommand (id: string): Promise<?Class<Command<*>>> {
+    const cachedCommand = await this.findCachedCommand(id)
+    if (!cachedCommand) return
+    let {topic, command} = cachedCommand
     let p = await this.pluginPath.require()
     let Command = (p.commands || [])
       .find(d => topic === d.topic && command === d.command)
@@ -66,11 +70,7 @@ export default class Plugin {
   async findTopic (id: string): Promise<?Class<Topic>> {
     let t = this.topics.find(t => t.id === id)
     if (!t) return
-    let plugin = await this.pluginPath.require()
-    let Topic = (plugin.topics || [])
-      .find(t => [t.id].includes(id))
-    if (!Topic) return
-    return typeof Topic === 'function' ? Topic : this.buildTopic(t)
+    return this.buildTopic(t)
   }
 
   buildTopic (t: CachedTopic): Class<Topic> {

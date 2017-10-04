@@ -2,6 +2,7 @@
 
 import type {Config} from 'cli-engine-config'
 import type Cache from './cache'
+import {Hooks} from '../hooks'
 
 import path from 'path'
 import fs from 'fs-extra'
@@ -43,11 +44,13 @@ class UserPluginPath extends PluginPath {
 }
 
 export default class UserPlugins extends Manager {
+  hooks: Hooks
   hardcodedDepFixes: Object
 
   constructor ({config, cache}: {config: Config, cache: Cache}) {
     super({config, cache})
     this.yarn = new Yarn(this.config, this.userPluginsDir)
+    this.hooks = new Hooks({config})
 
     /**
      * There is a bug with snappy & node-gyp & semver that causes issues when
@@ -131,6 +134,7 @@ export default class UserPlugins extends Manager {
   }
 
   async install (name: string, tag: string = 'latest') {
+    await this.hooks.run('plugins:preinstall', {plugin: name, tag})
     await this.setupUserPlugins()
     this.addPackageToPJSON(name, tag)
     try {
