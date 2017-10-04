@@ -372,7 +372,11 @@ export class Updater {
     }
 
     debug('update complete, restarting CLI')
-    const { status } = this.spawnBinPath(spawnSync, bin, args, { stdio: 'inherit' })
+    const env = {
+      ...process.env,
+      CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1',
+    }
+    const { status } = this.spawnBinPath(spawnSync, bin, args, { env, stdio: 'inherit' })
     cli.exit(status)
   }
 

@@ -46,7 +46,9 @@ export default class Update extends Command {
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
-        cli.action.stop(`already on latest version: ${this.config.version}`)
+        if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
+          cli.action.stop(`already on latest version: ${this.config.version}`)
+        }
       } else {
         let { yellow, green } = this.color
         cli.action.start(
