@@ -44,6 +44,7 @@
     "@types/supports-color": "^3.1.0",
     "babel-core": "^6.26.0",
     "del": "*",
+    "del-cli": "1.1.0",
     "execa": "^0.8.0",
     "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",
     "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
@@ -56,6 +57,7 @@
     "lint-staged": "^4.2.3",
     "nock": "*",
     "prettier": "^1.7.4",
+    "remap-istanbul": "0.9.5",
     "semver": "^5.4.1",
     "time-require": "^0.1.2",
     "ts-jest": "^21.0.1",
@@ -74,6 +76,7 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
+    "coverage": "cat coverage/coverage-final.json | remap-istanbul -o coverage/coverage-final.json && curl -s https://codecov.io/bash | bash",
     "clean": "del lib tmp",
     "download": "node ./scripts/download-yarn",
     "posttest": "prettier -l 'src/**/*.ts'",
