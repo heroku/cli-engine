@@ -19,6 +19,8 @@ export type CachedCommand = {
   flags: {[name: string]: Flag},
   description: ?string,
   help?: ?string,
+  buildHelpLine: [string, ?string],
+  buildHelp: string,
   usage?: ?string,
   hidden: boolean
 }
