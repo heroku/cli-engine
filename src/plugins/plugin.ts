@@ -5,6 +5,8 @@ import * as path from 'path'
 import _ from 'ts-lodash'
 import { Hooks } from '../hooks'
 
+const debug = require('debug')('plugins:plugin')
+
 export type PluginTypes = 'core' | 'user' | 'link'
 export type PluginOptions = {
   type: PluginTypes
@@ -85,10 +87,12 @@ export class Plugin extends CommandManagerBase {
   }
 
   protected async init() {
+    if (this.pjson) return
     this.pjson = await fs.readJSON(path.join(this.root, 'package.json'))
     this.name = this.pjson.name
     this.version = this.pjson.version
     if (this.pjson.main) {
+      debug(`requiring ${this.name}@${this.version}`)
       const m = require(path.join(this.root, this.pjson.main))
       if (!m.commands) m.commands = []
       if (!m.topics) m.topics = []
@@ -96,19 +100,10 @@ export class Plugin extends CommandManagerBase {
       m.commands.map(
         (c: any, i: number) => (m.commands[i] = c.default && typeof c.default !== 'boolean' ? c.default : c),
       )
-      m.commands.forEach((c: any) => {
-        c.__config = c.__config || {}
-        c.__config.id = makeID(c)
-        c.__config.plugin = this
-      })
       const hooks = new Hooks({ config: this.config })
       await hooks.run('plugins:parse', { module: m, plugin: this })
       this.module = m
     }
     await super.init()
   }
-}
-
-function makeID(c: any): string {
-  return _.compact([c.topic, c.command]).join(':')
 }
