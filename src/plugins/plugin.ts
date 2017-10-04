@@ -99,6 +99,7 @@ export class Plugin extends CommandManagerBase {
       m.commands.forEach((c: any) => {
         c.__config = c.__config || {}
         c.__config.id = makeID(c)
+        c.__config.plugin = this
       })
       const hooks = new Hooks({ config: this.config })
       await hooks.run('plugins:parse', { module: m })
