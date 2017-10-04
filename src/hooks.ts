@@ -15,6 +15,7 @@ export class Hooks {
     this.config = config
   }
 
+  async run(event: 'plugins:parse', options: { module: any }): Promise<void>
   async run(event: 'prerun', options: PreRunOptions): Promise<void>
   async run(event: string): Promise<void>
   async run(event: string, options: { [k: string]: any } = {}): Promise<void> {
