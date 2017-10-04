@@ -286,6 +286,7 @@ export class Updater {
       return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
+      debug(err)
       return true
     }
   }
