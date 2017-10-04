@@ -50,15 +50,15 @@ export class Updater {
   cli: CLI
   lock: Lock
 
-  constructor (config: Config) {
+  constructor (config: Config, cli: ?CLI) {
     this.config = config
-    this.cli = new CLI({mock: config.mock})
+    this.cli = cli || new CLI({mock: config.mock})
     this.lock = new deps.Lock(config)
   }
 
   get autoupdatefile (): string { return path.join(this.config.cacheDir, 'autoupdate') }
   get autoupdatelogfile (): string { return path.join(this.config.cacheDir, 'autoupdate.log') }
-  get binPath (): ?string { return process.env.CLI_BINPATH }
+  get binPath (): ?string { return process.env.CLI_BINPATH || this.config.bin }
   get updateDir (): string { return path.join(this.config.dataDir, 'tmp', 'u') }
   get versionFile (): string { return path.join(this.config.cacheDir, `${this.config.channel}.version`) }
 
@@ -116,7 +116,7 @@ export class Updater {
       const throttle = require('lodash.throttle')
       const updateStatus = throttle(newStatus => {
         this.cli.action.status = newStatus
-      }, 500)
+      }, 500, {leading: true, trailing: false})
       stream.on('data', data => {
         current += data.length
         updateStatus(`${filesize(current)}/${filesize(total)}`)
@@ -134,9 +134,10 @@ export class Updater {
 
     this._cleanup()
 
+    this.cli.action.status = 'finishing up'
     let downgrade = await this.lock.upgrade()
-    // wait 1000ms for any commands that were partially loaded to finish loading
-    await deps.wait(1000)
+    // wait 2000ms for any commands that were partially loaded to finish loading
+    await deps.wait(2000)
     if (await fs.exists(dir)) this._rename(dir, dirs.client)
     this._rename(extracted, dir)
     downgrade()
@@ -285,6 +286,7 @@ export class Updater {
       return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
+      debug(err)
       return true
     }
   }
@@ -371,7 +373,11 @@ export class Updater {
     }
 
     debug('update complete, restarting CLI')
-    const {status} = this.spawnBinPath(spawnSync, bin, args, {stdio: 'inherit'})
+    const env = {
+      ...process.env,
+      CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1'
+    }
+    const {status} = this.spawnBinPath(spawnSync, bin, args, {env, stdio: 'inherit'})
     this.cli.exit(status)
   }
 

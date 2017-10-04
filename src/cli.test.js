@@ -86,9 +86,9 @@ Flags:
  --core  show core plugins
 
 Example:
-    $ heroku plugins
+    $ cli-engine plugins
     heroku-ci 1.8.0
-    heroku-cli-status 3.0.10 (link)
+    heroku-cli-status 3.0.10
     heroku-fork 4.1.22
 
 cli-engine plugins commands: (get help with cli-engine help plugins:COMMAND)
@@ -106,7 +106,7 @@ installs a plugin into the CLI
 PLUGIN  plugin to install
 
 Example:
-    $ heroku plugins:install heroku-production-status
+    $ cli-engine plugins:install heroku-production-status
 
 `
 

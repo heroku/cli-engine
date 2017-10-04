@@ -2,7 +2,6 @@
 
 import {type Config} from 'cli-engine-config'
 import {type Command} from 'cli-engine-command'
-import type Plugin from './plugins/plugin'
 import path from 'path'
 import {undefault} from './util'
 const debug = require('debug')('cli:dispatcher')
@@ -60,7 +59,10 @@ class PluginCommandManager extends CommandManagerBase {
     const {default: Plugins} = require('./plugins')
     let plugins = new Plugins(this.config)
     await plugins.load()
-    return plugins.findCommand(id || this.config.defaultCommand || 'help')
+    let Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
+    if (!Command) return
+    Command.plugin = await plugins.findPluginWithCommand(Command.id)
+    return Command
   }
 }
 
@@ -79,16 +81,12 @@ export class Dispatcher {
     }
   }
 
-  async findCommand (id: string): {
-    Command?: ?Class<Command<*>>,
-    plugin?: ?Plugin
-  } {
-    if (!id) return {}
+  async findCommand (id: string) {
+    if (!id) return
     for (let manager of this.managers) {
       let Command = await manager.findCommand(id)
-      if (Command) return {Command}
+      if (Command) return Command
     }
-    return {}
   }
 
   findTopic (id: string) {

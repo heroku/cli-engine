@@ -4,15 +4,28 @@ import Command, {flags} from 'cli-engine-command'
 import {compare} from '../../util'
 import Plugins from '../../plugins'
 
+let examplePlugins = {
+  'heroku-ci': {version: '1.8.0'},
+  'heroku-cli-status': {version: '3.0.10', type: 'link'},
+  'heroku-fork': {version: '4.1.22'}
+}
+let cli = 'heroku'
+if (global.config) {
+  cli = global.config.bin
+  let pjson = global.config.pjson['cli-engine']
+  if (pjson['help'] && pjson['help']['plugins']) {
+    examplePlugins = pjson['help']['plugins']
+  }
+}
+const examplePluginsHelp = Object.entries(examplePlugins).map(([name, p]: [string, any]) => `    ${name} ${p.version}`)
+
 export default class extends Command<*> {
   static topic = 'plugins'
   static flags = {core: flags.boolean({description: 'show core plugins'})}
   static description = 'list installed plugins'
   static help = `Example:
-    $ heroku plugins
-    heroku-ci 1.8.0
-    heroku-cli-status 3.0.10 (link)
-    heroku-fork 4.1.22
+    $ ${cli} plugins
+${examplePluginsHelp.join('\n')}
 `
 
   async run () {

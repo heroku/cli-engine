@@ -4,6 +4,7 @@ import Command from 'cli-engine-command'
 import {compare} from '../util'
 import {stdtermwidth} from 'cli-engine-command/lib/screen'
 import Plugins from '../plugins'
+import type {CachedCommand} from '../plugins/cache'
 
 function trimToMaxLeft (n: number): number {
   let max = parseInt(stdtermwidth * 0.6)
@@ -54,14 +55,14 @@ export default class Help extends Command<*> {
     }
 
     const topic = await this.plugins.findTopic(cmd)
-    const matchedCommand = await this.plugins.findCommand(cmd)
+    const matchedCommand = await this.plugins.findCachedCommand(cmd)
 
     if (!topic && !matchedCommand) {
       throw new Error(`command ${cmd} not found`)
     }
 
     if (matchedCommand) {
-      this.out.log(matchedCommand.buildHelp(this.config))
+      this.out.log(matchedCommand.buildHelp)
     }
 
     if (topic) {
@@ -93,13 +94,13 @@ Help topics, type ${this.out.color.cmd(this.config.bin + ' help TOPIC')} for mor
     this.out.log()
   }
 
-  listCommandsHelp (topic: string, commands: Class<Command<*>>[]) {
+  listCommandsHelp (topic: string, commands: CachedCommand[]) {
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
     commands.sort(compare('command'))
     let helpCmd = this.out.color.cmd(`${this.config.bin} help ${topic}:COMMAND`)
     this.out.log(`${this.config.bin} ${this.out.color.bold(topic)} commands: (get help with ${helpCmd})`)
-    this.out.log(renderList(commands.map(c => c.buildHelpLine(this.config))))
+    this.out.log(renderList(commands.map(c => c.buildHelpLine)))
     this.out.log()
   }
 }

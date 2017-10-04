@@ -5,6 +5,8 @@ import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
+import {Hooks} from '../hooks'
+import Help from 'cli-engine-command/lib/help'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -44,6 +46,26 @@ type PluginPathOptions = {
   tag?: string
 }
 
+function makeID (o: any): string {
+  return o.id || [(o.topic || o.name), o.command].filter(s => s).join(':')
+}
+
+function buildHelp (c: ParsedCommand, config: Config): string {
+  if (!c.id) c.id = makeID(c)
+  c.flags = convertFlagsFromV5(c.flags)
+  if ((c: any).buildHelp) return (c: any).buildHelp(config)
+  const help = new Help(config)
+  return help.command((c: any))
+}
+
+function buildHelpLine (c: ParsedCommand, config: Config): [string, ?string] {
+  if (!c.id) c.id = makeID(c)
+  c.flags = convertFlagsFromV5(c.flags)
+  if ((c: any).buildHelpLine) return (c: any).buildHelpLine(config)
+  const help = new Help(config)
+  return help.commandLine((c: any))
+}
+
 export class PluginPath {
   constructor (options: PluginPathOptions) {
     this.config = options.config
@@ -75,7 +97,7 @@ export class PluginPath {
 
     const commands: CachedCommand[] = plugin.commands
       .map((c: ParsedCommand): CachedCommand => ({
-        id: c.id || this.makeID(c),
+        id: c.id || makeID(c),
         topic: c.topic,
         command: c.command,
         description: c.description,
@@ -85,6 +107,8 @@ export class PluginPath {
         usage: c.usage,
         hidden: !!c.hidden,
         aliases: getAliases(c),
+        buildHelpLine: buildHelpLine(c, this.config),
+        buildHelp: buildHelp(c, this.config),
         flags: convertFlagsFromV5(c.flags)
       }))
 
@@ -131,6 +155,8 @@ export class PluginPath {
       if (await this.repair(err)) return this.require()
       else throw err
     }
+    const hooks = new Hooks({ config: this.config })
+    await hooks.run('plugins:parse', {module: required})
 
     const exportedTopic: ParsedTopic = required.topic && this.undefaultTopic(required.topic)
     const exportedTopics : Array<ParsedTopic> = required.topics && required.topics.map(t => this.undefaultTopic(t))
@@ -161,10 +187,6 @@ export class PluginPath {
       }
       return topic
     })
-  }
-
-  makeID (o: any): string {
-    return [(o.topic || o.name), o.command].filter(s => s).join(':')
   }
 
   pjson (): {name: string, version: string} {

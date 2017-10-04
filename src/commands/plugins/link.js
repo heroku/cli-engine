@@ -4,6 +4,11 @@ import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 import path from 'path'
 
+let cli = 'heroku'
+if (global.config) {
+  cli = global.config.bin
+}
+
 export default class PluginsLink extends Command<*> {
   static topic = 'plugins'
   static command = 'link'
@@ -12,7 +17,7 @@ export default class PluginsLink extends Command<*> {
   ]
   static description = 'links a local plugin to the CLI for development'
   static help = `Example:
-    $ heroku plugins:link .
+    $ ${cli} plugins:link .
     Installing dependencies for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done
     Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`
 
