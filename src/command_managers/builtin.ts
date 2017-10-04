@@ -48,4 +48,10 @@ export class BuiltinCommandManager extends CommandManagerBase {
   async listCommandIDs() {
     return Object.keys(this.commands)
   }
+
+  protected require(p: string, id: string): ICommand {
+    let m = super.require(p, id)
+    m.__config.plugin = { name: 'builtin', version: require('../../package.json').version }
+    return m
+  }
 }
