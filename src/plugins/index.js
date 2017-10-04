@@ -81,12 +81,18 @@ export default class Plugins {
     }
   }
 
-  async commandsForTopic (topic: string): Promise<Class<Command<*>>[]> {
+  async findCachedCommand (id: string): Promise<?CachedCommand> {
+    for (let plugin of this.plugins) {
+      let c = await plugin.findCachedCommand(id)
+      if (c) return c
+    }
+  }
+
+  async commandsForTopic (topic: string): Promise<CachedCommand[]> {
     let commands = this.plugins.reduce((t, p) => {
       try {
         return t.concat(p.commands
-          .filter(c => c.topic === topic)
-          .map(c => p.findCommand(c.id)))
+          .filter(c => c.topic === topic))
       } catch (err) {
         this.cli.warn(err, `error reading plugin ${p.name}`)
         return t

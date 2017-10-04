@@ -60,7 +60,9 @@ test('linked plugin should be cached', async () => {
         'flags': {},
         'hidden': false,
         'id': 'foo',
-        'topic': 'foo'
+        'topic': 'foo',
+        buildHelp: 'Usage: test-cli foo\n\nlink\n',
+        buildHelpLine: ['foo', 'link']
       }
     ],
     'name': 'cli-engine-test-foo',
@@ -112,7 +114,9 @@ test('linked plugin prepare should clear cache', async () => {
         'flags': {},
         'hidden': false,
         'id': 'foo',
-        'topic': 'foo'
+        'topic': 'foo',
+        buildHelp: 'Usage: test-cli foo\n\nlink\n',
+        buildHelpLine: ['foo', 'link']
       }
     ],
     'name': 'cli-engine-test-foo',
