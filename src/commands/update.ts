@@ -14,9 +14,12 @@ function brew(...args: string[]) {
   return cp.spawnSync('brew', args, { stdio: 'inherit' })
 }
 
+const globalConfig = (<any>global).config
+const cliBin = globalConfig ? globalConfig.bin : 'heroku'
+
 export default class Update extends Command {
   options = {
-    description: 'update the Heroku CLI',
+    description: `update the ${cliBin} CLI`,
     args: [{ name: 'channel', optional: true }],
     flags: {
       autoupdate: flags.boolean({ hidden: true }) as IBooleanFlag,
