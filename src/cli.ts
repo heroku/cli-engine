@@ -1,6 +1,6 @@
 require('./fs')
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
-import { CLI as CLIUX } from 'cli-ux'
+import cli from 'cli-ux'
 import * as path from 'path'
 import { Hooks, PreRunOptions } from './hooks'
 import * as chalk from 'chalk'
@@ -11,7 +11,6 @@ const handleEPIPE = (err: any) => {
   if (err.code !== 'EPIPE') throw err
 }
 
-let cli: CLIUX = new CLIUX()
 const testing = (global as any)['columns']
 if (!testing) {
   process.once('SIGINT', () => {
@@ -53,7 +52,8 @@ export default class CLI {
       )
     }
     this.config = buildConfig(config)
-    cli = new CLIUX({ mock: this.config.mock, debug: !!this.config.debug, errlog: this.config.errlog })
+    cli.config.debug = this.config.debug
+    cli.config.errlog = this.config.errlog
   }
 
   async run() {

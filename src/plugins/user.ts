@@ -1,5 +1,5 @@
+import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
-import { CLI } from 'cli-ux'
 import { Plugin } from './plugin'
 import { Lock } from '../lock'
 import Yarn from './yarn'
@@ -14,17 +14,15 @@ export type PJSON = {
 export class UserPlugins {
   public plugins: Plugin[]
   protected config: Config
-  protected cli: CLI
   protected userPluginsPJSONPath: string
   protected userPluginsPJSON: PJSON = { private: true }
   private lock: Lock
   private yarn: Yarn
 
-  constructor({ config, cli }: { config: Config; cli: CLI }) {
+  constructor({ config }: { config: Config }) {
     this.config = config
-    this.cli = cli
-    this.lock = new Lock(this.config, this.cli)
-    this.yarn = new Yarn({ config, cli, cwd: this.userPluginsDir })
+    this.lock = new Lock(this.config)
+    this.yarn = new Yarn({ config, cwd: this.userPluginsDir })
   }
 
   get userPluginsDir(): string {
@@ -34,7 +32,7 @@ export class UserPlugins {
   public async update() {
     await this.init()
     if (this.plugins.length === 0) return
-    this.cli.action.start(`${this.config.name}: Updating plugins`)
+    cli.action.start(`${this.config.name}: Updating plugins`)
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['upgrade'])
     await downgrade()
@@ -56,7 +54,7 @@ export class UserPlugins {
       this.plugins.push(plugin)
     } catch (err) {
       this.removePackageFromPJSON(name)
-      this.cli.error(err)
+      cli.error(err)
     }
   }
 
@@ -71,7 +69,6 @@ export class UserPlugins {
     this.plugins = Object.entries(pjson.dependencies || {}).map(([name, tag]) => {
       return new Plugin({
         config: this.config,
-        cli: this.cli,
         type: 'user',
         root: this.userPluginPath(name),
         tag: tag,

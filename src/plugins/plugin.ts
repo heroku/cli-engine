@@ -1,5 +1,4 @@
 import { IArg, IFlag } from 'cli-flags'
-import { CLI } from 'cli-ux'
 import { Command, flags as Flags } from 'cli-engine-command'
 import { CommandManagerBase } from '../command_managers/base'
 import { ICommand, Config, Topic } from 'cli-engine-config'
@@ -14,7 +13,6 @@ export type PluginOptions = {
   root: string
   tag?: string
   config: Config
-  cli: CLI
 }
 
 export type PluginPJSON = {

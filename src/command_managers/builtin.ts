@@ -6,8 +6,8 @@ export class BuiltinCommandManager extends CommandManagerBase {
   commands: { [name: string]: string }
   topics: Topic[]
 
-  constructor({ config, cli }: CommandManagerBase) {
-    super({ config, cli })
+  constructor({ config }: CommandManagerBase) {
+    super({ config })
     this.commands = {
       commands: 'commands',
       help: 'help',

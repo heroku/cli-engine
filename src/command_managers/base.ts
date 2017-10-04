@@ -1,6 +1,6 @@
 import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic, ICommand } from 'cli-engine-config'
-import { CLI } from 'cli-ux'
+import cli from 'cli-ux'
 import { inspect } from 'util'
 import { deps } from '../deps'
 import _ from '../lodash'
@@ -21,11 +21,9 @@ function uniqCommandIDs(ids: string[]): string[] {
 
 export abstract class CommandManagerBase {
   protected config: Config
-  protected cli: CLI
   protected submanagers: CommandManagerBase[]
 
-  constructor({ config, cli }: { config: Config; cli?: CLI }) {
-    this.cli = cli || new CLI({ debug: !!config.debug, mock: config.mock, errlog: config.errlog })
+  constructor({ config }: { config: Config }) {
     this.config = config
     if (!this.submanagers) this.submanagers = []
   }
@@ -122,7 +120,7 @@ export abstract class CommandManagerBase {
     try {
       Command = deps.util.undefault(require(p))
     } catch (err) {
-      this.cli.warn(err, { context: `Error reading command from ${p}` })
+      cli.warn(err, { context: `Error reading command from ${p}` })
     }
     if (!Command || !(Command.prototype instanceof CommandBase)) {
       let extra = deps.util.isEmpty(Command)

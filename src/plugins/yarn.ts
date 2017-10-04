@@ -1,4 +1,4 @@
-import { CLI } from 'cli-ux'
+import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
 import * as fs from 'fs-extra'
@@ -7,14 +7,12 @@ const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
   config: Config
-  cli: CLI
   cwd: string
 
   static extraOpts: string[] = []
 
-  constructor({ config, cli, cwd }: { config: Config; cli: CLI; cwd: string }) {
+  constructor({ config, cwd }: { config: Config; cwd: string }) {
     this.config = config
-    this.cli = cli
     this.cwd = cwd
   }
 
@@ -58,14 +56,14 @@ export default class Yarn {
       forked.stdout.setEncoding('utf8')
       forked.stdout.on('data', (data: string) => {
         if (this.config.debug) {
-          this.cli.stdout.write(data)
+          cli.stdout.write(data)
         }
       })
 
       forked.stderr.setEncoding('utf8')
       forked.stderr.on('data', (data: string) => {
         if (this.config.debug) {
-          this.cli.stderr.write(data)
+          cli.stderr.write(data)
         }
 
         error += data

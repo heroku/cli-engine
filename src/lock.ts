@@ -1,10 +1,10 @@
 import * as path from 'path'
 import { Config } from 'cli-engine-config'
-import { CLI } from 'cli-ux'
+import cli from 'cli-ux'
 import { deps } from './deps'
 
 export class Lock {
-  constructor(readonly config: Config, readonly cli: CLI) {}
+  constructor(readonly config: Config) {}
 
   get updatelockfile(): string {
     return path.join(this.config.cacheDir, 'update.lock')
@@ -31,7 +31,7 @@ export class Lock {
 
     // check for other readers
     if (await deps.RWLockFile.hasReaders(this.updatelockfile)) {
-      this.cli.action.status = `Waiting for all commands to finish`
+      cli.action.status = `Waiting for all commands to finish`
     }
 
     // grab writer lock
