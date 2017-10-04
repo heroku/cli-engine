@@ -40,27 +40,27 @@ export default class Update extends Command {
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
       this.migrateBrew()
     } else if (this.config.updateDisabled) {
-      this.cli.warn(this.config.updateDisabled)
+      cli.warn(this.config.updateDisabled)
     } else {
-      this.cli.action.start(`${this.config.name}: Updating CLI`)
+      cli.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
-        this.cli.action.stop(`already on latest version: ${this.config.version}`)
+        cli.action.stop(`already on latest version: ${this.config.version}`)
       } else {
         let { yellow, green } = this.color
-        this.cli.action.start(
+        cli.action.start(
           `${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(
             manifest.version,
           )}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`,
         )
         await this.updater.update(manifest)
-        this.cli.action.stop()
+        cli.action.stop()
         try {
           await this.updater.autoupdate(true)
-          this.cli.exit(0)
+          cli.exit(0)
         } catch (err) {
-          this.cli.warn(err, { context: 'post-install autoupdate failed' })
+          cli.warn(err, { context: 'post-install autoupdate failed' })
         }
       }
     }
@@ -93,10 +93,10 @@ export default class Update extends Command {
       let p = fs.realpathSync('/usr/local/bin/heroku')
       if (p.match(/\/usr\/local\/Cellar\/heroku\/\d+\.\d+\.\d+\//)) {
         // not on private tap, move to it
-        this.cli.action.start('Upgrading homebrew formula')
+        cli.action.start('Upgrading homebrew formula')
         brew('tap', 'heroku/brew')
         brew('upgrade', 'heroku/brew/heroku')
-        this.cli.action.stop()
+        cli.action.stop()
       }
     } catch (err) {
       debug(err)

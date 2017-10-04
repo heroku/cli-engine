@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { deps } from '../deps'
@@ -14,7 +15,7 @@ export default class Commands extends Command {
   }
 
   async run() {
-    this.cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
+    cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
     await this.addV6Hack()
     const commandManager = new deps.CommandManager(this.config)
     let topics = (await commandManager.listTopics()).filter(t => !t.hidden)
@@ -35,7 +36,7 @@ export default class Commands extends Command {
         fullHelp: c.options.help,
         hidden: c.options.hidden,
       }))
-    this.cli.styledJSON({ topics, commands })
+    cli.styledJSON({ topics, commands })
   }
 
   async addV6Hack() {

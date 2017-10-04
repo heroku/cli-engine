@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { Config, ICommand } from 'cli-engine-config'
@@ -57,7 +58,7 @@ export default class Help extends Command {
     }
 
     if (matchedCommand) {
-      this.cli.log(buildHelp(this.config, matchedCommand))
+      cli.log(buildHelp(this.config, matchedCommand))
     }
 
     if (topic) {
@@ -86,14 +87,14 @@ export default class Help extends Command {
     if (!topics.length) return topics
 
     // header
-    this.cli.log(`${this.color.bold('Usage:')} ${this.config.bin} ${idPrefix}COMMAND
+    cli.log(`${this.color.bold('Usage:')} ${this.config.bin} ${idPrefix}COMMAND
 
 Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more details:`)
 
     // display topics
-    this.cli.log(renderList(topics))
+    cli.log(renderList(topics))
 
-    this.cli.log()
+    cli.log()
     return topics
   }
 
@@ -103,12 +104,12 @@ Help topics, type ${this.color.cmd(this.config.bin + ' help TOPIC')} for more de
     _.sortBy(commands, 'id')
     let helpCmd = this.color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
-      this.cli.log(`${this.config.bin} ${this.color.bold(topic)} commands: (get help with ${helpCmd})`)
+      cli.log(`${this.config.bin} ${this.color.bold(topic)} commands: (get help with ${helpCmd})`)
     } else {
-      this.cli.log('Root commands:')
+      cli.log('Root commands:')
     }
     let helpLines = commands.map(c => buildHelpLine(this.config, c)).map(([a, b]) => [` ${a}`, b] as [string, string])
-    this.cli.log(renderList(helpLines))
-    this.cli.log()
+    cli.log(renderList(helpLines))
+    cli.log()
   }
 }

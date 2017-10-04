@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import { Command } from 'cli-engine-command'
 
 export default class Version extends Command {
@@ -7,6 +8,6 @@ export default class Version extends Command {
   }
 
   async run() {
-    this.cli.log(this.config.userAgent)
+    cli.log(this.config.userAgent)
   }
 }

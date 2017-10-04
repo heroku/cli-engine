@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import { CommandManager } from './command_managers'
 import { Command } from 'cli-engine-command'
 
@@ -28,7 +29,7 @@ export default class NotFound extends Command {
 
   async run() {
     const { color } = this
-    this.commandManager = new CommandManager(this.config, this.cli)
+    this.commandManager = new CommandManager(this.config)
 
     let closest
     let binHelp = `${this.config.bin} help`
@@ -44,7 +45,7 @@ export default class NotFound extends Command {
     }
 
     let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''
-    this.cli.error(
+    cli.error(
       `${color.yellow(id)} is not a ${this.config.bin} command.
 ${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`,
       { exitCode: 127 },
