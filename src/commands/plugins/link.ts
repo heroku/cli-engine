@@ -3,13 +3,18 @@ import { Command } from 'cli-engine-command'
 // import {LinkPlugins} from '../../plugins'
 // import path from 'path'
 
+let cliBin = 'heroku'
+let globalConfig = (<any>global).config
+if (globalConfig) {
+  cliBin = globalConfig.bin
+}
 export default class PluginsLink extends Command {
   options = {
     description: 'links a local plugin to the CLI for development',
     help: `Example:
-    $ heroku plugins:link .
-    Installing dependencies for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done
-    Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`,
+    $ ${cliBin} plugins:link .
+    Installing dependencies for /Users/dickeyxxx/src/github.com/${cliBin}/${cliBin}-status... done
+    Running prepare script for /Users/dickeyxxx/src/github.com/${cliBin}/${cliBin}-status... done`,
     args: [{ name: 'path', optional: true, description: 'local file path to plugin root' }],
   }
 
