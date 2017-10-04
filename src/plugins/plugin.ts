@@ -102,7 +102,7 @@ export class Plugin extends CommandManagerBase {
         c.__config.plugin = this
       })
       const hooks = new Hooks({ config: this.config })
-      await hooks.run('plugins:parse', { module: m })
+      await hooks.run('plugins:parse', { module: m, plugin: this })
       this.module = m
     }
     await super.init()

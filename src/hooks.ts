@@ -1,7 +1,13 @@
 import { Config, ICommand } from 'cli-engine-config'
 import * as path from 'path'
+import { Plugin } from './plugins/plugin'
 
 const debug = require('debug')('cli-engine:hooks')
+
+export type PluginsParseOptions = {
+  module: any
+  plugin: Plugin
+}
 
 export type PreRunOptions = {
   command: ICommand
@@ -15,7 +21,7 @@ export class Hooks {
     this.config = config
   }
 
-  async run(event: 'plugins:parse', options: { module: any }): Promise<void>
+  async run(event: 'plugins:parse', options: PluginsParseOptions): Promise<void>
   async run(event: 'prerun', options: PreRunOptions): Promise<void>
   async run(event: string): Promise<void>
   async run(event: string, options: { [k: string]: any } = {}): Promise<void> {
