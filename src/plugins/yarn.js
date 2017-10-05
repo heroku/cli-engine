@@ -102,7 +102,11 @@ export default class Yarn {
     let options = {
       cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
-      env: Object.assign({}, process.env, this.pathEnv())
+      env: {
+        ...process.env,
+        ...this.pathEnv(),
+        YARN_REGISTRY: this.config.npmRegistry
+      }
     }
 
     debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
