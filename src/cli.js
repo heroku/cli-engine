@@ -121,7 +121,7 @@ export default class CLI {
 
   get cmdAskingForHelp (): boolean {
     for (let arg of this.config.argv) {
-      if (['--help', '-h'].includes(arg)) return true
+      if (arg === '--help') return true
       if (arg === '--') return false
     }
     return false
