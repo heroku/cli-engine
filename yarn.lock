@@ -779,15 +779,15 @@ cli-cursor@^2.1.0:
   dependencies:
     restore-cursor "^2.0.0"
 
-cli-engine-command@^9.0.0:
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-9.0.0.tgz#63ce9b5039b824ae171bb491d662c2cb2106fa88"
+cli-engine-command@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-9.0.1.tgz#facfe9fdbacf819bf34c7ecefaf17e1c0d734e15"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "^2.1.0"
-    cli-ux "^2.0.0"
+    cli-ux "^2.0.2"
     fs-extra "^4.0.2"
     http-call "^3.0.2"
     lodash.maxby "^4.6.0"
@@ -814,9 +814,9 @@ cli-truncate@^0.2.1:
     slice-ansi "0.0.4"
     string-width "^1.0.1"
 
-cli-ux@^2.0.0, cli-ux@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.1.tgz#24cde45b405de39c527de8deb877c7a47ddba3d2"
+cli-ux@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.2.tgz#e74a11ff2ac239b1ed00dfc5fa18c7e23a9a45f8"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
