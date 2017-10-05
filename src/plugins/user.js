@@ -107,10 +107,8 @@ export default class UserPlugins extends Manager {
 
   async setupUserPlugins () {
     const pjson = path.join(this.userPluginsDir, 'package.json')
-    const yarnrc = path.join(this.userPluginsDir, '.yarnrc')
     fs.mkdirpSync(this.userPluginsDir)
     if (!fs.existsSync(pjson)) fs.writeFileSync(pjson, JSON.stringify({private: true}))
-    if (!fs.existsSync(yarnrc)) fs.writeFileSync(yarnrc, 'registry "https://cli-npm.heroku.com/"')
   }
 
   async installForce () {
