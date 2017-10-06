@@ -45,30 +45,11 @@ class UserPluginPath extends PluginPath {
 
 export default class UserPlugins extends Manager {
   hooks: Hooks
-  hardcodedDepFixes: Object
 
   constructor ({config, cache}: {config: Config, cache: Cache}) {
     super({config, cache})
     this.yarn = new Yarn(this.config, this.userPluginsDir)
     this.hooks = new Hooks({config})
-
-    /**
-     * There is a bug with snappy & node-gyp & semver that causes issues when
-     * we rebuild.  What happens is that semver is downgraded from 5.3.0 to
-     * 4.3.2 which has a bug in it that causes node-gyp to fail
-     *
-     * I was going to try and make this an add to package.json to save some
-     * time but that causes 4.3.2 to install into node-gyp/node_modules for
-     * reasons I do not understand but `add` does the right thing
-     *
-     * I set version to ~5.3.0 to match the current dependency from node-gyp
-     * under the assumption that it is the most likely to work properly
-     *
-     * https://github.com/nodejs/node-gyp/blob/75cfae290fee1791a23fa68820ae5dd841e93e14/package.json#L34
-     */
-    this.hardcodedDepFixes = {
-      semver: '~5.3.0'
-    }
   }
 
   yarn: Yarn
@@ -81,9 +62,6 @@ export default class UserPlugins extends Manager {
     try {
       const pjson = this.userPluginsPJSON
       return entries(pjson.dependencies || {})
-        .filter(([name, tag]) => {
-          return !this.hardcodedDepFixes[name]
-        })
         .map(([name, tag]) => {
           return new UserPluginPath({config: this.config, type: 'user', path: this.userPluginPath(name), tag: tag, userPlugins: this})
         })
@@ -113,12 +91,6 @@ export default class UserPlugins extends Manager {
 
   async installForce () {
     if (fs.existsSync(path.join(this.userPluginsDir, 'node_modules'))) {
-      let dependencies = this.userPluginsPJSON['dependencies'] || {}
-      for (let mod in this.hardcodedDepFixes) {
-        if (!dependencies[mod]) {
-          await this.yarn.exec(['add', `${mod}@${this.hardcodedDepFixes[mod]}`])
-        }
-      }
       await this.yarn.exec(['install', '--force'])
     }
   }
