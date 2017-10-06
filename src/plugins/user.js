@@ -62,6 +62,7 @@ export default class UserPlugins extends Manager {
     try {
       const pjson = this.userPluginsPJSON
       return entries(pjson.dependencies || {})
+        .filter(([name, tag]) => name !== 'semver')
         .map(([name, tag]) => {
           return new UserPluginPath({config: this.config, type: 'user', path: this.userPluginPath(name), tag: tag, userPlugins: this})
         })
