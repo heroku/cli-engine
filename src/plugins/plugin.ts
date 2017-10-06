@@ -65,7 +65,7 @@ export class Plugin extends CommandManagerBase {
     let cmd = await super.findCommand(id)
     if (cmd) return cmd
     if (this.module) {
-      let cmd = this.module.commands.find(c => c.__config.id === id)
+      let cmd = this.module.commands.filter(c => c.__config).find(c => c.__config.id === id)
       if (cmd) return cmd
     }
   }
@@ -73,7 +73,8 @@ export class Plugin extends CommandManagerBase {
   public async listCommandIDs(): Promise<string[]> {
     let ids = await super.listCommandIDs()
     if (this.module) {
-      ids = ids.concat(this.module.commands.map(c => c.__config.id!))
+      let mids = this.module.commands.filter(c => c.__config).map(c => c.__config.id!)
+      ids = ids.concat(mids)
     }
     return ids
   }
