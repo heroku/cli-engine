@@ -30,7 +30,7 @@ export type PluginTopic = {
 }
 
 export type PluginModule = {
-  commands: ICommand[]
+  commands: any[]
   topics: PluginTopic[]
 }
 
@@ -65,8 +65,8 @@ export class Plugin extends CommandManagerBase {
     let cmd = await super.findCommand(id)
     if (cmd) return cmd
     if (this.module) {
-      let cmd = this.module.commands.filter(c => c.__config).find(c => c.__config.id === id)
-      if (cmd) return cmd
+      let Command = this.module.commands.filter(c => c.__config).find(c => c.__config.id === id)
+      if (Command) return new Command(this.config)
     }
   }
 
