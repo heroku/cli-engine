@@ -2,6 +2,7 @@
 
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
+import {Hooks} from '../../hooks'
 
 let examplePlugin = 'heroku-production-status'
 let cli = 'heroku'
@@ -31,5 +32,7 @@ export default class PluginsInstall extends Command<*> {
     const [plugin, tag = 'latest'] = this.argv[0].split('@')
     if (!this.config.debug) this.out.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
     await this.plugins.install(plugin, tag)
+    const hooks = new Hooks({config: this.config})
+    await hooks.run('update')
   }
 }
