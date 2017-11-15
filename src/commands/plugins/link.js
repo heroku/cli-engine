@@ -3,6 +3,7 @@
 import Command from 'cli-engine-command'
 import Plugins from '../../plugins'
 import path from 'path'
+import {Hooks} from '../../hooks'
 
 let cli = 'heroku'
 if (global.config) {
@@ -28,5 +29,7 @@ export default class PluginsLink extends Command<*> {
     let p = path.resolve(this.argv[0] || process.cwd())
     this.out.action.start(`Linking ${p}`)
     await this.plugins.addLinkedPlugin(p)
+    const hooks = new Hooks({config: this.config})
+    await hooks.run('update')
   }
 }
