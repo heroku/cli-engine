@@ -7,7 +7,7 @@
   "dependencies": {
     "@heroku/linewrap": "^1.0.0",
     "ansi-escapes": "^3.0.0",
-    "cli-engine-command": "^9.0.2",
+    "cli-engine-command": "^9.0.3",
     "cli-engine-config": "^3.4.0",
     "cli-ux": "^2.0.4",
     "debug": "^3.1.0",
