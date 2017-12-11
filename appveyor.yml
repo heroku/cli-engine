@@ -12,6 +12,7 @@ install:
   - yarn
   - git submodule sync
   - git submodule update --init --recursive --remote
+  - yarn --cwd test\roots\test-foo
 test_script:
   - ./node_modules/.bin/jest -i
 
