@@ -2,7 +2,7 @@
 
 import type {Config, Arg, Flag} from 'cli-engine-config'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
-import {convertFlagsFromV5, type LegacyFlag} from './legacy'
+import {type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
 import {Hooks} from '../hooks'
@@ -52,7 +52,7 @@ function makeID (o: any): string {
 
 function buildHelp (c: ParsedCommand, config: Config): string {
   if (!c.id) c.id = makeID(c)
-  c.flags = convertFlagsFromV5(c.flags)
+  c.flags = convertFlagsFromV5(c, config)
   if ((c: any).buildHelp) return (c: any).buildHelp(config)
   const help = new Help(config)
   return help.command((c: any))
@@ -60,10 +60,18 @@ function buildHelp (c: ParsedCommand, config: Config): string {
 
 function buildHelpLine (c: ParsedCommand, config: Config): [string, ?string] {
   if (!c.id) c.id = makeID(c)
-  c.flags = convertFlagsFromV5(c.flags)
+  c.flags = convertFlagsFromV5(c, config)
   if ((c: any).buildHelpLine) return (c: any).buildHelpLine(config)
   const help = new Help(config)
   return help.commandLine((c: any))
+}
+
+function convertFlagsFromV5 (Cmd: ParsedCommand, config: Config): {[name: string]: any} {
+  if (!config.legacyConverter) {
+    throw new Error('received v5 Flags but no legacyConverter was specified')
+  }
+  const converter = require(path.join(config.root, config.legacyConverter))
+  return converter.convertFlagsFromV5(Cmd.flags, Cmd)
 }
 
 export class PluginPath {
@@ -109,7 +117,7 @@ export class PluginPath {
         aliases: getAliases(c),
         buildHelpLine: buildHelpLine(c, this.config),
         buildHelp: buildHelp(c, this.config),
-        flags: convertFlagsFromV5(c.flags)
+        flags: convertFlagsFromV5(c, this.config)
       }))
 
     const topics: CachedTopic[] = (plugin.topics || [])
