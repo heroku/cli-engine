@@ -20,7 +20,7 @@ export default class Yarn {
     this.cwd = cwd
   }
 
-  get bin (): string { return path.join(__dirname, '..', '..', 'yarn', `yarn.js`) }
+  get bin (): string { return require.resolve('yarn/bin/yarn.js') }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
   pathKey (env: {[k: string]: ?string} = process.env): string {
@@ -91,6 +91,7 @@ export default class Yarn {
     if (args.length !== 0) await this.checkForYarnLock()
     args = args.concat([
       '--non-interactive',
+      `--cwd=${this.cwd}`,
       ...Yarn.extraOpts,
       ...this.proxyArgs()
     ])
@@ -100,7 +101,6 @@ export default class Yarn {
     }
 
     let options = {
-      cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
       env: {
         ...process.env,
@@ -109,7 +109,7 @@ export default class Yarn {
       }
     }
 
-    debug(`${options.cwd}: ${this.bin} ${args.join(' ')}`)
+    debug(`${this.bin} ${args.join(' ')}`)
     try {
       await this.fork(this.bin, args, options)
       debug('done')
