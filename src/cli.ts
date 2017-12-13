@@ -2,19 +2,19 @@ import {Command} from 'cli-engine-command'
 import {color} from 'cli-engine-command/lib/color'
 import {buildConfig, Config, ConfigOptions} from 'cli-engine-config'
 import {default as cli} from 'cli-ux'
-import path from 'path'
-import type {Hooks, PreRunOptions} from './hooks'
-import semver from 'semver'
+import * as path from 'path'
+import {Hooks, PreRunOptions} from './hooks'
+import * as semver from 'semver'
 
 const debug = require('debug')('cli')
-const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
+const handleEPIPE = (err: Error) => { if ((<any>err).code !== 'EPIPE') throw err }
 
-if (!global.testing) {
+if (!(<any>global).testing) {
   process.once('SIGINT', () => {
     if (cli.action.task) cli.action.stop(color.red('ctrl-c'))
     cli.exit(1)
   })
-  let handleErr = err => {
+  let handleErr = (err: Error) => {
     cli.error(err)
   }
   process.once('uncaughtException', handleErr)
@@ -27,23 +27,23 @@ process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
   config: Config
-  cmd: Command<*>
+  cmd: Command
   hooks: Hooks
 
-  constructor ({config}: {|config?: ConfigOptions|} = {}) {
+  constructor ({config}: {config?: ConfigOptions} = {}) {
     if (!config) config = {}
     if (!config.initPath) {
-      config.initPath = module.parent.filename
+      config.initPath = module.parent!.filename
     }
     if (!config.root) {
       const findUp = require('find-up')
       config.root = path.dirname(findUp.sync('package.json', {
-        cwd: module.parent.filename
+        cwd: module.parent!.filename
       }))
     }
     this.config = buildConfig(config)
-    global.config = this.config
-    global['cli-ux'] = {
+    ;(<any>global).config = this.config
+    ;(<any>global)['cli-ux'] = {
       debug: this.config.debug,
       mock: this.config.mock
     }
@@ -77,7 +77,7 @@ export default class CLI {
         let lock = new Lock(this.config)
         await lock.unread()
         let opts: PreRunOptions = {
-          Command: (Command: any),
+          Command: Command,
           argv: this.config.argv.slice(2)
         }
         await this.hooks.run('prerun', opts)
@@ -85,13 +85,13 @@ export default class CLI {
           // old style command
           // flow$ignore
           debug('running old style command')
-          this.cmd = await Command.run(({
+          this.cmd = await Command.run({
             argv: this.config.argv.slice(2),
             config: this.config,
             mock: this.config.mock
-          }: any))
+          })
         } else {
-          if (semver.satisfies((Command._version: any), '>=10.0.0-ts')) {
+          if (semver.satisfies(Command._version, '>=10.0.0-ts')) {
             debug('running ts command', {_version: Command._version})
             this.cmd = await Command.run({...this.config, argv: this.config.argv.slice(1)})
           } else {
@@ -118,8 +118,8 @@ export default class CLI {
   }
 
   flush (): Promise<void> {
-    if (global.testing) return Promise.resolve()
-    let p = new Promise(resolve => process.stdout.once('drain', resolve))
+    if ((<any>global).testing) return Promise.resolve()
+    let p = new Promise<void>(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
     return p
   }

@@ -1,7 +1,6 @@
-// @flow
-
 import {Hooks} from './hooks'
 import {buildConfig} from 'cli-engine-config'
+import * as path from 'path'
 
 let init = (options = {}) => {
   process.env.RAN_HOOK = '0'
@@ -16,7 +15,7 @@ test('does not error when no hooks', async () => {
 
 test('fires a hook', async () => {
   let hooks = init({
-    root: process.cwd(),
+    root: path.join(__dirname, '..'),
     hooks: {
       prerun: [
         'test/fixtures/hooks/prerun.js'

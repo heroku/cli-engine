@@ -1,17 +1,14 @@
-// @flow
+import {Config} from 'cli-engine-config'
+import * as path from 'path'
+import {cli} from 'cli-ux'
 
-import {type Config} from 'cli-engine-config'
-import lock from 'rwlockfile'
-import path from 'path'
-import {CLI} from 'cli-ux'
+const lock = require('rwlockfile')
 
 export default class Lock {
   config: Config
-  cli: CLI
 
   constructor (config: Config) {
     this.config = config
-    this.cli = new CLI({mock: config.mock})
   }
 
   get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
@@ -37,7 +34,7 @@ export default class Lock {
 
     // check for other readers
     if (await lock.hasReaders(this.updatelockfile)) {
-      this.cli.action.status = `Waiting for all commands to finish`
+      cli.action.status = `Waiting for all commands to finish`
     }
 
     // grab writer lock

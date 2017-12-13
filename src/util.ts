@@ -1,8 +1,6 @@
-// @flow
-
 const debug = require('debug')('util')
 
-export function compare (...props: any) {
+export function compare (...props: any[]) {
   return (a: any, b: any) => {
     for (let prop of props) {
       if (a[prop] === undefined) return -1
@@ -21,7 +19,7 @@ export function wait (ms: number, unref: boolean = false): Promise<void> {
   })
 }
 
-export function timeout (p: Promise<*>, ms: number): Promise<void> {
+export function timeout (p: Promise<any>, ms: number): Promise<void> {
   return Promise.race([
     p,
     wait(ms, true).then(() => debug('timed out'))

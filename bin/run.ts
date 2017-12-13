@@ -1,4 +1,4 @@
-const path = require('path')
+import * as path from 'path'
 const root = path.join(__dirname, '..', 'example')
 const {run} = require('../src/cli')
 run({

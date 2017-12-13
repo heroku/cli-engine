@@ -32,6 +32,13 @@
     "tmp": "^0.0.33"
   },
   "devDependencies": {
+    "@types/fs-extra": "5.0.0",
+    "@types/graceful-fs": "4.1.2",
+    "@types/jest": "21.1.8",
+    "@types/nock": "8.2.1",
+    "@types/node": "8.0.58",
+    "@types/semver": "5.4.0",
+    "@types/supports-color": "3.1.0",
     "del-cli": "1.1.0",
     "execa": "^0.8.0",
     "husky": "^0.14.3",
@@ -39,6 +46,8 @@
     "lint-staged": "^6.0.0",
     "nock": "^9.1.4",
     "prettier": "1.9.2",
+    "ts-jest": "21.2.4",
+    "ts-node": "4.0.1",
     "typescript": "2.6.2"
   },
   "engines": {
