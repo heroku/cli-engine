@@ -6,6 +6,7 @@ import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
 import {default as cli} from 'cli-ux'
 import path from 'path'
 import type {Hooks, PreRunOptions} from './hooks'
+import semver from 'semver'
 
 const debug = require('debug')('cli')
 const handleEPIPE = err => { if (err.code !== 'EPIPE') throw err }
@@ -82,17 +83,24 @@ export default class CLI {
           argv: this.config.argv.slice(2)
         }
         await this.hooks.run('prerun', opts)
-        debug('running cmd')
         if (!Command._version) {
           // old style command
           // flow$ignore
+          debug('running old style command')
           this.cmd = await Command.run({
             argv: this.config.argv.slice(2),
             config: this.config,
             mock: this.config.mock
           })
         } else {
-          this.cmd = await Command.run(this.config)
+          if (semver.satisfies((Command._version: any), '>=10.0.0-ts')) {
+            debug('running ts command', {_version: Command._version})
+            this.config.argv.shift()
+            this.cmd = await Command.run(this.config)
+          } else {
+            debug('running flow command', {_version: Command._version})
+            this.cmd = await Command.run(this.config)
+          }
         }
       } else {
         let topic = await dispatcher.findTopic(id)

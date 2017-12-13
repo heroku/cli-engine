@@ -25,6 +25,7 @@
     "netrc-parser": "^2.0.3",
     "node-gyp": "3.x",
     "rwlockfile": "^1.4.10",
+    "semver": "5.4.1",
     "string": "3.x",
     "string-similarity": "^1.2.0",
     "tar-fs": "1.16.0",
@@ -62,7 +63,6 @@
     "lint-staged": "^5.0.0",
     "nock": "^9.1.0",
     "rimraf": "2.6.2",
-    "semver": "^5.4.1",
     "time-require": "^0.1.2"
   },
   "engines": {
