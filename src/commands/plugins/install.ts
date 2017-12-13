@@ -1,7 +1,7 @@
-import {Command} from 'cli-engine-command'
-import {Plugins} from '../../plugins'
-import {Hooks} from '../../hooks'
-import {cli} from 'cli-ux'
+import { Command } from 'cli-engine-command'
+import { Plugins } from '../../plugins'
+import { Hooks } from '../../hooks'
+import { cli } from 'cli-ux'
 
 let examplePlugin = 'heroku-production-status'
 let bin = 'heroku'
@@ -22,12 +22,10 @@ export default class PluginsInstall extends Command {
   Example:
     $ ${bin} plugins:install ${examplePlugin}
   `
-  static args = [
-    {name: 'plugin', description: 'plugin to install'}
-  ]
+  static args = [{ name: 'plugin', description: 'plugin to install' }]
   plugins: Plugins
 
-  async run () {
+  async run() {
     this.plugins = new Plugins(this.config)
     console.dir(this.argv)
     const [plugin, tag = 'latest'] = this.argv[0].split('@')

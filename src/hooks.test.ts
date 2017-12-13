@@ -1,5 +1,5 @@
-import {Hooks} from './hooks'
-import {buildConfig} from 'cli-engine-config'
+import { Hooks } from './hooks'
+import { buildConfig } from 'cli-engine-config'
 import * as path from 'path'
 
 let init = (options = {}) => {
@@ -17,10 +17,8 @@ test('fires a hook', async () => {
   let hooks = init({
     root: path.join(__dirname, '..'),
     hooks: {
-      prerun: [
-        'test/fixtures/hooks/prerun.js'
-      ]
-    }
+      prerun: ['test/fixtures/hooks/prerun.js'],
+    },
   })
   await hooks.run('prerun')
   expect(process.env.RAN_HOOK).toEqual('1')
