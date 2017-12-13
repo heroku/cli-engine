@@ -1,15 +1,21 @@
-import {Command} from 'cli-engine-command'
-import {color} from 'cli-engine-command/lib/color'
-import {buildConfig, Config, ConfigOptions} from 'cli-engine-config'
-import {default as cli} from 'cli-ux'
+require('./fs')
+import { Command } from 'cli-engine-command'
+import { color } from 'cli-engine-command/lib/color'
+import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
+import { default as cli } from 'cli-ux'
 import * as path from 'path'
-import {Hooks, PreRunOptions} from './hooks'
-import * as semver from 'semver'
+import { Hooks } from './hooks'
+import { Updater } from './updater'
+import { Lock } from './lock'
+import { CommandManager } from './command_managers'
 
 const debug = require('debug')('cli')
-const handleEPIPE = (err: Error) => { if ((<any>err).code !== 'EPIPE') throw err }
+const handleEPIPE = (err: Error) => {
+  if ((<any>err).code !== 'EPIPE') throw err
+}
 
-if (!(<any>global).testing) {
+const g = global as any
+if (!g.testing) {
   process.once('SIGINT', () => {
     if (cli.action.task) cli.action.stop(color.red('ctrl-c'))
     cli.exit(1)
@@ -27,104 +33,93 @@ process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
   config: Config
+  Command: ICommand | undefined
   cmd: Command
   hooks: Hooks
 
-  constructor ({config}: {config?: ConfigOptions} = {}) {
+  constructor({ config }: { config?: ConfigOptions } = {}) {
     if (!config) config = {}
     if (!config.initPath) {
       config.initPath = module.parent!.filename
     }
     if (!config.root) {
       const findUp = require('find-up')
-      config.root = path.dirname(findUp.sync('package.json', {
-        cwd: module.parent!.filename
-      }))
+      config.root = path.dirname(
+        findUp.sync('package.json', {
+          cwd: module.parent!.filename,
+        }),
+      )
     }
     this.config = buildConfig(config)
     ;(<any>global).config = this.config
     ;(<any>global)['cli-ux'] = {
       debug: this.config.debug,
-      mock: this.config.mock
+      mock: this.config.mock,
     }
   }
 
-  async run () {
+  async run() {
     debug('starting run')
+    const config = this.config
 
-    require('./fs')
-    const {Updater} = require('./updater')
-    const updater = new Updater(this.config)
+    const updater = new Updater(config)
     debug('checking autoupdater')
     await updater.autoupdate()
 
-    const {Hooks} = require('./hooks')
-    this.hooks = new Hooks({config: this.config})
+    this.hooks = new Hooks({ config: this.config })
     await this.hooks.run('init')
 
+    debug('command_manager')
+    const id = this.config.argv[2]
+    const commandManager = new CommandManager(config)
     if (this.cmdAskingForHelp) {
-      debug('running help command')
-      this.cmd = await this.Help.run(this.config)
+      debug('asking for help')
+      // this.cmd = new Help(config)
     } else {
-      debug('dispatcher')
-      const id = this.config.argv[1]
-      const {Dispatcher} = require('./dispatcher')
-      const dispatcher = new Dispatcher(this.config)
-      let Command = await dispatcher.findCommand(id || this.config.defaultCommand || 'help')
+      this.Command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
+    }
 
-      if (Command) {
-        let {default: Lock} = require('./lock')
-        let lock = new Lock(this.config)
-        await lock.unread()
-        let opts: PreRunOptions = {
-          Command: Command,
-          argv: this.config.argv.slice(2)
-        }
-        await this.hooks.run('prerun', opts)
-        if (!Command._version) {
-          // old style command
-          // flow$ignore
-          debug('running old style command')
-          this.cmd = await Command.run({
-            argv: this.config.argv.slice(2),
-            config: this.config,
-            mock: this.config.mock
-          })
-        } else {
-          if (semver.satisfies(Command._version, '>=10.0.0-ts')) {
-            debug('running ts command', {_version: Command._version})
-            this.cmd = await Command.run({...this.config, argv: this.config.argv.slice(1)})
-          } else {
-            debug('running flow command', {_version: Command._version})
-            this.cmd = await Command.run(this.config)
-          }
-        }
+    if (!this.cmd) {
+      let topic = await commandManager.findTopic(id)
+      if (topic) {
+        debug('showing help for %s topic', id)
+        // this.cmd = new Help(config)
       } else {
-        let topic = await dispatcher.findTopic(id)
-        if (topic) {
-          await this.Help.run(this.config)
-        } else {
-          const {NotFound} = require('./not_found')
-          return new NotFound(this.config, this.config.argv).run()
-        }
+        debug('no command found')
+        // this.cmd = new NotFound(config)
       }
     }
 
-    debug('flushing stdout')
-    const {timeout} = require('./util')
-    await timeout(this.flush(), 10000)
-    debug('exiting')
-    cli.exit(0)
+    // let opts: PreRunOptions = {
+    //   command: this.cmd,
+    //   argv: this.config.argv.slice(2),
+    // }
+    // await this.hooks.run('prerun', opts)
+
+    let lock = new Lock(config)
+    await lock.unread()
+    debug('running %s', this.Command!.id)
+    this.cmd = await this.Command!.run({ ...config, argv: config.argv.slice(3) })
+
+    await this.exitAfterStdoutFlush()
   }
 
-  flush (): Promise<void> {
-    if ((<any>global).testing) return Promise.resolve()
-    let p = new Promise<void>(resolve => process.stdout.once('drain', resolve))
+  async exitAfterStdoutFlush() {
+    debug('flushing stdout')
+    const { timeout } = require('./util')
+    cli.done()
+    await timeout(this.flush(), 10000)
+    debug('exiting')
+  }
+
+  flush(): Promise<any> {
+    if (g.testing) return Promise.resolve()
+    let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
     return p
   }
 
-  get cmdAskingForHelp (): boolean {
+  get cmdAskingForHelp(): boolean {
     for (let arg of this.config.argv) {
       if (['--help', '-h'].includes(arg)) return true
       if (arg === '--') return false
@@ -132,14 +127,14 @@ export default class CLI {
     return false
   }
 
-  get Help () {
-    const {default: Help} = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
+  get Help() {
+    const { default: Help } = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
     return Help
   }
 }
 
-export function run ({config}: {config?: ConfigOptions} = {}) {
+export function run({ config }: { config?: ConfigOptions } = {}) {
   if (!config) config = {}
-  const cli = new CLI({config})
+  const cli = new CLI({ config })
   return cli.run()
 }

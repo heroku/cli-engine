@@ -1,34 +1,36 @@
-import {Config} from 'cli-engine-config'
+import { Config } from 'cli-engine-config'
 import * as path from 'path'
-import {cli} from 'cli-ux'
+import { cli } from 'cli-ux'
 
 const lock = require('rwlockfile')
 
-export default class Lock {
+export class Lock {
   config: Config
 
-  constructor (config: Config) {
+  constructor(config: Config) {
     this.config = config
   }
 
-  get updatelockfile (): string { return path.join(this.config.cacheDir, 'update.lock') }
+  get updatelockfile(): string {
+    return path.join(this.config.cacheDir, 'update.lock')
+  }
 
   // get read lock
-  async read () {
+  async read() {
     return lock.read(this.updatelockfile)
   }
 
-  async unread () {
+  async unread() {
     await lock.unread(this.updatelockfile)
   }
 
-  async canRead () {
+  async canRead() {
     let hasWriter = await lock.hasWriter(this.updatelockfile)
     return !hasWriter
   }
 
   // upgrade to writer
-  async upgrade () {
+  async upgrade() {
     // take off reader
     await this.unread()
 

@@ -1,95 +1,99 @@
-// @flow
-
-import Command, {flags} from 'cli-engine-command'
-import {Updater} from '../updater'
-import PluginsUpdate from './plugins/update'
-import {Hooks} from '../hooks'
+import { Command, flags, IBooleanFlag } from 'cli-engine-command'
+import { Updater } from '../updater'
+// import PluginsUpdate from './plugins/update'
+import { Hooks } from '../hooks'
 import cli from 'cli-ux'
-import path from 'path'
+import * as path from 'path'
+import { color } from 'heroku-cli-color'
 
 const debug = require('debug')('cli-engine:update')
 
-function brew (...args) {
+function brew(...args: string[]) {
   const cp = require('child_process')
   debug('brew %o', args)
-  return cp.spawnSync('brew', args, {stdio: 'inherit'})
+  return cp.spawnSync('brew', args, { stdio: 'inherit' })
 }
 
-const cliBin = global.config ? global.config.bin : 'heroku'
+const g = global as any
+const cliBin = g.config ? g.config.bin : 'heroku'
 
-export default class Update extends Command<*> {
+export default class Update extends Command {
   static topic = 'update'
   static description = `update the ${cliBin} CLI`
-  static args = [
-    {name: 'channel', optional: true}
-  ]
+  static args = [{ name: 'channel', optional: true }]
   static flags = {
-    autoupdate: flags.boolean({hidden: true})
+    autoupdate: flags.boolean({ hidden: true }) as IBooleanFlag,
   }
   updater: Updater
 
-  async run () {
+  async run() {
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
-    this.updater = new Updater(this.config, this.cli)
+    this.updater = new Updater(this.config)
     if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
       this.migrateBrew()
     } else if (this.config.updateDisabled) {
-      this.out.warn(this.config.updateDisabled)
+      cli.warn(this.config.updateDisabled)
     } else {
-      this.out.action.start(`${this.config.name}: Updating CLI`)
+      cli.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
       let manifest = await this.updater.fetchManifest(channel)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
-          this.out.action.stop(`already on latest version: ${this.config.version}`)
+          cli.action.stop(`already on latest version: ${this.config.version}`)
         }
       } else {
-        let {yellow, green} = this.out.color
-        this.out.action.start(`${this.config.name}: Updating CLI from ${green(this.config.version)} to ${green(manifest.version)}${channel === 'stable' ? '' : ' (' + yellow(channel) + ')'}`)
+        cli.action.start(
+          `${this.config.name}: Updating CLI from ${color.green(this.config.version)} to ${color.green(
+            manifest.version,
+          )}${channel === 'stable' ? '' : ' (' + color.yellow(channel) + ')'}`,
+        )
         await this.updater.update(manifest)
-        this.out.action.stop()
+        cli.action.stop()
         try {
           await this.updater.autoupdate(true)
-          this.out.exit(0)
+          cli.exit(0)
         } catch (err) {
-          this.out.warn(err, 'post-install autoupdate failed')
+          cli.warn(err, { context: 'post-install autoupdate failed' })
         }
       }
     }
     debug('fetch version')
     await this.updater.fetchVersion(true)
     debug('plugins update')
-    await PluginsUpdate.run({...this.config, argv: []})
+    // TODO: update plugins
+    // await PluginsUpdate.run({...this.config, argv: []})
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
-    const hooks = new Hooks({config: this.config})
+    const hooks = new Hooks({ config: this.config })
     await hooks.run('update')
     debug('done')
-    this.cli.action.stop()
+    cli.action.stop()
   }
 
-  async logChop () {
+  async logChop() {
     try {
       const logChopper = require('log-chopper').default
       await logChopper.chop(this.config.errlog)
-    } catch (e) { debug(e.message) }
+    } catch (e) {
+      debug(e.message)
+    }
   }
 
-  migrateBrew () {
+  migrateBrew() {
     try {
       debug('migrating from brew')
       const fs = require('fs-extra')
       let p = fs.realpathSync('/usr/local/bin/heroku')
       if (p.match(/\/usr\/local\/Cellar\/heroku\/\d+\.\d+\.\d+\//)) {
         // not on private tap, move to it
-        this.out.action.start('Upgrading homebrew formula')
+        cli.action.start('Upgrading homebrew formula')
         brew('tap', 'heroku/brew')
         brew('upgrade', 'heroku/brew/heroku')
-        this.out.action.stop()
+        cli.action.stop()
       }
     } catch (err) {
       debug(err)
