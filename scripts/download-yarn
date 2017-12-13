@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs-extra')
-const http = require('http-call')
+const {HTTP} = require('http-call')
 const path = require('path')
 const execa = require('execa')
 
@@ -24,13 +24,12 @@ async function download () {
   await fs.mkdirs(YARN_DIR)
   let output = fs.createWriteStream(YARN_PATH)
   fs.chmodSync(YARN_PATH, 0o777)
-  let {response} = await http.stream(YARN_URL)
+  let {response} = await HTTP.stream(YARN_URL)
   response.pipe(output)
   return new Promise((resolve, reject) => {
     response.on('error', reject)
     response.on('end', () => {
-      output.close()
-      resolve()
+      output.close(resolve)
     })
   })
 }
