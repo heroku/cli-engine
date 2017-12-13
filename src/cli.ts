@@ -1,8 +1,6 @@
-// @flow
-
-import type {Command} from 'cli-engine-command'
+import {Command} from 'cli-engine-command'
 import {color} from 'cli-engine-command/lib/color'
-import {buildConfig, type Config, type ConfigOptions} from 'cli-engine-config'
+import {buildConfig, Config, ConfigOptions} from 'cli-engine-config'
 import {default as cli} from 'cli-ux'
 import path from 'path'
 import type {Hooks, PreRunOptions} from './hooks'

@@ -2,26 +2,26 @@
   "name": "cli-engine",
   "description": "Generic CLI Framework",
   "version": "4.6.21",
-  "author": "Jeff Dickey @dickeyxxx",
+  "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "dependencies": {
     "@heroku/linewrap": "^1.0.0",
     "ansi-escapes": "^3.0.0",
-    "cli-engine-command": "^9.0.3",
-    "cli-engine-config": "^3.4.0",
-    "cli-ux": "^2.0.4",
+    "cli-engine-command": "^10.0.0",
+    "cli-engine-config": "^4.1.0",
+    "cli-ux": "^2.0.5",
     "debug": "^3.1.0",
     "filesize": "^3.5.11",
     "find-up": "^2.1.0",
-    "fs-extra": "^4.0.2",
-    "http-call": "^3.0.2",
+    "fs-extra": "^5.0.0",
+    "http-call": "^4.0.0",
     "klaw-sync": "^3.0.2",
     "lodash.flatten": "4.x",
     "lodash.maxby": "4.x",
     "lodash.throttle": "^4.1.1",
     "lodash.uniqby": "4.x",
     "log-chopper": "^1.0.1",
-    "moment": "^2.19.2",
+    "moment": "^2.19.4",
     "netrc-parser": "^2.0.3",
     "node-gyp": "3.x",
     "rwlockfile": "^1.4.10",
@@ -32,38 +32,13 @@
     "tmp": "^0.0.33"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-eslint": "8.0.2",
-    "babel-jest": "^21.2.0",
-    "babel-plugin-syntax-object-rest-spread": "^6.13.0",
-    "babel-plugin-transform-class-properties": "6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.0",
-    "babel-plugin-transform-flow-strip-types": "6.22.0",
-    "eslint": "^4.11.0",
-    "eslint-config-standard": "10.2.1",
-    "eslint-plugin-flowtype": "^2.39.1",
-    "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jest": "^21.3.2",
-    "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "3.6.0",
-    "eslint-plugin-standard": "3.0.1",
+    "del-cli": "1.1.0",
     "execa": "^0.8.0",
-    "flow-bin": "^0.54.1",
-    "flow-copy-source": "^1.2.1",
-    "flow-typed": "^2.1.5",
-    "got": "7.1.0",
-    "heroku-debug-4.0.0": "file:test/heroku-debug/4.0.0",
-    "heroku-debug-5.0.2": "file:test/heroku-debug/5.0.2",
-    "heroku-debug-5.0.3": "file:test/heroku-debug/5.0.3",
-    "heroku-hello-world-build": "0.0.0",
-    "heroku-kafka": "^2.9.13",
-    "heroku-pg-extras": "^1.1.1",
     "husky": "^0.14.3",
     "jest": "^21.2.1",
-    "lint-staged": "^5.0.0",
-    "nock": "^9.1.0",
-    "rimraf": "2.6.2",
-    "time-require": "^0.1.2"
+    "lint-staged": "^6.0.0",
+    "nock": "^9.1.4",
+    "typescript": "2.6.2"
   },
   "engines": {
     "node": ">= 8.3.0"
@@ -74,34 +49,18 @@
     "yarn"
   ],
   "homepage": "https://github.com/heroku/cli-engine",
-  "jest": {
-    "testEnvironment": "node",
-    "rootDir": "./src",
-    "setupTestFrameworkScriptFile": "../test/framework.js",
-    "setupFiles": [
-      "../test/init.js"
-    ]
-  },
   "keywords": [
     "cli"
   ],
   "license": "ISC",
-  "lint-staged": {
-    "src/**/*.js": [
-      "eslint --fix",
-      "git add"
-    ]
-  },
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "build": "babel src -d lib --ignore '*.test.js,**/__mocks__/*.js'",
-    "clean": "rimraf lib tmp",
     "download": "node ./scripts/download-yarn",
-    "precommit": "flow && lint-staged",
-    "prepare": "npm run clean && npm run build && npm run download",
-    "release": "np",
-    "test": "npm run download && jest -i && flow && eslint .",
-    "watch": "babel --watch src -d lib --ignore '*.test.js'"
+    "posttest": "prettier -l 'src/**/*.ts'",
+    "precommit": "lint-staged",
+    "prepare": "del-cli lib && tsc && del-cli \"lib/**/*.test.+(d.ts|js)\"",
+    "pretest": "npm run download && tsc",
+    "test": "jest"
   }
 }
