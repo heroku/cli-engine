@@ -60,18 +60,17 @@ export default class CLI {
 
   async run() {
     debug('starting run')
-    const config = this.config
 
-    const updater = new Updater(config)
+    const updater = new Updater(this.config)
     debug('checking autoupdater')
     await updater.autoupdate()
 
-    this.hooks = new Hooks({ config: this.config })
+    this.hooks = new Hooks(this.config)
     await this.hooks.run('init')
 
     debug('command_manager')
     const id = this.config.argv[2]
-    const commandManager = new CommandManager(config)
+    const commandManager = new CommandManager(this.config)
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       // this.cmd = new Help(config)
@@ -96,10 +95,10 @@ export default class CLI {
     // }
     // await this.hooks.run('prerun', opts)
 
-    let lock = new Lock(config)
+    let lock = new Lock(this.config)
     await lock.unread()
     debug('running %s', this.Command!.id)
-    this.cmd = await this.Command!.run({ ...config, argv: config.argv.slice(3) })
+    this.cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(2) })
 
     await this.exitAfterStdoutFlush()
   }

@@ -68,7 +68,7 @@ export default class Update extends Command {
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
-    const hooks = new Hooks({ config: this.config })
+    const hooks = new Hooks(this.config)
     await hooks.run('update')
     debug('done')
     cli.action.stop()

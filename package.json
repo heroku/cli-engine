@@ -14,7 +14,7 @@
     "filesize": "^3.5.11",
     "find-up": "^2.1.0",
     "fs-extra": "^5.0.0",
-    "heroku-cli-color": "1.0.1",
+    "heroku-cli-color": "1.0.2",
     "http-call": "^4.0.0",
     "klaw-sync": "^3.0.2",
     "lodash.flatten": "4.x",
@@ -31,15 +31,16 @@
     "string-similarity": "^1.2.0",
     "tar-fs": "1.16.0",
     "tmp": "^0.0.33",
-    "ts-lodash": "4.0.6"
+    "ts-lodash": "4.0.6",
+    "yarn": "1.3.2"
   },
   "devDependencies": {
     "@types/fs-extra": "5.0.0",
     "@types/graceful-fs": "4.1.2",
     "@types/jest": "21.1.8",
     "@types/lodash.uniqby": "4.7.3",
-    "@types/nock": "8.2.1",
-    "@types/node": "8.0.58",
+    "@types/nock": "9.1.0",
+    "@types/node": "8.5.0",
     "@types/semver": "5.4.0",
     "@types/supports-color": "3.1.0",
     "del-cli": "1.1.0",
@@ -58,8 +59,7 @@
   },
   "enginestrict": true,
   "files": [
-    "lib",
-    "yarn"
+    "lib"
   ],
   "homepage": "https://github.com/heroku/cli-engine",
   "keywords": [
@@ -69,11 +69,10 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "download": "node ./scripts/download-yarn",
     "posttest": "prettier -l 'src/**/*.ts'",
     "precommit": "lint-staged",
     "prepare": "del-cli lib && tsc && del-cli \"lib/**/*.test.+(d.ts|js)\"",
-    "pretest": "npm run download && tsc",
+    "pretest": "tsc",
     "test": "jest"
   }
 }

@@ -5,7 +5,7 @@ import * as path from 'path'
 let init = (options = {}) => {
   process.env.RAN_HOOK = '0'
   let config = buildConfig(options)
-  return new Hooks({config})
+  return new Hooks(config)
 }
 
 test('does not error when no hooks', async () => {

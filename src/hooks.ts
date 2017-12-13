@@ -12,7 +12,7 @@ export type PreRunOptions = {
 export class Hooks {
   config: Config
 
-  constructor ({config}: {config: Config}) {
+  constructor (config: Config) {
     this.config = config
   }
 
