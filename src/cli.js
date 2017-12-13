@@ -95,8 +95,7 @@ export default class CLI {
         } else {
           if (semver.satisfies((Command._version: any), '>=10.0.0-ts')) {
             debug('running ts command', {_version: Command._version})
-            this.config.argv.shift()
-            this.cmd = await Command.run(this.config)
+            this.cmd = await Command.run({...this.config, argv: this.config.argv.slice(1)})
           } else {
             debug('running flow command', {_version: Command._version})
             this.cmd = await Command.run(this.config)
