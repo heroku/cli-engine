@@ -87,11 +87,11 @@ export default class CLI {
           // old style command
           // flow$ignore
           debug('running old style command')
-          this.cmd = await Command.run({
+          this.cmd = await Command.run(({
             argv: this.config.argv.slice(2),
             config: this.config,
             mock: this.config.mock
-          })
+          }: any))
         } else {
           if (semver.satisfies((Command._version: any), '>=10.0.0-ts')) {
             debug('running ts command', {_version: Command._version})
