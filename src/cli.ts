@@ -52,11 +52,7 @@ export default class CLI {
       )
     }
     this.config = buildConfig(config)
-    ;(<any>global).config = this.config
-    ;(<any>global)['cli-ux'] = {
-      debug: this.config.debug,
-      mock: this.config.mock,
-    }
+    if (this.config.debug) cli.config.debug = true
   }
 
   async run() {
