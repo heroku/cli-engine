@@ -8,6 +8,7 @@ import { Hooks } from './hooks'
 import { Updater } from './updater'
 import { Lock } from './lock'
 import { CommandManager } from './command_managers'
+import deps from './deps'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: Error) => {
@@ -85,7 +86,7 @@ export default class CLI {
         // this.cmd = new Help(config)
       } else {
         debug('no command found')
-        // this.cmd = new NotFound(config)
+        this.Command = deps.NotFound
       }
     }
 
