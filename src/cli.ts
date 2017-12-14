@@ -70,7 +70,7 @@ export default class CLI {
     const commandManager = new CommandManager(this.config)
     if (this.cmdAskingForHelp) {
       debug('asking for help')
-      // this.cmd = new Help(config)
+      this.Command = deps.Help
     } else {
       this.Command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
     }

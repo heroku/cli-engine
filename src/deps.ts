@@ -4,6 +4,7 @@ import CLICommandHelp = require('cli-engine-command/lib/help')
 
 // local
 import notFound = require('./not_found')
+import help = require('./commands/help')
 
 export default {
   // remote
@@ -12,6 +13,7 @@ export default {
 
   // local
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },
+  get Help(): typeof help.default { return fetch('./help').default },
 }
 
 const cache: any = {}

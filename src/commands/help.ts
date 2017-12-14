@@ -27,12 +27,10 @@ function buildHelpLine(config: Config, c: ICommand): [string, string | undefined
 }
 
 export default class Help extends Command {
-  options = {
-    description: 'display help',
-    strict: false,
-    flags: {
-      all: flags.boolean({ description: 'show all commands' }) as IBooleanFlag,
-    },
+  static description = 'display help'
+  static variableArgs = true
+  static flags = {
+    all: flags.boolean({ description: 'show all commands' }) as IBooleanFlag,
   }
 
   commandManager: CommandManager
