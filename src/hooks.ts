@@ -1,11 +1,10 @@
-import { Config } from 'cli-engine-config'
-import { Command } from 'cli-engine-command'
+import { Config, ICommand } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli-engine:hooks')
 
 export type PreRunOptions = {
-  Command: typeof Command
+  Command: ICommand
   argv: string[]
 }
 

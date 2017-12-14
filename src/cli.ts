@@ -4,7 +4,7 @@ import { color } from 'cli-engine-command/lib/color'
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { default as cli } from 'cli-ux'
 import * as path from 'path'
-import { Hooks } from './hooks'
+import { Hooks, PreRunOptions } from './hooks'
 import { Updater } from './updater'
 import { Lock } from './lock'
 import { CommandManager } from './command_managers'
@@ -90,11 +90,11 @@ export default class CLI {
       }
     }
 
-    // let opts: PreRunOptions = {
-    //   command: this.cmd,
-    //   argv: this.config.argv.slice(2),
-    // }
-    // await this.hooks.run('prerun', opts)
+    let opts: PreRunOptions = {
+      Command: this.Command!,
+      argv: this.config.argv.slice(2),
+    }
+    await this.hooks.run('prerun', opts)
 
     let lock = new Lock(this.config)
     await lock.unread()
