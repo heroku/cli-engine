@@ -21,6 +21,7 @@ function uniqCommandIDs(ids: string[]): string[] {
 
 export abstract class CommandManagerBase {
   protected config: Config
+  protected initialized = false
 
   constructor(config: Config) {
     this.config = config
@@ -63,6 +64,7 @@ export abstract class CommandManagerBase {
   public async listRootCommands(): Promise<ICommand[]> {
     await this.init()
     const ids = await this.listRootCommandIDs()
+    console.dir(ids)
     let commands = _.compact(await Promise.all(ids.map(id => this.findCommand(id))))
     commands = _.sortBy(commands, c => c.id)
     commands = _.sortedUniqBy(commands, c => c.id)
@@ -79,7 +81,9 @@ export abstract class CommandManagerBase {
   }
 
   protected async init(): Promise<void> {
+    if (this.initialized) return
     await Promise.all(this.submanagers.map(m => m.init()))
+    this.initialized = true
   }
 
   protected async listTopicIDs(): Promise<string[]> {

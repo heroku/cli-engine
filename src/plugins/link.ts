@@ -32,7 +32,11 @@ export class LinkPlugins extends PluginManager {
     const retVal = []
     const plugins = await this.repo.list('link')
     for (let p of plugins) {
-      retVal.push(await this.loadPlugin(p.root))
+      try {
+        retVal.push(await this.loadPlugin(p.root))
+      } catch (err) {
+        cli.warn(err, { context: `error loading linked plugin from ${p.root}` })
+      }
     }
     return retVal
   }

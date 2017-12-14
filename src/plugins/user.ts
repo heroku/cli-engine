@@ -49,8 +49,16 @@ export class UserPlugins extends PluginManager {
 
   protected async fetchPlugins() {
     if (this.refreshNeeded) await this.refreshPlugins()
-    const p = await this.repo.list('user')
-    return p.map(p => this.loadPlugin(p.name, p.tag))
+    const retVal = []
+    const plugins = await this.repo.list('user')
+    for (let p of plugins) {
+      try {
+        retVal.push(await this.loadPlugin(p.name, p.tag))
+      } catch (err) {
+        cli.warn(err, { context: `error loading user plugin ${p.name}` })
+      }
+    }
+    return retVal
   }
 
   private get userPluginsDir(): string {

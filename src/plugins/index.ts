@@ -1,3 +1,4 @@
+import { cli } from 'cli-ux'
 // import { CorePlugins } from './core'
 import { UserPlugins } from './user'
 import { LinkPlugins } from './link'
@@ -44,11 +45,17 @@ export class Plugins extends CommandManagerBase {
   }
 
   protected async init() {
-    let refreshNeeded = (await this.repo.nodeVersion()) !== process.versions.node
-    this.user.refreshNeeded = refreshNeeded
-    this.link.refreshNeeded = refreshNeeded
-    await super.init()
-    await this.repo.updateNodeVersion()
+    if (this.initialized) return
+    try {
+      await this.repo.init()
+      let refreshNeeded = (await this.repo.nodeVersion()) !== process.versions.node
+      this.user.refreshNeeded = refreshNeeded
+      this.link.refreshNeeded = refreshNeeded
+      await super.init()
+      await this.repo.updateNodeVersion()
+    } catch (err) {
+      cli.warn(err, { context: 'error loading plugins' })
+    }
   }
 
   get submanagers(): PluginManager[] {

@@ -25,6 +25,18 @@ export class PluginRepo {
 
   public config: Config
 
+  public async init() {
+    if (this.repo) return
+    this.repo = (await this.read()) || {
+      version: 1,
+      node_version: process.versions.node,
+      link: [],
+      user: [],
+    }
+    if (!this.repo.link) this.repo.link = []
+    if (!this.repo.user) this.repo.user = []
+  }
+
   public async list(type: 'user'): Promise<RepoJSON['user']>
   public async list(type: 'link'): Promise<RepoJSON['link']>
   public async list(type: 'user' | 'link'): Promise<any> {
@@ -65,18 +77,6 @@ export class PluginRepo {
   }
 
   private repo: RepoJSON
-
-  private async init() {
-    if (this.repo) return
-    this.repo = (await this.read()) || {
-      version: 1,
-      node_version: process.versions.node,
-      link: [],
-      user: [],
-    }
-    if (!this.repo.link) this.repo.link = []
-    if (!this.repo.user) this.repo.user = []
-  }
 
   private get file() {
     return path.join(this.config.dataDir, 'plugins', 'plugins.json')
