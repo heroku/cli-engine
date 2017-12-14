@@ -1,37 +1,18 @@
 import { cli } from 'cli-ux'
-import { Config } from 'cli-engine-config'
 import { Plugin, PluginPJSON } from './plugin'
-import { Lock } from '../lock'
-import { PluginRepo } from './repo'
 import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import { CommandManagerBase } from '../command_managers/base'
+import { PluginManager } from './manager'
 import * as klaw from 'klaw-sync'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
 
-export class LinkPlugins extends CommandManagerBase {
-  public plugins: Plugin[]
-  protected config: Config
-  private lock: Lock
-  private repo: PluginRepo
-
-  constructor(config: Config) {
-    super(config)
-    this.lock = new Lock(this.config)
-    this.repo = new PluginRepo(config)
-  }
-
+export class LinkPlugins extends PluginManager {
   get userPluginsDir(): string {
     return path.join(this.config.dataDir, 'plugins')
-  }
-
-  public async list(): Promise<Plugin[]> {
-    await this.init()
-    return this.plugins
   }
 
   public async install(root: string): Promise<void> {
@@ -43,14 +24,13 @@ export class LinkPlugins extends CommandManagerBase {
     await downgrade()
   }
 
-  public async init() {
-    if (this.plugins) return
-    this.plugins = await this.fetchPlugins()
-    await super.init()
-  }
-
-  public get submanagers() {
-    return this.plugins
+  protected async fetchPlugins() {
+    const retVal = []
+    const plugins = await this.repo.list('link')
+    for (let p of plugins) {
+      retVal.push(await this.loadPlugin(p.root))
+    }
+    return retVal
   }
 
   private async loadPlugin(root: string) {
@@ -63,7 +43,7 @@ export class LinkPlugins extends CommandManagerBase {
   }
 
   private async refreshPlugin(root: string) {
-    if (await this.updateNodeModulesNeeded(root)) {
+    if (this.refreshNeeded || (await this.updateNodeModulesNeeded(root))) {
       await this.updateNodeModules(root)
     } else if (await this.prepareNeeded(root)) {
       await this.prepare(root)
@@ -120,14 +100,5 @@ export class LinkPlugins extends CommandManagerBase {
     const p = await this.repo.list('link')
     const plugin = p.find(p => p.root === root)
     if (plugin) return new Date(plugin.lastUpdated)
-  }
-
-  private async fetchPlugins() {
-    const retVal = []
-    const plugins = await this.repo.list('link')
-    for (let p of plugins) {
-      retVal.push(await this.loadPlugin(p.root))
-    }
-    return retVal
   }
 }

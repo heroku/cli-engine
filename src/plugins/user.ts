@@ -1,29 +1,20 @@
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import { Plugin } from './plugin'
-import { Lock } from '../lock'
 import { PluginRepo } from './repo'
 import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import { CommandManagerBase } from '../command_managers/base'
+import { PluginManager } from './manager'
 
-export class UserPlugins extends CommandManagerBase {
+export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
   protected config: Config
-  private lock: Lock
   private yarn: Yarn
-  private repo: PluginRepo
 
-  constructor(config: Config) {
-    super(config)
-    this.lock = new Lock(this.config)
+  constructor({ config, repo }: { config: Config; repo: PluginRepo }) {
+    super({ config, repo })
     this.yarn = new Yarn({ config, cwd: this.userPluginsDir })
-    this.repo = new PluginRepo(config)
-  }
-
-  get userPluginsDir(): string {
-    return path.join(this.config.dataDir, 'plugins')
   }
 
   public async update() {
@@ -33,11 +24,6 @@ export class UserPlugins extends CommandManagerBase {
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['upgrade'])
     await downgrade()
-  }
-
-  public async list(): Promise<Plugin[]> {
-    await this.init()
-    return this.plugins
   }
 
   public async install(name: string, tag: string): Promise<void> {
@@ -52,12 +38,16 @@ export class UserPlugins extends CommandManagerBase {
 
   public async init() {
     await this.setupUserPlugins()
-    if (this.plugins) return
-    this.plugins = (await this.repo.list('user')).map(p => this.loadPlugin(p.name, p.tag))
+    await super.init()
   }
 
-  public get submanagers() {
-    return this.plugins
+  protected async fetchPlugins() {
+    const p = await this.repo.list('user')
+    return p.map(p => this.loadPlugin(p.name, p.tag))
+  }
+
+  private get userPluginsDir(): string {
+    return path.join(this.config.dataDir, 'plugins')
   }
 
   private loadPlugin(name: string, tag: string) {
