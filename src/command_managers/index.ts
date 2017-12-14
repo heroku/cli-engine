@@ -8,9 +8,15 @@ export class CommandManager extends CommandManagerBase {
     const { BuiltinCommandManager } = require('./builtin')
     if (true || this.config.userPlugins) {
       const { Plugins } = require('../plugins')
-      this.submanagers.push(new Plugins(config))
+      this._submanagers.push(new Plugins(config))
     }
     // if (config.commandsDir) this.managers.push(new ConventionalCommandManager({config, cli, commandsDir: config.commandsDir}))
-    this.submanagers.push(new BuiltinCommandManager(config))
+    this._submanagers.push(new BuiltinCommandManager(config))
+  }
+
+  private _submanagers: CommandManagerBase[] = []
+
+  protected get submanagers() {
+    return this._submanagers
   }
 }

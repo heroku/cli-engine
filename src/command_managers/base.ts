@@ -21,12 +21,12 @@ function uniqCommandIDs(ids: string[]): string[] {
 
 export abstract class CommandManagerBase {
   protected config: Config
-  protected submanagers: CommandManagerBase[]
 
   constructor(config: Config) {
     this.config = config
-    if (!this.submanagers) this.submanagers = []
   }
+
+  protected get submanagers(): CommandManagerBase[] { return [] }
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()

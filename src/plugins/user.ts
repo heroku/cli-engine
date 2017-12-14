@@ -2,27 +2,24 @@ import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import { Plugin } from './plugin'
 import { Lock } from '../lock'
+import {PluginRepo} from './repo'
 import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
+import {CommandManagerBase} from '../command_managers/base'
 
-export type PJSON = {
-  private?: true
-  dependencies?: { [name: string]: string }
-}
-
-export class UserPlugins {
+export class UserPlugins extends CommandManagerBase {
   public plugins: Plugin[]
   protected config: Config
-  protected userPluginsPJSONPath: string
-  protected userPluginsPJSON: PJSON = { private: true }
   private lock: Lock
   private yarn: Yarn
+  private repo: PluginRepo
 
   constructor(config: Config) {
-    this.config = config
+    super(config)
     this.lock = new Lock(this.config)
     this.yarn = new Yarn({ config, cwd: this.userPluginsDir })
+    this.repo = new PluginRepo(config)
   }
 
   get userPluginsDir(): string {
@@ -45,60 +42,43 @@ export class UserPlugins {
 
   public async install(name: string, tag: string): Promise<void> {
     await this.init()
-    this.addPackageToPJSON(name, tag)
-    try {
-      await this.yarn.exec()
-      let path = this.userPluginPath(name)
-      let plugin = require(path)
-      if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)
-      this.plugins.push(plugin)
-    } catch (err) {
-      this.removePackageFromPJSON(name)
-      cli.error(err)
-    }
-  }
-
-  userPluginPath(name: string): string {
-    return path.join(this.userPluginsDir, 'node_modules', name)
+    await this.yarn.exec(['add', `${name}@${tag}`])
+    const plugin = this.loadPlugin(name, tag)
+    await plugin.validate()
+    await this.repo.add({type: 'user', name, tag})
   }
 
   public async init() {
     await this.setupUserPlugins()
     if (this.plugins) return
-    // const pjson = this.userPluginsPJSON
-    // this.plugins = Object.entries(pjson.dependencies || {}).map(([name, tag]) => {
-    //   return new Plugin({
-    //     config: this.config,
-    //     type: 'user',
-    //     root: this.userPluginPath(name),
-    //     tag: tag,
-    //   })
-    // })
+    this.plugins = (await this.repo.list('user')).map(p => {
+      return new Plugin({
+        config: this.config,
+        type: 'user',
+        root: this.userPluginPath(p.name),
+        tag: p.tag,
+      })
+    })
   }
 
-  protected async setupUserPlugins() {
-    this.userPluginsPJSONPath = path.join(this.userPluginsDir, 'package.json')
-    if (!fs.existsSync(this.userPluginsPJSONPath)) {
-      this.saveUserPluginsPJSON()
+  private loadPlugin (name: string, tag: string) {
+    return new Plugin({
+      config: this.config,
+      type: 'user',
+      root: this.userPluginPath(name),
+      tag,
+    })
+  }
+
+  private userPluginPath(name: string): string {
+    return path.join(this.userPluginsDir, 'node_modules', name)
+  }
+
+  private get pjsonPath() { return path.join(this.userPluginsDir, 'package.json') }
+
+  private async setupUserPlugins() {
+    if (!fs.existsSync(this.pjsonPath)) {
+      await fs.outputJSON(this.pjsonPath, {private: true}, { spaces: 2 })
     }
-    this.userPluginsPJSON = await fs.readJSON(this.userPluginsPJSONPath)
-  }
-
-  protected saveUserPluginsPJSON() {
-    fs.outputJSONSync(this.userPluginsPJSONPath, this.userPluginsPJSON, { spaces: 2 })
-  }
-
-  protected async addPackageToPJSON(name: string, version: string) {
-    let pjson = this.userPluginsPJSON
-    if (!pjson.dependencies) pjson.dependencies = {}
-    pjson.dependencies[name] = version
-    this.saveUserPluginsPJSON()
-  }
-
-  protected removePackageFromPJSON(name: string) {
-    let pjson = this.userPluginsPJSON
-    if (!pjson.dependencies) pjson.dependencies = {}
-    delete pjson.dependencies[name]
-    this.saveUserPluginsPJSON()
   }
 }

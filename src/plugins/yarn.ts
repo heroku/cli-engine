@@ -9,8 +9,6 @@ export default class Yarn {
   config: Config
   cwd: string
 
-  static extraOpts: string[] = []
-
   constructor({ config, cwd }: { config: Config; cwd: string }) {
     this.config = config
     this.cwd = cwd
@@ -87,9 +85,9 @@ export default class Yarn {
 
   async exec(args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    args = args.concat([`--cwd=${this.cwd}`, '--non-interactive', ...Yarn.extraOpts, ...this.proxyArgs()])
+    args = args.concat([`--cwd=${this.cwd}`, '--non-interactive', '--link-duplicates', ...this.proxyArgs()])
     let cacheDir = path.join(this.config.cacheDir, 'yarn')
-    args = args.concat([`--mutex=file:${cacheDir}`, `--cache-folder=${cacheDir}`])
+    args = args.concat([`--mutex=file:${cacheDir}`, `--preferred-cache-folder=${cacheDir}`])
 
     let options = {
       stdio: [null, null, null, 'ipc'],

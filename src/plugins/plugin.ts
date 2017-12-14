@@ -87,6 +87,13 @@ export class Plugin extends CommandManagerBase {
     return topics
   }
 
+  public async validate () {
+    const commands = await this.listCommandIDs()
+    if (!commands.length) {
+      throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
+    }
+  }
+
   protected async init() {
     if (this.pjson) return
     this.pjson = await fs.readJSON(path.join(this.root, 'package.json'))

@@ -1,6 +1,6 @@
 // import { CorePlugins } from './core'
 import { UserPlugins } from './user'
-import { Plugin } from './plugin'
+import { Plugin, PluginTypes } from './plugin'
 import { CommandManagerBase } from '../command_managers/base'
 import { Config } from 'cli-engine-config'
 
@@ -19,11 +19,18 @@ export class Plugins extends CommandManagerBase {
     return this.plugins
   }
 
-  get plugins() {
-    return []
+  public async hasPlugin(name: string): Promise<PluginTypes | undefined> {
+    await this.init()
+    const plugin = this.plugins.find(p => p.name === name)
+    if (plugin) return plugin.type
+  }
+
+  private get plugins(): Plugin[] {
+    return this.user.plugins
     // return this.core ? this.core.plugins.concat(this.user.plugins) : []
   }
-  get submanagers() {
+
+  get submanagers(): CommandManagerBase[] {
     return this.plugins
   }
 
