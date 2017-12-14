@@ -36,6 +36,12 @@ export class UserPlugins extends PluginManager {
     await downgrade()
   }
 
+  public async uninstall(name: string): Promise<void> {
+    await this.init()
+    await this.yarn.exec(['remove', name])
+    await this.repo.remove(name)
+  }
+
   public async init() {
     await this.setupUserPlugins()
     await super.init()

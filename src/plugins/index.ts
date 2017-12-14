@@ -34,6 +34,15 @@ export class Plugins extends CommandManagerBase {
     if (plugin) return plugin.type
   }
 
+  public async uninstall(name: string): Promise<void> {
+    const type = await this.hasPlugin(name)
+    if (!type) throw new Error(`${name} is not installed`)
+    if (type === 'user') {
+      await this.user.uninstall(name)
+    }
+    await this.repo.remove(name)
+  }
+
   protected async init() {
     let refreshNeeded = (await this.repo.nodeVersion()) !== process.versions.node
     this.user.refreshNeeded = refreshNeeded

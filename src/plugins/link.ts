@@ -18,10 +18,14 @@ export class LinkPlugins extends PluginManager {
   public async install(root: string): Promise<void> {
     await this.init()
     const downgrade = await this.lock.upgrade()
-    const plugin = await this.loadPlugin(root)
+    const plugin = await this.loadPlugin(root, true)
     await plugin.validate()
     await this.repo.add({ type: 'link', name: plugin.name, root, lastUpdated: new Date().toString() })
     await downgrade()
+  }
+
+  public pjson(root: string): PluginPJSON {
+    return require(path.join(root, 'package.json'))
   }
 
   protected async fetchPlugins() {
@@ -33,8 +37,8 @@ export class LinkPlugins extends PluginManager {
     return retVal
   }
 
-  private async loadPlugin(root: string) {
-    await this.refreshPlugin(root)
+  private async loadPlugin(root: string, refresh: boolean = false) {
+    await this.refreshPlugin(root, refresh)
     return new Plugin({
       config: this.config,
       type: 'link',
@@ -42,8 +46,8 @@ export class LinkPlugins extends PluginManager {
     })
   }
 
-  private async refreshPlugin(root: string) {
-    if (this.refreshNeeded || (await this.updateNodeModulesNeeded(root))) {
+  private async refreshPlugin(root: string, refresh: boolean = false) {
+    if (refresh || this.refreshNeeded || (await this.updateNodeModulesNeeded(root))) {
       await this.updateNodeModules(root)
     } else if (await this.prepareNeeded(root)) {
       await this.prepare(root)
@@ -90,10 +94,6 @@ export class LinkPlugins extends PluginManager {
     const yarn = new Yarn({ config: this.config, cwd: root })
     await yarn.exec(['run', 'prepare'])
     cli.action.stop()
-  }
-
-  private pjson(root: string): PluginPJSON {
-    return require(path.join(root, 'package.json'))
   }
 
   private async lastUpdatedForRoot(root: string): Promise<Date | undefined> {

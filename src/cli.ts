@@ -69,7 +69,7 @@ export default class CLI {
     await this.hooks.run('init')
 
     debug('command_manager')
-    const id = this.config.argv[2]
+    const id = this.config.argv[1]
     const commandManager = new CommandManager(this.config)
     if (this.cmdAskingForHelp) {
       debug('asking for help')
@@ -98,7 +98,7 @@ export default class CLI {
     let lock = new Lock(this.config)
     await lock.unread()
     debug('running %s', this.Command!.id)
-    this.cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(2) })
+    this.cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(1) })
 
     await this.exitAfterStdoutFlush()
   }
