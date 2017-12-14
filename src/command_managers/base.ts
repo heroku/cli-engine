@@ -26,7 +26,9 @@ export abstract class CommandManagerBase {
     this.config = config
   }
 
-  protected get submanagers(): CommandManagerBase[] { return [] }
+  protected get submanagers(): CommandManagerBase[] {
+    return []
+  }
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()

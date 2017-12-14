@@ -24,7 +24,7 @@ export default class PluginsInstall extends Command {
   `
   static args = [{ name: 'plugin', description: 'plugin to install' }]
   static flags = {
-    force: flags.boolean({char: 'f'}) as IBooleanFlag
+    force: flags.boolean({ char: 'f' }) as IBooleanFlag,
   }
   plugins: Plugins
 
@@ -32,7 +32,7 @@ export default class PluginsInstall extends Command {
     this.plugins = new Plugins(this.config)
     const [plugin, tag = 'latest'] = this.argv[0].split('@')
     if (!this.config.debug) cli.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
-    if (!this.flags.force && await this.plugins.hasPlugin(plugin)) {
+    if (!this.flags.force && (await this.plugins.hasPlugin(plugin))) {
       throw new Error('Plugin is already installed. Run with --force to install anyways.')
     }
     await this.plugins.user.install(plugin, tag)
