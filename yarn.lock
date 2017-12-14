@@ -66,9 +66,9 @@
   version "8.0.58"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.58.tgz#5b3881c0be3a646874803fee3197ea7f1ed6df90"
 
-"@types/node@8.5.0":
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.0.tgz#c5be22ffc84b221466fc8dfc0d6b1f88060808ef"
+"@types/node@8.5.1":
+  version "8.5.1"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.1.tgz#4ec3020bcdfe2abffeef9ba3fbf26fca097514b5"
 
 "@types/semver@5.4.0":
   version "5.4.0"
@@ -664,9 +664,9 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.0.0.tgz#b17e74d5c34a32a3633d75eb9d77277fc2de3d5d"
+cli-engine-command@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.0.1.tgz#ca62fc8e410917281ff4a1824a6bda5954df4a1f"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
@@ -682,9 +682,18 @@ cli-engine-command@^10.0.0:
     string "3.x"
     supports-color "^5.1.0"
 
-cli-engine-config@4.1.0, cli-engine-config@^4.1.0:
+cli-engine-config@4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.1.0.tgz#d4075fe1c35f9f6edbb460eab01e6ccd6a40db5e"
+  dependencies:
+    cli-flags "1.0.18"
+    debug "^3.1.0"
+    fs-extra "^5.0.0"
+    uuid "^3.1.0"
+
+cli-engine-config@^4.2.2:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.2.2.tgz#e4aa64f7979ba6c6ba2a11d8b12fac4d625e6e83"
   dependencies:
     cli-flags "1.0.18"
     debug "^3.1.0"

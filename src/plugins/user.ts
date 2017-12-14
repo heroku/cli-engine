@@ -42,6 +42,7 @@ export class UserPlugins extends PluginManager {
   }
 
   protected async fetchPlugins() {
+    if (this.refreshNeeded) await this.refreshPlugins()
     const p = await this.repo.list('user')
     return p.map(p => this.loadPlugin(p.name, p.tag))
   }
@@ -57,6 +58,10 @@ export class UserPlugins extends PluginManager {
       root: this.userPluginPath(name),
       tag,
     })
+  }
+
+  private async refreshPlugins() {
+    await this.yarn.exec()
   }
 
   private userPluginPath(name: string): string {

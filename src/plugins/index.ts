@@ -35,13 +35,11 @@ export class Plugins extends CommandManagerBase {
   }
 
   protected async init() {
-    let refreshNeeded = (await this.repo.cliEngineVersion()) !== this.config.userAgent
-    console.dir(this.config.userAgent)
-    console.dir(await this.repo.cliEngineVersion())
+    let refreshNeeded = (await this.repo.nodeVersion()) !== process.versions.node
     this.user.refreshNeeded = refreshNeeded
     this.link.refreshNeeded = refreshNeeded
     await super.init()
-    await this.repo.updateCliEngineVersion()
+    await this.repo.updateNodeVersion()
   }
 
   get submanagers(): PluginManager[] {

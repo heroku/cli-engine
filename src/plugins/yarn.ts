@@ -85,16 +85,17 @@ export default class Yarn {
 
   async exec(args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    args = args.concat([`--cwd=${this.cwd}`, '--non-interactive', '--link-duplicates', ...this.proxyArgs()])
+    args = args.concat(['--non-interactive', '--link-duplicates', ...this.proxyArgs()])
     let cacheDir = path.join(this.config.cacheDir, 'yarn')
     args = args.concat([`--mutex=file:${cacheDir}`, `--preferred-cache-folder=${cacheDir}`])
 
     let options = {
+      cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
       env: Object.assign({}, process.env, this.pathEnv()),
     }
 
-    debug(`${this.bin} ${args.join(' ')}`)
+    debug(`${this.cwd}: ${this.bin} ${args.join(' ')}`)
     try {
       await this.fork(this.bin, args, options)
       debug('done')

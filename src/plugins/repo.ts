@@ -6,7 +6,7 @@ const debug = require('debug')('cli-engine:pluginrepo')
 
 export type RepoJSON = {
   version: 1
-  cli_engine_version: string
+  node_version: string
   user: {
     name: string
     tag: string
@@ -33,14 +33,14 @@ export class PluginRepo {
     else return this.repo.link
   }
 
-  public async cliEngineVersion(): Promise<string> {
+  public async nodeVersion(): Promise<string> {
     await this.init()
-    return this.repo.cli_engine_version
+    return this.repo.node_version
   }
 
-  public async updateCliEngineVersion(): Promise<void> {
+  public async updateNodeVersion(): Promise<void> {
     await this.init()
-    this.repo.cli_engine_version = this.config.userAgent
+    this.repo.node_version = process.versions.node
     await this.write(this.repo)
   }
 
@@ -70,7 +70,7 @@ export class PluginRepo {
     if (this.repo) return
     this.repo = (await this.read()) || {
       version: 1,
-      cli_engine_version: this.config.userAgent,
+      node_version: process.versions.node,
       link: [],
       user: [],
     }
