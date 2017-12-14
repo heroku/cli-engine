@@ -1,4 +1,4 @@
-import {Config} from 'cli-engine-config'
+import { Config } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
@@ -13,50 +13,53 @@ export type RepoJSON = {
   }[]
   link: {
     name: string
-    path: string
+    root: string
+    lastUpdated: string
   }[]
 }
 
 export class PluginRepo {
-  constructor (config: Config) {
+  constructor(config: Config) {
     this.config = config
   }
 
   public config: Config
 
-  public async list (type: 'user'): Promise<RepoJSON['user']>
-  public async list (type: 'link'): Promise<RepoJSON['link']>
-  public async list (type: 'user' | 'link'): Promise<any> {
+  public async list(type: 'user'): Promise<RepoJSON['user']>
+  public async list(type: 'link'): Promise<RepoJSON['link']>
+  public async list(type: 'user' | 'link'): Promise<any> {
     await this.init()
     if (type === 'user') return this.repo.user
     else return this.repo.link
   }
 
-  public async remove (name: string): Promise<void> {
+  public async remove(name: string): Promise<void> {
     await this.init()
     this.repo.user = this.repo.user.filter(p => p.name !== name)
     this.repo.link = this.repo.link.filter(p => p.name !== name)
     await this.write(this.repo)
   }
 
-  public async add (opts: RepoJSON['user'][0] & {type: 'user'} | RepoJSON['link'][0] & {type: 'link'}): Promise<void> {
+  public async add(
+    opts: RepoJSON['user'][0] & { type: 'user' } | RepoJSON['link'][0] & { type: 'link' },
+  ): Promise<void> {
     await this.init()
     await this.remove(opts.name)
     if (opts.type === 'user') {
-      this.repo.user.push({name: opts.name, tag: opts.tag})
+      this.repo.user.push({ name: opts.name, tag: opts.tag })
     } else {
-      this.repo.link.push({name: opts.name, path: opts.path})
+      this.repo.link.push({ name: opts.name, root: opts.root, lastUpdated: opts.lastUpdated })
     }
     await this.write(this.repo)
   }
 
   private repo: RepoJSON
 
-  private async init () {
+  private async init() {
     if (this.repo) return
-    this.repo = await this.read() || {
+    this.repo = (await this.read()) || {
       version: 1,
-      updated_at: (new Date()).toString(),
+      updated_at: new Date().toString(),
       link: [],
       user: [],
     }
@@ -64,9 +67,11 @@ export class PluginRepo {
     if (!this.repo.user) this.repo.user = []
   }
 
-  private get file() { return path.join(this.config.dataDir, 'plugins.json') }
+  private get file() {
+    return path.join(this.config.dataDir, 'plugins', 'plugins.json')
+  }
 
-  private async read (): Promise<RepoJSON | undefined> {
+  private async read(): Promise<RepoJSON | undefined> {
     try {
       return await fs.readJSON(this.file)
     } catch (err) {
@@ -76,7 +81,7 @@ export class PluginRepo {
     }
   }
 
-  private async write (repo: RepoJSON): Promise<void> {
-    await fs.outputJSON(this.file, repo, {spaces: 2})
+  private async write(repo: RepoJSON): Promise<void> {
+    await fs.outputJSON(this.file, repo, { spaces: 2 })
   }
 }
