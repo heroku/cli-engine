@@ -2,7 +2,7 @@ import { Config } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
-const debug = require('debug')('cli-engine:pluginrepo')
+const debug = require('debug')('cli:plugins:repo')
 
 export type RepoJSON = {
   version: 1
@@ -45,8 +45,7 @@ export class PluginRepo {
     else return this.repo.link
   }
 
-  public async nodeVersion(): Promise<string> {
-    await this.init()
+  public get nodeVersion(): string {
     return this.repo.node_version
   }
 

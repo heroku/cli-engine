@@ -1,7 +1,7 @@
 import { Config, ICommand } from 'cli-engine-config'
 import * as path from 'path'
 
-const debug = require('debug')('cli-engine:hooks')
+const debug = require('debug')('cli:hooks')
 
 export type PreRunOptions = {
   Command: ICommand

@@ -48,7 +48,7 @@ export class Plugins extends CommandManagerBase {
     if (this.initialized) return
     try {
       await this.repo.init()
-      let refreshNeeded = (await this.repo.nodeVersion()) !== process.versions.node
+      let refreshNeeded = this.repo.nodeVersion !== process.versions.node
       this.user.refreshNeeded = refreshNeeded
       this.link.refreshNeeded = refreshNeeded
       await super.init()

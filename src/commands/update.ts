@@ -6,7 +6,7 @@ import cli from 'cli-ux'
 import * as path from 'path'
 import { color } from 'heroku-cli-color'
 
-const debug = require('debug')('cli-engine:update')
+const debug = require('debug')('cli:update')
 
 function brew(...args: string[]) {
   const cp = require('child_process')
