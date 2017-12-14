@@ -78,7 +78,7 @@ export default class CLI {
       this.Command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
     }
 
-    if (!this.cmd) {
+    if (!this.Command) {
       let topic = await commandManager.findTopic(id)
       if (topic) {
         debug('showing help for %s topic', id)

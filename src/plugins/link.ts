@@ -49,6 +49,10 @@ export class LinkPlugins extends CommandManagerBase {
     await super.init()
   }
 
+  public get submanagers() {
+    return this.plugins
+  }
+
   private async loadPlugin(root: string) {
     await this.refreshPlugin(root)
     return new Plugin({

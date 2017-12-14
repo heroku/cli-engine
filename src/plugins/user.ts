@@ -56,6 +56,10 @@ export class UserPlugins extends CommandManagerBase {
     this.plugins = (await this.repo.list('user')).map(p => this.loadPlugin(p.name, p.tag))
   }
 
+  public get submanagers() {
+    return this.plugins
+  }
+
   private loadPlugin(name: string, tag: string) {
     return new Plugin({
       config: this.config,
