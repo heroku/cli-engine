@@ -32,6 +32,7 @@ export abstract class CommandManagerBase {
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()
+    id = this.unalias(id)
     let finders = this.submanagers.map(m => m.findCommand(id))
     for (let p of finders) {
       let Command = await p
@@ -131,5 +132,10 @@ export abstract class CommandManagerBase {
       throw new Error(`${p} does not appear to be a valid command.\n${extra}`)
     }
     return Command
+  }
+
+  private unalias(id: string): string {
+    const alias = Object.entries(this.config.aliases).find(([, aliases]) => aliases.includes(id))
+    return alias ? alias[0] : id
   }
 }
