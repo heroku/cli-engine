@@ -144,7 +144,7 @@ export class Updater {
 
     this._cleanupDirs(dirs)
 
-    this._createBin(path.join(dir, 'bin', this.config.bin))
+    this._createBin(path.join(dir, 'bin', this.config.bin), manifest)
   }
 
   extract(stream: NodeJS.ReadableStream, dir: string, sha: string): Promise<void> {
@@ -392,17 +392,21 @@ export class Updater {
     }
   }
 
-  private _createBin(dst: string) {
-    const src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
-    fs.outputFileSync(
-      src,
-      `#!/usr/bin/env bash
+  private _createBin(dst: string, manifest: Manifest) {
+    let src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
+    let body
+    if (this.config.windows) {
+      body = `@echo off
+"%~dp0\\..${manifest.version}\\heroku.cmd" %*
+`
+    } else {
+      body = `#!/usr/bin/env bash
 if [ "$DEBUG" == "*" ]; then
   echo "running ${dst}" "$@"
 fi
 "${dst}" "$@"
-`,
-      { mode: 0o777 },
-    )
+`
+    }
+    fs.outputFileSync(src, body, { mode: 0o777 })
   }
 }
