@@ -17,7 +17,7 @@ jobs:
       - run: yarn link
       - run: cd example && yarn link cli-engine && yarn
       - run: cd test/roots/test-foo && yarn
-      - run: ./bin/run version
+      - run: DEBUG=* ./bin/run version
       - run: yarn test --coverage
       - run: bash <(curl -s https://codecov.io/bash)
       - save_cache:
