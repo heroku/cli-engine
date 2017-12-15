@@ -6,6 +6,8 @@ import { PluginManager } from './manager'
 import _ from 'ts-lodash'
 import deps from '../deps'
 
+const debug = require('debug')('cli:plugins:link')
+
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
@@ -22,7 +24,7 @@ export class LinkPlugins extends PluginManager {
     const plugin = await this.loadPlugin(root, true)
     await plugin.init()
     await plugin.validate()
-    await this.manifest.add({ type: 'link', name: plugin.name, root, lastUpdated: new Date().toString() })
+    await this.manifest.add({ type: 'link', name: plugin.name, root, last_updated: new Date().toISOString() })
     await this.manifest.save()
     await downgrade()
   }
@@ -32,7 +34,7 @@ export class LinkPlugins extends PluginManager {
   }
 
   protected async fetchPlugins(): Promise<Plugin[]> {
-    const defs = await this.manifest.list('link')
+    const defs = this.manifest.list('link')
     const promises = defs.map(async p => {
       try {
         return await this.loadPlugin(p.root)
@@ -82,31 +84,50 @@ export class LinkPlugins extends PluginManager {
   private async prepareNeeded(root: string): Promise<boolean> {
     const pjson = await this.pjson(root)
     const main = pjson.main
-    if (!main) return false
     // @ts-ignore
-    if (!await fs.exists(path.join(root, main))) return true
-    const updatedAt = this.lastUpdatedForRoot(root)
-    return !!deps
-      .klawSync(root, {
-        // @ts-ignore
-        noRecurseOnFailedFilter: true,
-        filter: (f: any) => !['.git', 'node_modules'].includes(path.basename(f.path)),
-      })
-      // TODO: it might be good to remove .js to get rid of false positives once people are mostly off flow builds
-      .filter((f: any) => f.path.endsWith('.js') || f.path.endsWith('.ts'))
-      .find((f: any) => f.stats.mtime > updatedAt)
+    if (main && !await fs.exists(path.join(root, main))) return true
+    return this.dirty(root)
+  }
+
+  private async dirty(root: string): Promise<boolean> {
+    const updatedAt = await this.lastUpdatedForRoot(root)
+    if (!updatedAt) return true
+    return new Promise<boolean>((resolve, reject) => {
+      deps
+        .klaw(root, {
+          depthLimit: 10,
+          filter: f => {
+            return !['.git', 'node_modules'].includes(path.basename(f))
+          },
+        })
+        .on('data', f => {
+          if (f.stats.isDirectory()) return
+          if (f.path.endsWith('.js') || f.path.endsWith('.ts')) {
+            if (f.stats.mtime > updatedAt) {
+              debug(`${f.path} has been updated, preparing linked plugin`)
+              resolve(true)
+            }
+          }
+        })
+        .on('error', reject)
+        .on('end', () => resolve(false))
+    })
   }
 
   private async prepare(root: string) {
     cli.action.start(`Running prepare script for ${root}`)
     const yarn = new deps.Yarn({ config: this.config, cwd: root })
     await yarn.exec(['run', 'prepare'])
+    const plugins = this.manifest.list('link')
+    if (plugins.find(p => p.root === root)) {
+      this.manifest.update(root)
+    }
     cli.action.stop()
   }
 
-  private async lastUpdatedForRoot(root: string): Promise<Date | undefined> {
-    const p = await this.manifest.list('link')
+  private lastUpdatedForRoot(root: string): Date | undefined {
+    const p = this.manifest.list('link')
     const plugin = p.find(p => p.root === root)
-    if (plugin) return new Date(plugin.lastUpdated)
+    if (plugin) return new Date(plugin.last_updated)
   }
 }

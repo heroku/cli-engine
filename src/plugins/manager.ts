@@ -105,6 +105,22 @@ export abstract class PluginManager {
     return Command
   }
 
+  protected loadCommandsFromDir(d: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      deps
+        .klaw(d, { depthLimit: 10 })
+        .on('data', f => {
+          if (!f.stats.isDirectory() && f.path.endsWith('.js')) {
+            let parsed = path.parse(f.path)
+            let p = path.relative(d, path.join(parsed.dir, parsed.name))
+            this.commandIDs.push(p.split(path.sep).join(':'))
+          }
+        })
+        .on('error', reject)
+        .on('end', resolve)
+    })
+  }
+
   private unalias(id: string): string {
     const alias = Object.entries(this.aliases).find(([, aliases]) => aliases.includes(id))
     return alias ? alias[0] : id

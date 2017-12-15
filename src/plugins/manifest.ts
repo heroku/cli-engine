@@ -7,7 +7,7 @@ const debug = require('debug')('cli:plugins:manifest')
 export type ManifestLink = {
   name: string
   root: string
-  lastUpdated: string
+  last_updated: string
 }
 
 export type ManifestUser = {
@@ -31,6 +31,8 @@ export class PluginManifest {
   }
 
   public config: Config
+  public nodeVersionChanged: boolean = false
+  public needsSave: boolean = false
 
   public async init() {
     if (this.manifest) return
@@ -41,37 +43,47 @@ export class PluginManifest {
     }
     if (!this.manifest.link) this.manifest.link = []
     if (!this.manifest.user) this.manifest.user = []
+    this.nodeVersionChanged = this.manifest.node_version !== process.versions.node
+    if (this.nodeVersionChanged) {
+      this.manifest.node_version = process.versions.node
+      this.needsSave = true
+    }
   }
 
   public async save(): Promise<void> {
-    this.manifest.node_version = process.versions.node
+    if (!this.needsSave) return
     await fs.outputJSON(this.file, this.manifest, { spaces: 2 })
+    this.needsSave = false
   }
 
-  public async list(type: 'user'): Promise<ManifestJSON['user']>
-  public async list(type: 'link'): Promise<ManifestJSON['link']>
-  public async list(type: 'user' | 'link'): Promise<any> {
-    await this.init()
+  public list(type: 'user'): ManifestJSON['user']
+  public list(type: 'link'): ManifestJSON['link']
+  public list(type: 'user' | 'link'): any {
     if (type === 'user') return this.manifest.user
     else return this.manifest.link
   }
 
-  public get nodeVersionChanged(): boolean {
-    return this.manifest.node_version !== process.versions.node
-  }
-
-  public async add(opts: ManifestUserOpts | ManifestLinkOpts): Promise<void> {
-    await this.remove(opts.name)
+  public add(opts: ManifestUserOpts | ManifestLinkOpts) {
+    this.remove(opts.name)
     if (opts.type === 'user') {
       this.manifest.user.push({ name: opts.name, tag: opts.tag })
     } else {
-      this.manifest.link.push({ name: opts.name, root: opts.root, lastUpdated: opts.lastUpdated })
+      this.manifest.link.push({ name: opts.name, root: opts.root, last_updated: opts.last_updated })
     }
+    this.needsSave = true
   }
 
-  public async remove(name: string): Promise<void> {
+  public remove(name: string) {
     this.manifest.user = this.manifest.user.filter(p => p.name !== name)
     this.manifest.link = this.manifest.link.filter(p => p.name !== name)
+    this.needsSave = true
+  }
+
+  public update(name: string) {
+    let p = this.manifest.link.find(p => [p.name, p.root].includes(name))
+    if (!p) throw new Error(`${name} not found in manifest`)
+    p.last_updated = new Date().toISOString()
+    this.needsSave = true
   }
 
   private manifest: ManifestJSON

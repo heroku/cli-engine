@@ -18,6 +18,7 @@ export type PluginPJSON = {
   version: string
   main?: string
   'cli-engine'?: {
+    commandsDir?: string
     aliases?: { [k: string]: string | string[] }
   }
 }
@@ -61,6 +62,11 @@ export class Plugin extends PluginManager {
     const pjsonConfig = this.pjson['cli-engine'] || {}
     this.name = this.pjson.name
     this.version = this.pjson.version
+
+    if (pjsonConfig.commandsDir) {
+      const commandsDir = path.join(this.root, pjsonConfig.commandsDir)
+      await this.loadCommandsFromDir(commandsDir)
+    }
 
     if (this.pjson.main) {
       await this.requireModule(this.pjson.main)

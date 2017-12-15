@@ -79,6 +79,7 @@ export default class CLI {
       if (topic) {
         debug('showing help for %s topic', id)
         this.Command = deps.Help
+        argv = this.config.argv
       } else {
         debug('no command found')
         this.Command = deps.NotFound

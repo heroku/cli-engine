@@ -5,6 +5,7 @@ import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import { PluginManager } from './manager'
+import _ from 'ts-lodash'
 
 export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
@@ -46,16 +47,16 @@ export class UserPlugins extends PluginManager {
   }
 
   protected async fetchPlugins() {
-    const retVal = []
-    const plugins = await this.manifest.list('user')
-    for (let p of plugins) {
+    const defs = this.manifest.list('user')
+    const promises = defs.map(async p => {
       try {
-        retVal.push(await this.loadPlugin(p.name, p.tag))
+        return await this.loadPlugin(p.name, p.tag)
       } catch (err) {
-        cli.warn(err, { context: `error loading user plugin ${p.name}` })
+        cli.warn(err, { context: `error loading user plugin from ${this.userPluginPath(p.name)}` })
       }
-    }
-    return retVal
+    })
+    const plugins = await Promise.all(promises)
+    return _.compact(plugins)
   }
 
   private loadPlugin(name: string, tag: string) {

@@ -2,7 +2,7 @@
 import { HTTP } from 'http-call'
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
 import * as moment from 'moment'
-import * as klawSync from 'klaw-sync'
+import * as klaw from 'klaw'
 
 // local
 import Hooks = require('./hooks')
@@ -16,6 +16,7 @@ import lock = require('./lock')
 import Builtin = require('./plugins/builtin')
 import Plugins = require('./plugins')
 import linkPlugins = require('./plugins/link')
+import corePlugins = require('./plugins/core')
 import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
 import pluginManifest = require('./plugins/manifest')
@@ -26,7 +27,7 @@ export default {
   get HTTP(): typeof HTTP { return fetch('http-call').HTTP },
   get moment(): typeof moment { return fetch('moment') },
   get rwlockfile(): any { return fetch('rwlockfile') },
-  get klawSync(): typeof klawSync { return fetch('klaw-sync') },
+  get klaw(): typeof klaw { return fetch('klaw') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
@@ -41,6 +42,7 @@ export default {
   get LinkPlugins(): typeof linkPlugins.LinkPlugins { return fetch('./plugins/link').LinkPlugins },
   get Plugins(): typeof Plugins.Plugins { return fetch('./plugins').Plugins },
   get UserPlugins(): typeof userPlugins.UserPlugins { return fetch('./plugins/user').UserPlugins },
+  get CorePlugins(): typeof corePlugins.CorePlugins { return fetch('./plugins/core').CorePlugins },
   get Yarn(): typeof yarn.default { return fetch('./plugins/yarn').default },
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
 }
