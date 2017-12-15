@@ -32,11 +32,9 @@ export class Plugins extends PluginManager {
         name = linked.name
       } else throw new Error(`${name} is not installed`)
     }
-    let downgrade = await this.lock.upgrade()
     await this.manifest.remove(name)
     await this.manifest.save()
     if (type === 'user') await this.user.uninstall(name)
-    await downgrade()
   }
 
   protected async _init() {

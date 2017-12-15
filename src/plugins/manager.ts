@@ -3,7 +3,6 @@ import * as path from 'path'
 import cli from 'cli-ux'
 import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
-import { Lock } from '../lock'
 import { PluginManifest } from './manifest'
 import { PluginTopic } from './plugin'
 import { inspect } from 'util'
@@ -41,7 +40,6 @@ export abstract class PluginManager {
   protected submanagers: PluginManager[] = []
   protected config: Config
   protected manifest: PluginManifest
-  protected lock: Lock
   protected userPluginsDir: string
 
   private initialized = false
@@ -49,7 +47,6 @@ export abstract class PluginManager {
   constructor(opts: PluginManagerOptions) {
     this.config = opts.config
     this.manifest = opts.manifest || new deps.PluginManifest(this.config)
-    this.lock = new deps.Lock(this.config)
     this.userPluginsDir = path.join(this.config.dataDir, 'plugins')
   }
 

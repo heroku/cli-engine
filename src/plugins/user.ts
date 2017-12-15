@@ -5,17 +5,22 @@ import { Plugin } from './plugin'
 import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
+import { Lock } from '../lock'
 import { PluginManager } from './manager'
 import _ from 'ts-lodash'
+
+const debug = require('debug')('cli:plugins:user')
 
 export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
   protected config: Config
+  protected lock: Lock
 
   private pjsonPath: string
   private yarn: Yarn
 
   protected async _init() {
+    this.lock = new deps.Lock(this.config, path.join(this.userPluginsDir, 'plugins.lock'))
     this.pjsonPath = path.join(this.userPluginsDir, 'package.json')
     await this.createPJSON()
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
@@ -77,5 +82,12 @@ export class UserPlugins extends PluginManager {
     if (!await deps.util.exists(this.pjsonPath)) {
       await fs.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
     }
+  }
+
+  private async checkIfUpdating() {
+    if (!await this.lock.canRead()) {
+      debug('update in process')
+      // await this.restartCLI()
+    } else await this.lock.read()
   }
 }

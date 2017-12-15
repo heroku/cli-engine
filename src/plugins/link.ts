@@ -20,13 +20,11 @@ export class LinkPlugins extends PluginManager {
   }
 
   public async install(root: string): Promise<void> {
-    const downgrade = await this.lock.upgrade()
     const plugin = await this.loadPlugin(root, true)
     await plugin.init()
     await plugin.validate()
     await this.manifest.add({ type: 'link', name: plugin.name, root, last_updated: new Date().toISOString() })
     await this.manifest.save()
-    await downgrade()
   }
 
   protected async _init() {

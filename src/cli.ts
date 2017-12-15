@@ -54,16 +54,18 @@ export default class CLI {
     debug('starting run')
     const config = this.config
     let argv = config.argv.slice(1)
+    const id = this.config.argv[1]
 
-    const updater = new deps.Updater(this.config)
-    debug('checking autoupdater')
-    await updater.autoupdate()
+    if (id !== 'update') {
+      const updater = new deps.Updater(this.config)
+      debug('checking autoupdater')
+      await updater.autoupdate()
+    }
 
     this.hooks = new deps.Hooks(this.config)
     await this.hooks.run('init')
 
     debug('command_manager')
-    const id = this.config.argv[1]
     const plugins = new deps.Plugins({ config })
     await plugins.init()
     if (this.cmdAskingForHelp) {

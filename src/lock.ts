@@ -5,27 +5,29 @@ import { cli } from 'cli-ux'
 
 export class Lock {
   config: Config
+  lockfile: string
 
-  constructor(config: Config) {
+  constructor(config: Config, lockfile?: string) {
     this.config = config
-  }
-
-  get updatelockfile(): string {
-    return path.join(this.config.cacheDir, 'update.lock')
+    this.lockfile = lockfile || path.join(this.config.cacheDir, 'update.lock')
   }
 
   // get read lock
   async read() {
-    return deps.rwlockfile.read(this.updatelockfile)
+    return deps.rwlockfile.read(this.lockfile)
   }
 
   async unread() {
-    await deps.rwlockfile.unread(this.updatelockfile)
+    await deps.rwlockfile.unread(this.lockfile)
   }
 
   async canRead() {
-    let hasWriter = await deps.rwlockfile.hasWriter(this.updatelockfile)
+    let hasWriter = await deps.rwlockfile.hasWriter(this.lockfile)
     return !hasWriter
+  }
+
+  async write() {
+    return this.upgrade()
   }
 
   // upgrade to writer
@@ -34,18 +36,18 @@ export class Lock {
     await this.unread()
 
     // check for other readers
-    if (await deps.rwlockfile.hasReaders(this.updatelockfile)) {
+    if (await deps.rwlockfile.hasReaders(this.lockfile)) {
       cli.action.status = `Waiting for all commands to finish`
     }
 
     // grab writer lock
-    let unlock = await deps.rwlockfile.write(this.updatelockfile)
+    let unlock = await deps.rwlockfile.write(this.lockfile)
 
     // return downgrade function
     return async () => {
       // turn back into reader when unlocking
       await unlock()
-      return deps.rwlockfile.read(this.updatelockfile)
+      return deps.rwlockfile.read(this.lockfile)
     }
   }
 }

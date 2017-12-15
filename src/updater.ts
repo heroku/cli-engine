@@ -35,7 +35,7 @@ export class Updater {
 
   constructor(config: Config) {
     this.config = config
-    this.lock = new deps.Lock(config)
+    this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
   }
 
   get autoupdatefile(): string {
@@ -91,6 +91,7 @@ export class Updater {
   }
 
   async update(manifest: Manifest) {
+    const downgrade = await this.lock.write()
     let base = this.base(manifest)
     const filesize = require('filesize')
 
@@ -98,6 +99,12 @@ export class Updater {
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let { response: stream } = await deps.HTTP.stream(url)
+
+    let clientRoot = path.join(this.config.dataDir, 'client')
+    let output = path.join(clientRoot, manifest.version)
+
+    await this._mkdirp(clientRoot)
+    await this._remove(output)
 
     if ((<any>cli.action).frames) {
       // if spinner action
@@ -117,15 +124,11 @@ export class Updater {
       })
     }
 
-    let clientRoot = path.join(this.config.dataDir, 'client')
-    let output = path.join(clientRoot, manifest.version)
-
-    await this._mkdirp(clientRoot)
-    await this._remove(output)
     await this.extract(stream, clientRoot, manifest.sha256gz)
     await this._rename(path.join(clientRoot, base), output)
 
     await this._createBin(path.join(output, 'bin', this.config.bin), manifest)
+    await downgrade()
   }
 
   extract(stream: NodeJS.ReadableStream, dir: string, sha: string): Promise<void> {
@@ -220,7 +223,6 @@ export class Updater {
 
   async autoupdate(force: boolean = false) {
     try {
-      await this.checkIfUpdating()
       await this.warnIfUpdateAvailable()
       if (!force && !await this.autoupdateNeeded()) return
 
@@ -241,8 +243,7 @@ export class Updater {
         timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
       )
 
-      const spawn = deps.crossSpawn
-      this.spawnBinPath(spawn, binPath, ['update', '--autoupdate'], {
+      this.spawnBinPath(binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv,
@@ -287,45 +288,13 @@ export class Updater {
     })
   }
 
-  async checkIfUpdating() {
-    if (!await this.lock.canRead()) {
-      debug('update in process')
-      await this.restartCLI()
-    } else await this.lock.read()
-  }
-
-  async restartCLI() {
-    let unread = await this.lock.read()
-    await unread()
-
-    let bin = this.binPath
-    let args = process.argv.slice(2)
-    if (!bin) {
-      if (this.config.initPath) {
-        bin = process.argv[0]
-        args.unshift(this.config.initPath)
-      } else {
-        debug('cannot restart CLI, no binpath')
-        return
-      }
-    }
-
-    debug('update complete, restarting CLI')
-    const env = {
-      ...process.env,
-      CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1',
-    }
-    const { status } = this.spawnBinPath(deps.crossSpawn.sync, bin, args, { env, stdio: 'inherit' })
-    cli.exit(status)
-  }
-
-  spawnBinPath(spawnFunc: Function, binPath: string, args: string[], options: Object) {
+  spawnBinPath(binPath: string, args: string[], options: Object) {
     debug(binPath, args)
     if (this.config.windows) {
       args = ['/c', binPath].concat(args)
-      return spawnFunc(process.env.comspec || 'cmd.exe', args, options)
+      return deps.crossSpawn(process.env.comspec || 'cmd.exe', args, options)
     } else {
-      return spawnFunc(binPath, args, options)
+      return deps.crossSpawn(binPath, args, options)
     }
   }
 
