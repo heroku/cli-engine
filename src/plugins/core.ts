@@ -1,15 +1,18 @@
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
-import { Plugin } from './plugin'
+import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
 import _ from 'ts-lodash'
 import * as path from 'path'
+
+const debug = require('debug')('cli:plugins:core')
 
 export class CorePlugins extends PluginManager {
   public plugins: Plugin[]
   protected config: Config
 
   protected async _init() {
+    debug('init')
     this.submanagers = this.plugins = await this.fetchPlugins()
   }
 
@@ -20,9 +23,8 @@ export class CorePlugins extends PluginManager {
 
   private loadPlugin(name: string) {
     try {
-      return new Plugin({
+      return new CorePlugin({
         config: this.config,
-        type: 'core',
         root: this.root(name),
       })
     } catch (err) {
@@ -34,4 +36,8 @@ export class CorePlugins extends PluginManager {
     // @ts-ignore
     return path.join(this.config.root, 'node_modules', name)
   }
+}
+
+export class CorePlugin extends Plugin {
+  public type: PluginType = 'core'
 }

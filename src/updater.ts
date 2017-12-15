@@ -195,7 +195,7 @@ export class Updater {
   }
 
   private async _remove(dir: string) {
-    if (await deps.util.exists(dir)) {
+    if (await deps.file.exists(dir)) {
       debug(`remove ${dir}`)
       await fs.remove(dir)
     }

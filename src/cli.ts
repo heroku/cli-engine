@@ -100,17 +100,16 @@ export default class CLI {
 
     debug('running %s', this.Command!.id)
     const cmd = await this.Command!.run({ ...this.config, argv })
+    debug('exited normally')
 
     await this.exitAfterStdoutFlush()
     return cmd
   }
 
   async exitAfterStdoutFlush() {
-    debug('flushing stdout')
     const { timeout } = require('./util')
     cli.done()
     await timeout(this.flush(), 10000)
-    debug('exiting')
   }
 
   flush(): Promise<any> {

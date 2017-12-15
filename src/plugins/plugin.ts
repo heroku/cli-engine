@@ -5,11 +5,8 @@ import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
 import { Lock } from '../lock'
 
-const debug = require('debug')('cli:plugins')
-
 export type PluginType = 'core' | 'user' | 'link'
 export type PluginOptions = {
-  type: PluginType
   root: string
   tag?: string
   config: Config
@@ -39,10 +36,10 @@ export type PluginModule = {
   topics: PluginTopic[]
 }
 
-export class Plugin extends PluginManager {
+export abstract class Plugin extends PluginManager {
   public name: string
   public version: string
-  public type: PluginType
+  public abstract type: PluginType
   public root: string
   public pjson: PluginPJSON
   public tag?: string
@@ -54,7 +51,6 @@ export class Plugin extends PluginManager {
 
   constructor(options: PluginOptions) {
     super(options)
-    this.type = options.type
     this.root = options.root
     this.tag = options.tag
     this.lock = options.lock
@@ -68,7 +64,8 @@ export class Plugin extends PluginManager {
 
   protected async _init() {
     try {
-      this.pjson = await deps.util.fetchJSONFile(path.join(this.root, 'package.json'))
+      this.debug('_init')
+      this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
       const pjsonConfig = this.pjson['cli-engine'] || {}
       this.name = this.pjson.name
       this.version = this.pjson.version
@@ -103,10 +100,15 @@ export class Plugin extends PluginManager {
     if (cmd) {
       cmd = deps.util.undefault(cmd)
       cmd = this.addPluginToCommand(cmd)
+      this.debug(`found command ${cmd.id}`)
       // TODO: lock
       // if (this.lock) await this.lock.read()
       return cmd
     }
+  }
+
+  protected get debug() {
+    return require('debug')(`cli:plugins:${this.name || path.basename(this.root)}`)
   }
 
   private commandPath(id: string): string {
@@ -125,7 +127,7 @@ export class Plugin extends PluginManager {
   }
 
   private async requireModule(main: string) {
-    debug(`requiring ${this.name}@${this.version}`)
+    this.debug(`requiring ${this.name}@${this.version}`)
 
     const m: PluginModule = {
       commands: [],

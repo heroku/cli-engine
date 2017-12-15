@@ -1,13 +1,14 @@
 import deps from '../deps'
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
-import { Plugin } from './plugin'
+import { Plugin, PluginType } from './plugin'
 import Yarn from './yarn'
 import * as path from 'path'
-import * as fs from 'fs-extra'
 import { Lock } from '../lock'
 import { PluginManager } from './manager'
-import _ from 'ts-lodash'
+import { PluginManifest } from './manifest'
+
+const debug = require('debug')('cli:plugins:user')
 
 export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
@@ -16,14 +17,11 @@ export class UserPlugins extends PluginManager {
 
   private pjsonPath: string
   private yarn: Yarn
+  private manifest: PluginManifest
 
-  protected async _init() {
-    this.lock = new deps.Lock(this.config, path.join(this.userPluginsDir, 'plugins.lock'))
-    this.pjsonPath = path.join(this.userPluginsDir, 'package.json')
-    await this.createPJSON()
-    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-    if (this.manifest.nodeVersionChanged) await this.yarn.exec()
-    this.submanagers = this.plugins = await this.fetchPlugins()
+  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
+    super({ config })
+    this.manifest = manifest
   }
 
   public async update() {
@@ -51,23 +49,31 @@ export class UserPlugins extends PluginManager {
     await this.manifest.remove(name)
   }
 
-  protected async fetchPlugins() {
+  protected async _init() {
+    debug('_init')
+    await this.manifest.init()
+    this.lock = new deps.Lock(this.config, path.join(this.userPluginsDir, 'plugins.lock'))
+    this.pjsonPath = path.join(this.userPluginsDir, 'package.json')
+    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
+    await this.refresh()
+    this.submanagers = this.plugins = this.fetchPlugins()
+  }
+
+  private async refresh() {
+    await this.createPJSON()
+    if (this.manifest.nodeVersionChanged) {
+      await this.yarn.exec()
+    }
+  }
+
+  protected fetchPlugins() {
     const defs = this.manifest.list('user')
-    const promises = defs.map(async p => {
-      try {
-        return await this.loadPlugin(p.name, p.tag)
-      } catch (err) {
-        cli.warn(err, { context: `error loading user plugin from ${this.userPluginPath(p.name)}` })
-      }
-    })
-    const plugins = await Promise.all(promises)
-    return _.compact(plugins)
+    return defs.map(p => this.loadPlugin(p.name, p.tag))
   }
 
   private loadPlugin(name: string, tag: string) {
-    return new Plugin({
+    return new UserPlugin({
       config: this.config,
-      type: 'user',
       root: this.userPluginPath(name),
       lock: this.lock,
       tag,
@@ -79,8 +85,12 @@ export class UserPlugins extends PluginManager {
   }
 
   private async createPJSON() {
-    if (!await deps.util.exists(this.pjsonPath)) {
-      await fs.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
+    if (!await deps.file.exists(this.pjsonPath)) {
+      await deps.file.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
     }
   }
+}
+
+export class UserPlugin extends Plugin {
+  public type: PluginType = 'user'
 }

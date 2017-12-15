@@ -1,3 +1,4 @@
+import deps from '../deps'
 import { Config } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -36,6 +37,10 @@ export class PluginManifest {
 
   public async init() {
     if (this.manifest) return
+    debug('init')
+    if (!await deps.file.exists(this.file)) {
+      await this.migrate()
+    }
     this.manifest = (await this.read()) || {
       version: 1,
       link: [],
@@ -99,6 +104,14 @@ export class PluginManifest {
       if (err.code === 'ENOENT') {
         debug(err)
       } else throw err
+    }
+  }
+
+  private async migrate() {
+    const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
+    if (await deps.file.exists(linkedPath)) {
+      let linked = deps.file.fetchJSONFile(linkedPath)
+      console.dir(linked)
     }
   }
 }

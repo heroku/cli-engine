@@ -1,9 +1,10 @@
+import { Config } from 'cli-engine-config'
 import { cli } from 'cli-ux'
-import { Plugin, PluginPJSON } from './plugin'
+import { Plugin, PluginOptions, PluginType } from './plugin'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import { PluginManager } from './manager'
-import _ from 'ts-lodash'
+import { PluginManifest } from './manifest'
 import deps from '../deps'
 
 const debug = require('debug')('cli:plugins:link')
@@ -13,91 +14,118 @@ function touch(f: string) {
 }
 
 export class LinkPlugins extends PluginManager {
-  public plugins: Plugin[]
+  public plugins: LinkedPlugin[]
 
-  public async pjson(root: string): Promise<PluginPJSON> {
-    return deps.util.fetchJSONFile(path.join(root, 'package.json'))
+  private manifest: PluginManifest
+
+  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
+    super({ config })
+    this.manifest = manifest
   }
 
   public async install(root: string): Promise<void> {
-    const plugin = await this.loadPlugin(root, true)
+    const plugin = this.loadPlugin(root, true)
     await plugin.init()
     await plugin.validate()
     await this.manifest.add({ type: 'link', name: plugin.name, root, last_updated: new Date().toISOString() })
     await this.manifest.save()
   }
 
+  public async pjson(root: string) {
+    return deps.file.fetchJSONFile(path.join(root, 'package.json'))
+  }
+
   protected async _init() {
-    this.submanagers = this.plugins = await this.fetchPlugins()
-  }
-
-  protected async fetchPlugins(): Promise<Plugin[]> {
+    debug('_init')
+    await this.manifest.init()
     const defs = this.manifest.list('link')
-    const promises = defs.map(async p => {
-      try {
-        // @ts-ignore
-        if (!await fs.exists(p.root)) {
-          debug(`Ignoring ${p.root} as it does not exist`)
-          return
-        }
-        return await this.loadPlugin(p.root)
-      } catch (err) {
-        cli.warn(err, { context: `error loading linked plugin from ${p.root}` })
-      }
-    })
-    const plugins = await Promise.all(promises)
-    return _.compact(plugins)
+    const plugins = defs.map(p => this.loadPlugin(p.root))
+    this.submanagers = this.plugins = plugins
   }
 
-  private async loadPlugin(root: string, forceRefresh: boolean = false) {
-    await this.refreshPlugin(root, forceRefresh || this.manifest.nodeVersionChanged)
-    return new Plugin({
+  private loadPlugin(root: string, forceRefresh: boolean = false) {
+    return new LinkedPlugin({
+      forceRefresh,
+      manifest: this.manifest,
       config: this.config,
-      type: 'link',
       root,
     })
   }
+}
 
-  private async refreshPlugin(root: string, refresh: boolean = false) {
-    if (refresh || (await this.updateNodeModulesNeeded(root))) {
-      await this.updateNodeModules(root)
-      await this.prepare(root)
-    } else if (await this.prepareNeeded(root)) {
-      await this.prepare(root)
+export class LinkedPlugin extends Plugin {
+  public type: PluginType = 'link'
+
+  private forceRefresh: boolean
+  private manifest: PluginManifest
+
+  constructor(opts: { forceRefresh: boolean; manifest: PluginManifest } & PluginOptions) {
+    super(opts)
+    this.manifest = opts.manifest
+    this.forceRefresh = opts.forceRefresh || this.manifest.nodeVersionChanged
+  }
+
+  protected async _init() {
+    this.debug('_init')
+    if (!await deps.file.exists(this.root)) {
+      this.debug(`Ignoring ${this.root} as it does not exist`)
+      return
+    }
+    this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
+    await this.refresh()
+    await super._init()
+  }
+
+  protected async refresh() {
+    if (this.forceRefresh || (await this.updateNodeModulesNeeded())) {
+      await this.updateNodeModules()
+      await this.prepare()
+    } else if (await this.prepareNeeded()) {
+      await this.prepare()
     }
   }
 
-  private async updateNodeModulesNeeded(root: string): Promise<boolean> {
-    let modules = path.join(root, 'node_modules')
-    // @ts-ignore
-    if (!await fs.exists(modules)) return true
+  private async updateNodeModulesNeeded(): Promise<boolean> {
+    let modules = path.join(this.root, 'node_modules')
+    if (!await deps.file.exists(modules)) return true
     let modulesInfo = await fs.stat(modules)
-    let pjsonInfo = await fs.stat(path.join(root, 'package.json'))
+    let pjsonInfo = await fs.stat(path.join(this.root, 'package.json'))
     return modulesInfo.mtime < pjsonInfo.mtime
   }
 
-  private async updateNodeModules(root: string): Promise<void> {
-    cli.action.start(`Installing node modules for ${root}`)
-    const yarn = new deps.Yarn({ config: this.config, cwd: root })
+  private async updateNodeModules(): Promise<void> {
+    cli.action.start(`Installing node modules for ${this.root}`)
+    const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
-    touch(path.join(root, 'node_modules'))
+    touch(path.join(this.root, 'node_modules'))
     cli.action.stop()
   }
 
-  private async prepareNeeded(root: string): Promise<boolean> {
-    const pjson = await this.pjson(root)
-    const main = pjson.main
-    // @ts-ignore
-    if (main && !await fs.exists(path.join(root, main))) return true
-    return this.dirty(root)
+  private async prepareNeeded(): Promise<boolean> {
+    const main = this.pjson.main
+    if (main && !await deps.file.exists(path.join(this.root, main))) return true
+    return this.dirty()
   }
 
-  private async dirty(root: string): Promise<boolean> {
-    const updatedAt = await this.lastUpdatedForRoot(root)
+  private async prepare() {
+    const { scripts } = this.pjson
+    if (!scripts || !scripts.prepare) return
+    cli.action.start(`Running prepare script for ${this.root}`)
+    const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
+    await yarn.exec(['run', 'prepare'])
+    const plugins = this.manifest.list('link')
+    if (plugins.find(p => p.root === this.root)) {
+      this.manifest.update(this.root)
+    }
+    cli.action.stop()
+  }
+
+  private async dirty(): Promise<boolean> {
+    const updatedAt = this.lastUpdated
     if (!updatedAt) return true
     return new Promise<boolean>((resolve, reject) => {
       deps
-        .klaw(root, {
+        .klaw(this.root, {
           depthLimit: 10,
           filter: f => {
             return !['.git', 'node_modules'].includes(path.basename(f))
@@ -107,7 +135,7 @@ export class LinkPlugins extends PluginManager {
           if (f.stats.isDirectory()) return
           if (f.path.endsWith('.js') || f.path.endsWith('.ts')) {
             if (f.stats.mtime > updatedAt) {
-              debug(`${f.path} has been updated, preparing linked plugin`)
+              this.debug(`${f.path} has been updated, preparing linked plugin`)
               resolve(true)
             }
           }
@@ -117,22 +145,13 @@ export class LinkPlugins extends PluginManager {
     })
   }
 
-  private async prepare(root: string) {
-    const { scripts } = await this.pjson(root)
-    if (!scripts || !scripts.prepare) return
-    cli.action.start(`Running prepare script for ${root}`)
-    const yarn = new deps.Yarn({ config: this.config, cwd: root })
-    await yarn.exec(['run', 'prepare'])
-    const plugins = this.manifest.list('link')
-    if (plugins.find(p => p.root === root)) {
-      this.manifest.update(root)
-    }
-    cli.action.stop()
+  private get lastUpdated(): Date | undefined {
+    const info = this.manifestInfo
+    if (info) return new Date(info.last_updated)
   }
 
-  private lastUpdatedForRoot(root: string): Date | undefined {
+  private get manifestInfo() {
     const p = this.manifest.list('link')
-    const plugin = p.find(p => p.root === root)
-    if (plugin) return new Date(plugin.last_updated)
+    return p.find(p => p.root === this.root)
   }
 }

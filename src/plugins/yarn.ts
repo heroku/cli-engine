@@ -114,7 +114,7 @@ export default class Yarn {
 
   async checkForYarnLock() {
     // add yarn lockfile if it does not exist
-    if (this.cwd && !await deps.util.exists(path.join(this.cwd, 'yarn.lock'))) {
+    if (this.cwd && !await deps.file.exists(path.join(this.cwd, 'yarn.lock'))) {
       await this.exec()
     }
   }

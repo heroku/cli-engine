@@ -1,5 +1,3 @@
-import * as fs from 'fs-extra'
-
 const debug = require('debug')('util')
 
 export function compare(...props: any[]) {
@@ -54,14 +52,6 @@ export function isEmpty(obj: any) {
   return true
 }
 
-const jsonFiles: { [k: string]: any } = {}
-export async function fetchJSONFile(f: string): Promise<any> {
-  if (!jsonFiles[f]) {
-    jsonFiles[f] = await fs.readJSON(f)
-  }
-  return jsonFiles[f]
-}
-
 export function toArray<T>(o: T | T[]): T[] {
   return Array.isArray(o) ? o : [o]
 }
@@ -74,9 +64,4 @@ export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: stri
     },
     {} as { [k: string]: T[] },
   )
-}
-
-export function exists(f: string): Promise<boolean> {
-  // @ts-ignore
-  return fs.exists(f)
 }

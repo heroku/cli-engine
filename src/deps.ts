@@ -10,6 +10,7 @@ import help = require('./commands/help')
 import notFound = require('./not_found')
 import updater = require('./updater')
 import util = require('./util')
+import file = require('./file')
 import lock = require('./lock')
 
 // plugins
@@ -37,6 +38,7 @@ export default {
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },
   get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
   get util(): typeof util { return fetch('./util') },
+  get file(): typeof file { return fetch('./file') },
 
   // plugins
   get Builtin(): typeof Builtin.Builtin { return fetch('./plugins/builtin').Builtin },

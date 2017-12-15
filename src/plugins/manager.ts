@@ -3,7 +3,6 @@ import * as path from 'path'
 import cli from 'cli-ux'
 import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
-import { PluginManifest } from './manifest'
 import { PluginTopic } from './plugin'
 import { inspect } from 'util'
 import _ from 'ts-lodash'
@@ -29,7 +28,6 @@ function topicFromID(id: string) {
 
 export type PluginManagerOptions = {
   config: Config
-  manifest?: PluginManifest
 }
 
 export abstract class PluginManager {
@@ -39,22 +37,23 @@ export abstract class PluginManager {
 
   protected submanagers: PluginManager[] = []
   protected config: Config
-  protected manifest: PluginManifest
   protected userPluginsDir: string
 
   private initialized = false
 
   constructor(opts: PluginManagerOptions) {
     this.config = opts.config
-    this.manifest = opts.manifest || new deps.PluginManifest(this.config)
     this.userPluginsDir = path.join(this.config.dataDir, 'plugins')
   }
 
   public async init(): Promise<void> {
     if (this.initialized) return
-    await this.manifest.init()
-    await this._init()
-    await Promise.all(this.submanagers.map(m => m.init()))
+    try {
+      await this._init()
+    } catch (err) {
+      cli.warn(err, { context: this.constructor.name })
+    }
+    await this.initSubmanagers()
     this.initialized = true
     this.mergeCommandIDs()
     this.mergeTopics()
@@ -62,6 +61,17 @@ export abstract class PluginManager {
     this.mergeAliases()
   }
   protected abstract async _init(): Promise<void>
+
+  public async initSubmanagers(): Promise<void> {
+    const promises = []
+    for (let m of this.submanagers) {
+      promises.push(m.init())
+      if (process.env.CLI_ENGINE_LOAD_PLUGINS_IN_SERIAL === '1') {
+        await promises.pop()
+      }
+    }
+    await Promise.all(promises)
+  }
 
   public get topicIDs(): string[] {
     return Object.keys(this.topics)

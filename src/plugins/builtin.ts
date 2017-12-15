@@ -2,10 +2,13 @@ import { PluginManager } from './manager'
 import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
 
+const debug = require('debug')('cli:plugins:builtin')
+
 export class Builtin extends PluginManager {
   private commands: { [name: string]: string }
 
   protected async _init() {
+    debug('_init')
     this.commands = {
       commands: 'commands',
       help: 'help',
