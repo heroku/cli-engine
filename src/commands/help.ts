@@ -37,6 +37,7 @@ export default class Help extends Command {
 
   async run() {
     this.commandManager = new CommandManager(this.config)
+    await this.commandManager.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
