@@ -13,8 +13,9 @@ export class Builtin extends PluginManager {
       version: 'version',
       which: 'which',
     }
-    if (this.config.userPlugins) {
+    if (true || this.config.userPlugins) {
       this.commands = {
+        ...this.commands,
         plugins: 'plugins',
         'plugins:install': 'plugins/install',
         'plugins:link': 'plugins/link',
@@ -28,6 +29,8 @@ export class Builtin extends PluginManager {
         commands: []
       }
     }
+
+    this.commandIDs = Object.keys(this.commands)
   }
 
   protected _findCommand(id: string): ICommand | undefined {

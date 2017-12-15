@@ -5,12 +5,21 @@ import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
 import { Lock } from '../lock'
 import { PluginManifest } from './manifest'
+import { PluginTopic } from './plugin'
 import { inspect } from 'util'
 import _ from 'ts-lodash'
 
 const debug = require('debug')('cli:plugins')
 
 export type Topic = BaseTopic & { commands: string[] }
+
+function mergeTopics (a: PluginTopic, b: PluginTopic): Topic {
+  return {
+    ...a,
+    ...b,
+    commands: [],
+  }
+}
 
 function topicFromID(id: string) {
   return id
@@ -51,7 +60,9 @@ export abstract class PluginManager {
     this.initialized = true
     for (let m of this.submanagers) {
       this.commandIDs = [...this.commandIDs, ...m.commandIDs]
-      this.topics = { ...this.topics, ...m.topics }
+      for (let t of Object.values(m.topics)) {
+        this.topics[t.name] = mergeTopics(this.topics[t.name], t)
+      }
     }
     this.commandIDs = _.compact(this.commandIDs.sort())
     for (let id of this.commandIDs) {

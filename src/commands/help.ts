@@ -79,7 +79,7 @@ export default class Help extends Command {
       // only get from the prefix
       .filter(t => t.name.startsWith(idPrefix))
       // only get topics 1 level deep
-      .filter(t => t.name.split(':').length <= (prefix || '').split(':').length + 1)
+      .filter(t => t.name.split(':').length < (prefix || '').split(':').length + 1)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
     if (!topics.length) return topics
