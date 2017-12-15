@@ -20,15 +20,9 @@ export type Manifest = {
   sha256gz: string
 }
 
-type TmpDirs = {
-  dir: string
-  node: string
-  client: string
-  extract: string
-}
-
-function mtime(f: string) {
-  return deps.moment(fs.statSync(f).mtime)
+async function mtime(f: string) {
+  const { mtime } = await fs.stat(f)
+  return deps.moment(mtime)
 }
 
 function timestamp(msg: string): string {
@@ -52,9 +46,6 @@ export class Updater {
   }
   get binPath(): string | undefined {
     return this.config.reexecBin || this.config.bin
-  }
-  get updateDir(): string {
-    return path.join(this.config.dataDir, 'tmp', 'u')
   }
   get versionFile(): string {
     return path.join(this.config.cacheDir, `${this.config.channel}.version`)
@@ -126,25 +117,15 @@ export class Updater {
       })
     }
 
-    fs.mkdirpSync(this.updateDir)
-    let dirs = this._dirs(require('tmp').dirSync({ dir: this.updateDir }).name)
+    let clientRoot = path.join(this.config.dataDir, 'client')
+    let output = path.join(clientRoot, manifest.version)
 
-    let dir = path.join(this.config.dataDir, 'client', manifest.version)
-    let tmp = dirs.extract
+    await this._mkdirp(clientRoot)
+    await this._remove(output)
+    await this.extract(stream, clientRoot, manifest.sha256gz)
+    await this._rename(path.join(clientRoot, base), output)
 
-    await this.extract(stream, tmp, manifest.sha256gz)
-    let extracted = path.join(dirs.extract, base)
-
-    this._cleanup()
-
-    if (await deps.util.exists(dir)) {
-      this._rename(dir, dirs.client)
-    }
-    this._rename(extracted, dir)
-
-    this._cleanupDirs(dirs)
-
-    this._createBin(path.join(dir, 'bin', this.config.bin), manifest)
+    await this._createBin(path.join(output, 'bin', this.config.bin), manifest)
   }
 
   extract(stream: NodeJS.ReadableStream, dir: string, sha: string): Promise<void> {
@@ -163,12 +144,7 @@ export class Updater {
       }
 
       let fail = (err: Error) => {
-        this._catch(() => {
-          if (fs.existsSync(dir)) {
-            fs.removeSync(dir)
-          }
-        })
-        reject(err)
+        this._remove(dir).then(() => reject(err))
       }
 
       let hasher = crypto.createHash('sha256')
@@ -188,6 +164,7 @@ export class Updater {
         switch (header.type) {
           case 'directory':
           case 'file':
+            debug(header.name)
             return false
           case 'symlink':
             return true
@@ -209,71 +186,31 @@ export class Updater {
     })
   }
 
-  private _cleanup() {
-    let dir = this.updateDir
-    this._catch(() => {
-      if (fs.existsSync(dir)) {
-        fs.readdirSync(dir).forEach(d => {
-          let dirs = this._dirs(path.join(dir, d))
-
-          this._remove(dirs.node)
-
-          if (mtime(dirs.dir).isBefore(deps.moment().subtract(24, 'hours'))) {
-            this._cleanupDirs(dirs)
-          } else {
-            this._removeIfEmpty(dirs)
-          }
-        })
-      }
-    })
+  private async _rename(from: string, to: string) {
+    debug(`renaming ${from} to ${to}`)
+    await fs.rename(from, to)
   }
 
-  private _cleanupDirs(dirs: TmpDirs) {
-    this._remove(dirs.client)
-    this._remove(dirs.extract)
-    this._removeIfEmpty(dirs)
+  private async _remove(dir: string) {
+    if (await deps.util.exists(dir)) {
+      debug(`remove ${dir}`)
+      await fs.remove(dir)
+    }
   }
 
-  private _removeIfEmpty(dirs: TmpDirs) {
-    this._catch(() => {
-      if (fs.readdirSync(dirs.dir).length === 0) {
-        this._remove(dirs.dir)
-      }
-    })
-  }
-
-  private _dirs(dir: string) {
-    let client = path.join(dir, 'client')
-    let extract = path.join(dir, 'extract')
-    let node = path.join(dir, 'node.exe')
-
-    return { dir, client, extract, node }
-  }
-
-  private _rename(src: string, dst: string) {
-    debug(`rename ${src} to ${dst}`)
-    // moveSync tries to do a rename first then falls back to copy & delete
-    // on windows the delete would error on node.exe so we explicitly rename
-    let rename = this.config.windows ? fs.renameSync : fs.moveSync
-    rename(src, dst)
-  }
-
-  private _remove(dir: string) {
-    this._catch(() => {
-      if (fs.existsSync(dir)) {
-        debug(`remove ${dir}`)
-        fs.removeSync(dir)
-      }
-    })
+  private async _mkdirp(dir: string) {
+    debug(`mkdirp ${dir}`)
+    await fs.mkdirp(dir)
   }
 
   base(manifest: Manifest): string {
     return `${this.config.name}-v${manifest.version}-${this.config.platform}-${this.config.arch}`
   }
 
-  get autoupdateNeeded(): boolean {
+  private async autoupdateNeeded(): Promise<boolean> {
     try {
-      return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
+      const m = await mtime(this.autoupdatefile)
+      return m.isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       debug('autoupdate ENOENT')
@@ -285,10 +222,10 @@ export class Updater {
     try {
       await this.checkIfUpdating()
       await this.warnIfUpdateAvailable()
-      if (!force && !this.autoupdateNeeded) return
+      if (!force && !await this.autoupdateNeeded()) return
 
       debug('autoupdate running')
-      fs.outputFileSync(this.autoupdatefile, '')
+      await fs.outputFile(this.autoupdatefile, '')
 
       const binPath = this.binPath
       if (!binPath) {
@@ -297,7 +234,7 @@ export class Updater {
       }
       debug(`spawning autoupdate on ${binPath}`)
 
-      let fd = fs.openSync(this.autoupdatelogfile, 'a')
+      let fd = await fs.open(this.autoupdatelogfile, 'a')
       // @ts-ignore
       fs.write(
         fd,
@@ -392,7 +329,7 @@ export class Updater {
     }
   }
 
-  private _createBin(dst: string, manifest: Manifest) {
+  private async _createBin(dst: string, manifest: Manifest) {
     let src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
     let body
     if (this.config.windows) {
@@ -407,6 +344,6 @@ fi
 "${dst}" "$@"
 `
     }
-    fs.outputFileSync(src, body, { mode: 0o777 })
+    await fs.outputFile(src, body, { mode: 0o777 })
   }
 }
