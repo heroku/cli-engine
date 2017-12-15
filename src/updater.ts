@@ -129,7 +129,7 @@ export class Updater {
     fs.mkdirpSync(this.updateDir)
     let dirs = this._dirs(require('tmp').dirSync({ dir: this.updateDir }).name)
 
-    let dir = path.join(this.config.dataDir, 'client')
+    let dir = path.join(this.config.dataDir, 'client', manifest.version)
     let tmp = dirs.extract
 
     await this.extract(stream, tmp, manifest.sha256gz)
@@ -137,18 +137,14 @@ export class Updater {
 
     this._cleanup()
 
-    cli.action.status = 'finishing up'
-    let downgrade = await this.lock.upgrade()
-    // wait 2000ms for any commands that were partially loaded to finish loading
-    await deps.util.wait(2000)
-    // @ts-ignore
-    if (await fs.exists(dir)) {
+    if (await deps.util.exists(dir)) {
       this._rename(dir, dirs.client)
     }
     this._rename(extracted, dir)
-    downgrade()
 
     this._cleanupDirs(dirs)
+
+    this._createBin(path.join(dir, 'bin', this.config.bin))
   }
 
   extract(stream: NodeJS.ReadableStream, dir: string, sha: string): Promise<void> {
@@ -233,8 +229,6 @@ export class Updater {
   }
 
   private _cleanupDirs(dirs: TmpDirs) {
-    this._moveNode(dirs)
-
     this._remove(dirs.client)
     this._remove(dirs.extract)
     this._removeIfEmpty(dirs)
@@ -269,15 +263,6 @@ export class Updater {
       if (fs.existsSync(dir)) {
         debug(`remove ${dir}`)
         fs.removeSync(dir)
-      }
-    })
-  }
-
-  private _moveNode(dirs: TmpDirs) {
-    this._catch(() => {
-      let dirDeleteNode = path.join(dirs.client, 'bin', 'node.exe')
-      if (fs.existsSync(dirDeleteNode)) {
-        this._rename(dirDeleteNode, dirs.node)
       }
     })
   }
@@ -399,5 +384,11 @@ export class Updater {
     } else {
       return spawnFunc(binPath, args, options)
     }
+  }
+
+  private _createBin(dst: string) {
+    const src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
+    fs.mkdirp(path.dirname(src))
+    fs.symlinkSync(dst, src)
   }
 }
