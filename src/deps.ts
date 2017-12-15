@@ -3,7 +3,6 @@ import { HTTP } from 'http-call'
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
 import * as moment from 'moment'
 import * as klaw from 'klaw'
-import * as crossSpawn from 'cross-spawn'
 
 // local
 import Hooks = require('./hooks')
@@ -29,7 +28,7 @@ export default {
   get moment(): typeof moment { return fetch('moment') },
   get rwlockfile(): any { return fetch('rwlockfile') },
   get klaw(): typeof klaw { return fetch('klaw') },
-  get crossSpawn(): typeof crossSpawn { return fetch('cross-spawn') },
+  get crossSpawn(): any { return fetch('cross-spawn') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
