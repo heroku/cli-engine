@@ -6,6 +6,7 @@ const root = path.join(__dirname, '..', 'example')
 const {run} = require('../src/cli')
 run({
   config: {
+    reexecBin: __filename,
     root,
     updateDisabled: `add update disable message here`
   }

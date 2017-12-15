@@ -1,3 +1,4 @@
+import deps from '../deps'
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
@@ -15,7 +16,7 @@ export default class Yarn {
   }
 
   get bin(): string {
-    return require.resolve('yarn/bin/yarn.js')
+    return require.resolve('yarn/bin/yarn')
   }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
@@ -46,9 +47,8 @@ export default class Yarn {
   }
 
   fork(modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
-    const { fork } = require('child_process')
     return new Promise((resolve, reject) => {
-      let forked = fork(modulePath, args, options)
+      let forked = deps.crossSpawn(modulePath, args, options)
       let error = ''
 
       forked.stdout.setEncoding('utf8')
@@ -96,7 +96,7 @@ export default class Yarn {
     let options = {
       cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
-      env: Object.assign({}, process.env, this.pathEnv()),
+      env: { ...process.env, ...this.pathEnv() },
     }
 
     debug(`${this.cwd}: ${this.bin} ${args.join(' ')}`)
@@ -115,7 +115,7 @@ export default class Yarn {
 
   async checkForYarnLock() {
     // add yarn lockfile if it does not exist
-    if (this.cwd && !fs.existsSync(path.join(this.cwd, 'yarn.lock'))) {
+    if (this.cwd && !await deps.util.exists(path.join(this.cwd, 'yarn.lock'))) {
       await this.exec()
     }
   }

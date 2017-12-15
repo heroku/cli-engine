@@ -75,3 +75,8 @@ export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: stri
     {} as { [k: string]: T[] },
   )
 }
+
+export function exists(f: string): Promise<boolean> {
+  // @ts-ignore
+  return fs.exists(f)
+}

@@ -18,6 +18,7 @@ export type PluginPJSON = {
   name: string
   version: string
   main?: string
+  scripts?: { [k: string]: string }
   'cli-engine'?: {
     commandsDir?: string
     aliases?: { [k: string]: string | string[] }

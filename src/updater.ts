@@ -51,7 +51,7 @@ export class Updater {
     return path.join(this.config.cacheDir, 'autoupdate.log')
   }
   get binPath(): string | undefined {
-    return process.env.CLI_BINPATH || this.config.bin
+    return this.config.reexecBin || this.config.bin
   }
   get updateDir(): string {
     return path.join(this.config.dataDir, 'tmp', 'u')
@@ -291,7 +291,7 @@ export class Updater {
       return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
-      debug(err)
+      debug('autoupdate ENOENT')
       return true
     }
   }
@@ -393,6 +393,7 @@ export class Updater {
   }
 
   spawnBinPath(spawnFunc: Function, binPath: string, args: string[], options: Object) {
+    debug(binPath, args)
     if (this.config.windows) {
       args = ['/c', binPath].concat(args)
       return spawnFunc(process.env.comspec || 'cmd.exe', args, options)

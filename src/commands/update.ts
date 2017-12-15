@@ -1,6 +1,6 @@
 import { Command, flags, IBooleanFlag } from 'cli-engine-command'
 import { Updater } from '../updater'
-// import PluginsUpdate from './plugins/update'
+import PluginsUpdate from './plugins/update'
 import { Hooks } from '../hooks'
 import cli from 'cli-ux'
 import * as path from 'path'
@@ -63,8 +63,7 @@ export default class Update extends Command {
     debug('fetch version')
     await this.updater.fetchVersion(true)
     debug('plugins update')
-    // TODO: update plugins
-    // await PluginsUpdate.run({...this.config, argv: []})
+    await PluginsUpdate.run({ ...this.config, argv: [] })
     debug('log chop')
     await this.logChop()
     debug('autocomplete')

@@ -1,3 +1,4 @@
+import deps from '../deps'
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import { Plugin } from './plugin'
@@ -73,8 +74,7 @@ export class UserPlugins extends PluginManager {
   }
 
   private async createPJSON() {
-    // @ts-ignore
-    if (!fs.exists(this.pjsonPath)) {
+    if (!await deps.util.exists(this.pjsonPath)) {
       await fs.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
     }
   }

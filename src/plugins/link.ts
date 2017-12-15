@@ -120,6 +120,8 @@ export class LinkPlugins extends PluginManager {
   }
 
   private async prepare(root: string) {
+    const { scripts } = await this.pjson(root)
+    if (!scripts || !scripts.prepare) return
     cli.action.start(`Running prepare script for ${root}`)
     const yarn = new deps.Yarn({ config: this.config, cwd: root })
     await yarn.exec(['run', 'prepare'])
