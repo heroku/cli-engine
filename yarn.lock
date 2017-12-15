@@ -663,6 +663,15 @@ cli-engine-config@4.3.0-ts.1:
     fs-extra "^5.0.0"
     uuid "^3.1.0"
 
+cli-engine-config@4.3.0-ts.2:
+  version "4.3.0-ts.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.3.0-ts.2.tgz#59bc720244f5481f9539f62e25d72a99e0584640"
+  dependencies:
+    cli-flags "1.0.18"
+    debug "^3.1.0"
+    fs-extra "^5.0.0"
+    uuid "^3.1.0"
+
 cli-flags@1.0.18:
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-1.0.18.tgz#632ca43cdc872f9031b1dbbce8e92216a35ab4d2"
