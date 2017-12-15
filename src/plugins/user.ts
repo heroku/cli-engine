@@ -24,25 +24,25 @@ export class UserPlugins extends PluginManager {
   public async update() {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
-    // let downgrade = await this.lock.upgrade()
-    // await this.yarn.exec(['upgrade'])
-    // await downgrade()
+    let downgrade = await this.lock.upgrade()
+    await this.yarn.exec(['upgrade'])
+    await downgrade()
   }
 
   public async install(name: string, tag: string): Promise<void> {
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['add', `${name}@${tag}`])
     const plugin = this.loadPlugin(name, tag)
+    await plugin.init()
     await plugin.validate()
     await this.manifest.add({ type: 'user', name, tag })
+    await this.manifest.save()
     await downgrade()
   }
 
   public async uninstall(name: string): Promise<void> {
-    let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['remove', name])
     await this.manifest.remove(name)
-    await downgrade()
   }
 
   protected async fetchPlugins() {

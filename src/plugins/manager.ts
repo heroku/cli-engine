@@ -62,6 +62,7 @@ export abstract class PluginManager {
     this.mergeCommandIDs()
     this.mergeTopics()
     this.addMissingTopics()
+    this.mergeAliases()
   }
   protected abstract async _init(): Promise<void>
 
@@ -134,6 +135,14 @@ export abstract class PluginManager {
       // add this command to the topic
       this.topics[topic].commands = this.topics[topic].commands || []
       this.topics[topic].commands.push(id)
+    }
+  }
+
+  private mergeAliases() {
+    for (let m of this.submanagers) {
+      for (let [k, v] of Object.entries(m.aliases)) {
+        this.aliases[k] = [...(this.aliases[k] || []), ...deps.util.toArray(v)]
+      }
     }
   }
 }

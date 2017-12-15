@@ -1,3 +1,4 @@
+import { cli } from 'cli-ux'
 import { Command } from 'cli-engine-command'
 import { Plugins } from '../../plugins'
 
@@ -7,7 +8,7 @@ const bin: string = g.config ? g.config.bin : 'heroku'
 export default class PluginsUninstall extends Command {
   static topic = 'plugins'
   static command = 'uninstall'
-  static args = [{ name: 'plugin', description: 'plugin name to uninstall' }]
+  static args = [{ name: 'plugin', description: 'plugin name to uninstall', required: true }]
   static aliases = ['plugins:unlink']
   static description = 'uninstalls or unlinks a plugin'
   static help = `Example:
@@ -17,8 +18,10 @@ export default class PluginsUninstall extends Command {
   plugins: Plugins
 
   async run() {
-    this.plugins = new Plugins({ config: this.config })
     const [plugin] = this.argv
+    cli.action.start(`Uninstalling ${plugin}`)
+    this.plugins = new Plugins({ config: this.config })
+    await this.plugins.init()
     await this.plugins.uninstall(plugin)
   }
 }

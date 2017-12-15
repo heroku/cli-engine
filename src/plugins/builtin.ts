@@ -31,6 +31,7 @@ export class Builtin extends PluginManager {
     }
 
     this.commandIDs = Object.keys(this.commands)
+    this.aliases = this.config.aliases
   }
 
   protected _findCommand(id: string): ICommand | undefined {

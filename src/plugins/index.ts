@@ -3,6 +3,7 @@ import { UserPlugins } from './user'
 import { LinkPlugins } from './link'
 import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
+import * as path from 'path'
 
 export class Plugins extends PluginManager {
   public plugins: Plugin[]
@@ -20,10 +21,18 @@ export class Plugins extends PluginManager {
 
   public async uninstall(name: string): Promise<void> {
     const type = await this.pluginType(name)
-    if (!type) throw new Error(`${name} is not installed`)
+    if (!type) {
+      const root = path.resolve(name)
+      const linked = this.link.plugins.find(p => path.resolve(p.root) === root)
+      if (linked) {
+        name = linked.name
+      } else throw new Error(`${name} is not installed`)
+    }
+    let downgrade = await this.lock.upgrade()
     await this.manifest.remove(name)
     await this.manifest.save()
     if (type === 'user') await this.user.uninstall(name)
+    await downgrade()
   }
 
   protected async _init() {
@@ -35,6 +44,7 @@ export class Plugins extends PluginManager {
       this.submanagers = [...this.submanagers, this.user, this.link]
     }
     await Promise.all(this.submanagers.map(m => m.init()))
+    if (this.manifest.nodeVersionChanged) await this.manifest.save()
     this.plugins = this.link.plugins.concat(this.user.plugins)
   }
 }

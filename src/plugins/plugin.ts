@@ -17,6 +17,9 @@ export type PluginPJSON = {
   name: string
   version: string
   main?: string
+  'cli-engine'?: {
+    aliases?: { [k: string]: string | string[] }
+  }
 }
 
 export type PluginTopic = {
@@ -27,6 +30,7 @@ export type PluginTopic = {
 
 export type PluginModule = {
   commands: ICommand[]
+  topic?: PluginTopic
   topics: PluginTopic[]
 }
 
@@ -54,17 +58,15 @@ export class Plugin extends PluginManager {
 
   protected async _init() {
     this.pjson = await deps.util.fetchJSONFile(path.join(this.root, 'package.json'))
+    const pjsonConfig = this.pjson['cli-engine'] || {}
     this.name = this.pjson.name
     this.version = this.pjson.version
 
     if (this.pjson.main) {
-      this.module = await this.requireModule(this.pjson.main)
-
-      for (let topic of this.module.topics) {
-        this.topics[topic.name] = { ...topic, commands: [] }
-      }
-      this.commandIDs = [...this.commandIDs, ...this.module.commands.map(m => m.id)]
+      await this.requireModule(this.pjson.main)
     }
+
+    this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
   }
 
   protected _findCommand(id: string): ICommand | undefined {
@@ -84,10 +86,10 @@ export class Plugin extends PluginManager {
     return cmd
   }
 
-  private async requireModule(main: string): Promise<PluginModule> {
+  private async requireModule(main: string) {
     debug(`requiring ${this.name}@${this.version}`)
 
-    const m = {
+    const m: PluginModule = {
       commands: [],
       topics: [],
       ...require(path.join(this.root, main)),
@@ -99,6 +101,11 @@ export class Plugin extends PluginManager {
     const hooks = new deps.Hooks(this.config)
     await hooks.run('plugins:parse', { module: m, pjson: this.pjson })
 
-    return m
+    for (let topic of m.topics) {
+      this.topics[topic.name] = { ...topic, commands: [] }
+    }
+    this.commandIDs = [...this.commandIDs, ...m.commands.map(m => m.id)]
+
+    this.module = m
   }
 }
