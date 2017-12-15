@@ -23,17 +23,15 @@ export default class PluginsLink extends Command {
     Installing dependencies for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done
     Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`
 
-  plugins: Plugins
-
   async run() {
-    this.plugins = new Plugins(this.config)
+    const plugins = new Plugins(this.config)
     let p = path.resolve(this.argv[0] || process.cwd())
     cli.action.start(`Linking ${p}`)
-    const { name } = this.plugins.link.pjson(p)
-    if (!this.flags.force && (await this.plugins.hasPlugin(name))) {
+    const { name } = await plugins.link.pjson(p)
+    if (!this.flags.force && plugins.pluginType(name)) {
       throw new Error('Plugin is already installed. Run with --force to install anyways.')
     }
-    await this.plugins.link.install(p)
+    await plugins.link.install(p)
     const hooks = new Hooks(this.config)
     await hooks.run('update')
   }

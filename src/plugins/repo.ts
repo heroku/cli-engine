@@ -4,18 +4,25 @@ import * as path from 'path'
 
 const debug = require('debug')('cli:plugins:repo')
 
+export type RepoLink = {
+  name: string
+  root: string
+  lastUpdated: string
+}
+
+export type RepoUser = {
+  name: string
+  tag: string
+}
+
+export type RepoUserOpts = RepoUser & { type: 'user' }
+export type RepoLinkOpts = RepoLink & { type: 'link' }
+
 export type RepoJSON = {
   version: 1
-  node_version: string
-  user: {
-    name: string
-    tag: string
-  }[]
-  link: {
-    name: string
-    root: string
-    lastUpdated: string
-  }[]
+  node_version?: string
+  user: RepoUser[]
+  link: RepoLink[]
 }
 
 export class PluginRepo {
@@ -29,12 +36,16 @@ export class PluginRepo {
     if (this.repo) return
     this.repo = (await this.read()) || {
       version: 1,
-      node_version: process.versions.node,
       link: [],
       user: [],
     }
     if (!this.repo.link) this.repo.link = []
     if (!this.repo.user) this.repo.user = []
+  }
+
+  public async save(): Promise<void> {
+    this.repo.node_version = process.versions.node
+    await fs.outputJSON(this.file, this.repo, { spaces: 2 })
   }
 
   public async list(type: 'user'): Promise<RepoJSON['user']>
@@ -45,34 +56,22 @@ export class PluginRepo {
     else return this.repo.link
   }
 
-  public get nodeVersion(): string {
-    return this.repo.node_version
+  public get nodeVersionChanged(): boolean {
+    return this.repo.node_version !== process.versions.node
   }
 
-  public async updateNodeVersion(): Promise<void> {
-    await this.init()
-    this.repo.node_version = process.versions.node
-    await this.write(this.repo)
-  }
-
-  public async add(
-    opts: RepoJSON['user'][0] & { type: 'user' } | RepoJSON['link'][0] & { type: 'link' },
-  ): Promise<void> {
-    await this.init()
+  public async add(opts: RepoUserOpts | RepoLinkOpts): Promise<void> {
     await this.remove(opts.name)
     if (opts.type === 'user') {
       this.repo.user.push({ name: opts.name, tag: opts.tag })
     } else {
       this.repo.link.push({ name: opts.name, root: opts.root, lastUpdated: opts.lastUpdated })
     }
-    await this.write(this.repo)
   }
 
   public async remove(name: string): Promise<void> {
-    await this.init()
     this.repo.user = this.repo.user.filter(p => p.name !== name)
     this.repo.link = this.repo.link.filter(p => p.name !== name)
-    await this.write(this.repo)
   }
 
   private repo: RepoJSON
@@ -89,9 +88,5 @@ export class PluginRepo {
         debug(err)
       } else throw err
     }
-  }
-
-  private async write(repo: RepoJSON): Promise<void> {
-    await fs.outputJSON(this.file, repo, { spaces: 2 })
   }
 }

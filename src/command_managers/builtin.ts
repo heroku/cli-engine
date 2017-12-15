@@ -1,13 +1,12 @@
 import { CommandManagerBase } from './base'
 import * as path from 'path'
-import { Config, Topic, ICommand } from 'cli-engine-config'
+import { Topic, ICommand } from 'cli-engine-config'
 
 export class BuiltinCommandManager extends CommandManagerBase {
   commands: { [name: string]: string }
   topics: Topic[]
 
-  constructor(config: Config) {
-    super(config)
+  protected async _init() {
     this.commands = {
       commands: 'commands',
       help: 'help',

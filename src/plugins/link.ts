@@ -1,22 +1,22 @@
 import { cli } from 'cli-ux'
 import { Plugin, PluginPJSON } from './plugin'
-import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import { PluginManager } from './manager'
+import { PluginManager } from './base'
 import * as klaw from 'klaw-sync'
+import _ from 'ts-lodash'
+import deps from '../deps'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
 
 export class LinkPlugins extends PluginManager {
-  get userPluginsDir(): string {
-    return path.join(this.config.dataDir, 'plugins')
+  public async pjson(root: string): Promise<PluginPJSON> {
+    return this.fetchJSONFile(path.join(root, 'package.json'))
   }
 
   public async install(root: string): Promise<void> {
-    await this.init()
     const downgrade = await this.lock.upgrade()
     const plugin = await this.loadPlugin(root, true)
     await plugin.validate()
@@ -24,25 +24,25 @@ export class LinkPlugins extends PluginManager {
     await downgrade()
   }
 
-  public pjson(root: string): PluginPJSON {
-    return require(path.join(root, 'package.json'))
+  protected async _init() {
+    this.submanagers = this.plugins = await this.fetchPlugins()
   }
 
   protected async fetchPlugins() {
-    const retVal = []
-    const plugins = await this.repo.list('link')
-    for (let p of plugins) {
+    const defs = await this.repo.list('link')
+    const promises = defs.map(async p => {
       try {
-        retVal.push(await this.loadPlugin(p.root))
+        return await this.loadPlugin(p.root)
       } catch (err) {
         cli.warn(err, { context: `error loading linked plugin from ${p.root}` })
       }
-    }
-    return retVal
+    })
+    const plugins = await Promise.all(promises)
+    return _.compact(plugins)
   }
 
-  private async loadPlugin(root: string, refresh: boolean = false) {
-    await this.refreshPlugin(root, refresh)
+  private async loadPlugin(root: string, forceRefresh: boolean = false) {
+    await this.refreshPlugin(root, forceRefresh || this.repo.nodeVersionChanged)
     return new Plugin({
       config: this.config,
       type: 'link',
@@ -51,8 +51,9 @@ export class LinkPlugins extends PluginManager {
   }
 
   private async refreshPlugin(root: string, refresh: boolean = false) {
-    if (refresh || this.refreshNeeded || (await this.updateNodeModulesNeeded(root))) {
+    if (refresh || (await this.updateNodeModulesNeeded(root))) {
       await this.updateNodeModules(root)
+      await this.prepare(root)
     } else if (await this.prepareNeeded(root)) {
       await this.prepare(root)
     }
@@ -69,15 +70,14 @@ export class LinkPlugins extends PluginManager {
 
   private async updateNodeModules(root: string): Promise<void> {
     cli.action.start(`Installing node modules for ${root}`)
-    const yarn = new Yarn({ config: this.config, cwd: root })
+    const yarn = new deps.Yarn({ config: this.config, cwd: root })
     await yarn.exec()
     touch(path.join(root, 'node_modules'))
     cli.action.stop()
-    await this.prepare(root)
   }
 
   private async prepareNeeded(root: string): Promise<boolean> {
-    const pjson = this.pjson(root)
+    const pjson = await this.pjson(root)
     const main = pjson.main
     if (!main) return false
     // @ts-ignore
@@ -95,7 +95,7 @@ export class LinkPlugins extends PluginManager {
 
   private async prepare(root: string) {
     cli.action.start(`Running prepare script for ${root}`)
-    const yarn = new Yarn({ config: this.config, cwd: root })
+    const yarn = new deps.Yarn({ config: this.config, cwd: root })
     await yarn.exec(['run', 'prepare'])
     cli.action.stop()
   }

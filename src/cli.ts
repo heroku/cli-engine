@@ -68,6 +68,7 @@ export default class CLI {
     debug('command_manager')
     const id = this.config.argv[1]
     const commandManager = new CommandManager(this.config)
+    await commandManager.init()
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       this.Command = deps.Help

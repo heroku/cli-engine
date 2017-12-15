@@ -20,19 +20,12 @@ function uniqCommandIDs(ids: string[]): string[] {
 }
 
 export abstract class CommandManagerBase {
-  protected config: Config
   protected initialized = false
+  protected submanagers: CommandManagerBase[] = []
 
-  constructor(config: Config) {
-    this.config = config
-  }
-
-  protected get submanagers(): CommandManagerBase[] {
-    return []
-  }
+  constructor(protected config: Config) {}
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
-    await this.init()
     id = this.unalias(id)
     let finders = this.submanagers.map(m => m.findCommand(id))
     for (let p of finders) {
@@ -42,27 +35,23 @@ export abstract class CommandManagerBase {
   }
 
   public async listTopics(): Promise<Topic[]> {
-    await this.init()
     let arrs = await Promise.all(this.submanagers.map(m => m.listTopics()))
     let topics = arrs.reduce((next, res) => next.concat(res), [])
     return uniqTopics(topics)
   }
 
   public async listCommandIDs(): Promise<string[]> {
-    await this.init()
     let arrs = await Promise.all(this.submanagers.map(m => m.listCommandIDs()))
     let ids = arrs.reduce((next, res) => next.concat(res), [])
     return uniqCommandIDs(ids)
   }
 
   public async findTopic(id: string): Promise<Topic | undefined> {
-    await this.init()
     let topics = await this.listTopics()
     return topics.find(t => t.name === id)
   }
 
   public async listRootCommands(): Promise<ICommand[]> {
-    await this.init()
     const ids = await this.listRootCommandIDs()
     console.dir(ids)
     let commands = _.compact(await Promise.all(ids.map(id => this.findCommand(id))))
@@ -72,7 +61,6 @@ export abstract class CommandManagerBase {
   }
 
   public async commandsForTopic(topic: string): Promise<ICommand[]> {
-    await this.init()
     let ids = await this.commandIDsForTopic(topic)
     let commands = _.compact(await Promise.all(ids.map(id => this.findCommand(id))))
     commands = _.sortBy(commands, c => c.id)
@@ -80,11 +68,13 @@ export abstract class CommandManagerBase {
     return commands
   }
 
-  protected async init(): Promise<void> {
+  public async init(): Promise<void> {
     if (this.initialized) return
+    await this._init()
     await Promise.all(this.submanagers.map(m => m.init()))
     this.initialized = true
   }
+  protected abstract async _init(): Promise<void>
 
   protected async listTopicIDs(): Promise<string[]> {
     const commands = await this.listCommandIDs()

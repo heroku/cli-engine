@@ -30,7 +30,7 @@ ${examplePluginsHelp.join('\n')}
 `
 
   async run() {
-    let plugins = await new Plugins(this.config).listPlugins()
+    let plugins = await this.fetchPlugins()
     plugins.sort(compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
     if (!plugins.length) cli.warn('no plugins installed')
@@ -40,5 +40,11 @@ ${examplePluginsHelp.join('\n')}
       else if (plugin.tag !== 'latest') output += color.dim(` (${String(plugin.tag)})`)
       cli.log(output)
     }
+  }
+
+  private async fetchPlugins() {
+    const plugins = new Plugins(this.config)
+    await plugins.init()
+    return plugins.plugins
   }
 }

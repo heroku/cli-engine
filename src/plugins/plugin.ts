@@ -1,15 +1,14 @@
-import { CommandManagerBase } from '../command_managers/base'
+import { PluginBase } from './base'
 import { ICommand, Config, Topic } from 'cli-engine-config'
-import * as fs from 'fs-extra'
 import * as path from 'path'
 import _ from 'ts-lodash'
 import { Hooks } from '../hooks'
 
 const debug = require('debug')('plugins:plugin')
 
-export type PluginTypes = 'core' | 'user' | 'link'
+export type PluginType = 'core' | 'user' | 'link'
 export type PluginOptions = {
-  type: PluginTypes
+  type: PluginType
   root: string
   tag?: string
   config: Config
@@ -45,10 +44,10 @@ function fixTopic(t: PluginTopic): Topic | undefined {
   }
 }
 
-export class Plugin extends CommandManagerBase {
+export class Plugin extends PluginBase {
   public name: string
   public version: string
-  public type: PluginTypes
+  public type: PluginType
   public root: string
   public pjson: PluginPJSON
   public tag?: string
@@ -94,9 +93,8 @@ export class Plugin extends CommandManagerBase {
     }
   }
 
-  protected async init() {
-    if (this.pjson) return
-    this.pjson = await fs.readJSON(path.join(this.root, 'package.json'))
+  protected async _init() {
+    this.pjson = await this.fetchJSONFile(path.join(this.root, 'package.json'))
     this.name = this.pjson.name
     this.version = this.pjson.version
     if (this.pjson.main) {
@@ -112,6 +110,5 @@ export class Plugin extends CommandManagerBase {
       await hooks.run('plugins:parse', { module: m, plugin: this })
       this.module = m
     }
-    await super.init()
   }
 }
