@@ -2,7 +2,6 @@ import deps from '../deps'
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
-import * as fs from 'fs-extra'
 
 const debug = require('debug')('cli:yarn')
 
