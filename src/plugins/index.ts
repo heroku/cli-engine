@@ -43,11 +43,11 @@ export class Plugins extends PluginManager {
     const submanagerOpts = { config: this.config, manifest: this.manifest }
     this.builtin = new deps.Builtin(submanagerOpts)
     this.core = new deps.CorePlugins(submanagerOpts)
-    this.submanagers = [this.builtin, this.core]
+    this.submanagers = [this.core, this.builtin]
     if (true || this.config.userPlugins) {
       this.user = new deps.UserPlugins(submanagerOpts)
       this.link = new deps.LinkPlugins(submanagerOpts)
-      this.submanagers = [...this.submanagers, this.user, this.link]
+      this.submanagers = [this.link, this.user, ...this.submanagers]
     }
     await Promise.all(this.submanagers.map(m => m.init()))
     await this.manifest.save()

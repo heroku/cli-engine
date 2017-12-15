@@ -37,6 +37,11 @@ export class LinkPlugins extends PluginManager {
     const defs = this.manifest.list('link')
     const promises = defs.map(async p => {
       try {
+        // @ts-ignore
+        if (!await fs.exists(p.root)) {
+          debug(`Ignoring ${p.root} as it does not exist`)
+          return
+        }
         return await this.loadPlugin(p.root)
       } catch (err) {
         cli.warn(err, { context: `error loading linked plugin from ${p.root}` })

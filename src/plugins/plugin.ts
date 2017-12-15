@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import deps from '../deps'
 import { PluginManager } from './manager'
 import { ICommand, Config } from 'cli-engine-config'
@@ -59,21 +60,25 @@ export class Plugin extends PluginManager {
   }
 
   protected async _init() {
-    this.pjson = await deps.util.fetchJSONFile(path.join(this.root, 'package.json'))
-    const pjsonConfig = this.pjson['cli-engine'] || {}
-    this.name = this.pjson.name
-    this.version = this.pjson.version
+    try {
+      this.pjson = await deps.util.fetchJSONFile(path.join(this.root, 'package.json'))
+      const pjsonConfig = this.pjson['cli-engine'] || {}
+      this.name = this.pjson.name
+      this.version = this.pjson.version
 
-    if (pjsonConfig.commandsDir) {
-      this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
-      await this.loadCommandsFromDir(this.commandsDir)
+      if (pjsonConfig.commandsDir) {
+        this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
+        await this.loadCommandsFromDir(this.commandsDir)
+      }
+
+      if (this.pjson.main) {
+        await this.requireModule(this.pjson.main)
+      }
+
+      this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
+    } catch (err) {
+      cli.warn(err, { context: `Error loading plugin: ${this.name}` })
     }
-
-    if (this.pjson.main) {
-      await this.requireModule(this.pjson.main)
-    }
-
-    this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
   }
 
   protected _findCommand(id: string): ICommand | undefined {
