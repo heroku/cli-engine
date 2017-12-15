@@ -319,7 +319,7 @@ export class Updater {
         timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
       )
 
-      const { spawn } = require('child_process')
+      const spawn = deps.crossSpawn
       this.spawnBinPath(spawn, binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
@@ -370,7 +370,6 @@ export class Updater {
     let unread = await this.lock.read()
     await unread()
 
-    const { spawnSync } = require('child_process')
     let bin = this.binPath
     let args = process.argv.slice(2)
     if (!bin) {
@@ -388,7 +387,7 @@ export class Updater {
       ...process.env,
       CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1',
     }
-    const { status } = this.spawnBinPath(spawnSync, bin, args, { env, stdio: 'inherit' })
+    const { status } = this.spawnBinPath(deps.crossSpawn.sync, bin, args, { env, stdio: 'inherit' })
     cli.exit(status)
   }
 
