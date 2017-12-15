@@ -61,3 +61,17 @@ export async function fetchJSONFile(f: string): Promise<any> {
   }
   return jsonFiles[f]
 }
+
+export function toArray<T>(o: T | T[]): T[] {
+  return Array.isArray(o) ? o : [o]
+}
+
+export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: string]: T[] } {
+  return Object.entries(input || {}).reduce(
+    (output, [k, v]) => {
+      output[k] = toArray(v)
+      return output
+    },
+    {} as { [k: string]: T[] },
+  )
+}
