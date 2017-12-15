@@ -29,7 +29,7 @@ export default {
   get klawSync(): typeof klawSync { return fetch('klaw-sync') },
 
   // local
-  get Help(): typeof help.default { return fetch('./help').default },
+  get Help(): typeof help.default { return fetch('./commands/help').default },
   get Hooks(): typeof Hooks.Hooks { return fetch('./hooks').Hooks },
   get Lock(): typeof lock.Lock { return fetch('./lock').Lock },
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },

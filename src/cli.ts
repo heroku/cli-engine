@@ -53,6 +53,7 @@ export default class CLI {
   async run() {
     debug('starting run')
     const config = this.config
+    let argv = config.argv.slice(1)
 
     const updater = new deps.Updater(this.config)
     debug('checking autoupdater')
@@ -68,6 +69,7 @@ export default class CLI {
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       this.Command = deps.Help
+      argv = this.config.argv
     } else {
       this.Command = plugins.findCommand(id || this.config.defaultCommand || 'help')
     }
@@ -76,7 +78,7 @@ export default class CLI {
       let topic = plugins.topics[id]
       if (topic) {
         debug('showing help for %s topic', id)
-        // this.cmd = new Help(config)
+        this.Command = deps.Help
       } else {
         debug('no command found')
         this.Command = deps.NotFound
@@ -85,13 +87,13 @@ export default class CLI {
 
     await this.hooks.run('prerun', {
       Command: this.Command!,
-      argv: this.config.argv.slice(2),
+      argv,
     })
 
     let lock = new deps.Lock(this.config)
     await lock.unread()
     debug('running %s', this.Command!.id)
-    const cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(1) })
+    const cmd = await this.Command!.run({ ...this.config, argv })
 
     await this.exitAfterStdoutFlush()
     return cmd
@@ -118,11 +120,6 @@ export default class CLI {
       if (arg === '--') return false
     }
     return false
-  }
-
-  get Help() {
-    const { default: Help } = this.config.userPlugins ? require('./commands/help') : require('./commands/newhelp')
-    return Help
   }
 }
 

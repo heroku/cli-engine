@@ -21,13 +21,13 @@ export class UserPlugins extends PluginManager {
     this.submanagers = this.plugins = await this.fetchPlugins()
   }
 
-  // public async update() {
-  //   if (this.plugins.length === 0) return
-  //   cli.action.start(`${this.config.name}: Updating plugins`)
-  //   let downgrade = await this.lock.upgrade()
-  //   await this.yarn.exec(['upgrade'])
-  //   await downgrade()
-  // }
+  public async update() {
+    if (this.plugins.length === 0) return
+    cli.action.start(`${this.config.name}: Updating plugins`)
+    // let downgrade = await this.lock.upgrade()
+    // await this.yarn.exec(['upgrade'])
+    // await downgrade()
+  }
 
   public async install(name: string, tag: string): Promise<void> {
     let downgrade = await this.lock.upgrade()

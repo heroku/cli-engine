@@ -1,6 +1,6 @@
 import deps from '../deps'
-import {UserPlugins} from './user'
-import {LinkPlugins} from './link'
+import { UserPlugins } from './user'
+import { LinkPlugins } from './link'
 import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
 
@@ -14,6 +14,10 @@ export class Plugins extends PluginManager {
     return plugin && plugin.type
   }
 
+  public async update(): Promise<void> {
+    await this.user.update()
+  }
+
   public async uninstall(name: string): Promise<void> {
     const type = await this.pluginType(name)
     if (!type) throw new Error(`${name} is not installed`)
@@ -23,7 +27,7 @@ export class Plugins extends PluginManager {
   }
 
   protected async _init() {
-    const submanagerOpts = {config: this.config, manifest: this.manifest}
+    const submanagerOpts = { config: this.config, manifest: this.manifest }
     this.submanagers = [new deps.Builtin(submanagerOpts)]
     if (true || this.config.userPlugins) {
       this.user = new deps.UserPlugins(submanagerOpts)
