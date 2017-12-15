@@ -70,8 +70,18 @@ export class Plugin extends PluginManager {
   protected _findCommand(id: string): ICommand | undefined {
     if (this.module) {
       let cmd = this.module.commands.find(c => c.id === id)
-      if (cmd) return cmd
+      if (cmd) return this.addPluginToCommand(cmd)
     }
+  }
+
+  private addPluginToCommand (cmd: ICommand): ICommand {
+    cmd.plugin = {
+      type: this.type,
+      path: this.root,
+      name: this.name,
+      version: this.version,
+    }
+    return cmd
   }
 
   private async requireModule (main: string): Promise<PluginModule> {

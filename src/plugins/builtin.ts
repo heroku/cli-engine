@@ -43,7 +43,7 @@ export class Builtin extends PluginManager {
 
   protected require(p: string, id: string): ICommand {
     let m = super.require(p, id)
-    m.plugin = { name: 'builtin', version: require('../../package.json').version }
+    m.plugin = { name: 'builtin', type: 'builtin', version: require('../../package.json').version, path: p }
     return m
   }
 }
