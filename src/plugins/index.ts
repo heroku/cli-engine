@@ -51,6 +51,6 @@ export class Plugins extends PluginManager {
     }
     await Promise.all(this.submanagers.map(m => m.init()))
     await this.manifest.save()
-    this.plugins = this.link.plugins.concat(this.user.plugins)
+    this.plugins = this.link.plugins.concat(this.user.plugins).concat(this.core.plugins)
   }
 }
