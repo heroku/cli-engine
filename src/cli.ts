@@ -86,6 +86,11 @@ export default class CLI {
       }
     }
 
+    const { _version } = this.Command
+    if (!_version) {
+      argv = this.config.argv.slice(2)
+    }
+
     await this.hooks.run('prerun', {
       Command: this.Command!,
       argv,
