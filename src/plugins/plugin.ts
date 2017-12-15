@@ -43,6 +43,7 @@ export class Plugin extends PluginManager {
   public pjson: PluginPJSON
   public tag?: string
   public module?: PluginModule
+  public commandsDir?: string
 
   constructor(options: PluginOptions) {
     super(options)
@@ -64,8 +65,8 @@ export class Plugin extends PluginManager {
     this.version = this.pjson.version
 
     if (pjsonConfig.commandsDir) {
-      const commandsDir = path.join(this.root, pjsonConfig.commandsDir)
-      await this.loadCommandsFromDir(commandsDir)
+      this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
+      await this.loadCommandsFromDir(this.commandsDir)
     }
 
     if (this.pjson.main) {
@@ -80,6 +81,19 @@ export class Plugin extends PluginManager {
       let cmd = this.module.commands.find(c => c.id === id)
       if (cmd) return this.addPluginToCommand(cmd)
     }
+    if (this.commandsDir) {
+      try {
+        let cmd = require(this.commandPath(id))
+        return this.addPluginToCommand(deps.util.undefault(cmd))
+      } catch (err) {
+        if (err.code !== 'MODULE_NOT_FOUND') throw err
+      }
+    }
+  }
+
+  private commandPath(id: string): string {
+    if (!this.commandsDir) throw new Error('commandsDir not set')
+    return path.join(this.commandsDir, id.split(':').join(path.sep))
   }
 
   private addPluginToCommand(cmd: ICommand): ICommand {
