@@ -323,9 +323,15 @@ export class Updater {
     return `${bin}_TIMESTAMPS`
   }
 
+  get skipAnalyticsEnvVar(): string {
+    let bin = this.config.bin.replace('-', '_').toUpperCase()
+    return `${bin}_SKIP_ANALYTICS`
+  }
+
   get autoupdateEnv(): { [k: string]: string } {
     return Object.assign({}, process.env, {
       [this.timestampEnvVar]: '1',
+      [this.skipAnalyticsEnvVar]: '1',
     })
   }
 
