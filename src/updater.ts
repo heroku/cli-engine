@@ -394,7 +394,15 @@ export class Updater {
 
   private _createBin(dst: string) {
     const src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
-    fs.mkdirp(path.dirname(src))
-    fs.symlinkSync(dst, src)
+    fs.outputFileSync(
+      src,
+      `#!/usr/bin/env bash
+if [ "$DEBUG" == "*" ]; then
+  echo "running ${dst}" "$@"
+fi
+"${dst}" "$@"
+`,
+      { mode: 0o777 },
+    )
   }
 }
