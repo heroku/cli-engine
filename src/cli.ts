@@ -96,8 +96,6 @@ export default class CLI {
       argv,
     })
 
-    let lock = new deps.Lock(this.config)
-    await lock.unread()
     debug('running %s', this.Command!.id)
     const cmd = await this.Command!.run({ ...this.config, argv })
 
