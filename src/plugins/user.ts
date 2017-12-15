@@ -30,7 +30,8 @@ export class UserPlugins extends PluginManager {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     let downgrade = await this.lock.upgrade()
-    await this.yarn.exec(['upgrade'])
+    const packages = this.manifest.list('user').map(p => `${p.name}@${p.tag}`)
+    await this.yarn.exec(['upgrade', ...packages])
     await downgrade()
   }
 
