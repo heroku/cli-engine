@@ -26,7 +26,7 @@ export class Builtin extends PluginManager {
       this.topics['plugins'] = {
         name: 'plugins',
         description: 'manage plugins',
-        commands: []
+        commands: [],
       }
     }
 

@@ -61,7 +61,7 @@ export class Plugin extends PluginManager {
       this.module = await this.requireModule(this.pjson.main)
 
       for (let topic of this.module.topics) {
-        this.topics[topic.name] = {...topic, commands: []}
+        this.topics[topic.name] = { ...topic, commands: [] }
       }
       this.commandIDs = [...this.commandIDs, ...this.module.commands.map(m => m.id)]
     }
@@ -74,7 +74,7 @@ export class Plugin extends PluginManager {
     }
   }
 
-  private addPluginToCommand (cmd: ICommand): ICommand {
+  private addPluginToCommand(cmd: ICommand): ICommand {
     cmd.plugin = {
       type: this.type,
       path: this.root,
@@ -84,13 +84,13 @@ export class Plugin extends PluginManager {
     return cmd
   }
 
-  private async requireModule (main: string): Promise<PluginModule> {
+  private async requireModule(main: string): Promise<PluginModule> {
     debug(`requiring ${this.name}@${this.version}`)
 
     const m = {
       commands: [],
       topics: [],
-      ...require(path.join(this.root, main))
+      ...require(path.join(this.root, main)),
     }
 
     if (m.topic) m.topics.push(m.topic)

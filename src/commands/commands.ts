@@ -1,6 +1,6 @@
-import {cli} from 'cli-ux'
-import {Command, flags, InputFlags} from 'cli-engine-command'
-import {Plugins} from '../plugins'
+import { cli } from 'cli-ux'
+import { Command, flags, InputFlags } from 'cli-engine-command'
+import { Plugins } from '../plugins'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
@@ -9,12 +9,12 @@ const debug = require('debug')('cli:commands')
 export default class Commands extends Command {
   static topic = 'commands'
   static hidden = true
-  static flags: InputFlags = {json: flags.boolean()}
+  static flags: InputFlags = { json: flags.boolean() }
 
   plugins: Plugins
 
-  async run () {
-    this.plugins = new Plugins({config: this.config})
+  async run() {
+    this.plugins = new Plugins({ config: this.config })
     await this.plugins.init()
     if (this.flags.json) {
       cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
@@ -25,7 +25,7 @@ export default class Commands extends Command {
     }
   }
 
-  async outputJSON () {
+  async outputJSON() {
     const topics = Object.values(this.plugins.topics).filter(t => !t.hidden)
     const commands = this.plugins.commandIDs
       .map(id => this.plugins.findCommand(id)!)
@@ -37,19 +37,19 @@ export default class Commands extends Command {
         description: c.description,
         help: c.help,
         fullHelp: c.help,
-        hidden: c.hidden
+        hidden: c.hidden,
       }))
-    cli.styledJSON({topics, commands})
+    cli.styledJSON({ topics, commands })
   }
 
-  outputPlain () {
+  outputPlain() {
     const commands = this.plugins.commandIDs
     for (let id of commands) {
       cli.log(id)
     }
   }
 
-  async addV6Hack () {
+  async addV6Hack() {
     try {
       const hack = `### begin v6 v.1
 begin
@@ -70,7 +70,7 @@ end
       if (this.config.windows) return
       let cliRB = path.join(this.config.home, '.heroku', 'client', 'lib', 'heroku', 'cli.rb')
       // @ts-ignore
-      if (!(await fs.exists(cliRB))) return
+      if (!await fs.exists(cliRB)) return
       let contents = await fs.readFile(cliRB, 'utf8')
       if (contents.startsWith('### begin v6 v.1')) return
       await fs.outputFile(cliRB, hack + contents)

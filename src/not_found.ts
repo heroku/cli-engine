@@ -24,7 +24,7 @@ export default class NotFound extends Command {
   }
 
   async run() {
-    this.plugins = new deps.Plugins({config: this.config})
+    this.plugins = new deps.Plugins({ config: this.config })
     await this.plugins.init()
 
     let closest

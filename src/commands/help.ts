@@ -36,7 +36,7 @@ export default class Help extends Command {
   plugins: Plugins
 
   async run() {
-    this.plugins = new Plugins({config: this.config})
+    this.plugins = new Plugins({ config: this.config })
     await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
@@ -97,9 +97,7 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
   }
 
   private listCommandsHelp(commandIDs: string[], topic?: string) {
-    let commands: ICommand[] = commandIDs
-      .map(id => this.plugins.findCommand(id)!)
-      .filter(c => c && !c.hidden)
+    let commands: ICommand[] = commandIDs.map(id => this.plugins.findCommand(id)!).filter(c => c && !c.hidden)
     if (commands.length === 0) return
     _.sortBy(commands, 'id')
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)

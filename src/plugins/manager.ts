@@ -13,7 +13,7 @@ const debug = require('debug')('cli:plugins')
 
 export type Topic = BaseTopic & { commands: string[] }
 
-function mergeTopics (a: PluginTopic, b: PluginTopic): Topic {
+function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
   return {
     ...a,
     ...b,
@@ -36,7 +36,7 @@ export type PluginManagerOptions = {
 export abstract class PluginManager {
   public topics: { [name: string]: Topic } = {}
   public commandIDs: string[] = []
-  public aliases: {[from: string]: string[]} = {}
+  public aliases: { [from: string]: string[] } = {}
 
   protected submanagers: PluginManager[] = []
   protected config: Config
@@ -109,14 +109,14 @@ export abstract class PluginManager {
     return alias ? alias[0] : id
   }
 
-  private mergeCommandIDs () {
+  private mergeCommandIDs() {
     for (let m of this.submanagers) {
       this.commandIDs = [...this.commandIDs, ...m.commandIDs]
     }
     this.commandIDs = _.compact(this.commandIDs.sort())
   }
 
-  private mergeTopics () {
+  private mergeTopics() {
     for (let m of this.submanagers) {
       for (let t of Object.values(m.topics)) {
         this.topics[t.name] = mergeTopics(this.topics[t.name], t)
@@ -124,7 +124,7 @@ export abstract class PluginManager {
     }
   }
 
-  private addMissingTopics () {
+  private addMissingTopics() {
     for (let id of this.commandIDs) {
       const topic = topicFromID(id)
       if (!topic) continue

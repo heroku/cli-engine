@@ -1,12 +1,12 @@
-import {PluginModule, PluginPJSON} from './plugins/plugin'
+import { PluginModule, PluginPJSON } from './plugins/plugin'
 import { Config, ICommand } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli:hooks')
 
 export type PluginsParseHookOptions = {
-  module: PluginModule,
-  pjson: PluginPJSON,
+  module: PluginModule
+  pjson: PluginPJSON
 }
 
 export class Hooks {
@@ -18,7 +18,7 @@ export class Hooks {
 
   async run(event: 'init'): Promise<void>
   async run(event: 'update'): Promise<void>
-  async run(event: 'prerun', options: {Command: ICommand, argv: string[]}): Promise<void>
+  async run(event: 'prerun', options: { Command: ICommand; argv: string[] }): Promise<void>
   async run(event: 'plugins:parse', options: PluginsParseHookOptions): Promise<void>
   async run(event: string, options: Object = {}): Promise<void> {
     let scripts = this.config.hooks[event]
