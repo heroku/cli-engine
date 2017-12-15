@@ -4,7 +4,7 @@ import { PluginManager } from './manager'
 import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
 
-const debug = require('debug')('plugins:plugin')
+const debug = require('debug')('cli:plugins')
 
 export type PluginType = 'core' | 'user' | 'link'
 export type PluginOptions = {
