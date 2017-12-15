@@ -1,3 +1,4 @@
+import deps from '../deps'
 import { cli } from 'cli-ux'
 import { Command, flags, InputFlags } from 'cli-engine-command'
 import { Plugins } from '../plugins'
@@ -69,8 +70,7 @@ end
 `
       if (this.config.windows) return
       let cliRB = path.join(this.config.home, '.heroku', 'client', 'lib', 'heroku', 'cli.rb')
-      // @ts-ignore
-      if (!await fs.exists(cliRB)) return
+      if (!await deps.file.exists(cliRB)) return
       let contents = await fs.readFile(cliRB, 'utf8')
       if (contents.startsWith('### begin v6 v.1')) return
       await fs.outputFile(cliRB, hack + contents)

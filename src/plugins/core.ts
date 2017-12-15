@@ -33,7 +33,6 @@ export class CorePlugins extends PluginManager {
   }
 
   private root(name: string): string {
-    // @ts-ignore
     return path.join(this.config.root, 'node_modules', name)
   }
 }
