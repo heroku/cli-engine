@@ -1,14 +1,10 @@
 require('./fs')
-import { Command } from 'cli-engine-command'
-import { color } from 'cli-engine-command/lib/color'
+import deps from './deps'
+import { color } from 'heroku-cli-color'
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { default as cli } from 'cli-ux'
 import * as path from 'path'
 import { Hooks } from './hooks'
-import { Updater } from './updater'
-import { Lock } from './lock'
-import { Plugins } from './plugins'
-import deps from './deps'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: Error) => {
@@ -33,10 +29,9 @@ if (!g.testing) {
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
-  config: Config
-  Command: ICommand | undefined
-  cmd: Command
-  hooks: Hooks
+  private config: Config
+  private Command: ICommand | undefined
+  private hooks: Hooks
 
   constructor({ config }: { config?: ConfigOptions } = {}) {
     if (!config) config = {}
@@ -59,16 +54,16 @@ export default class CLI {
     debug('starting run')
     const config = this.config
 
-    const updater = new Updater(this.config)
+    const updater = new deps.Updater(this.config)
     debug('checking autoupdater')
     await updater.autoupdate()
 
-    this.hooks = new Hooks(this.config)
+    this.hooks = new deps.Hooks(this.config)
     await this.hooks.run('init')
 
     debug('command_manager')
     const id = this.config.argv[1]
-    const plugins = new Plugins({config})
+    const plugins = new deps.Plugins({ config })
     await plugins.init()
     if (this.cmdAskingForHelp) {
       debug('asking for help')
@@ -93,12 +88,13 @@ export default class CLI {
       argv: this.config.argv.slice(2),
     })
 
-    let lock = new Lock(this.config)
+    let lock = new deps.Lock(this.config)
     await lock.unread()
     debug('running %s', this.Command!.id)
-    this.cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(1) })
+    const cmd = await this.Command!.run({ ...this.config, argv: this.config.argv.slice(1) })
 
     await this.exitAfterStdoutFlush()
+    return cmd
   }
 
   async exitAfterStdoutFlush() {

@@ -1,8 +1,7 @@
+import deps from './deps'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
 import { cli } from 'cli-ux'
-
-const lock = require('rwlockfile')
 
 export class Lock {
   config: Config
@@ -17,15 +16,15 @@ export class Lock {
 
   // get read lock
   async read() {
-    return lock.read(this.updatelockfile)
+    return deps.rwlockfile.read(this.updatelockfile)
   }
 
   async unread() {
-    await lock.unread(this.updatelockfile)
+    await deps.rwlockfile.unread(this.updatelockfile)
   }
 
   async canRead() {
-    let hasWriter = await lock.hasWriter(this.updatelockfile)
+    let hasWriter = await deps.rwlockfile.hasWriter(this.updatelockfile)
     return !hasWriter
   }
 
@@ -35,18 +34,18 @@ export class Lock {
     await this.unread()
 
     // check for other readers
-    if (await lock.hasReaders(this.updatelockfile)) {
+    if (await deps.rwlockfile.hasReaders(this.updatelockfile)) {
       cli.action.status = `Waiting for all commands to finish`
     }
 
     // grab writer lock
-    let unlock = await lock.write(this.updatelockfile)
+    let unlock = await deps.rwlockfile.write(this.updatelockfile)
 
     // return downgrade function
     return async () => {
       // turn back into reader when unlocking
       await unlock()
-      return lock.read(this.updatelockfile)
+      return deps.rwlockfile.read(this.updatelockfile)
     }
   }
 }

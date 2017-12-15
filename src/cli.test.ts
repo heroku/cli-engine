@@ -1,5 +1,22 @@
 import { cli } from 'cli-ux'
-import { example } from '../test/roots'
+import { run } from './cli'
+
+export interface IRootRun {
+  code: number
+  stdout: string
+  stderr: string
+}
+
+export async function example(argv: string[]): Promise<IRootRun> {
+  let code = 0
+  argv = ['cli-engine', ...argv]
+  await run({ config: { argv } })
+  return {
+    stdout: cli.stdout.output,
+    stderr: cli.stderr.output,
+    code,
+  }
+}
 
 test('runs the version command', async function() {
   const { stdout } = await example(['version'])

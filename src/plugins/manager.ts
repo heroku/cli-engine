@@ -4,7 +4,7 @@ import cli from 'cli-ux'
 import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
 import { Lock } from '../lock'
-import {PluginManifest} from './manifest'
+import { PluginManifest } from './manifest'
 import { inspect } from 'util'
 import _ from 'ts-lodash'
 
@@ -12,8 +12,11 @@ const debug = require('debug')('cli:plugins')
 
 export type Topic = BaseTopic & { commands: string[] }
 
-function topicFromID (id: string) {
-  return id.split(':').slice(0, -1).join(':')
+function topicFromID(id: string) {
+  return id
+    .split(':')
+    .slice(0, -1)
+    .join(':')
 }
 
 export type PluginManagerOptions = {
@@ -22,7 +25,7 @@ export type PluginManagerOptions = {
 }
 
 export abstract class PluginManager {
-  public topics: {[name: string]: Topic} = {}
+  public topics: { [name: string]: Topic } = {}
   public commandIDs: string[] = []
 
   protected submanagers: PluginManager[] = []
@@ -35,8 +38,8 @@ export abstract class PluginManager {
 
   constructor(opts: PluginManagerOptions) {
     this.config = opts.config
-    this.manifest = opts.manifest || new PluginManifest(this.config)
-    this.lock = new Lock(this.config)
+    this.manifest = opts.manifest || new deps.PluginManifest(this.config)
+    this.lock = new deps.Lock(this.config)
     this.userPluginsDir = path.join(this.config.dataDir, 'plugins')
   }
 
@@ -48,14 +51,14 @@ export abstract class PluginManager {
     this.initialized = true
     for (let m of this.submanagers) {
       this.commandIDs = [...this.commandIDs, ...m.commandIDs]
-      this.topics = {...this.topics, ...m.topics}
+      this.topics = { ...this.topics, ...m.topics }
     }
     this.commandIDs = _.compact(this.commandIDs.sort())
     for (let id of this.commandIDs) {
       const topic = topicFromID(id)
       if (!topic) continue
       // create topic if none exist
-      this.topics[topic] = this.topics[topic] || {name: topic, commands: []}
+      this.topics[topic] = this.topics[topic] || { name: topic, commands: [] }
 
       // add this command to the topic
       this.topics[topic].commands = this.topics[topic].commands || []
@@ -82,7 +85,9 @@ export abstract class PluginManager {
     }
   }
 
-  protected _findCommand(_: string): ICommand | undefined { return undefined }
+  protected _findCommand(_: string): ICommand | undefined {
+    return undefined
+  }
 
   protected require(p: string, id: string): ICommand {
     debug('Reading command %s at %s', id, p)

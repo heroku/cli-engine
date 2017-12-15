@@ -6,17 +6,9 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@heroku/linewrap/-/linewrap-1.0.0.tgz#a9d4e99f0a3e423a899b775f5f3d6747a1ff15c6"
 
-"@types/arrify@^1.0.1":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@types/arrify/-/arrify-1.0.2.tgz#4a6856b9bfd4713c781df95349c6b15db60d4de1"
-
 "@types/content-type@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@types/content-type/-/content-type-1.1.2.tgz#bff0a1b7aa5bd48516c8ed7a6efefb1e85813245"
-
-"@types/diff@^3.2.1":
-  version "3.2.2"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-3.2.2.tgz#4d6f45537322a7a420d353a0939513c7e96d14a6"
 
 "@types/fs-extra@5.0.0":
   version "5.0.0"
@@ -50,23 +42,13 @@
   version "4.14.88"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.88.tgz#97eaf2dc668f33ed8e511a5b627035f4ea20b0f5"
 
-"@types/minimist@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@types/minimist/-/minimist-1.2.0.tgz#69a23a3ad29caf0097f06eda59b361ee2f0639f6"
-
-"@types/mkdirp@^0.5.0":
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/@types/mkdirp/-/mkdirp-0.5.2.tgz#503aacfe5cc2703d5484326b1b27efa67a339c1f"
-  dependencies:
-    "@types/node" "*"
-
 "@types/nock@9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@types/nock/-/nock-9.1.0.tgz#f2f0b1da56507cb469fa08225ee78f5453b910d6"
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@^8.0.27":
+"@types/node@*":
   version "8.0.58"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.58.tgz#5b3881c0be3a646874803fee3197ea7f1ed6df90"
 
@@ -77,12 +59,6 @@
 "@types/semver@5.4.0":
   version "5.4.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-5.4.0.tgz#f3658535af7f1f502acd6da7daf405ffeb1f7ee4"
-
-"@types/source-map-support@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@types/source-map-support/-/source-map-support-0.4.0.tgz#a62a1866614af68c888173c001481f242aaf148b"
-  dependencies:
-    "@types/node" "*"
 
 "@types/strip-bom@^3.0.0":
   version "3.0.0"
@@ -95,14 +71,6 @@
 "@types/supports-color@3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@types/supports-color/-/supports-color-3.1.0.tgz#3584b6b54f45333e988da2c29e6797eff5a20f8c"
-
-"@types/v8flags@types/npm-v8flags#de224ae1cd5fd7dbb4e7158a6cc7a29e5315930d":
-  version "2.0.0"
-  resolved "https://codeload.github.com/types/npm-v8flags/tar.gz/de224ae1cd5fd7dbb4e7158a6cc7a29e5315930d"
-
-"@types/yn@types/npm-yn#ca75f6c82940fae6a06fb41d2d37a6aa9b4ea8e9":
-  version "2.0.0"
-  resolved "https://codeload.github.com/types/npm-yn/tar.gz/ca75f6c82940fae6a06fb41d2d37a6aa9b4ea8e9"
 
 abab@^1.0.3:
   version "1.0.3"
@@ -668,36 +636,27 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.0.1.tgz#ca62fc8e410917281ff4a1824a6bda5954df4a1f"
+cli-engine-command@10.1.0-ts.0:
+  version "10.1.0-ts.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.1.0-ts.0.tgz#1b807ce336679e62172f06f686e69132f4c426db"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "2.3.0"
-    cli-engine-config "4.1.0"
+    cli-engine-config "4.3.0-ts.0"
     cli-flags "1.0.18"
-    cli-ux "^2.0.5"
+    cli-ux "^2.0.7"
     fs-extra "^5.0.0"
-    http-call "^4.0.0"
+    http-call "^4.0.4"
     lodash.maxby "^4.6.0"
     moment "^2.19.4"
     string "3.x"
     supports-color "^5.1.0"
 
-cli-engine-config@4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.1.0.tgz#d4075fe1c35f9f6edbb460eab01e6ccd6a40db5e"
-  dependencies:
-    cli-flags "1.0.18"
-    debug "^3.1.0"
-    fs-extra "^5.0.0"
-    uuid "^3.1.0"
-
-cli-engine-config@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.2.2.tgz#e4aa64f7979ba6c6ba2a11d8b12fac4d625e6e83"
+cli-engine-config@4.3.0-ts.0:
+  version "4.3.0-ts.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.3.0-ts.0.tgz#759f4bdea5941d402b9a10258a904bf4168ec795"
   dependencies:
     cli-flags "1.0.18"
     debug "^3.1.0"
@@ -741,9 +700,9 @@ cli-ux@^2.0.5:
     supports-color "^4.4.0"
     ts-lodash "^4.0.5"
 
-cli-ux@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.6.tgz#51a6d07827f24cc31946178fd7cae8fc5fe2127b"
+cli-ux@^2.0.7:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.7.tgz#61ed276700a7fa90a4aa8456c2e28a944c91d268"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
@@ -837,7 +796,7 @@ core-js@^2.4.0, core-js@^2.5.0:
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.1.tgz#ae6874dc66937789b80754ff5428df66819ca50b"
 
-core-js@^2.5.1, core-js@^2.5.3:
+core-js@^2.5.3:
   version "2.5.3"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.5.3.tgz#8acc38345824f16d8365b7c9b4259168e8ed603e"
 
@@ -1498,17 +1457,6 @@ html-encoding-sniffer@^1.0.1:
   resolved "https://registry.yarnpkg.com/html-encoding-sniffer/-/html-encoding-sniffer-1.0.1.tgz#79bf7a785ea495fe66165e734153f363ff5437da"
   dependencies:
     whatwg-encoding "^1.0.1"
-
-http-call@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/http-call/-/http-call-4.0.0.tgz#78c4ab4056b01e8967088526ae762cf9b5371ea8"
-  dependencies:
-    core-js "^2.5.1"
-    debug "^3.0.1"
-    is-retry-allowed "^1.1.0"
-    is-stream "^1.1.0"
-    mime-types "^2.1.17"
-    tunnel-agent "^0.6.0"
 
 http-call@^4.0.4:
   version "4.0.4"
@@ -2462,7 +2410,7 @@ mime-db@~1.30.0:
   version "1.30.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.30.0.tgz#74c643da2dd9d6a45399963465b26d5ca7d71f01"
 
-mime-types@^2.1.12, mime-types@^2.1.17, mime-types@~2.1.7:
+mime-types@^2.1.12, mime-types@~2.1.7:
   version "2.1.17"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.17.tgz#09d7a393f03e995a79f8af857b70a9e0ab16557a"
   dependencies:
@@ -3575,18 +3523,10 @@ ts-lodash@^4.0.5:
   dependencies:
     lodash "^4.17.4"
 
-ts-node@4.0.1:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-4.0.1.tgz#4d368088b50c382d78285c029784ea0f32a4eb5c"
+ts-node@4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-4.0.2.tgz#cb3d039b9898fdc79ad09ab7e69c84564c8c41ee"
   dependencies:
-    "@types/arrify" "^1.0.1"
-    "@types/diff" "^3.2.1"
-    "@types/minimist" "^1.2.0"
-    "@types/mkdirp" "^0.5.0"
-    "@types/node" "^8.0.27"
-    "@types/source-map-support" "^0.4.0"
-    "@types/v8flags" types/npm-v8flags#de224ae1cd5fd7dbb4e7158a6cc7a29e5315930d
-    "@types/yn" types/npm-yn#ca75f6c82940fae6a06fb41d2d37a6aa9b4ea8e9
     arrify "^1.0.0"
     chalk "^2.3.0"
     diff "^3.1.0"

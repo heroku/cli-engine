@@ -7,9 +7,9 @@
   "dependencies": {
     "@heroku/linewrap": "^1.0.0",
     "ansi-escapes": "^3.0.0",
-    "cli-engine-command": "^10.0.1",
-    "cli-engine-config": "^4.2.2",
-    "cli-ux": "^2.0.6",
+    "cli-engine-command": "10.1.0-ts.0",
+    "cli-engine-config": "4.3.0-ts.0",
+    "cli-ux": "^2.0.7",
     "debug": "^3.1.0",
     "filesize": "^3.5.11",
     "find-up": "^2.1.0",
@@ -52,7 +52,7 @@
     "nock": "^9.1.4",
     "prettier": "1.9.2",
     "ts-jest": "21.2.4",
-    "ts-node": "4.0.1",
+    "ts-node": "4.0.2",
     "typescript": "2.6.2"
   },
   "engines": {

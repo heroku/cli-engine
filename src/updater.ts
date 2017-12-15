@@ -1,12 +1,10 @@
+import deps from './deps'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 
 import { Lock } from './lock'
-import { HTTP } from 'http-call'
 import { Config } from 'cli-engine-config'
 import { cli } from 'cli-ux'
-import * as moment from 'moment'
-import * as util from './util'
 
 const debug = require('debug')('cli:updater')
 
@@ -30,11 +28,11 @@ type TmpDirs = {
 }
 
 function mtime(f: string) {
-  return moment(fs.statSync(f).mtime)
+  return deps.moment(fs.statSync(f).mtime)
 }
 
 function timestamp(msg: string): string {
-  return `[${moment().format()}] ${msg}`
+  return `[${deps.moment().format()}] ${msg}`
 }
 
 export class Updater {
@@ -43,7 +41,7 @@ export class Updater {
 
   constructor(config: Config) {
     this.config = config
-    this.lock = new Lock(config)
+    this.lock = new deps.Lock(config)
   }
 
   get autoupdatefile(): string {
@@ -69,7 +67,7 @@ export class Updater {
 
   async fetchManifest(channel: string): Promise<Manifest> {
     try {
-      let { body } = await HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let { body } = await deps.HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
       return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
@@ -86,7 +84,7 @@ export class Updater {
     }
     if (!v) {
       debug('fetching latest %s version', this.config.channel)
-      let { body } = await HTTP.get(this.s3url(this.config.channel, 'version'))
+      let { body } = await deps.HTTP.get(this.s3url(this.config.channel, 'version'))
       v = body
       await this._catch(() => fs.writeJSON(this.versionFile, v))
     }
@@ -108,7 +106,7 @@ export class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let { response: stream } = await HTTP.stream(url)
+    let { response: stream } = await deps.HTTP.stream(url)
 
     if ((<any>cli.action).frames) {
       // if spinner action
@@ -142,7 +140,7 @@ export class Updater {
     cli.action.status = 'finishing up'
     let downgrade = await this.lock.upgrade()
     // wait 2000ms for any commands that were partially loaded to finish loading
-    await util.wait(2000)
+    await deps.util.wait(2000)
     // @ts-ignore
     if (await fs.exists(dir)) {
       this._rename(dir, dirs.client)
@@ -224,7 +222,7 @@ export class Updater {
 
           this._remove(dirs.node)
 
-          if (mtime(dirs.dir).isBefore(moment().subtract(24, 'hours'))) {
+          if (mtime(dirs.dir).isBefore(deps.moment().subtract(24, 'hours'))) {
             this._cleanupDirs(dirs)
           } else {
             this._removeIfEmpty(dirs)
@@ -290,7 +288,7 @@ export class Updater {
 
   get autoupdateNeeded(): boolean {
     try {
-      return mtime(this.autoupdatefile).isBefore(moment().subtract(5, 'hours'))
+      return mtime(this.autoupdatefile).isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') console.error(err.stack)
       debug(err)

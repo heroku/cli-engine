@@ -3,7 +3,6 @@ import { Plugin, PluginPJSON } from './plugin'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import { PluginManager } from './manager'
-import * as klaw from 'klaw-sync'
 import _ from 'ts-lodash'
 import deps from '../deps'
 
@@ -85,11 +84,12 @@ export class LinkPlugins extends PluginManager {
     // @ts-ignore
     if (!await fs.exists(path.join(root, main))) return true
     const updatedAt = this.lastUpdatedForRoot(root)
-    return !!klaw(root, {
-      // @ts-ignore
-      noRecurseOnFailedFilter: true,
-      filter: (f: any) => !['.git', 'node_modules'].includes(path.basename(f.path)),
-    })
+    return !!deps
+      .klawSync(root, {
+        // @ts-ignore
+        noRecurseOnFailedFilter: true,
+        filter: (f: any) => !['.git', 'node_modules'].includes(path.basename(f.path)),
+      })
       // TODO: it might be good to remove .js to get rid of false positives once people are mostly off flow builds
       .filter((f: any) => f.path.endsWith('.js') || f.path.endsWith('.ts'))
       .find((f: any) => f.stats.mtime > updatedAt)
