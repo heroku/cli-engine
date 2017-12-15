@@ -3,6 +3,7 @@ import deps from '../deps'
 import { PluginManager } from './manager'
 import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
+import { Lock } from '../lock'
 
 const debug = require('debug')('cli:plugins')
 
@@ -12,6 +13,7 @@ export type PluginOptions = {
   root: string
   tag?: string
   config: Config
+  lock?: Lock
 }
 
 export type PluginPJSON = {
@@ -47,11 +49,15 @@ export class Plugin extends PluginManager {
   public module?: PluginModule
   public commandsDir?: string
 
+  // @ts-ignore
+  private lock?: Lock
+
   constructor(options: PluginOptions) {
     super(options)
     this.type = options.type
     this.root = options.root
     this.tag = options.tag
+    this.lock = options.lock
   }
 
   public validate() {
@@ -83,17 +89,23 @@ export class Plugin extends PluginManager {
   }
 
   protected _findCommand(id: string): ICommand | undefined {
+    let cmd
     if (this.module) {
-      let cmd = this.module.commands.find(c => c.id === id)
-      if (cmd) return this.addPluginToCommand(cmd)
+      cmd = this.module.commands.find(c => c.id === id)
     }
-    if (this.commandsDir) {
+    if (!cmd && this.commandsDir) {
       try {
-        let cmd = require(this.commandPath(id))
-        return this.addPluginToCommand(deps.util.undefault(cmd))
+        cmd = require(this.commandPath(id))
       } catch (err) {
         if (err.code !== 'MODULE_NOT_FOUND') throw err
       }
+    }
+    if (cmd) {
+      cmd = deps.util.undefault(cmd)
+      cmd = this.addPluginToCommand(cmd)
+      // TODO: lock
+      // if (this.lock) await this.lock.read()
+      return cmd
     }
   }
 
