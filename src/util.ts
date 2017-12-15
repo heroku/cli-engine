@@ -1,3 +1,5 @@
+import * as fs from 'fs-extra'
+
 const debug = require('debug')('util')
 
 export function compare(...props: any[]) {
@@ -50,4 +52,12 @@ export function isEmpty(obj: any) {
   }
 
   return true
+}
+
+const jsonFiles: {[k: string]: any} = {}
+export async function fetchJSONFile(f: string): Promise<any> {
+  if (!jsonFiles[f]) {
+    jsonFiles[f] = await fs.readJSON(f)
+  }
+  return jsonFiles[f]
 }

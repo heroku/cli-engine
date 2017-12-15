@@ -2,7 +2,7 @@ import { cli } from 'cli-ux'
 import { Plugin, PluginPJSON } from './plugin'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import { PluginManager } from './base'
+import { PluginManager } from './manager'
 import * as klaw from 'klaw-sync'
 import _ from 'ts-lodash'
 import deps from '../deps'
@@ -12,15 +12,17 @@ function touch(f: string) {
 }
 
 export class LinkPlugins extends PluginManager {
+  public plugins: Plugin[]
+
   public async pjson(root: string): Promise<PluginPJSON> {
-    return this.fetchJSONFile(path.join(root, 'package.json'))
+    return deps.util.fetchJSONFile(path.join(root, 'package.json'))
   }
 
   public async install(root: string): Promise<void> {
     const downgrade = await this.lock.upgrade()
     const plugin = await this.loadPlugin(root, true)
     await plugin.validate()
-    await this.repo.add({ type: 'link', name: plugin.name, root, lastUpdated: new Date().toString() })
+    await this.manifest.add({ type: 'link', name: plugin.name, root, lastUpdated: new Date().toString() })
     await downgrade()
   }
 
@@ -28,8 +30,8 @@ export class LinkPlugins extends PluginManager {
     this.submanagers = this.plugins = await this.fetchPlugins()
   }
 
-  protected async fetchPlugins() {
-    const defs = await this.repo.list('link')
+  protected async fetchPlugins(): Promise<Plugin[]> {
+    const defs = await this.manifest.list('link')
     const promises = defs.map(async p => {
       try {
         return await this.loadPlugin(p.root)
@@ -42,7 +44,7 @@ export class LinkPlugins extends PluginManager {
   }
 
   private async loadPlugin(root: string, forceRefresh: boolean = false) {
-    await this.refreshPlugin(root, forceRefresh || this.repo.nodeVersionChanged)
+    await this.refreshPlugin(root, forceRefresh || this.manifest.nodeVersionChanged)
     return new Plugin({
       config: this.config,
       type: 'link',
@@ -101,7 +103,7 @@ export class LinkPlugins extends PluginManager {
   }
 
   private async lastUpdatedForRoot(root: string): Promise<Date | undefined> {
-    const p = await this.repo.list('link')
+    const p = await this.manifest.list('link')
     const plugin = p.find(p => p.root === root)
     if (plugin) return new Date(plugin.lastUpdated)
   }

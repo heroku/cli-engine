@@ -4,7 +4,7 @@ import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { Config, ICommand } from 'cli-engine-config'
 import { renderList } from 'cli-ux/lib/list'
-import { CommandManager } from '../command_managers'
+import { Plugins } from '../plugins'
 import deps from '../deps'
 import _ from 'ts-lodash'
 
@@ -33,25 +33,25 @@ export default class Help extends Command {
     all: flags.boolean({ description: 'show all commands' }) as IBooleanFlag,
   }
 
-  commandManager: CommandManager
+  plugins: Plugins
 
   async run() {
-    this.commandManager = new CommandManager(this.config)
-    await this.commandManager.init()
+    this.plugins = new Plugins({config: this.config})
+    await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
       let topics = await this.topics()
       if (this.flags.all) {
-        let cmds = await this.commandManager.listRootCommands()
-        cmds = cmds.filter(c => !topics.find(t => c.id!.startsWith(t[0])))
-        if (cmds) this.listCommandsHelp(cmds)
+        let rootCmds = this.plugins.rootCommandIDs
+        rootCmds = rootCmds.filter(c => !topics.find(t => c.startsWith(t[0])))
+        if (rootCmds) this.listCommandsHelp(rootCmds)
       }
       return
     }
 
-    const topic = await this.commandManager.findTopic(subject)
-    const matchedCommand = await this.commandManager.findCommand(subject)
+    const topic = await this.plugins.topics[subject]
+    const matchedCommand = await this.plugins.findCommand(subject)
 
     if (!topic && !matchedCommand) {
       return this.notFound(subject)
@@ -63,8 +63,7 @@ export default class Help extends Command {
 
     if (topic) {
       await this.topics(topic.name)
-      const cmds = await this.commandManager.commandsForTopic(topic.name)
-      if (cmds) this.listCommandsHelp(cmds, subject)
+      this.listCommandsHelp(topic.commands, subject)
     }
   }
 
@@ -75,7 +74,7 @@ export default class Help extends Command {
   private async topics(prefix?: string) {
     const idPrefix = prefix ? `${prefix}:` : ''
     // fetch topics
-    let topics = (await this.commandManager.listTopics())
+    let topics = Object.values(this.plugins.topics)
       .filter(t => !t.hidden)
       // only get from the prefix
       .filter(t => t.name.startsWith(idPrefix))
@@ -97,8 +96,10 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
     return topics
   }
 
-  private listCommandsHelp(commands: ICommand[], topic?: string) {
-    commands = commands.filter(c => !c.hidden)
+  private listCommandsHelp(commandIDs: string[], topic?: string) {
+    let commands: ICommand[] = commandIDs
+      .map(id => this.plugins.findCommand(id)!)
+      .filter(c => c && !c.hidden)
     if (commands.length === 0) return
     _.sortBy(commands, 'id')
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)

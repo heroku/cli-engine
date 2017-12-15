@@ -1,15 +1,13 @@
-import { cli } from 'cli-ux'
-import { UserPlugins } from './user'
-import { LinkPlugins } from './link'
+import deps from '../deps'
+import {UserPlugins} from './user'
+import {LinkPlugins} from './link'
 import { Plugin, PluginType } from './plugin'
-import { PluginRepo } from './repo'
-import { CommandManagerBase } from '../command_managers/base'
+import { PluginManager } from './manager'
 
-export class Plugins extends CommandManagerBase {
-  public repo: PluginRepo
+export class Plugins extends PluginManager {
+  public plugins: Plugin[]
   public user: UserPlugins
   public link: LinkPlugins
-  public plugins: Plugin[]
 
   public pluginType(name: string): PluginType | undefined {
     const plugin = this.plugins.find(p => p.name === name)
@@ -19,29 +17,20 @@ export class Plugins extends CommandManagerBase {
   public async uninstall(name: string): Promise<void> {
     const type = await this.pluginType(name)
     if (!type) throw new Error(`${name} is not installed`)
-    if (type === 'user') {
-      try {
-        await this.user.uninstall(name)
-      } catch (err) {
-        cli.warn(err)
-      }
-    }
-    await this.repo.remove(name)
-    await this.repo.save()
-  }
-
-  public async init() {
-    if (this.initialized) return
-    await super.init()
-    this.plugins = this.link.plugins.concat(this.user.plugins)
-    // .concat(this.core.plugins)
+    await this.manifest.remove(name)
+    await this.manifest.save()
+    if (type === 'user') await this.user.uninstall(name)
   }
 
   protected async _init() {
-    this.repo = new PluginRepo(this.config)
-    this.user = new UserPlugins({ config: this.config, repo: this.repo })
-    this.link = new LinkPlugins({ config: this.config, repo: this.repo })
-    this.submanagers = [this.link, this.user]
-    await this.repo.init()
+    const submanagerOpts = {config: this.config, manifest: this.manifest}
+    this.submanagers = [new deps.Builtin(submanagerOpts)]
+    if (true || this.config.userPlugins) {
+      this.user = new deps.UserPlugins(submanagerOpts)
+      this.link = new deps.LinkPlugins(submanagerOpts)
+      this.submanagers = [...this.submanagers, this.user, this.link]
+    }
+    await Promise.all(this.submanagers.map(m => m.init()))
+    this.plugins = this.link.plugins.concat(this.user.plugins)
   }
 }

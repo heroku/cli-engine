@@ -1,8 +1,7 @@
-import { PluginBase } from './base'
-import { ICommand, Config, Topic } from 'cli-engine-config'
+import deps from '../deps'
+import { PluginManager } from './manager'
+import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
-import _ from 'ts-lodash'
-import { Hooks } from '../hooks'
 
 const debug = require('debug')('plugins:plugin')
 
@@ -21,9 +20,7 @@ export type PluginPJSON = {
 }
 
 export type PluginTopic = {
-  id?: string
-  name?: string
-  topic?: string
+  name: string
   description?: string
   hidden?: boolean
 }
@@ -33,18 +30,7 @@ export type PluginModule = {
   topics: PluginTopic[]
 }
 
-function fixTopic(t: PluginTopic): Topic | undefined {
-  if (!t) return
-  let name = t.name || t.topic || t.id
-  if (!name) return
-  return {
-    name,
-    description: t.description,
-    hidden: t.hidden,
-  }
-}
-
-export class Plugin extends PluginBase {
+export class Plugin extends PluginManager {
   public name: string
   public version: string
   public type: PluginType
@@ -54,61 +40,55 @@ export class Plugin extends PluginBase {
   public module?: PluginModule
 
   constructor(options: PluginOptions) {
-    super(options.config)
+    super(options)
     this.type = options.type
     this.root = options.root
     this.tag = options.tag
   }
 
-  public async findCommand(id: string): Promise<ICommand | undefined> {
-    let cmd = await super.findCommand(id)
-    if (cmd) return cmd
+  public validate() {
+    if (!this.commandIDs.length) {
+      throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
+    }
+  }
+
+  protected async _init() {
+    this.pjson = await deps.util.fetchJSONFile(path.join(this.root, 'package.json'))
+    this.name = this.pjson.name
+    this.version = this.pjson.version
+
+    if (this.pjson.main) {
+      this.module = await this.requireModule(this.pjson.main)
+
+      for (let topic of this.module.topics) {
+        this.topics[topic.name] = {...topic, commands: []}
+      }
+      this.commandIDs = [...this.commandIDs, ...this.module.commands.map(m => m.id)]
+    }
+  }
+
+  protected _findCommand(id: string): ICommand | undefined {
     if (this.module) {
       let cmd = this.module.commands.find(c => c.id === id)
       if (cmd) return cmd
     }
   }
 
-  public async listCommandIDs(): Promise<string[]> {
-    let ids = await super.listCommandIDs()
-    if (this.module) {
-      let mids = this.module.commands.map(c => c.id)
-      ids = ids.concat(mids)
-    }
-    return ids
-  }
+  private async requireModule (main: string): Promise<PluginModule> {
+    debug(`requiring ${this.name}@${this.version}`)
 
-  public async listTopics(): Promise<Topic[]> {
-    let topics = await super.listTopics()
-    if (this.module) {
-      topics = topics.concat(_.compact(this.module.topics.map(fixTopic)))
+    const m = {
+      commands: [],
+      topics: [],
+      ...require(path.join(this.root, main))
     }
-    return topics
-  }
 
-  public async validate() {
-    const commands = await this.listCommandIDs()
-    if (!commands.length) {
-      throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
-    }
-  }
+    if (m.topic) m.topics.push(m.topic)
+    m.commands = m.commands.map(deps.util.undefault)
 
-  protected async _init() {
-    this.pjson = await this.fetchJSONFile(path.join(this.root, 'package.json'))
-    this.name = this.pjson.name
-    this.version = this.pjson.version
-    if (this.pjson.main) {
-      debug(`requiring ${this.name}@${this.version}`)
-      const m = require(path.join(this.root, this.pjson.main))
-      if (!m.commands) m.commands = []
-      if (!m.topics) m.topics = []
-      if (m.topic) m.topics.push(m.topic)
-      m.commands.map(
-        (c: any, i: number) => (m.commands[i] = c.default && typeof c.default !== 'boolean' ? c.default : c),
-      )
-      const hooks = new Hooks(this.config)
-      await hooks.run('plugins:parse', { module: m, plugin: this })
-      this.module = m
-    }
+    const hooks = new deps.Hooks(this.config)
+    await hooks.run('plugins:parse', { module: m, pjson: this.pjson })
+
+    return m
   }
 }

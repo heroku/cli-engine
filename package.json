@@ -75,5 +75,6 @@
     "prepare": "del-cli lib && tsc && del-cli \"lib/**/*.test.+(d.ts|js)\"",
     "pretest": "tsc",
     "test": "jest"
-  }
+  },
+  "types": "lib/cli.d.ts"
 }

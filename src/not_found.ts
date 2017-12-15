@@ -1,15 +1,16 @@
+import deps from './deps'
 import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
-import { CommandManager } from './command_managers'
+import { Plugins } from './plugins'
 import { Command } from 'cli-engine-command'
 
 export default class NotFound extends Command {
   static variableArgs = true
 
-  commandManager: CommandManager
+  plugins: Plugins
 
-  async allCommands(): Promise<string[]> {
-    let ids = await this.commandManager.listCommandIDs()
+  allCommands(): string[] {
+    let ids = this.plugins.commandIDs
     return ids
     // TODO add aliases
     // return this.commandManager.listCommandIDs().reduce((commands, c) => {
@@ -17,30 +18,26 @@ export default class NotFound extends Command {
     // }, [])
   }
 
-  async closest(cmd: string) {
+  closest(cmd: string) {
     const DCE = require('string-similarity')
-    return DCE.findBestMatch(cmd, await this.allCommands()).bestMatch.target
-  }
-
-  async isValidTopic(name: string): Promise<boolean> {
-    let t = await this.commandManager.findTopic(name)
-    return !!t
+    return DCE.findBestMatch(cmd, this.allCommands()).bestMatch.target
   }
 
   async run() {
-    this.commandManager = new CommandManager(this.config)
+    this.plugins = new deps.Plugins({config: this.config})
+    await this.plugins.init()
 
     let closest
     let binHelp = `${this.config.bin} help`
     let id = this.config.argv[0]
     let idSplit = id.split(':')
-    if (await this.isValidTopic(idSplit[0])) {
+    if (this.plugins.topics[idSplit[0]]) {
       // if valid topic, update binHelp with topic
       binHelp = `${binHelp} ${idSplit[0]}`
       // if topic:COMMAND present, try closest for id
-      if (idSplit[1]) closest = await this.closest(id)
+      if (idSplit[1]) closest = this.closest(id)
     } else {
-      closest = await this.closest(id)
+      closest = this.closest(id)
     }
 
     let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''

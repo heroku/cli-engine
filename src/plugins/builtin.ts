@@ -1,10 +1,9 @@
-import { CommandManagerBase } from './base'
+import { PluginManager } from './manager'
 import * as path from 'path'
-import { Topic, ICommand } from 'cli-engine-config'
+import { ICommand } from 'cli-engine-config'
 
-export class BuiltinCommandManager extends CommandManagerBase {
-  commands: { [name: string]: string }
-  topics: Topic[]
+export class Builtin extends PluginManager {
+  private commands: { [name: string]: string }
 
   protected async _init() {
     this.commands = {
@@ -14,7 +13,6 @@ export class BuiltinCommandManager extends CommandManagerBase {
       version: 'version',
       which: 'which',
     }
-    this.topics = []
     if (this.config.userPlugins) {
       this.commands = {
         plugins: 'plugins',
@@ -24,28 +22,20 @@ export class BuiltinCommandManager extends CommandManagerBase {
         'plugins:update': 'plugins/update',
         ...this.commands,
       }
-      this.topics.push({ name: 'plugins', description: 'manage plugins' })
+      this.topics['plugins'] = {
+        name: 'plugins',
+        description: 'manage plugins',
+        commands: []
+      }
     }
   }
 
-  async findCommand(id: string): Promise<ICommand | undefined> {
+  protected _findCommand(id: string): ICommand | undefined {
     let p = this.commands[id]
     if (p) {
       p = path.join(__dirname, '..', 'commands', p)
       return this.require(p, id)
     }
-  }
-
-  async listTopics() {
-    return this.topics
-  }
-
-  async listTopicIDs() {
-    return this.topics.map(t => t.name)
-  }
-
-  async listCommandIDs() {
-    return Object.keys(this.commands)
   }
 
   protected require(p: string, id: string): ICommand {

@@ -4,7 +4,7 @@ import { Plugin } from './plugin'
 import Yarn from './yarn'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import { PluginManager } from './base'
+import { PluginManager } from './manager'
 
 export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
@@ -17,7 +17,7 @@ export class UserPlugins extends PluginManager {
     this.pjsonPath = path.join(this.userPluginsDir, 'package.json')
     await this.createPJSON()
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-    if (this.repo.nodeVersionChanged) await this.yarn.exec()
+    if (this.manifest.nodeVersionChanged) await this.yarn.exec()
     this.submanagers = this.plugins = await this.fetchPlugins()
   }
 
@@ -34,20 +34,20 @@ export class UserPlugins extends PluginManager {
     await this.yarn.exec(['add', `${name}@${tag}`])
     const plugin = this.loadPlugin(name, tag)
     await plugin.validate()
-    await this.repo.add({ type: 'user', name, tag })
+    await this.manifest.add({ type: 'user', name, tag })
     await downgrade()
   }
 
   public async uninstall(name: string): Promise<void> {
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['remove', name])
-    await this.repo.remove(name)
+    await this.manifest.remove(name)
     await downgrade()
   }
 
   protected async fetchPlugins() {
     const retVal = []
-    const plugins = await this.repo.list('user')
+    const plugins = await this.manifest.list('user')
     for (let p of plugins) {
       try {
         retVal.push(await this.loadPlugin(p.name, p.tag))

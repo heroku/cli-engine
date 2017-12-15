@@ -4,10 +4,10 @@ import { color } from 'cli-engine-command/lib/color'
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
 import { default as cli } from 'cli-ux'
 import * as path from 'path'
-import { Hooks, PreRunOptions } from './hooks'
+import { Hooks } from './hooks'
 import { Updater } from './updater'
 import { Lock } from './lock'
-import { CommandManager } from './command_managers'
+import { Plugins } from './plugins'
 import deps from './deps'
 
 const debug = require('debug')('cli')
@@ -57,6 +57,7 @@ export default class CLI {
 
   async run() {
     debug('starting run')
+    const config = this.config
 
     const updater = new Updater(this.config)
     debug('checking autoupdater')
@@ -67,17 +68,17 @@ export default class CLI {
 
     debug('command_manager')
     const id = this.config.argv[1]
-    const commandManager = new CommandManager(this.config)
-    await commandManager.init()
+    const plugins = new Plugins({config})
+    await plugins.init()
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       this.Command = deps.Help
     } else {
-      this.Command = await commandManager.findCommand(id || this.config.defaultCommand || 'help')
+      this.Command = plugins.findCommand(id || this.config.defaultCommand || 'help')
     }
 
     if (!this.Command) {
-      let topic = await commandManager.findTopic(id)
+      let topic = plugins.topics[id]
       if (topic) {
         debug('showing help for %s topic', id)
         // this.cmd = new Help(config)
@@ -87,11 +88,10 @@ export default class CLI {
       }
     }
 
-    let opts: PreRunOptions = {
+    await this.hooks.run('prerun', {
       Command: this.Command!,
       argv: this.config.argv.slice(2),
-    }
-    await this.hooks.run('prerun', opts)
+    })
 
     let lock = new Lock(this.config)
     await lock.unread()

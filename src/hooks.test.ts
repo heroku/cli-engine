@@ -10,16 +10,16 @@ let init = (options = {}) => {
 
 test('does not error when no hooks', async () => {
   let hooks = init()
-  await hooks.run('prerun')
+  await hooks.run('init')
 })
 
 test('fires a hook', async () => {
   let hooks = init({
     root: path.join(__dirname, '..'),
     hooks: {
-      prerun: ['test/fixtures/hooks/prerun.js'],
+      init: ['test/fixtures/hooks/prerun.js'],
     },
   })
-  await hooks.run('prerun')
+  await hooks.run('init')
   expect(process.env.RAN_HOOK).toEqual('1')
 })
