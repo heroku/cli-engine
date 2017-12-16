@@ -7,6 +7,7 @@ import { PluginManifest } from './manifest'
 import { CorePlugins } from './core'
 import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
+import { PluginCache } from './cache'
 import * as path from 'path'
 
 const debug = require('debug')('cli:plugins')
@@ -19,6 +20,7 @@ export class Plugins extends PluginManager {
   public link: LinkPlugins
 
   private manifest?: PluginManifest
+  private cache: PluginCache
 
   public pluginType(name: string): PluginType | undefined {
     const plugin = this.plugins.find(p => p.name === name)
@@ -45,14 +47,15 @@ export class Plugins extends PluginManager {
   }
 
   protected async _init() {
-    const submanagerOpts = { config: this.config }
+    this.cache = new deps.PluginCache(this.config)
+    const submanagerOpts = { config: this.config, cache: this.cache }
     this.builtin = new deps.Builtin(submanagerOpts)
     this.core = new deps.CorePlugins(submanagerOpts)
     this.submanagers = [this.core, this.builtin]
     if (true || this.config.userPlugins) {
       try {
         this.manifest = new deps.PluginManifest(this.config)
-        const submanagerOpts = { config: this.config, manifest: this.manifest }
+        const submanagerOpts = { config: this.config, manifest: this.manifest, cache: this.cache }
         this.user = new deps.UserPlugins(submanagerOpts)
         this.link = new deps.LinkPlugins(submanagerOpts)
         this.submanagers = [this.link, this.user, this.core, this.builtin]
@@ -62,7 +65,25 @@ export class Plugins extends PluginManager {
       }
     }
     await this.initSubmanagers()
-    if (this.manifest) await this.manifest.save()
+    await this.saveManifest()
+    await this.saveCache()
     this.plugins = [...this.core.plugins, ...this.user.plugins, ...this.link.plugins]
+  }
+
+  private async saveManifest() {
+    try {
+      if (!this.manifest) return
+      await this.manifest.save()
+    } catch (err) {
+      cli.warn(err)
+    }
+  }
+
+  private async saveCache() {
+    try {
+      await this.cache.save()
+    } catch (err) {
+      cli.warn(err)
+    }
   }
 }

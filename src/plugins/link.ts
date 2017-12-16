@@ -5,6 +5,7 @@ import * as path from 'path'
 import * as fs from 'fs-extra'
 import { PluginManager } from './manager'
 import { PluginManifest } from './manifest'
+import { PluginCache } from './cache'
 import deps from '../deps'
 
 const debug = require('debug')('cli:plugins:link')
@@ -17,10 +18,12 @@ export class LinkPlugins extends PluginManager {
   public plugins: LinkedPlugin[]
 
   private manifest: PluginManifest
+  private cache: PluginCache
 
-  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
+  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
     super({ config })
     this.manifest = manifest
+    this.cache = cache
   }
 
   public async install(root: string): Promise<void> {
@@ -45,9 +48,10 @@ export class LinkPlugins extends PluginManager {
 
   private loadPlugin(root: string, forceRefresh: boolean = false) {
     return new LinkedPlugin({
+      config: this.config,
+      cache: this.cache,
       forceRefresh,
       manifest: this.manifest,
-      config: this.config,
       root,
     })
   }

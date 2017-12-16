@@ -1,15 +1,15 @@
-import cli from 'cli-ux'
 import deps from '../deps'
 import { PluginManager } from './manager'
 import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
 import { Lock } from '../lock'
+import { PluginCache } from './cache'
 
 export type PluginType = 'core' | 'user' | 'link'
 export type PluginOptions = {
-  root: string
-  tag?: string
   config: Config
+  cache: PluginCache
+  root: string
   lock?: Lock
 }
 
@@ -42,17 +42,18 @@ export abstract class Plugin extends PluginManager {
   public abstract type: PluginType
   public root: string
   public pjson: PluginPJSON
-  public tag?: string
   public module?: PluginModule
   public commandsDir?: string
+  public tag?: string
 
   // @ts-ignore
   private lock?: Lock
+  private cache: PluginCache
 
   constructor(options: PluginOptions) {
     super(options)
+    this.cache = options.cache
     this.root = options.root
-    this.tag = options.tag
     this.lock = options.lock
   }
 
@@ -63,25 +64,23 @@ export abstract class Plugin extends PluginManager {
   }
 
   protected async _init() {
-    try {
-      this.debug('_init')
-      this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
-      const pjsonConfig = this.pjson['cli-engine'] || {}
-      this.name = this.pjson.name
-      this.version = this.pjson.version
+    this.debug('_init')
+    await this.cache.init()
+    this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
+    const pjsonConfig = this.pjson['cli-engine'] || {}
+    this.name = this.pjson.name
+    this.version = this.pjson.version
+    this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
 
-      if (pjsonConfig.commandsDir) {
-        this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
-        await this.loadCommandsFromDir(this.commandsDir)
-      }
+    if (pjsonConfig.commandsDir) {
+      this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
+      await this.loadCommandsFromDir(this.commandsDir)
+    }
 
-      if (this.pjson.main) {
-        await this.requireModule(this.pjson.main)
-      }
-
-      this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
-    } catch (err) {
-      cli.warn(err, { context: `Error loading plugin: ${this.name}` })
+    if (this.pjson.main) {
+      const ids = await this.fetchCommandIDsFromModule()
+      this.commandIDs.concat(ids)
+      // await this.requireModule(this.pjson.main)
     }
   }
 
@@ -126,13 +125,14 @@ export abstract class Plugin extends PluginManager {
     return cmd
   }
 
-  private async requireModule(main: string) {
+  private async fetchModule(): Promise<PluginModule> {
+    if (this.module) return this.module
     this.debug(`requiring ${this.name}@${this.version}`)
 
     const m: PluginModule = {
       commands: [],
       topics: [],
-      ...require(path.join(this.root, main)),
+      ...require(path.join(this.root, this.pjson.main!)),
     }
 
     if (m.topic) m.topics.push(m.topic)
@@ -144,8 +144,14 @@ export abstract class Plugin extends PluginManager {
     for (let topic of m.topics) {
       this.topics[topic.name] = { ...topic, commands: [] }
     }
-    this.commandIDs = [...this.commandIDs, ...m.commands.map(m => m.id)]
 
-    this.module = m
+    return (this.module = m)
+  }
+
+  private async fetchCommandIDsFromModule(): Promise<string[]> {
+    return this.cache.fetch(this, 'commandIDs', async () => {
+      const m = await this.fetchModule()
+      return m.commands.map(m => m.id)
+    })
   }
 }

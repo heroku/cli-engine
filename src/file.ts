@@ -26,3 +26,8 @@ export async function outputJSON(file: string, data: any, options: any) {
   debug('outputJSON', file, data, options)
   return fs.outputJSON(file, data, options)
 }
+
+export async function readJSON(file: string) {
+  debug('readJSON', file)
+  return fs.readJSON(file)
+}

@@ -21,6 +21,7 @@ import corePlugins = require('./plugins/core')
 import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
 import pluginManifest = require('./plugins/manifest')
+import pluginCache = require('./plugins/cache')
 
 export default {
   // remote
@@ -48,6 +49,7 @@ export default {
   get CorePlugins(): typeof corePlugins.CorePlugins { return fetch('./plugins/core').CorePlugins },
   get Yarn(): typeof yarn.default { return fetch('./plugins/yarn').default },
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
+  get PluginCache(): typeof pluginCache.PluginCache { return fetch('./plugins/cache').PluginCache },
 }
 
 const cache: any = {}

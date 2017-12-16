@@ -1,11 +1,12 @@
 import deps from '../deps'
 import cli from 'cli-ux'
 import { Config } from 'cli-engine-config'
-import { Plugin, PluginType } from './plugin'
+import { Plugin, PluginType, PluginOptions } from './plugin'
 import Yarn from './yarn'
 import * as path from 'path'
 import { Lock } from '../lock'
 import { PluginManager } from './manager'
+import { PluginCache } from './cache'
 import { PluginManifest } from './manifest'
 
 const debug = require('debug')('cli:plugins:user')
@@ -13,15 +14,17 @@ const debug = require('debug')('cli:plugins:user')
 export class UserPlugins extends PluginManager {
   public plugins: Plugin[]
   protected config: Config
+  protected cache: PluginCache
   protected lock: Lock
 
   private pjsonPath: string
   private yarn: Yarn
   private manifest: PluginManifest
 
-  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
+  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
     super({ config })
     this.manifest = manifest
+    this.cache = cache
   }
 
   public async update() {
@@ -66,7 +69,7 @@ export class UserPlugins extends PluginManager {
     }
   }
 
-  protected fetchPlugins() {
+  private fetchPlugins() {
     const defs = this.manifest.list('user')
     return defs.map(p => this.loadPlugin(p.name, p.tag))
   }
@@ -74,6 +77,7 @@ export class UserPlugins extends PluginManager {
   private loadPlugin(name: string, tag: string) {
     return new UserPlugin({
       config: this.config,
+      cache: this.cache,
       root: this.userPluginPath(name),
       lock: this.lock,
       tag,
@@ -91,6 +95,16 @@ export class UserPlugins extends PluginManager {
   }
 }
 
-export class UserPlugin extends Plugin {
+type UserPluginOptions = PluginOptions & {
+  tag: string
+}
+
+class UserPlugin extends Plugin {
   public type: PluginType = 'user'
+  public tag: string
+
+  constructor(opts: UserPluginOptions) {
+    super(opts)
+    this.tag = opts.tag || 'latest'
+  }
 }

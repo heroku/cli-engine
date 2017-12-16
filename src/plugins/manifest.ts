@@ -1,6 +1,5 @@
 import deps from '../deps'
 import { Config } from 'cli-engine-config'
-import * as fs from 'fs-extra'
 import * as path from 'path'
 
 const debug = require('debug')('cli:plugins:manifest')
@@ -57,7 +56,7 @@ export class PluginManifest {
 
   public async save(): Promise<void> {
     if (!this.needsSave) return
-    await fs.outputJSON(this.file, this.manifest, { spaces: 2 })
+    await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
     this.needsSave = false
   }
 
@@ -99,7 +98,7 @@ export class PluginManifest {
 
   private async read(): Promise<ManifestJSON | undefined> {
     try {
-      return await fs.readJSON(this.file)
+      return await deps.file.readJSON(this.file)
     } catch (err) {
       if (err.code === 'ENOENT') {
         debug(err)
