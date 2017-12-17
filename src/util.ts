@@ -65,3 +65,11 @@ export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: stri
     {} as { [k: string]: T[] },
   )
 }
+
+export async function concatPromiseArrays<T> (promises: Promise<T[]>[]): Promise<T[]> {
+  let out: T[] = []
+  for (let p of promises) {
+    out = out.concat(await p)
+  }
+  return out
+}

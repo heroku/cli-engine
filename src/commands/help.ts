@@ -37,20 +37,19 @@ export default class Help extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
       let topics = await this.topics()
       if (this.flags.all) {
-        let rootCmds = this.plugins.rootCommandIDs
+        let rootCmds = await this.plugins.rootCommandIDs()
         rootCmds = rootCmds.filter(c => !topics.find(t => c.startsWith(t[0])))
-        if (rootCmds) this.listCommandsHelp(rootCmds)
+        if (rootCmds) await this.listCommandsHelp(rootCmds)
       }
       return
     }
 
-    const topic = await this.plugins.topics[subject]
+    const topic = await this.plugins.findTopic(subject)
     const matchedCommand = await this.plugins.findCommand(subject)
 
     if (!topic && !matchedCommand) {
@@ -63,7 +62,7 @@ export default class Help extends Command {
 
     if (topic) {
       await this.topics(topic.name)
-      this.listCommandsHelp(topic.commands, subject)
+      await this.listCommandsHelp(topic.commands, subject)
     }
   }
 
@@ -96,8 +95,9 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
     return topics
   }
 
-  private listCommandsHelp(commandIDs: string[], topic?: string) {
-    let commands: ICommand[] = commandIDs.map(id => this.plugins.findCommand(id)!).filter(c => c && !c.hidden)
+  private async listCommandsHelp(commandIDs: string[], topic?: string) {
+    let commands = await this.plugins.findCommands(commandIDs)
+    commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
     _.sortBy(commands, 'id')
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)

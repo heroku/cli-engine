@@ -9,8 +9,8 @@ export default class NotFound extends Command {
 
   plugins: Plugins
 
-  allCommands(): string[] {
-    let ids = this.plugins.commandIDs
+  async allCommands(): Promise<string[]> {
+    let ids = await this.plugins.commandIDs()
     return ids
     // TODO add aliases
     // return this.commandManager.listCommandIDs().reduce((commands, c) => {
@@ -18,26 +18,25 @@ export default class NotFound extends Command {
     // }, [])
   }
 
-  closest(cmd: string) {
+  async closest(cmd: string) {
     const DCE = require('string-similarity')
-    return DCE.findBestMatch(cmd, this.allCommands()).bestMatch.target
+    return DCE.findBestMatch(cmd, await this.allCommands()).bestMatch.target
   }
 
   async run() {
     this.plugins = new deps.Plugins({ config: this.config })
-    await this.plugins.init()
 
     let closest
     let binHelp = `${this.config.bin} help`
     let id = this.config.argv[0]
     let idSplit = id.split(':')
-    if (this.plugins.topics[idSplit[0]]) {
+    if (await this.plugins.findTopic(idSplit[0])) {
       // if valid topic, update binHelp with topic
       binHelp = `${binHelp} ${idSplit[0]}`
       // if topic:COMMAND present, try closest for id
-      if (idSplit[1]) closest = this.closest(id)
+      if (idSplit[1]) closest = await this.closest(id)
     } else {
-      closest = this.closest(id)
+      closest = await this.closest(id)
     }
 
     let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''

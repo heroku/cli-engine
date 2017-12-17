@@ -21,7 +21,6 @@ export default class PluginsUninstall extends Command {
     const [plugin] = this.argv
     cli.action.start(`Uninstalling ${plugin}`)
     this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
     await this.plugins.uninstall(plugin)
   }
 }

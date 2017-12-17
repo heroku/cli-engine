@@ -9,19 +9,16 @@ import { PluginManager } from './manager'
 import { PluginCache } from './cache'
 import { PluginManifest } from './manifest'
 
-const debug = require('debug')('cli:plugins:user')
-
 export class UserPlugins extends PluginManager {
-  public plugins: Plugin[]
+  public plugins: UserPlugin[]
   protected config: Config
-  protected cache: PluginCache
+  protected cache?: PluginCache
   protected lock: Lock
 
-  private pjsonPath: string
   private yarn: Yarn
   private manifest: PluginManifest
 
-  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
+  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache?: PluginCache }) {
     super({ config })
     this.manifest = manifest
     this.cache = cache
@@ -31,7 +28,7 @@ export class UserPlugins extends PluginManager {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     let downgrade = await this.lock.upgrade()
-    const packages = this.manifest.list('user').map(p => `${p.name}@${p.tag}`)
+    const packages = (await this.manifest.list('user')).map(p => `${p.name}@${p.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
     await downgrade()
   }
@@ -40,7 +37,6 @@ export class UserPlugins extends PluginManager {
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['add', `${name}@${tag}`])
     const plugin = this.loadPlugin(name, tag)
-    await plugin.init()
     await plugin.validate()
     await this.manifest.add({ type: 'user', name, tag })
     await this.manifest.save()
@@ -53,13 +49,12 @@ export class UserPlugins extends PluginManager {
   }
 
   protected async _init() {
-    debug('_init')
-    await this.manifest.init()
+    this.debug('init')
     this.lock = new deps.Lock(this.config, path.join(this.userPluginsDir, 'plugins.lock'))
-    this.pjsonPath = path.join(this.userPluginsDir, 'package.json')
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
     await this.refresh()
-    this.submanagers = this.plugins = this.fetchPlugins()
+    const defs = await this.manifest.list('user')
+    this.submanagers = this.plugins = defs.map(p => this.loadPlugin(p.name, p.tag))
   }
 
   private async refresh() {
@@ -67,11 +62,6 @@ export class UserPlugins extends PluginManager {
     if (this.manifest.nodeVersionChanged) {
       await this.yarn.exec()
     }
-  }
-
-  private fetchPlugins() {
-    const defs = this.manifest.list('user')
-    return defs.map(p => this.loadPlugin(p.name, p.tag))
   }
 
   private loadPlugin(name: string, tag: string) {
@@ -88,6 +78,9 @@ export class UserPlugins extends PluginManager {
     return path.join(this.userPluginsDir, 'node_modules', name)
   }
 
+  private get userPluginsDir () { return path.join(this.config.dataDir, 'plugins') }
+  private get pjsonPath () { return path.join(this.userPluginsDir, 'package.json') }
+
   private async createPJSON() {
     if (!await deps.file.exists(this.pjsonPath)) {
       await deps.file.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
@@ -95,11 +88,11 @@ export class UserPlugins extends PluginManager {
   }
 }
 
-type UserPluginOptions = PluginOptions & {
+export type UserPluginOptions = PluginOptions & {
   tag: string
 }
 
-class UserPlugin extends Plugin {
+export class UserPlugin extends Plugin {
   public type: PluginType = 'user'
   public tag: string
 

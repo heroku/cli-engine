@@ -85,12 +85,13 @@ export default class Yarn {
   async exec(args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
     const cacheDir = path.join(this.config.cacheDir, 'yarn')
-    args = args.concat([
+    args = [
+      ...args,
       '--non-interactive',
       '--link-duplicates',
       `--preferred-cache-folder=${cacheDir}`,
       ...this.proxyArgs(),
-    ])
+    ]
 
     let options = {
       cwd: this.cwd,
@@ -107,7 +108,7 @@ export default class Yarn {
       let networkConcurrency = '--network-concurrency=1'
       if (err.message.includes('EAI_AGAIN') && !args.includes(networkConcurrency)) {
         debug('EAI_AGAIN')
-        return this.exec(args.concat(networkConcurrency))
+        return this.exec([...args, networkConcurrency])
       } else throw err
     }
   }

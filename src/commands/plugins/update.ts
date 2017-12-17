@@ -10,7 +10,6 @@ export default class PluginsUpdate extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
     await this.plugins.update()
   }
 }

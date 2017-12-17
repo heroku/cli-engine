@@ -8,7 +8,7 @@ import { PluginCache } from './cache'
 export type PluginType = 'core' | 'user' | 'link'
 export type PluginOptions = {
   config: Config
-  cache: PluginCache
+  cache: PluginCache | undefined
   root: string
   lock?: Lock
 }
@@ -18,7 +18,7 @@ export type PluginPJSON = {
   version: string
   main?: string
   scripts?: { [k: string]: string }
-  'cli-engine'?: {
+  'cli-engine': {
     commandsDir?: string
     aliases?: { [k: string]: string | string[] }
   }
@@ -41,14 +41,12 @@ export abstract class Plugin extends PluginManager {
   public version: string
   public abstract type: PluginType
   public root: string
-  public pjson: PluginPJSON
-  public module?: PluginModule
-  public commandsDir?: string
   public tag?: string
+  public pjson: PluginPJSON
 
   // @ts-ignore
-  private lock?: Lock
-  private cache: PluginCache
+  protected lock?: Lock
+  protected cache?: PluginCache
 
   constructor(options: PluginOptions) {
     super(options)
@@ -57,62 +55,68 @@ export abstract class Plugin extends PluginManager {
     this.lock = options.lock
   }
 
-  public validate() {
-    if (!this.commandIDs.length) {
-      throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
-    }
-  }
-
   protected async _init() {
-    this.debug('_init')
-    await this.cache.init()
     this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
-    const pjsonConfig = this.pjson['cli-engine'] || {}
+    if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
     this.name = this.pjson.name
     this.version = this.pjson.version
-    this.aliases = deps.util.objValsToArrays(pjsonConfig.aliases)
-
-    if (pjsonConfig.commandsDir) {
-      this.commandsDir = path.join(this.root, pjsonConfig.commandsDir)
-      await this.loadCommandsFromDir(this.commandsDir)
-    }
-
-    if (this.pjson.main) {
-      const ids = await this.fetchCommandIDsFromModule()
-      this.commandIDs.concat(ids)
-      // await this.requireModule(this.pjson.main)
-    }
+    this.debug = require('debug')(`cli:plugins:${this.name}`)
   }
 
-  protected _findCommand(id: string): ICommand | undefined {
-    let cmd
-    if (this.module) {
-      cmd = this.module.commands.find(c => c.id === id)
-    }
-    if (!cmd && this.commandsDir) {
-      try {
-        cmd = require(this.commandPath(id))
-      } catch (err) {
-        if (err.code !== 'MODULE_NOT_FOUND') throw err
-      }
-    }
+  public get commandsDir(): string | undefined {
+    let d = this.pjson['cli-engine'].commandsDir
+    if (d) return path.join(this.root, d)
+  }
+
+  public async commandIDs() {
+    return deps.util.concatPromiseArrays([
+      this.commandIDsFromDir(),
+      this.fetchCommandIDsFromModule()
+    ])
+  }
+
+  public validate() {
+    // if (!this.commandIDs.length) {
+    //   throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
+    // }
+  }
+
+  public async aliases() {
+    return deps.util.objValsToArrays(this.pjson['cli-engine'].aliases)
+  }
+
+  public async findCommand(id: string): Promise<ICommand | undefined> {
+    let cmd = await this.findCommandInModule(id)
+    if (!cmd) cmd = await this.findCommandInDir(id)
     if (cmd) {
-      cmd = deps.util.undefault(cmd)
       cmd = this.addPluginToCommand(cmd)
-      this.debug(`found command ${cmd.id}`)
-      // TODO: lock
-      // if (this.lock) await this.lock.read()
       return cmd
     }
   }
 
-  protected get debug() {
-    return require('debug')(`cli:plugins:${this.name || path.basename(this.root)}`)
+  public async findCommandInModule (id: string) {
+    const m = await this.fetchModule()
+    if (!m) return
+    return m.commands.find(c => c.id === id)
+  }
+
+  public async findCommandInDir (id: string) {
+    const dir = this.commandsDir
+    if (!dir) return
+    let p
+    try {
+      p = this.commandPath(id)
+    } catch (err) {
+      if (err.code === 'MODULE_NOT_FOUND') return
+      throw err
+    }
+    if (!(await deps.file.exists(p))) return
+    return this.require(p, id)
   }
 
   private commandPath(id: string): string {
     if (!this.commandsDir) throw new Error('commandsDir not set')
-    return path.join(this.commandsDir, id.split(':').join(path.sep))
+    return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
   }
 
   private addPluginToCommand(cmd: ICommand): ICommand {
@@ -125,33 +129,54 @@ export abstract class Plugin extends PluginManager {
     return cmd
   }
 
-  private async fetchModule(): Promise<PluginModule> {
-    if (this.module) return this.module
-    this.debug(`requiring ${this.name}@${this.version}`)
+  private _module: Promise<PluginModule | undefined>
+  private async fetchModule(): Promise<PluginModule | undefined> {
+    if (this._module) return this._module
+    return this._module = (async () => {
+      if (!this.pjson.main) return
+      this.debug(`requiring ${this.name}@${this.version}`)
 
-    const m: PluginModule = {
-      commands: [],
-      topics: [],
-      ...require(path.join(this.root, this.pjson.main!)),
-    }
+      const m: PluginModule = {
+        commands: [],
+        topics: [],
+        ...require(path.join(this.root, this.pjson.main!)),
+      }
 
-    if (m.topic) m.topics.push(m.topic)
-    m.commands = m.commands.map(deps.util.undefault)
+      if (m.topic) m.topics.push(m.topic)
+      m.commands = m.commands.map(deps.util.undefault)
 
-    const hooks = new deps.Hooks(this.config)
-    await hooks.run('plugins:parse', { module: m, pjson: this.pjson })
+      const hooks = new deps.Hooks(this.config)
+      await hooks.run('plugins:parse', { module: m, pjson: this.pjson })
 
-    for (let topic of m.topics) {
-      this.topics[topic.name] = { ...topic, commands: [] }
-    }
-
-    return (this.module = m)
+      return m
+    })()
   }
 
   private async fetchCommandIDsFromModule(): Promise<string[]> {
-    return this.cache.fetch(this, 'commandIDs', async () => {
+    const fn = async () => {
       const m = await this.fetchModule()
+      if (!m) return []
       return m.commands.map(m => m.id)
+    }
+    return this.cache ? this.cache.fetch(this, 'commandIDs', fn) : fn()
+  }
+
+  private commandIDsFromDir(): Promise<string[]> {
+    const d = this.commandsDir
+    if (!d) return Promise.resolve([])
+    return new Promise((resolve, reject) => {
+      let ids: string[] = []
+      deps
+        .klaw(d, { depthLimit: 10 })
+        .on('data', f => {
+          if (!f.stats.isDirectory() && f.path.endsWith('.js')) {
+            let parsed = path.parse(f.path)
+            let p = path.relative(d, path.join(parsed.dir, parsed.name))
+            ids.push(p.split(path.sep).join(':'))
+          }
+        })
+        .on('error', reject)
+        .on('end', () => resolve(ids))
     })
   }
 }

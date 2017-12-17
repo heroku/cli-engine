@@ -3,16 +3,16 @@ import * as fs from 'fs-extra'
 const debug = require('debug')('cli:file')
 
 export function exists(f: string): Promise<boolean> {
-  debug('exists', f)
+  // debug('exists', f)
   // @ts-ignore
   return fs.exists(f)
 }
 
-const jsonFiles: { [k: string]: any } = {}
-export async function fetchJSONFile(f: string): Promise<any> {
+const jsonFiles: { [k: string]: Promise<any> } = {}
+export function fetchJSONFile(f: string): Promise<any> {
   if (!jsonFiles[f]) {
     debug('fetchJSONFile', f)
-    jsonFiles[f] = await fs.readJSON(f)
+    jsonFiles[f] = fs.readJSON(f)
   }
   return jsonFiles[f]
 }

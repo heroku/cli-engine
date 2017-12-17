@@ -291,7 +291,7 @@ export class Updater {
   spawnBinPath(binPath: string, args: string[], options: Object) {
     debug(binPath, args)
     if (this.config.windows) {
-      args = ['/c', binPath].concat(args)
+      args = ['/c', binPath, ...args]
       return deps.crossSpawn(process.env.comspec || 'cmd.exe', args, options)
     } else {
       return deps.crossSpawn(binPath, args, options)

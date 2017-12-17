@@ -67,17 +67,16 @@ export default class CLI {
 
     debug('command_manager')
     const plugins = new deps.Plugins({ config })
-    await plugins.init()
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       this.Command = deps.Help
       argv = this.config.argv
     } else {
-      this.Command = plugins.findCommand(id || this.config.defaultCommand || 'help')
+      this.Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
     }
 
     if (!this.Command) {
-      let topic = plugins.topics[id]
+      const topic = await plugins.findTopic(id)
       if (topic) {
         debug('showing help for %s topic', id)
         this.Command = deps.Help

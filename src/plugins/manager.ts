@@ -1,15 +1,13 @@
 import deps from '../deps'
-import * as path from 'path'
 import cli from 'cli-ux'
-import { Command as CommandBase } from 'cli-engine-command'
 import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
 import { PluginTopic } from './plugin'
 import { inspect } from 'util'
-import _ from 'ts-lodash'
 
-const debug = require('debug')('cli:plugins')
 
 export type Topic = BaseTopic & { commands: string[] }
+export type Topics = {[from: string]: Topic}
+export type Aliases = {[from: string]: string[]}
 
 function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
   return {
@@ -31,79 +29,87 @@ export type PluginManagerOptions = {
 }
 
 export abstract class PluginManager {
-  public topics: { [name: string]: Topic } = {}
-  public commandIDs: string[] = []
-  public aliases: { [from: string]: string[] } = {}
-
   protected submanagers: PluginManager[] = []
   protected config: Config
-  protected userPluginsDir: string
-
-  private initialized = false
 
   constructor(opts: PluginManagerOptions) {
     this.config = opts.config
-    this.userPluginsDir = path.join(this.config.dataDir, 'plugins')
   }
 
-  public async init(): Promise<void> {
-    if (this.initialized) return
-    try {
+  private _initPromise: Promise<void>
+  public init(): Promise<void> {
+    if (this._initPromise) return this._initPromise
+    return this._initPromise = (async () => {
       await this._init()
-    } catch (err) {
-      cli.warn(err, { context: this.constructor.name })
-    }
-    await this.initSubmanagers()
-    this.initialized = true
-    this.mergeCommandIDs()
-    this.mergeTopics()
-    this.addMissingTopics()
-    this.mergeAliases()
+      await Promise.all(this.submanagers.map(m => m.init()))
+    })()
   }
-  protected abstract async _init(): Promise<void>
+  protected async _init(): Promise<void> {}
 
-  public async initSubmanagers(): Promise<void> {
-    const promises = []
-    for (let m of this.submanagers) {
-      promises.push(m.init())
-      if (process.env.CLI_ENGINE_LOAD_PLUGINS_IN_SERIAL === '1') {
-        await promises.pop()
+  public async topics(): Promise<Topics> {
+    const topics: Topics = {}
+    await this.init()
+    let promises = this.submanagers.map(m => m.topics())
+    for (let p of promises) {
+      for (let t of Object.values(p)) {
+        topics[t.name] = mergeTopics(topics[t.name], t)
       }
     }
-    await Promise.all(promises)
+    return this.addMissingTopics(topics)
   }
 
-  public get topicIDs(): string[] {
-    return Object.keys(this.topics)
+  public async findTopic(name: string): Promise<Topic | undefined> {
+    const topics = await this.topics()
+    return topics[name]
   }
 
-  public get rootCommandIDs(): string[] {
-    return this.commandIDs.filter(id => !id.includes(':'))
+  public async topicIDs(): Promise<string[]> {
+    return Object.keys(await this.topics())
   }
 
-  public findCommand(id: string): ICommand | undefined {
-    id = this.unalias(id)
-    let cmd = this._findCommand(id)
-    if (cmd) return cmd
-    for (let m of this.submanagers) {
-      let cmd = m.findCommand(id)
-      if (cmd) return cmd
+  public async commandIDs(): Promise<string[]> {
+    await this.init()
+    const ids = await deps.util.concatPromiseArrays(this.submanagers.map(r => r.commandIDs()))
+    return ids.sort()
+  }
+
+  public async rootCommandIDs(): Promise<string[]> {
+    let ids = await this.commandIDs()
+    return ids.filter(id => !id.includes(':'))
+  }
+
+  public async aliases(): Promise<Aliases> {
+    let aliases: Aliases = {}
+    await this.init()
+    let promises = this.submanagers.map(m => m.aliases())
+    for (let a of promises) {
+      for (let [k, v] of Object.entries(await a)) {
+        aliases[k] = [...(aliases[k] || []), ...deps.util.toArray(v)]
+      }
     }
+    return aliases
   }
 
-  protected _findCommand(_: string): ICommand | undefined {
-    return undefined
+  public async findCommand(id: string): Promise<ICommand | undefined> {
+    await this.init()
+    for (let m of await this.submanagers) {
+      let cmd = await m.findCommand(await m.unalias(id))
+      if (cmd) {
+        this.debug(`found command ${cmd.id}`)
+        return cmd
+      }
+    }
   }
 
   protected require(p: string, id: string): ICommand {
-    debug('Reading command %s at %s', id, p)
-    let Command: undefined | typeof CommandBase
+    this.debug('Reading command %s at %s', id, p)
+    let Command: ICommand | undefined
     try {
       Command = deps.util.undefault(require(p))
     } catch (err) {
       cli.warn(err, { context: `Error reading command from ${p}` })
     }
-    if (!Command || !(Command.prototype instanceof CommandBase)) {
+    if (!Command || !Command._version) {
       let extra = deps.util.isEmpty(Command)
         ? 'Does the command have `export default class extends Command {...}`?'
         : `Received: ${inspect(Command)}`
@@ -112,60 +118,25 @@ export abstract class PluginManager {
     return Command
   }
 
-  protected loadCommandsFromDir(d: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      deps
-        .klaw(d, { depthLimit: 10 })
-        .on('data', f => {
-          if (!f.stats.isDirectory() && f.path.endsWith('.js')) {
-            let parsed = path.parse(f.path)
-            let p = path.relative(d, path.join(parsed.dir, parsed.name))
-            this.commandIDs.push(p.split(path.sep).join(':'))
-          }
-        })
-        .on('error', reject)
-        .on('end', resolve)
-    })
-  }
+  protected debug = require('debug')(`cli:plugins:${this.constructor.name.split('Plugin')[0].toLowerCase()}`)
 
-  private unalias(id: string): string {
-    const alias = Object.entries(this.aliases).find(([, aliases]) => aliases.includes(id))
+  private async unalias(id: string): Promise<string> {
+    const aliases = Object.entries(await this.aliases())
+    const alias = Object.entries(aliases).find(([, aliases]) => aliases.includes(id))
     return alias ? alias[0] : id
   }
 
-  private mergeCommandIDs() {
-    for (let m of this.submanagers) {
-      this.commandIDs = [...this.commandIDs, ...m.commandIDs]
-    }
-    this.commandIDs = _.compact(this.commandIDs.sort())
-  }
-
-  private mergeTopics() {
-    for (let m of this.submanagers) {
-      for (let t of Object.values(m.topics)) {
-        this.topics[t.name] = mergeTopics(this.topics[t.name], t)
-      }
-    }
-  }
-
-  private addMissingTopics() {
-    for (let id of this.commandIDs) {
+  private async addMissingTopics(topics: Topics): Promise<Topics> {
+    for (let id of await this.commandIDs()) {
       const topic = topicFromID(id)
       if (!topic) continue
       // create topic if none exist
-      this.topics[topic] = this.topics[topic] || { name: topic, commands: [] }
+      topics[topic] = topics[topic] || { name: topic, commands: [] }
 
       // add this command to the topic
-      this.topics[topic].commands = this.topics[topic].commands || []
-      this.topics[topic].commands.push(id)
+      topics[topic].commands = topics[topic].commands || []
+      topics[topic].commands.push(id)
     }
-  }
-
-  private mergeAliases() {
-    for (let m of this.submanagers) {
-      for (let [k, v] of Object.entries(m.aliases)) {
-        this.aliases[k] = [...(this.aliases[k] || []), ...deps.util.toArray(v)]
-      }
-    }
+    return topics
   }
 }
