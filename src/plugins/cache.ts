@@ -34,16 +34,21 @@ export class PluginCache {
     this.needsSave = false
   }
 
+  private fetchPromises: {[k: string]: Promise<any>} = {}
   public async fetch<T>(plugin: Plugin, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
-    let pluginCache = this.cache.plugins[cacheKey(plugin)]
+    const key = cacheKey(plugin)
+    let pluginCache = this.cache.plugins[key]
     if (!pluginCache) {
-      pluginCache = this.cache.plugins[cacheKey(plugin)] = {} as CachePlugin
+      pluginCache = this.cache.plugins[key] = {} as CachePlugin
     }
     if (!pluginCache[prop]) {
-      debug('fetching', cacheKey(plugin), prop)
-      pluginCache[prop] = await fn()
-      this.needsSave = true
+      this.fetchPromises[key] = this.fetchPromises[key] || (async () => {
+        debug('fetching', cacheKey(plugin), prop)
+        pluginCache[prop] = await fn()
+        this.needsSave = true
+      })()
+      await this.fetchPromises[key]
     }
     return pluginCache[prop]
   }

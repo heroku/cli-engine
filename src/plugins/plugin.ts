@@ -95,6 +95,8 @@ export abstract class Plugin extends PluginManager {
   }
 
   public async findCommandInModule (id: string) {
+    const ids = await this.fetchCommandIDsFromModule()
+    if (!ids.includes(id)) return
     const m = await this.fetchModule()
     if (!m) return
     return m.commands.find(c => c.id === id)

@@ -41,10 +41,14 @@ export abstract class PluginManager {
     if (this._initPromise) return this._initPromise
     return this._initPromise = (async () => {
       await this._init()
-      await Promise.all(this.submanagers.map(m => m.init()))
+      await this.initSubmanagers()
     })()
   }
   protected async _init(): Promise<void> {}
+
+  protected async initSubmanagers () {
+    await Promise.all(this.submanagers.map(m => m.init()))
+  }
 
   public async topics(): Promise<Topics> {
     const topics: Topics = {}

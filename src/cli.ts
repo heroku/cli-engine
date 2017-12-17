@@ -97,10 +97,12 @@ export default class CLI {
       argv,
     })
 
+    await plugins.save()
     debug('running %s', this.Command!.id)
     const cmd = await this.Command!.run({ ...this.config, argv })
     debug('exited normally')
 
+    await plugins.save()
     await this.exitAfterStdoutFlush()
     return cmd
   }

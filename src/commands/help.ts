@@ -73,7 +73,7 @@ export default class Help extends Command {
   private async topics(prefix?: string) {
     const idPrefix = prefix ? `${prefix}:` : ''
     // fetch topics
-    let topics = Object.values(this.plugins.topics)
+    let topics = Object.values(await this.plugins.topics())
       .filter(t => !t.hidden)
       // only get from the prefix
       .filter(t => t.name.startsWith(idPrefix))

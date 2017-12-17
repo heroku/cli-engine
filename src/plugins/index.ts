@@ -46,13 +46,6 @@ export class Plugins extends PluginManager {
     if (type === 'user') await this.user.uninstall(name)
   }
 
-  // public async init() {
-  //   await super.init()
-  //   await this.saveManifest()
-  //   await this.saveCache()
-  //   this.plugins = [...this.core.plugins, ...this.user.plugins, ...this.link.plugins]
-  // }
-
   protected async _init() {
     try {
       this.cache = new deps.PluginCache(this.config)
@@ -80,6 +73,17 @@ export class Plugins extends PluginManager {
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
   }
 
+  public async save() {
+    try {
+      if (!this.manifest) return
+      await this.manifest.save()
+      if (!this.cache) return
+      await this.cache.save()
+    } catch (err) {
+      cli.warn(err)
+    }
+  }
+
   public async findCommand(id: string, options: {must: true}): Promise<ICommand>
   public async findCommand(id: string, options?: {must?: boolean}): Promise<ICommand | undefined>
   public async findCommand(id: string, options: {must?: boolean} = {}): Promise<ICommand | undefined> {
@@ -97,21 +101,4 @@ export class Plugins extends PluginManager {
     const managers = _.compact([this.link, this.user, this.core])
     return managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
   }
-
-  // private async saveManifest() {
-  //   try {
-  //     if (!this.manifest) return
-  //     await this.manifest.save()
-  //   } catch (err) {
-  //     cli.warn(err)
-  //   }
-  // }
-
-  // private async saveCache() {
-  //   try {
-  //     await this.cache.save()
-  //   } catch (err) {
-  //     cli.warn(err)
-  //   }
-  // }
 }
