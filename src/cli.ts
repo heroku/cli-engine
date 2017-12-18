@@ -88,8 +88,8 @@ export default class CLI {
     }
 
     const { _version } = this.Command
-    if (!_version) {
-      argv = this.config.argv.slice(2)
+    if (deps.semver.lt(_version, '10.0.0')) {
+      argv = this.config.argv.slice(0)
     }
 
     await this.hooks.run('prerun', {

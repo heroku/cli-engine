@@ -5,6 +5,7 @@ import * as moment from 'moment'
 import * as klaw from 'klaw'
 import Heroku = require('cli-engine-heroku')
 import stripAnsi = require('strip-ansi')
+import semver = require('semver')
 
 // local
 import Hooks = require('./hooks')
@@ -36,6 +37,7 @@ export default {
   get crossSpawn(): any { return fetch('cross-spawn') },
   get Heroku(): typeof Heroku { return fetch('cli-engine-heroku') },
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
+  get semver(): typeof semver { return fetch('semver') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
