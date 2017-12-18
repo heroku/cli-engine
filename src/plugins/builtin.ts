@@ -49,7 +49,9 @@ export class Builtin extends Plugin {
   }
 
   public async topics(): Promise<Topics> {
-    const topics: Topics = {}
+    const topics: Topics = {
+      cache: { name: 'cache', hidden: true, commands: [] },
+    }
     if (true || this.config.userPlugins) {
       topics['plugins'] = {
         name: 'plugins',

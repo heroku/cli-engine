@@ -75,13 +75,16 @@ export class PluginCache {
   }
 
   private get file() {
-    return path.join(this.config.cacheDir, 'commands.json')
+    return path.join(this.config.cacheDir, 'plugins.json')
   }
 
   private async read(): Promise<CacheJSON | undefined> {
     try {
       let cache = await fs.readJSON(this.file)
-      if (cache.version !== this.config.userAgent) return
+      if (cache.version !== this.config.userAgent) {
+        debug('cache version mismatch')
+        return
+      }
       return cache
     } catch (err) {
       if (err.code === 'ENOENT') {
