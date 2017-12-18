@@ -75,7 +75,7 @@ export type LegacyFlag = {
 const debug = require('debug')('cli:legacy')
 
 export class PluginLegacy {
-  constructor(private config: Config) {}
+  constructor(_: Config) {}
 
   public convert(m: PluginModule | LegacyModule): PluginModule {
     m.commands = this.convertCommands(m.commands)
