@@ -1,4 +1,5 @@
-import {ICommand} from 'cli-engine-config'
+import { color } from 'heroku-cli-color'
+import { ICommand } from 'cli-engine-config'
 import cli from 'cli-ux'
 import deps from '../deps'
 import { UserPlugins } from './user'
@@ -50,7 +51,7 @@ export class Plugins extends PluginManager {
     try {
       this.cache = new deps.PluginCache(this.config)
     } catch (err) {
-      cli.warn(err, {context: 'plugin cache'})
+      cli.warn(err, { context: 'plugin cache' })
     }
     const submanagerOpts = { config: this.config, cache: this.cache }
     this.builtin = new deps.Builtin(submanagerOpts)
@@ -58,7 +59,7 @@ export class Plugins extends PluginManager {
     try {
       this.core = new deps.CorePlugins(submanagerOpts)
     } catch (err) {
-      cli.warn(err, {context: 'core plugins'})
+      cli.warn(err, { context: 'core plugins' })
     }
     if (true || this.config.userPlugins) {
       try {
@@ -67,32 +68,55 @@ export class Plugins extends PluginManager {
         this.user = new deps.UserPlugins(submanagerOpts)
         this.link = new deps.LinkPlugins(submanagerOpts)
       } catch (err) {
-        cli.warn(err, {context: 'user/link plugins'})
+        cli.warn(err, { context: 'user/link plugins' })
       }
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
   }
 
-  public async findCommand(id: string, options: {must: true}): Promise<ICommand>
-  public async findCommand(id: string, options?: {must?: boolean}): Promise<ICommand | undefined>
-  public async findCommand(id: string, options: {must?: boolean} = {}): Promise<ICommand | undefined> {
+  public async findCommand(id: string, options: { must: true }): Promise<ICommand>
+  public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
+  public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
     const cmd = await super.findCommand(id)
     await this.saveCache()
     if (!cmd && options.must) throw new Error(`${id} not found`)
     return cmd
   }
 
-  public async findCommands(ids: string[]): Promise<ICommand[]> {
-    return Promise.all(ids.map(id => this.findCommand(id, {must: true})))
+  public async findCommandHelp(id: string): Promise<string | undefined> {
+    const plugin = await this.findPluginWithCommandID(id)
+    if (!plugin) return
+    const fn = async () => {
+      const c = await plugin.findCommand(id)
+      if (!c) throw new Error('command not found')
+      return c.buildHelp(this.config)
+    }
+    if (!this.cache) return fn()
+    let help = await this.cache.fetch(plugin, `command:${id}`, fn)
+    await this.saveCache()
+    if (!color.supportsColor) help = deps.stripAnsi(help)
+    return help
   }
 
-  public async plugins (): Promise<Plugin[]> {
+  public async findPluginWithCommandID(id: string): Promise<Plugin | undefined> {
+    const plugins = await this.plugins()
+    for (let p of plugins) {
+      const ids = await p.commandIDs()
+      if (ids.includes(id)) return p
+    }
+  }
+
+  public async findCommands(ids: string[]): Promise<ICommand[]> {
+    return Promise.all(ids.map(id => this.findCommand(id, { must: true })))
+  }
+
+  public async plugins(): Promise<Plugin[]> {
     await this.init()
     const managers = _.compact([this.link, this.user, this.core])
     return managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
   }
 
-  public async saveCache () {
+  public async saveCache() {
     try {
       if (this.cache) this.cache.save()
     } catch (err) {

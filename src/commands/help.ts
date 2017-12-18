@@ -14,12 +14,6 @@ function topicSort(a: any, b: any) {
   return 0
 }
 
-function buildHelp(config: Config, c: ICommand): string {
-  if (c.buildHelp) return c.buildHelp(config)
-  let help = new deps.CLICommandHelp(config)
-  return help.command(c)
-}
-
 function buildHelpLine(config: Config, c: ICommand): [string, string | undefined] {
   if (c.buildHelpLine) return c.buildHelpLine(config)
   let help = new deps.CLICommandHelp(config)
@@ -50,15 +44,13 @@ export default class Help extends Command {
     }
 
     const topic = await this.plugins.findTopic(subject)
-    const matchedCommand = await this.plugins.findCommand(subject)
+    const commandHelp = await this.plugins.findCommandHelp(subject)
 
-    if (!topic && !matchedCommand) {
+    if (!topic && !commandHelp) {
       return this.notFound(subject)
     }
 
-    if (matchedCommand) {
-      cli.log(buildHelp(this.config, matchedCommand))
-    }
+    if (commandHelp) cli.log(commandHelp)
 
     if (topic) {
       await this.topics(topic.name)
