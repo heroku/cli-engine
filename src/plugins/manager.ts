@@ -8,7 +8,7 @@ export type Topic = BaseTopic & { commands: string[] }
 export type Topics = { [from: string]: Topic }
 export type Aliases = { [from: string]: string[] }
 
-function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
+export function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
   return {
     ...a,
     ...b,

@@ -116,6 +116,7 @@ export class Plugins extends PluginManager {
     cli.action.start('Warming cache')
     await this.init()
     if (!this.cache) return cli.warn('cache disabled')
+    await this.topics()
     const ids = await this.commandIDs()
     await this.findCommandsHelpLines(ids, { save: false })
     for (let p of ids.map(id => this.findCommandHelp(id, { save: false }))) await p
@@ -169,6 +170,11 @@ export class Plugins extends PluginManager {
     } catch (err) {
       cli.warn(err)
     }
+  }
+
+  public async save() {
+    await this.saveCache()
+    await this.saveManifest()
   }
 
   private async migrate() {

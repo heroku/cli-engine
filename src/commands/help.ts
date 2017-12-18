@@ -23,6 +23,7 @@ export default class Help extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
+    await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
@@ -32,6 +33,7 @@ export default class Help extends Command {
         rootCmds = rootCmds.filter(c => !topics.find(t => c.startsWith(t[0])))
         if (rootCmds) await this.listCommandsHelp(rootCmds)
       }
+      await this.plugins.save()
       return
     }
 
@@ -48,6 +50,8 @@ export default class Help extends Command {
       await this.topics(topic.name)
       await this.listCommandsHelp(topic.commands, subject)
     }
+
+    await this.plugins.save()
   }
 
   private async notFound(subject: string) {

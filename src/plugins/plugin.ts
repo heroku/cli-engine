@@ -1,5 +1,5 @@
 import deps from '../deps'
-import { PluginManager } from './manager'
+import { PluginManager, mergeTopics, Topics } from './manager'
 import { ICommand, Config } from 'cli-engine-config'
 import * as path from 'path'
 import { Lock } from '../lock'
@@ -70,6 +70,17 @@ export abstract class Plugin extends PluginManager {
 
   public async commandIDs() {
     return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
+  }
+
+  public async topics(): Promise<Topics> {
+    let topics: Topics = {}
+    let promises = [this.fetchTopicsFromModule()]
+    for (let p of promises) {
+      for (let t of Object.values(await p)) {
+        topics[t.name] = mergeTopics(topics[t.name], t)
+      }
+    }
+    return topics
   }
 
   public async aliases() {
@@ -154,6 +165,15 @@ export abstract class Plugin extends PluginManager {
       return m.commands.map(m => m.id)
     }
     return this.cache ? this.cache.fetch(this, 'commandIDs', fn) : fn()
+  }
+
+  private async fetchTopicsFromModule(): Promise<Topics> {
+    const fn = async () => {
+      const m = await this.fetchModule()
+      if (!m) return {}
+      return m.topics
+    }
+    return this.cache ? this.cache.fetch(this, 'topics', fn) : fn()
   }
 
   private commandIDsFromDir(): Promise<string[]> {
