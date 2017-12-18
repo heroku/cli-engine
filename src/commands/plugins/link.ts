@@ -27,6 +27,7 @@ export default class PluginsLink extends Command {
     const plugins = new Plugins({ config: this.config })
     let p = path.resolve(this.argv[0] || process.cwd())
     cli.action.start(`Linking ${p}`)
+    await plugins.init()
     const { name } = await plugins.link.pjson(p)
     if (!this.flags.force && plugins.pluginType(name)) {
       throw new Error(`${name} is already installed. Run with --force to install anyway`)

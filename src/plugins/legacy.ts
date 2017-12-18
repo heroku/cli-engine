@@ -31,7 +31,11 @@ export type LegacyContext = {
   cwd: string
 }
 
-export type LegacyCommand = V5Command
+export type FlowCommand = {
+  id: string
+}
+
+export type LegacyCommand = V5Command | FlowCommand
 
 export type AnyTopic = PluginTopic | LegacyTopic
 export type AnyCommand = ICommand | LegacyCommand
@@ -89,8 +93,14 @@ export class PluginLegacy {
   private convertCommand(c: AnyCommand): ICommand {
     if (this.isICommand(c)) return c
     if (this.isV5Command(c)) return this.convertFromV5(c)
+    if (this.isFlowCommand(c)) return this.convertFromFlow(c)
     debug(c)
     throw new Error(`Invalid command: ${inspect(c)}`)
+  }
+
+  private convertFromFlow(c: any): ICommand {
+    c._version = '0.0.0'
+    return c
   }
 
   private convertFromV5(c: V5Command): ICommand {
@@ -162,6 +172,11 @@ export class PluginLegacy {
   private isV5Command(command: AnyCommand): command is V5Command {
     let c = command
     return !!(typeof c === 'object')
+  }
+
+  private isFlowCommand(command: AnyCommand): command is FlowCommand {
+    let c = command as FlowCommand
+    return !!(!('_version' in c) && c.id)
   }
 }
 

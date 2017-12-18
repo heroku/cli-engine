@@ -88,7 +88,11 @@ export default class CLI {
     }
 
     const { _version } = this.Command
-    if (deps.semver.lt(_version, '10.0.0')) {
+    if (_version === '0.0.0') {
+      debug('legacy cli-engine-command version', _version)
+      argv = this.config.argv.slice(2)
+    } else if (deps.semver.lt(_version, '10.0.0')) {
+      debug(`legacy cli-engine-command version`, _version)
       argv = this.config.argv.slice(0)
     }
 
