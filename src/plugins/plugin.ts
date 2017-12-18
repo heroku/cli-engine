@@ -150,7 +150,9 @@ export abstract class Plugin extends PluginManager {
       const hooks = new deps.Hooks(this.config)
       await hooks.run('plugins:parse', { module: m, pjson: this.pjson })
 
-      return m
+      let legacy = new deps.PluginLegacy(this.config)
+
+      return legacy.convert(m)
     })()
   }
 

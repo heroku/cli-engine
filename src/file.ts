@@ -18,12 +18,12 @@ export function fetchJSONFile(f: string): Promise<any> {
 }
 
 export async function outputFile(file: string, data: any, options: any) {
-  debug('outputFile', file, data, options)
+  debug('outputFile', file)
   return fs.outputFile(file, data, options)
 }
 
 export async function outputJSON(file: string, data: any, options: any) {
-  debug('outputJSON', file, data, options)
+  debug('outputJSON', file)
   return fs.outputJSON(file, data, options)
 }
 

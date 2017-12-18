@@ -672,6 +672,21 @@ cli-engine-config@4.3.0-ts.2:
     fs-extra "^5.0.0"
     uuid "^3.1.0"
 
+cli-engine-heroku@6.1.0-ts.0:
+  version "6.1.0-ts.0"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-6.1.0-ts.0.tgz#0ef9a1549a902abbe3dfce223177cf043625b6e1"
+  dependencies:
+    ansi-styles "3.2.0"
+    chalk "2.3.0"
+    cli-engine-command "10.1.0-ts.2"
+    cli-engine-config "4.3.0-ts.1"
+    cli-ux "^2.0.7"
+    heroku-client "^3.0.3"
+    http-call "^4.0.4"
+    lodash.flatten "4.4.0"
+    netrc-parser "^2.0.3"
+    supports-color "5.1.0"
+
 cli-flags@1.0.18:
   version "1.0.18"
   resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-1.0.18.tgz#632ca43cdc872f9031b1dbbce8e92216a35ab4d2"
@@ -894,15 +909,15 @@ debug@^2.2.0, debug@^2.6.3, debug@^2.6.8:
   dependencies:
     ms "2.0.0"
 
-debug@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-3.0.1.tgz#0564c612b521dc92d9f2988f0549e34f9c98db64"
+debug@^3.0.0, debug@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   dependencies:
     ms "2.0.0"
 
-debug@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
+debug@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-3.0.1.tgz#0564c612b521dc92d9f2988f0549e34f9c98db64"
   dependencies:
     ms "2.0.0"
 
@@ -1439,6 +1454,14 @@ heroku-cli-color@1.0.2:
     ansi-styles "3.2.0"
     chalk "2.3.0"
     supports-color "5.1.0"
+
+heroku-client@^3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.3.tgz#302df7fe315f8fa0a98c1a6cbd22a5d81e1c5253"
+  dependencies:
+    debug "^3.0.0"
+    is-retry-allowed "^1.0.0"
+    tunnel-agent "^0.6.0"
 
 hoek@2.x.x:
   version "2.16.3"
@@ -2279,7 +2302,7 @@ locate-path@^2.0.0:
     p-locate "^2.0.0"
     path-exists "^3.0.0"
 
-lodash.flatten@4.x:
+lodash.flatten@4.4.0, lodash.flatten@4.x:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.flatten/-/lodash.flatten-4.4.0.tgz#f31c22225a9632d2bbf8e4addbef240aa765a61f"
 

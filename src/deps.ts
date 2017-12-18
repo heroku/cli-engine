@@ -3,6 +3,7 @@ import { HTTP } from 'http-call'
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
 import * as moment from 'moment'
 import * as klaw from 'klaw'
+import Heroku = require('cli-engine-heroku')
 
 // local
 import Hooks = require('./hooks')
@@ -22,6 +23,7 @@ import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
 import pluginManifest = require('./plugins/manifest')
 import pluginCache = require('./plugins/cache')
+import pluginLegacy = require('./plugins/legacy')
 
 export default {
   // remote
@@ -31,6 +33,7 @@ export default {
   get rwlockfile(): any { return fetch('rwlockfile') },
   get klaw(): typeof klaw { return fetch('klaw') },
   get crossSpawn(): any { return fetch('cross-spawn') },
+  get Heroku(): typeof Heroku { return fetch('cli-engine-heroku') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
@@ -50,6 +53,7 @@ export default {
   get Yarn(): typeof yarn.default { return fetch('./plugins/yarn').default },
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
   get PluginCache(): typeof pluginCache.PluginCache { return fetch('./plugins/cache').PluginCache },
+  get PluginLegacy(): typeof pluginLegacy.PluginLegacy { return fetch('./plugins/legacy').PluginLegacy },
 }
 
 const cache: any = {}
