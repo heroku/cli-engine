@@ -640,63 +640,54 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@10.1.0-ts.2:
-  version "10.1.0-ts.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.1.0-ts.2.tgz#0ab0ce929eab32f0e194579e7a28e82b406b79f1"
+cli-engine-command@10.1.0-ts.4:
+  version "10.1.0-ts.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-10.1.0-ts.4.tgz#2f1836dc921afad67d6dd8fe7440066581e36808"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     cardinal "1.x"
     chalk "2.3.0"
-    cli-engine-config "4.3.0-ts.1"
-    cli-flags "1.0.18"
-    cli-ux "^2.0.7"
+    cli-engine-config "4.3.0-ts.4"
+    cli-flags "1.0.19"
+    cli-ux "^2.0.8"
     fs-extra "^5.0.0"
     http-call "^4.0.4"
     lodash.maxby "^4.6.0"
-    moment "^2.19.4"
+    moment "^2.20.0"
     string "3.x"
     supports-color "^5.1.0"
 
-cli-engine-config@4.3.0-ts.1:
-  version "4.3.0-ts.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.3.0-ts.1.tgz#39e226c1dacbca647c629d5b8a8188817343bec3"
+cli-engine-config@4.3.0-ts.4:
+  version "4.3.0-ts.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.3.0-ts.4.tgz#6f810f736f56188efae4234278940e85074a6f56"
   dependencies:
-    cli-flags "1.0.18"
+    cli-flags "1.0.19"
     debug "^3.1.0"
     fs-extra "^5.0.0"
     uuid "^3.1.0"
 
-cli-engine-config@4.3.0-ts.2:
-  version "4.3.0-ts.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-4.3.0-ts.2.tgz#59bc720244f5481f9539f62e25d72a99e0584640"
-  dependencies:
-    cli-flags "1.0.18"
-    debug "^3.1.0"
-    fs-extra "^5.0.0"
-    uuid "^3.1.0"
-
-cli-engine-heroku@6.1.0-ts.0:
-  version "6.1.0-ts.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-6.1.0-ts.0.tgz#0ef9a1549a902abbe3dfce223177cf043625b6e1"
+cli-engine-heroku@6.1.0-ts.1:
+  version "6.1.0-ts.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-6.1.0-ts.1.tgz#3a20bf2b947cde9355ad327a79c4a6c75ebe0c6a"
   dependencies:
     ansi-styles "3.2.0"
     chalk "2.3.0"
-    cli-engine-command "10.1.0-ts.2"
-    cli-engine-config "4.3.0-ts.1"
-    cli-ux "^2.0.7"
+    cli-engine-command "10.1.0-ts.4"
+    cli-engine-config "4.3.0-ts.4"
+    cli-ux "^2.0.8"
     heroku-client "^3.0.3"
     http-call "^4.0.4"
     lodash.flatten "4.4.0"
     netrc-parser "^2.0.3"
     supports-color "5.1.0"
 
-cli-flags@1.0.18:
-  version "1.0.18"
-  resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-1.0.18.tgz#632ca43cdc872f9031b1dbbce8e92216a35ab4d2"
+cli-flags@1.0.19:
+  version "1.0.19"
+  resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-1.0.19.tgz#19f117964bb4ff61d9376df7942aa1d99edd06cd"
   dependencies:
     chalk "^2.3.0"
-    cli-ux "^2.0.5"
+    cli-ux "^2.0.8"
     lodash "^4.17.4"
     ts-lodash "^4.0.6"
 
@@ -711,39 +702,22 @@ cli-truncate@^0.2.1:
     slice-ansi "0.0.4"
     string-width "^1.0.1"
 
-cli-ux@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.5.tgz#4484fafbdafc996bf8a81b157adc069e34a4f4ef"
+cli-ux@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.8.tgz#8cefd0e6d8aa9d7245fc21324287ff6fe3d7fa90"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     ansi-styles "^3.2.0"
     cardinal "^1.0.0"
-    chalk "^2.1.0"
-    fs-extra "^4.0.2"
+    chalk "^2.3.0"
+    fs-extra "^5.0.0"
     lodash "^4.17.4"
-    moment "^2.18.1"
+    moment "^2.20.0"
     password-prompt "^1.0.3"
     strip-ansi "^4.0.0"
-    supports-color "^4.4.0"
-    ts-lodash "^4.0.5"
-
-cli-ux@^2.0.7:
-  version "2.0.7"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.7.tgz#61ed276700a7fa90a4aa8456c2e28a944c91d268"
-  dependencies:
-    "@heroku/linewrap" "^1.0.0"
-    ansi-escapes "^3.0.0"
-    ansi-styles "^3.2.0"
-    cardinal "^1.0.0"
-    chalk "^2.1.0"
-    fs-extra "^4.0.2"
-    lodash "^4.17.4"
-    moment "^2.18.1"
-    password-prompt "^1.0.3"
-    strip-ansi "^4.0.0"
-    supports-color "^4.4.0"
-    ts-lodash "^4.0.5"
+    supports-color "^5.1.0"
+    ts-lodash "^4.0.6"
 
 cliui@^2.1.0:
   version "2.1.0"
@@ -2480,13 +2454,9 @@ mkdirp@0.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1:
   dependencies:
     minimist "0.0.8"
 
-moment@^2.18.1:
-  version "2.18.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.18.1.tgz#c36193dd3ce1c2eed2adb7c802dbbc77a81b1c0f"
-
-moment@^2.19.4:
-  version "2.19.4"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.19.4.tgz#17e5e2c6ead8819c8ecfad83a0acccb312e94682"
+moment@^2.20.0:
+  version "2.20.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.0.tgz#53396358994dd3a551e966a66af715ecb6c30ad0"
 
 ms@2.0.0:
   version "2.0.0"
@@ -3419,7 +3389,7 @@ supports-color@^3.1.2:
   dependencies:
     has-flag "^1.0.0"
 
-supports-color@^4.0.0, supports-color@^4.4.0:
+supports-color@^4.0.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.4.0.tgz#883f7ddabc165142b2a61427f3352ded195d1a3e"
   dependencies:
@@ -3550,12 +3520,6 @@ ts-jest@21.2.4:
 ts-lodash@4.0.6, ts-lodash@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.6.tgz#1166589945e8a980dc809b875c9d6b70aadd8537"
-  dependencies:
-    lodash "^4.17.4"
-
-ts-lodash@^4.0.5:
-  version "4.0.5"
-  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.5.tgz#1d0a74de2758df43a821d176e2cc85c50925ee67"
   dependencies:
     lodash "^4.17.4"
 
