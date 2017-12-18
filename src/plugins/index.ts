@@ -11,7 +11,6 @@ import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
 import { PluginCache } from './cache'
 import _ from 'ts-lodash'
-import * as path from 'path'
 
 export class Plugins extends PluginManager {
   public builtin: Builtin
@@ -30,6 +29,7 @@ export class Plugins extends PluginManager {
 
   public async update(): Promise<void> {
     await this.init()
+    await this.migrate()
     await this.user.update()
   }
 
@@ -74,7 +74,6 @@ export class Plugins extends PluginManager {
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
     await this.initSubmanagers()
-    await this.migrate()
     await this.saveCache()
     await this.saveManifest()
   }
@@ -173,17 +172,16 @@ export class Plugins extends PluginManager {
   }
 
   private async migrate() {
-    try {
-      if (!this.link || !this.manifest) return
-      const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
-      if (await deps.file.exists(linkedPath)) {
-        let linked = await deps.file.fetchJSONFile(linkedPath)
-        let promises = linked.plugins.map((l: string) => this.link.install(l))
-        for (let p of promises) await p
-        await deps.file.remove(linkedPath)
-      }
-    } catch (err) {
-      cli.warn(err)
+    if (this.user && this.link && this.manifest) {
+      const migrate = new deps.PluginsMigrate({
+        user: this.user,
+        link: this.link,
+        config: this.config,
+        manifest: this.manifest,
+      })
+      await migrate.migrate()
+      await this.saveCache()
+      await this.saveManifest()
     }
   }
 }

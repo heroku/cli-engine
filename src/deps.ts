@@ -26,6 +26,7 @@ import yarn = require('./plugins/yarn')
 import pluginManifest = require('./plugins/manifest')
 import pluginCache = require('./plugins/cache')
 import pluginLegacy = require('./plugins/legacy')
+import pluginsMigrate = require('./plugins/migrate')
 
 export default {
   // remote
@@ -58,6 +59,7 @@ export default {
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
   get PluginCache(): typeof pluginCache.PluginCache { return fetch('./plugins/cache').PluginCache },
   get PluginLegacy(): typeof pluginLegacy.PluginLegacy { return fetch('./plugins/legacy').PluginLegacy },
+  get PluginsMigrate(): typeof pluginsMigrate.PluginsMigrate { return fetch('./plugins/migrate').PluginsMigrate },
 }
 
 const cache: any = {}

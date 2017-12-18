@@ -57,7 +57,7 @@ export abstract class PluginManager {
       return m.topics().catch(err => cli.warn(err))
     })
     for (let p of promises) {
-      for (let t of Object.values(p)) {
+      for (let t of Object.values(await p)) {
         topics[t.name] = mergeTopics(topics[t.name], t)
       }
     }

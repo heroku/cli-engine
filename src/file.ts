@@ -1,3 +1,4 @@
+import { Stats } from 'fs'
 import * as fs from 'fs-extra'
 
 const debug = require('debug')('cli:file')
@@ -35,4 +36,9 @@ export async function readJSON(file: string) {
 export async function remove(file: string) {
   debug('remove', file)
   return fs.remove(file)
+}
+
+export async function stat(file: string): Promise<Stats> {
+  debug('stat', file)
+  return fs.stat(file)
 }

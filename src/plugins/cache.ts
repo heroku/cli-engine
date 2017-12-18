@@ -26,12 +26,16 @@ export class PluginCache {
 
   public needsSave: boolean = false
   private cache: CacheJSON
+  private mtime?: number
 
   public async save(): Promise<void> {
     await this.init()
     if (!this.needsSave) return
     this.needsSave = false
+    debug('saving')
+    await this.canWrite()
     await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
+    delete this._init
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
@@ -68,7 +72,6 @@ export class PluginCache {
         version: this.config.userAgent,
         plugins: {},
       }
-      if (!this.cache.plugins) this.cache.plugins = {}
     })())
   }
 
@@ -78,16 +81,34 @@ export class PluginCache {
 
   private async read(): Promise<CacheJSON | undefined> {
     try {
+      this.mtime = await this.getLastUpdated()
       let cache = await fs.readJSON(this.file)
       if (cache.version !== this.config.userAgent) {
         debug('cache version mismatch')
         return
       }
+      if (!cache.plugins) this.cache.plugins = {}
       return cache
     } catch (err) {
       if (err.code === 'ENOENT') {
         debug(err)
       } else throw err
+    }
+  }
+
+  private async canWrite() {
+    if (!this.mtime) return
+    if ((await this.getLastUpdated()) !== this.mtime) {
+      throw new Error('cache file modified, cannot save')
+    }
+  }
+
+  private async getLastUpdated(): Promise<number | undefined> {
+    try {
+      const stat = await deps.file.stat(this.file)
+      return stat.mtime.getTime()
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
     }
   }
 }

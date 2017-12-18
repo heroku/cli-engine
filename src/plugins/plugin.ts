@@ -72,12 +72,6 @@ export abstract class Plugin extends PluginManager {
     return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
   }
 
-  public validate() {
-    // if (!this.commandIDs.length) {
-    //   throw new Error(`${this.name} does not appear to be a ${this.config.bin} CLI plugin`)
-    // }
-  }
-
   public async aliases() {
     return deps.util.objValsToArrays(this.pjson['cli-engine'].aliases)
   }

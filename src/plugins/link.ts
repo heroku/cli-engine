@@ -24,8 +24,9 @@ export class LinkPlugins extends PluginManager {
   }
 
   public async install(root: string): Promise<void> {
+    this.debug('installing', root)
     const plugin = this.loadPlugin(root, true)
-    await plugin.validate()
+    await plugin.init()
     await this.manifest.add({ type: 'link', name: plugin.name, root, last_updated: new Date().toISOString() })
     await this.manifest.save()
   }

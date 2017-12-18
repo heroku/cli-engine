@@ -37,7 +37,7 @@ export class UserPlugins extends PluginManager {
     let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['add', `${name}@${tag}`])
     const plugin = this.loadPlugin(name, tag)
-    await plugin.validate()
+    await plugin.init()
     await this.manifest.add({ type: 'user', name, tag })
     await this.manifest.save()
     await downgrade()
@@ -60,7 +60,9 @@ export class UserPlugins extends PluginManager {
   private async refresh() {
     await this.createPJSON()
     if (this.manifest.nodeVersionChanged) {
+      const downgrade = await this.lock.upgrade()
       await this.yarn.exec()
+      await downgrade()
     }
   }
 
@@ -87,7 +89,7 @@ export class UserPlugins extends PluginManager {
 
   private async createPJSON() {
     if (!await deps.file.exists(this.pjsonPath)) {
-      await deps.file.outputJSON(this.pjsonPath, { private: true }, { spaces: 2 })
+      await deps.file.outputJSON(this.pjsonPath, { private: true, 'cli-engine': { schema: 1 } }, { spaces: 2 })
     }
   }
 }
