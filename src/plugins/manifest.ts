@@ -36,8 +36,8 @@ export class PluginManifest {
 
   public async save(): Promise<void> {
     if (!this.needsSave) return
-    await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
     this.needsSave = false
+    await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
   }
 
   public async list(type: 'user'): Promise<ManifestJSON['user']>
@@ -80,9 +80,6 @@ export class PluginManifest {
     if (this._init) return this._init
     return (this._init = (async () => {
       debug('init')
-      if (!await deps.file.exists(this.file)) {
-        await this.migrate()
-      }
       this.manifest = (await this.read()) || {
         version: 1,
         link: [],
@@ -109,14 +106,6 @@ export class PluginManifest {
       if (err.code === 'ENOENT') {
         debug(err)
       } else throw err
-    }
-  }
-
-  private async migrate() {
-    const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
-    if (await deps.file.exists(linkedPath)) {
-      let linked = deps.file.fetchJSONFile(linkedPath)
-      console.dir(linked)
     }
   }
 }

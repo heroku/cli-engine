@@ -31,3 +31,8 @@ export async function readJSON(file: string) {
   debug('readJSON', file)
   return fs.readJSON(file)
 }
+
+export async function remove(file: string) {
+  debug('remove', file)
+  return fs.remove(file)
+}

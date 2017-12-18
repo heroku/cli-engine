@@ -11,6 +11,7 @@ import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
 import { PluginCache } from './cache'
 import _ from 'ts-lodash'
+import * as path from 'path'
 
 export class Plugins extends PluginManager {
   public builtin: Builtin
@@ -72,6 +73,7 @@ export class Plugins extends PluginManager {
       }
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
+    await this.migrate()
   }
 
   public async findCommand(id: string, options: { must: true }): Promise<ICommand>
@@ -154,6 +156,21 @@ export class Plugins extends PluginManager {
   public async saveCache() {
     try {
       if (this.cache) this.cache.save()
+    } catch (err) {
+      cli.warn(err)
+    }
+  }
+
+  private async migrate() {
+    try {
+      if (!this.link || !this.manifest) return
+      const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
+      if (await deps.file.exists(linkedPath)) {
+        let linked = await deps.file.fetchJSONFile(linkedPath)
+        let promises = linked.plugins.map((l: string) => this.link.install(l))
+        for (let p of promises) await p
+        // await deps.file.remove(linkedPath)
+      }
     } catch (err) {
       cli.warn(err)
     }

@@ -54,10 +54,8 @@ export class PluginCache {
 
   public async reset(plugin: Plugin) {
     await this.init()
-    console.dir(cacheKey(plugin))
-    console.dir(this.cache.plugins[cacheKey(plugin)])
-    delete this.cache.plugins[cacheKey(plugin)]
-    console.dir(this.cache.plugins[cacheKey(plugin)])
+    const key = cacheKey(plugin)
+    delete this.cache.plugins[key]
     this.needsSave = true
   }
 
