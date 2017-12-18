@@ -11,7 +11,7 @@ export class Builtin extends Plugin {
   public version = require('../../package.json').version
   private commands: { [name: string]: string }
 
-  constructor({ config, cache }: { config: Config; cache: PluginCache }) {
+  constructor({ config, cache }: { config: Config; cache?: PluginCache }) {
     super({ config, cache, root: path.join(__dirname, '..', 'commands') })
 
     this.commands = {
