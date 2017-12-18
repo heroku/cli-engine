@@ -83,7 +83,7 @@ export class Plugins extends PluginManager {
     return cmd
   }
 
-  public async findCommandHelp(id: string): Promise<string | undefined> {
+  public async findCommandHelp(id: string, options: { save?: boolean } = {}): Promise<string | undefined> {
     const plugin = await this.findPluginWithCommandID(id)
     if (!plugin) return
     const fn = async () => {
@@ -93,21 +93,35 @@ export class Plugins extends PluginManager {
     }
     if (!this.cache) return fn()
     let help = await this.cache.fetch(plugin, `command:help:${id}`, fn)
-    await this.saveCache()
+    if (options.save || options.save === undefined) await this.saveCache()
     if (!color.supportsColor) help = deps.stripAnsi(help)
     return help
   }
 
-  public async findCommandsHelpLines(ids: string[]): Promise<[string, string | undefined][]> {
+  public async findCommandsHelpLines(
+    ids: string[],
+    options: { save?: boolean } = {},
+  ): Promise<[string, string | undefined][]> {
     ids.sort()
     let help = await Promise.all(ids.map(id => this.findCommandHelpLine(id)))
-    await this.saveCache()
+    if (options.save || options.save === undefined) await this.saveCache()
     return _.compact(help)
+  }
+
+  public async warmCache() {
+    cli.action.start('Warming cache')
+    await this.init()
+    if (!this.cache) return cli.warn('cache disabled')
+    const ids = await this.commandIDs()
+    await this.findCommandsHelpLines(ids, { save: false })
+    for (let p of ids.map(id => this.findCommandHelp(id, { save: false }))) await p
+    await this.cache.save()
+    cli.action.stop()
   }
 
   private async findCommandHelpLine(id: string): Promise<[string, string | undefined] | null> {
     const plugin = await this.findPluginWithCommandID(id)
-    if (!plugin) throw new Error('command not found')
+    if (!plugin) throw new Error(`command ${id} not found`)
     const fn = async () => {
       const c = await plugin.findCommand(id)
       if (!c) throw new Error('command not found')
@@ -133,7 +147,8 @@ export class Plugins extends PluginManager {
   public async plugins(): Promise<Plugin[]> {
     await this.init()
     const managers = _.compact([this.link, this.user, this.core])
-    return managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
+    const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
+    return [...plugins, this.builtin]
   }
 
   public async saveCache() {

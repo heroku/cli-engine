@@ -1,18 +1,22 @@
+import { PluginCache } from './cache'
+import { Plugin, PluginType } from './plugin'
 import { Config } from 'cli-engine-config'
-import { PluginManager, Topics } from './manager'
+import { Topics } from './manager'
 import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
 
-// const debug = require('debug')('cli:plugins:builtin')
-
-export class Builtin extends PluginManager {
+export class Builtin extends Plugin {
+  public type: PluginType = 'builtin'
+  public name = 'builtin'
+  public version = require('../../package.json').version
   private commands: { [name: string]: string }
 
-  constructor({ config }: { config: Config }) {
-    super({ config })
+  constructor({ config, cache }: { config: Config; cache: PluginCache }) {
+    super({ config, cache, root: path.join(__dirname, '..', 'commands') })
 
     this.commands = {
       commands: 'commands',
+      'cache:warm': 'cache/warm',
       help: 'help',
       update: 'update',
       version: 'version',
@@ -30,6 +34,8 @@ export class Builtin extends PluginManager {
       }
     }
   }
+
+  public async init() {}
 
   public async commandIDs() {
     return Object.keys(this.commands)
@@ -56,14 +62,13 @@ export class Builtin extends PluginManager {
   public async findCommand(id: string): Promise<ICommand | undefined> {
     let p = this.commands[id]
     if (p) {
-      p = path.join(__dirname, '..', 'commands', p)
+      p = path.join(this.root, p)
       return this.require(p, id)
     }
   }
 
   protected require(p: string, id: string): ICommand {
     let m = super.require(p, id)
-    m.plugin = { name: 'builtin', type: 'builtin', version: require('../../package.json').version, path: p }
-    return m
+    return this.addPluginToCommand(m)
   }
 }

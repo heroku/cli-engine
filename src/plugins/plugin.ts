@@ -5,7 +5,7 @@ import * as path from 'path'
 import { Lock } from '../lock'
 import { PluginCache } from './cache'
 
-export type PluginType = 'core' | 'user' | 'link'
+export type PluginType = 'builtin' | 'core' | 'user' | 'link'
 export type PluginOptions = {
   config: Config
   cache: PluginCache | undefined
@@ -113,19 +113,19 @@ export abstract class Plugin extends PluginManager {
     return this.require(p, id)
   }
 
-  private commandPath(id: string): string {
-    if (!this.commandsDir) throw new Error('commandsDir not set')
-    return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
-  }
-
-  private addPluginToCommand(cmd: ICommand): ICommand {
+  protected addPluginToCommand(cmd: ICommand): ICommand {
     cmd.plugin = {
       type: this.type,
-      path: this.root,
+      root: this.root,
       name: this.name,
       version: this.version,
     }
     return cmd
+  }
+
+  private commandPath(id: string): string {
+    if (!this.commandsDir) throw new Error('commandsDir not set')
+    return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
   }
 
   private _module: Promise<PluginModule | undefined>
