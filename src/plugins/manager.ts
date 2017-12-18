@@ -4,10 +4,9 @@ import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
 import { PluginTopic } from './plugin'
 import { inspect } from 'util'
 
-
 export type Topic = BaseTopic & { commands: string[] }
-export type Topics = {[from: string]: Topic}
-export type Aliases = {[from: string]: string[]}
+export type Topics = { [from: string]: Topic }
+export type Aliases = { [from: string]: string[] }
 
 function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
   return {
@@ -39,16 +38,15 @@ export abstract class PluginManager {
   private _initPromise: Promise<void>
   public init(): Promise<void> {
     if (this._initPromise) return this._initPromise
-    return this._initPromise = (async () => {
+    return (this._initPromise = (async () => {
       await this._init()
       await this.initSubmanagers()
-    })()
+    })())
   }
   protected async _init(): Promise<void> {}
 
-  protected async initSubmanagers () {
-    const promises = this.submanagers
-      .map(m => m.init().catch(err => cli.warn(err)))
+  protected async initSubmanagers() {
+    const promises = this.submanagers.map(m => m.init().catch(err => cli.warn(err)))
     for (let s of promises) await s
   }
 
@@ -102,8 +100,7 @@ export abstract class PluginManager {
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()
     for (let m of await this.submanagers) {
-      let cmd = await m.findCommand(await m.unalias(id))
-      .catch(err => cli.warn(err))
+      let cmd = await m.findCommand(await m.unalias(id)).catch(err => cli.warn(err))
       if (cmd) {
         this.debug(`found command ${cmd.id}`)
         return cmd

@@ -69,10 +69,7 @@ export abstract class Plugin extends PluginManager {
   }
 
   public async commandIDs() {
-    return deps.util.concatPromiseArrays([
-      this.commandIDsFromDir(),
-      this.fetchCommandIDsFromModule()
-    ])
+    return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
   }
 
   public validate() {
@@ -94,7 +91,7 @@ export abstract class Plugin extends PluginManager {
     }
   }
 
-  public async findCommandInModule (id: string) {
+  public async findCommandInModule(id: string) {
     const ids = await this.fetchCommandIDsFromModule()
     if (!ids.includes(id)) return
     const m = await this.fetchModule()
@@ -102,7 +99,7 @@ export abstract class Plugin extends PluginManager {
     return m.commands.find(c => c.id === id)
   }
 
-  public async findCommandInDir (id: string) {
+  public async findCommandInDir(id: string) {
     const dir = this.commandsDir
     if (!dir) return
     let p
@@ -112,7 +109,7 @@ export abstract class Plugin extends PluginManager {
       if (err.code === 'MODULE_NOT_FOUND') return
       throw err
     }
-    if (!(await deps.file.exists(p))) return
+    if (!await deps.file.exists(p)) return
     return this.require(p, id)
   }
 
@@ -134,7 +131,7 @@ export abstract class Plugin extends PluginManager {
   private _module: Promise<PluginModule | undefined>
   private async fetchModule(): Promise<PluginModule | undefined> {
     if (this._module) return this._module
-    return this._module = (async () => {
+    return (this._module = (async () => {
       if (!this.pjson.main) return
       this.debug(`requiring ${this.name}@${this.version}`)
 
@@ -153,7 +150,7 @@ export abstract class Plugin extends PluginManager {
       let legacy = new deps.PluginLegacy(this.config)
 
       return legacy.convert(m)
-    })()
+    })())
   }
 
   private async fetchCommandIDsFromModule(): Promise<string[]> {

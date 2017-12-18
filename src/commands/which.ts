@@ -12,7 +12,7 @@ export default class extends Command {
   async run() {
     this.plugins = new Plugins({ config: this.config })
     const id = this.argv[0]
-    const command = await this.plugins.findCommand(id, {must: true})
+    const command = await this.plugins.findCommand(id, { must: true })
     const plugin = command.plugin!
     cli.styledHeader(`Plugin ${plugin.name}`)
     cli.styledObject(plugin, ['version', 'type', 'path'])

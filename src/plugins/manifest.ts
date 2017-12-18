@@ -78,7 +78,7 @@ export class PluginManifest {
   private _init: Promise<void>
   public async init() {
     if (this._init) return this._init
-    return this._init = (async () => {
+    return (this._init = (async () => {
       debug('init')
       if (!await deps.file.exists(this.file)) {
         await this.migrate()
@@ -95,7 +95,7 @@ export class PluginManifest {
         this.manifest.node_version = process.versions.node
         this.needsSave = true
       }
-    })()
+    })())
   }
 
   private get file() {

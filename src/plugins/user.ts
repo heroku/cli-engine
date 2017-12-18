@@ -78,8 +78,12 @@ export class UserPlugins extends PluginManager {
     return path.join(this.userPluginsDir, 'node_modules', name)
   }
 
-  private get userPluginsDir () { return path.join(this.config.dataDir, 'plugins') }
-  private get pjsonPath () { return path.join(this.userPluginsDir, 'package.json') }
+  private get userPluginsDir() {
+    return path.join(this.config.dataDir, 'plugins')
+  }
+  private get pjsonPath() {
+    return path.join(this.userPluginsDir, 'package.json')
+  }
 
   private async createPJSON() {
     if (!await deps.file.exists(this.pjsonPath)) {

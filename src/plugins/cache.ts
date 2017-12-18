@@ -34,7 +34,7 @@ export class PluginCache {
     this.needsSave = false
   }
 
-  private fetchPromises: {[k: string]: Promise<any>} = {}
+  private fetchPromises: { [k: string]: Promise<any> } = {}
   public async fetch<T>(plugin: Plugin, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
     const key = cacheKey(plugin)
@@ -43,11 +43,13 @@ export class PluginCache {
       pluginCache = this.cache.plugins[key] = {} as CachePlugin
     }
     if (!pluginCache[prop]) {
-      this.fetchPromises[key] = this.fetchPromises[key] || (async () => {
-        debug('fetching', key, prop)
-        pluginCache[prop] = await fn()
-        this.needsSave = true
-      })()
+      this.fetchPromises[key] =
+        this.fetchPromises[key] ||
+        (async () => {
+          debug('fetching', key, prop)
+          pluginCache[prop] = await fn()
+          this.needsSave = true
+        })()
       await this.fetchPromises[key]
     }
     return pluginCache[prop]
@@ -65,14 +67,14 @@ export class PluginCache {
   private _init: Promise<void>
   private async init() {
     if (this._init) return this._init
-    return this._init = (async () => {
+    return (this._init = (async () => {
       debug('init')
       this.cache = (await this.read()) || {
         version: this.config.userAgent,
         plugins: {},
       }
       if (!this.cache.plugins) this.cache.plugins = {}
-    })()
+    })())
   }
 
   private get file() {

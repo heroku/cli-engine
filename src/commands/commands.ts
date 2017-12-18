@@ -30,7 +30,8 @@ export default class Commands extends Command {
     const topics = Object.values(await this.plugins.topics()).filter(t => !t.hidden)
     const commands = await Promise.all(ids.map(id => this.plugins.findCommand(id)))
     const outputCommands = commands
-      .filter(c => !!c).map(c => c!)
+      .filter(c => !!c)
+      .map(c => c!)
       .map(c => ({
         command: c.command,
         topic: c.topic,

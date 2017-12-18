@@ -1,4 +1,4 @@
-import {Config} from 'cli-engine-config'
+import { Config } from 'cli-engine-config'
 import { PluginManager, Topics } from './manager'
 import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
@@ -8,8 +8,8 @@ import { ICommand } from 'cli-engine-config'
 export class Builtin extends PluginManager {
   private commands: { [name: string]: string }
 
-  constructor ({config}: {config: Config}) {
-    super({config})
+  constructor({ config }: { config: Config }) {
+    super({ config })
 
     this.commands = {
       commands: 'commands',
@@ -37,11 +37,11 @@ export class Builtin extends PluginManager {
 
   public async aliases() {
     return {
-      'version': ['-v', '--version']
+      version: ['-v', '--version'],
     }
   }
 
-  public async topics (): Promise<Topics> {
+  public async topics(): Promise<Topics> {
     const topics: Topics = {}
     if (true || this.config.userPlugins) {
       topics['plugins'] = {
