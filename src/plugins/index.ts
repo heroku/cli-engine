@@ -73,7 +73,10 @@ export class Plugins extends PluginManager {
       }
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
+    await this.initSubmanagers()
     await this.migrate()
+    await this.saveCache()
+    await this.saveManifest()
   }
 
   public async findCommand(id: string, options: { must: true }): Promise<ICommand>
@@ -161,6 +164,14 @@ export class Plugins extends PluginManager {
     }
   }
 
+  public async saveManifest() {
+    try {
+      if (this.manifest) this.manifest.save()
+    } catch (err) {
+      cli.warn(err)
+    }
+  }
+
   private async migrate() {
     try {
       if (!this.link || !this.manifest) return
@@ -169,7 +180,7 @@ export class Plugins extends PluginManager {
         let linked = await deps.file.fetchJSONFile(linkedPath)
         let promises = linked.plugins.map((l: string) => this.link.install(l))
         for (let p of promises) await p
-        // await deps.file.remove(linkedPath)
+        await deps.file.remove(linkedPath)
       }
     } catch (err) {
       cli.warn(err)

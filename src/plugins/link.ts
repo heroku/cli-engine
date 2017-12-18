@@ -81,11 +81,8 @@ export class LinkPlugin extends Plugin {
   protected async refresh() {
     if (this.forceRefresh || (await this.updateNodeModulesNeeded())) {
       await this.updateNodeModules()
-      await this.prepare()
-      if (this.cache) this.cache.reset(this)
     } else if (await this.prepareNeeded()) {
       await this.prepare()
-      if (this.cache) this.cache.reset(this)
     }
   }
 
@@ -102,7 +99,7 @@ export class LinkPlugin extends Plugin {
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
     touch(path.join(this.root, 'node_modules'))
-    cli.action.stop()
+    await this.prepare()
   }
 
   private async prepareNeeded(): Promise<boolean> {
@@ -120,6 +117,7 @@ export class LinkPlugin extends Plugin {
     if (await this.manifestInfo()) {
       await this.manifest.update(this.root)
     }
+    if (this.cache) await this.cache.reset(this)
     cli.action.stop()
   }
 
