@@ -44,7 +44,7 @@ export class PluginCache {
     }
     if (!pluginCache[prop]) {
       this.fetchPromises[key] = this.fetchPromises[key] || (async () => {
-        debug('fetching', cacheKey(plugin), prop)
+        debug('fetching', key, prop)
         pluginCache[prop] = await fn()
         this.needsSave = true
       })()

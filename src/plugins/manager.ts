@@ -47,13 +47,17 @@ export abstract class PluginManager {
   protected async _init(): Promise<void> {}
 
   protected async initSubmanagers () {
-    await Promise.all(this.submanagers.map(m => m.init()))
+    const promises = this.submanagers
+      .map(m => m.init().catch(err => cli.warn(err)))
+    for (let s of promises) await s
   }
 
   public async topics(): Promise<Topics> {
     const topics: Topics = {}
     await this.init()
-    let promises = this.submanagers.map(m => m.topics())
+    let promises = this.submanagers.map(m => {
+      return m.topics().catch(err => cli.warn(err))
+    })
     for (let p of promises) {
       for (let t of Object.values(p)) {
         topics[t.name] = mergeTopics(topics[t.name], t)
@@ -73,7 +77,8 @@ export abstract class PluginManager {
 
   public async commandIDs(): Promise<string[]> {
     await this.init()
-    const ids = await deps.util.concatPromiseArrays(this.submanagers.map(r => r.commandIDs()))
+    const p = this.submanagers.map(s => s.commandIDs().catch(err => cli.warn(err)))
+    const ids = await deps.util.concatPromiseArrays(p)
     return ids.sort()
   }
 
@@ -98,6 +103,7 @@ export abstract class PluginManager {
     await this.init()
     for (let m of await this.submanagers) {
       let cmd = await m.findCommand(await m.unalias(id))
+      .catch(err => cli.warn(err))
       if (cmd) {
         this.debug(`found command ${cmd.id}`)
         return cmd
@@ -126,7 +132,7 @@ export abstract class PluginManager {
 
   private async unalias(id: string): Promise<string> {
     const aliases = Object.entries(await this.aliases())
-    const alias = Object.entries(aliases).find(([, aliases]) => aliases.includes(id))
+    const alias = aliases.find(([, aliases]) => aliases.includes(id))
     return alias ? alias[0] : id
   }
 

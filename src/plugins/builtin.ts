@@ -29,12 +29,16 @@ export class Builtin extends PluginManager {
         ...this.commands,
       }
     }
-
-    // this.aliases = this.config.aliases
   }
 
   public async commandIDs() {
     return Object.keys(this.commands)
+  }
+
+  public async aliases() {
+    return {
+      'version': ['-v', '--version']
+    }
   }
 
   public async topics (): Promise<Topics> {

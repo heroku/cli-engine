@@ -50,7 +50,7 @@ export class PluginManifest {
 
   public async add(opts: ManifestUserOpts | ManifestLinkOpts) {
     await this.init()
-    this.remove(opts.name)
+    await this.remove(opts.name)
     if (opts.type === 'user') {
       this.manifest.user.push({ name: opts.name, tag: opts.tag })
     } else {

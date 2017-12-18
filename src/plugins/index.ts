@@ -73,21 +73,11 @@ export class Plugins extends PluginManager {
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
   }
 
-  public async save() {
-    try {
-      if (!this.manifest) return
-      await this.manifest.save()
-      if (!this.cache) return
-      await this.cache.save()
-    } catch (err) {
-      cli.warn(err)
-    }
-  }
-
   public async findCommand(id: string, options: {must: true}): Promise<ICommand>
   public async findCommand(id: string, options?: {must?: boolean}): Promise<ICommand | undefined>
   public async findCommand(id: string, options: {must?: boolean} = {}): Promise<ICommand | undefined> {
     const cmd = await super.findCommand(id)
+    await this.saveCache()
     if (!cmd && options.must) throw new Error(`${id} not found`)
     return cmd
   }
@@ -100,5 +90,13 @@ export class Plugins extends PluginManager {
     await this.init()
     const managers = _.compact([this.link, this.user, this.core])
     return managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
+  }
+
+  public async saveCache () {
+    try {
+      if (this.cache) this.cache.save()
+    } catch (err) {
+      cli.warn(err)
+    }
   }
 }
