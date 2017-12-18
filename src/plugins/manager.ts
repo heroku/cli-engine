@@ -101,10 +101,7 @@ export abstract class PluginManager {
     await this.init()
     for (let m of await this.submanagers) {
       let cmd = await m.findCommand(await m.unalias(id)).catch(err => cli.warn(err))
-      if (cmd) {
-        this.debug(`found command ${cmd.id}`)
-        return cmd
-      }
+      if (cmd) return cmd
     }
   }
 

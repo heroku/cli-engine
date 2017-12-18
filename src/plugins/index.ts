@@ -92,13 +92,33 @@ export class Plugins extends PluginManager {
       return c.buildHelp(this.config)
     }
     if (!this.cache) return fn()
-    let help = await this.cache.fetch(plugin, `command:${id}`, fn)
+    let help = await this.cache.fetch(plugin, `command:help:${id}`, fn)
     await this.saveCache()
     if (!color.supportsColor) help = deps.stripAnsi(help)
     return help
   }
 
-  public async findPluginWithCommandID(id: string): Promise<Plugin | undefined> {
+  public async findCommandsHelpLines(ids: string[]): Promise<[string, string | undefined][]> {
+    ids.sort()
+    let help = await Promise.all(ids.map(id => this.findCommandHelpLine(id)))
+    await this.saveCache()
+    return _.compact(help)
+  }
+
+  private async findCommandHelpLine(id: string): Promise<[string, string | undefined] | null> {
+    const plugin = await this.findPluginWithCommandID(id)
+    if (!plugin) throw new Error('command not found')
+    const fn = async () => {
+      const c = await plugin.findCommand(id)
+      if (!c) throw new Error('command not found')
+      if (c.hidden) return null
+      return c.buildHelpLine(this.config)
+    }
+    if (!this.cache) return fn()
+    return this.cache.fetch(plugin, `command:helpline:${id}`, fn)
+  }
+
+  private async findPluginWithCommandID(id: string): Promise<Plugin | undefined> {
     const plugins = await this.plugins()
     for (let p of plugins) {
       const ids = await p.commandIDs()

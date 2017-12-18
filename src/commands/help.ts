@@ -2,22 +2,14 @@ import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
 import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
-import { Config, ICommand } from 'cli-engine-config'
 import { renderList } from 'cli-ux/lib/list'
 import { Plugins } from '../plugins'
 import deps from '../deps'
-import _ from 'ts-lodash'
 
 function topicSort(a: any, b: any) {
   if (a[0] < b[0]) return -1
   if (a[0] > b[0]) return 1
   return 0
-}
-
-function buildHelpLine(config: Config, c: ICommand): [string, string | undefined] {
-  if (c.buildHelpLine) return c.buildHelpLine(config)
-  let help = new deps.CLICommandHelp(config)
-  return help.commandLine(c)
 }
 
 export default class Help extends Command {
@@ -88,17 +80,16 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
   }
 
   private async listCommandsHelp(commandIDs: string[], topic?: string) {
-    let commands = await this.plugins.findCommands(commandIDs)
-    commands = commands.filter(c => !c.hidden)
-    if (commands.length === 0) return
-    _.sortBy(commands, 'id')
+    let helpLines = await this.plugins.findCommandsHelpLines(commandIDs)
+    // commands = commands.filter(c => !c.hidden)
+    if (helpLines.length === 0) return
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
       cli.log(`${this.config.bin} ${color.bold(topic)} commands: (get help with ${helpCmd})`)
     } else {
       cli.log('Root commands:')
     }
-    let helpLines = commands.map(c => buildHelpLine(this.config, c)).map(([a, b]) => [` ${a}`, b] as [string, string])
+    helpLines = helpLines.map(([a, b]) => [` ${a}`, b] as [string, string])
     cli.log(renderList(helpLines))
     cli.log()
   }

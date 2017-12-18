@@ -30,29 +30,26 @@ export class PluginCache {
   public async save(): Promise<void> {
     await this.init()
     if (!this.needsSave) return
-    await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
     this.needsSave = false
+    await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
   public async fetch<T>(plugin: Plugin, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
     const key = cacheKey(plugin)
-    let pluginCache = this.cache.plugins[key]
-    if (!pluginCache) {
-      pluginCache = this.cache.plugins[key] = {} as CachePlugin
-    }
-    if (!pluginCache[prop]) {
-      this.fetchPromises[key] =
-        this.fetchPromises[key] ||
-        (async () => {
-          debug('fetching', key, prop)
-          pluginCache[prop] = await fn()
-          this.needsSave = true
-        })()
-      await this.fetchPromises[key]
-    }
-    return pluginCache[prop]
+    if (this.fetchPromises[key + prop]) return this.fetchPromises[key + prop]
+    return (this.fetchPromises[key + prop] = (async () => {
+      if (!this.cache.plugins[key]) {
+        this.cache.plugins[key] = {} as CachePlugin
+      }
+      if (!(prop in this.cache.plugins[key])) {
+        debug('fetching', key, prop)
+        this.cache.plugins[key][prop] = await fn()
+        this.needsSave = true
+      }
+      return this.cache.plugins[key][prop]
+    })())
   }
 
   public async reset(plugin: Plugin) {
