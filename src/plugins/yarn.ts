@@ -88,7 +88,7 @@ export default class Yarn {
     args = [
       ...args,
       '--non-interactive',
-      '--link-duplicates',
+      // '--link-duplicates',
       `--preferred-cache-folder=${cacheDir}`,
       ...this.proxyArgs(),
     ]

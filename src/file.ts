@@ -33,6 +33,11 @@ export async function readJSON(file: string) {
   return fs.readJSON(file)
 }
 
+export async function read(file: string) {
+  debug('read', file)
+  return fs.readFile(file, 'utf8')
+}
+
 export async function remove(file: string) {
   debug('remove', file)
   return fs.remove(file)

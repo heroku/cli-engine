@@ -46,7 +46,8 @@ export abstract class PluginManager {
   protected async _init(): Promise<void> {}
 
   protected async initSubmanagers() {
-    const promises = this.submanagers.map(m => m.init().catch(err => cli.warn(err)))
+    const errHandle = (err: Error) => cli.warn(err, { context: `init: ${this.constructor.name}` })
+    const promises = this.submanagers.map(m => m.init().catch(errHandle))
     for (let s of promises) await s
   }
 
@@ -57,7 +58,7 @@ export abstract class PluginManager {
       return m.topics().catch(err => cli.warn(err))
     })
     for (let p of promises) {
-      for (let t of Object.values(await p)) {
+      for (let t of Object.values((await p) || {})) {
         topics[t.name] = mergeTopics(topics[t.name], t)
       }
     }
@@ -75,7 +76,8 @@ export abstract class PluginManager {
 
   public async commandIDs(): Promise<string[]> {
     await this.init()
-    const p = this.submanagers.map(s => s.commandIDs().catch(err => cli.warn(err)))
+    const errHandle = (err: Error) => cli.warn(err, { context: `commandIDs: ${this.constructor.name}` })
+    const p = this.submanagers.map(s => s.commandIDs().catch(errHandle))
     const ids = await deps.util.concatPromiseArrays(p)
     return ids.sort()
   }
@@ -100,7 +102,8 @@ export abstract class PluginManager {
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()
     for (let m of await this.submanagers) {
-      let cmd = await m.findCommand(await m.unalias(id)).catch(err => cli.warn(err))
+      const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
+      let cmd = await m.findCommand(await m.unalias(id)).catch(errHandle)
       if (cmd) return cmd
     }
   }

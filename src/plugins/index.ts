@@ -74,8 +74,7 @@ export class Plugins extends PluginManager {
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
     await this.initSubmanagers()
-    await this.saveCache()
-    await this.saveManifest()
+    await this.save()
   }
 
   public async findCommand(id: string, options: { must: true }): Promise<ICommand>
@@ -186,8 +185,7 @@ export class Plugins extends PluginManager {
         manifest: this.manifest,
       })
       await migrate.migrate()
-      await this.saveCache()
-      await this.saveManifest()
+      await this.save()
     }
   }
 }

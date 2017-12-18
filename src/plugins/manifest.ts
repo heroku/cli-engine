@@ -1,3 +1,4 @@
+import { Lock } from '../lock'
 import deps from '../deps'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
@@ -28,20 +29,29 @@ export type ManifestJSON = {
 export class PluginManifest {
   constructor(config: Config) {
     this.config = config
+    this.lock = new Lock(this.config, `${this.file}.lock`)
   }
 
   public config: Config
   public nodeVersionChanged: boolean = false
   public needsSave: boolean = false
   public mtime?: number
+  public lock: Lock
 
+  private saving: Promise<void>
   public async save(): Promise<void> {
     if (!this.needsSave) return
     this.needsSave = false
-    debug('saving')
-    await this.canWrite()
-    await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
-    delete this._init
+    return (this.saving = (async () => {
+      const downgrade = await this.lock.upgrade()
+      debug('saving')
+      if (!await this.canWrite()) {
+        throw new Error('manifest file modified, cannot save')
+      }
+      await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
+      delete this._init
+      await downgrade()
+    })())
   }
 
   public async list(type: 'user'): Promise<ManifestJSON['user']>
@@ -81,6 +91,7 @@ export class PluginManifest {
   private manifest: ManifestJSON
   private _init: Promise<void>
   public async init() {
+    await this.saving
     if (this._init) return this._init
     return (this._init = (async () => {
       debug('init')
@@ -110,15 +121,15 @@ export class PluginManifest {
     } catch (err) {
       if (err.code === 'ENOENT') {
         debug(err)
-      } else throw err
+      } else {
+        throw err
+      }
     }
   }
 
   private async canWrite() {
-    if (!this.mtime) return
-    if ((await this.getLastUpdated()) !== this.mtime) {
-      throw new Error('manifest file modified, cannot save')
-    }
+    if (!this.mtime) return true
+    return (await this.getLastUpdated()) === this.mtime
   }
 
   private async getLastUpdated(): Promise<number | undefined> {

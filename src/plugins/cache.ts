@@ -28,14 +28,18 @@ export class PluginCache {
   private cache: CacheJSON
   private mtime?: number
 
+  private saving?: Promise<void>
   public async save(): Promise<void> {
     await this.init()
     if (!this.needsSave) return
     this.needsSave = false
-    debug('saving')
-    await this.canWrite()
-    await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
-    delete this._init
+    this.saving = (async () => {
+      debug('saving')
+      if (!await this.canWrite()) {
+        throw new Error('cache file modified, cannot save')
+      }
+      await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
+    })()
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
@@ -65,6 +69,7 @@ export class PluginCache {
 
   private _init: Promise<void>
   private async init() {
+    await this.saving
     if (this._init) return this._init
     return (this._init = (async () => {
       debug('init')
@@ -97,10 +102,8 @@ export class PluginCache {
   }
 
   private async canWrite() {
-    if (!this.mtime) return
-    if ((await this.getLastUpdated()) !== this.mtime) {
-      throw new Error('cache file modified, cannot save')
-    }
+    if (!this.mtime) return true
+    return (await this.getLastUpdated()) === this.mtime
   }
 
   private async getLastUpdated(): Promise<number | undefined> {

@@ -74,7 +74,7 @@ export default class Help extends Command {
     // header
     cli.log(`${color.bold('Usage:')} ${this.config.bin} ${idPrefix}COMMAND
 
-Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details:`)
+Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
 
     // display topics
     cli.log(renderList(topics))
@@ -89,9 +89,9 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
     if (helpLines.length === 0) return
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
-      cli.log(`${this.config.bin} ${color.bold(topic)} commands: (get help with ${helpCmd})`)
+      cli.log(`${this.config.bin} ${color.bold(topic)} commands: (get help with ${helpCmd})\n`)
     } else {
-      cli.log('Root commands:')
+      cli.log('Root commands:\n')
     }
     helpLines = helpLines.map(([a, b]) => [` ${a}`, b] as [string, string])
     cli.log(renderList(helpLines))
