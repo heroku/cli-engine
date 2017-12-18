@@ -43,6 +43,7 @@ export class Builtin extends Plugin {
 
   public async aliases() {
     return {
+      'plugins:uninstall': ['plugins:unlink'],
       version: ['-v', '--version'],
     }
   }
