@@ -65,15 +65,20 @@ export abstract class PluginManager {
     return _.uniq(ids.concat(...this.submanagers.map(s => s.commandIDs)).sort())
   }
 
-  public async findCommand(id: string): Promise<ICommand | undefined> {
-    if (!this.commandIDs.includes(id)) return
-    let cmd = await this._findCommand(await this.unalias(id))
-    if (cmd) return cmd
-    for (let m of await this.submanagers) {
-      const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
-      let cmd = await m.findCommand(id).catch(errHandle)
+  private _commandFinders: { [k: string]: Promise<ICommand | undefined> } = {}
+  public findCommand(id: string): Promise<ICommand | undefined> {
+    if (this._commandFinders[id]) return this._commandFinders[id]
+    return (this._commandFinders[id] = (async () => {
+      if (!this.commandIDs.includes(id)) return
+      let cmd = await this._findCommand(await this.unalias(id))
       if (cmd) return cmd
-    }
+      const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
+      const promises = this.submanagers.map(s => s.findCommand(id).catch(errHandle))
+      for (let p of promises) {
+        let cmd = await p
+        if (cmd) return cmd
+      }
+    })())
   }
 
   public async findCommandInfo(id: string): Promise<CommandInfo | undefined> {
