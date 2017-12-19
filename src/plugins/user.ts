@@ -27,6 +27,16 @@ export class UserPlugins extends PluginManager {
     await this.manifest.remove(name)
   }
 
+  protected async _needsRefresh() {
+    if (this.manifest.nodeVersionChanged) return true
+    return super._needsRefresh()
+  }
+
+  protected async _refresh() {
+    await this.yarn.exec()
+    for (let p of this.plugins.map(p => p.resetCache())) await p
+  }
+
   protected async _init() {
     this.debug('init')
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
@@ -78,5 +88,9 @@ export class UserPlugin extends Plugin {
   constructor(opts: UserPluginOptions) {
     super(opts)
     this.tag = opts.tag || 'latest'
+  }
+
+  public async resetCache() {
+    await this.cache.reset(this.cacheKey)
   }
 }
