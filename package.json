@@ -23,7 +23,6 @@
     "log-chopper": "^1.0.1",
     "moment": "^2.20.1",
     "netrc-parser": "^2.0.3",
-    "node-gyp": "3.x",
     "rwlockfile": "^1.4.10",
     "semver": "5.4.1",
     "string": "3.x",
