@@ -319,7 +319,7 @@ export class Updater {
     let body
     if (this.config.windows) {
       body = `@echo off
-"%~dp0\\..${manifest.version}\\heroku.cmd" %*
+"%~dp0\\..\\${manifest.version}\\bin\\heroku.cmd" %*
 `
     } else {
       body = `#!/usr/bin/env bash
