@@ -52,7 +52,8 @@ export class Updater {
     return path.join(this.config.dataDir, 'client')
   }
   private get clientBin(): string {
-    return path.join(this.clientRoot, 'bin', this.config.bin)
+    let b = path.join(this.clientRoot, 'bin', this.config.bin)
+    return this.config.windows ? `${b}.cmd` : b
   }
 
   private _binPath: Promise<string | undefined>
