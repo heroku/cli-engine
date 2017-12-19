@@ -1,3 +1,3 @@
 module.exports = () => {
-  process.env.RAN_HOOK = 1
+  process.env.RAN_HOOK = '1'
 }
