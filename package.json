@@ -74,10 +74,13 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
+    "clean": "del-cli lib",
     "posttest": "prettier -l 'src/**/*.ts'",
     "precommit": "lint-staged",
-    "prepare": "del-cli lib && tsc && del-cli \"lib/**/*.test.+(d.ts|js)\"",
+    "prepare": "tsc",
+    "prepublishOnly": "yarn run clean && yarn run prepare && yarn run prune",
     "pretest": "tsc",
+    "prune": "del-cli \"lib/**/*\\.test\\.(d.ts|js)\"",
     "test": "jest"
   },
   "types": "lib/cli.d.ts"
