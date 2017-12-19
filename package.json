@@ -7,9 +7,6 @@
   "dependencies": {
     "@heroku/linewrap": "^1.0.0",
     "ansi-escapes": "^3.0.0",
-    "cli-engine-command": "10.1.0-ts.4",
-    "cli-engine-config": "4.3.0-ts.4",
-    "cli-engine-heroku": "6.1.0-ts.1",
     "cli-ux": "^2.0.9",
     "cross-spawn": "5.1.0",
     "debug": "^3.1.0",
@@ -48,6 +45,9 @@
     "@types/semver": "5.4.0",
     "@types/strip-ansi": "3.0.0",
     "@types/supports-color": "3.1.0",
+    "cli-engine-command": "10.1.0-ts.4",
+    "cli-engine-config": "4.3.0-ts.4",
+    "cli-engine-heroku": "6.1.0-ts.1",
     "del-cli": "1.1.0",
     "execa": "^0.8.0",
     "husky": "^0.14.3",
@@ -72,6 +72,11 @@
   ],
   "license": "ISC",
   "main": "lib/cli.js",
+  "peerDependencies": {
+    "cli-engine-command": "^11.0.0",
+    "cli-engine-config": "^5.0.0",
+    "cli-engine-heroku": "^6.0.0"
+  },
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
     "clean": "del-cli lib",
