@@ -81,16 +81,23 @@ export class LinkPlugin extends Plugin {
     this.forceRefresh = opts.forceRefresh
   }
 
-  public async refresh() {
+  protected async resetCache() {
+    await super.resetCache()
+    const plugin = await this.manifestInfo()
+    if (plugin) await this.manifest.update('link', plugin.name)
+  }
+
+  protected async _refresh() {
     let type = await this.refreshType()
-    if (!type) return
-    this.debug('refreshing', type)
     switch (type) {
       case 'node_modules':
-        return this.updateNodeModules()
+        await this.updateNodeModules()
+        break
       case 'prepare':
-        return this.prepare()
+        await this.prepare()
+        break
     }
+    await super._refresh()
   }
 
   protected async _needsRefresh() {
@@ -105,6 +112,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
+    this.debug('update node modules')
     let modules = path.join(this.root, 'node_modules')
     if (!await deps.file.exists(modules)) return true
     let modulesInfo = await fs.stat(modules)
@@ -126,6 +134,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async prepare() {
+    this.debug('prepare')
     const { scripts } = this.pjson
     if (!scripts || !scripts.prepare) return
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
@@ -143,11 +152,5 @@ export class LinkPlugin extends Plugin {
     const plugins = await this.manifest.list('link')
     const plugin = plugins.find(p => p.root === this.root)
     return plugin
-  }
-
-  private async resetCache() {
-    await this.cache.reset(this.cacheKey)
-    const plugin = await this.manifestInfo()
-    if (plugin) await this.manifest.update('link', plugin.name)
   }
 }

@@ -63,6 +63,14 @@ export abstract class Plugin extends PluginManager {
     }
   }
 
+  protected async _refresh() {
+    await this.resetCache()
+  }
+
+  protected async _needsRefresh() {
+    return !await this.cache.get(this.cacheKey, 'topics')
+  }
+
   protected _commandIDs() {
     return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
   }
@@ -92,6 +100,10 @@ export abstract class Plugin extends PluginManager {
 
   protected async _topics() {
     return Topic.mergeSubtopics(await this.fetchTopicsFromModule())
+  }
+
+  protected async resetCache() {
+    await this.cache.reset(this.cacheKey)
   }
 
   private async findCommandInModule(id: string) {

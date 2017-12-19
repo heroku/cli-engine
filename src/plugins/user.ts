@@ -34,7 +34,7 @@ export class UserPlugins extends PluginManager {
 
   protected async _refresh() {
     await this.yarn.exec()
-    for (let p of this.plugins.map(p => p.resetCache())) await p
+    for (let p of this.plugins.map(p => p.refresh())) await p
   }
 
   protected async _init() {
@@ -88,9 +88,5 @@ export class UserPlugin extends Plugin {
   constructor(opts: UserPluginOptions) {
     super(opts)
     this.tag = opts.tag || 'latest'
-  }
-
-  public async resetCache() {
-    await this.cache.reset(this.cacheKey)
   }
 }
