@@ -73,13 +73,22 @@ export class Plugins extends PluginManager {
       } else throw new Error(`${name} is not installed`)
     }
     await this.manifest.remove(name)
-    await this.manifest.save()
+    await this.save()
     if (type === 'user') await this.user.uninstall(name)
     await downgrade()
   }
 
   public async init() {
     await super.init()
+    if (await this.needsRefresh) {
+      let downgrade = await this.lock.upgrade()
+      cli.action.start('Refreshing plugins')
+      await this.refresh()
+      await this.load
+      await this.save()
+      cli.action.stop()
+      await downgrade()
+    }
     await this.load
   }
 
@@ -101,16 +110,6 @@ export class Plugins extends PluginManager {
       }
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
-  }
-
-  protected async _load() {
-    if (!await this.needsRefresh) return
-    let downgrade = await this.lock.upgrade()
-    cli.action.start('Refreshing plugins')
-    await this.refresh()
-    await this.save()
-    cli.action.stop()
-    await downgrade()
   }
 
   public async findCommand(id: string, options: { must: true }): Promise<ICommand>

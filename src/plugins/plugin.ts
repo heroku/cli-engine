@@ -2,6 +2,7 @@ import deps from '../deps'
 import { Topic, Topics } from './topic'
 import { PluginManager, PluginManagerOptions } from './manager'
 import { ICommand } from 'cli-engine-config'
+import { PluginManifest } from './manifest'
 import * as path from 'path'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
@@ -10,6 +11,7 @@ export type PluginOptions = PluginManagerOptions & {
   root: string
   version: string
   type: PluginType
+  manifest: PluginManifest
   pjson?: PluginPJSON
 }
 

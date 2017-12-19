@@ -45,6 +45,7 @@ export class UserPlugins extends PluginManager {
       config: this.config,
       cache: this.cache,
       version: pjson.version,
+      manifest: this.manifest,
     })
   }
 

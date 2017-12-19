@@ -1,4 +1,3 @@
-import { cli } from 'cli-ux'
 import { Plugin, PluginPJSON, PluginOptions, PluginType } from './plugin'
 import * as path from 'path'
 import * as fs from 'fs-extra'
@@ -64,6 +63,7 @@ export class LinkPlugins extends PluginManager {
       type: 'link',
       config: this.config,
       forceRefresh,
+      manifest: this.manifest,
       root,
       version: pjson.version,
       pjson,
@@ -82,7 +82,10 @@ export class LinkPlugin extends Plugin {
   }
 
   public async refresh() {
-    switch (await this.refreshType()) {
+    let type = await this.refreshType()
+    if (!type) return
+    this.debug('refreshing', type)
+    switch (type) {
       case 'node_modules':
         return this.updateNodeModules()
       case 'prepare':
@@ -131,12 +134,20 @@ export class LinkPlugin extends Plugin {
   }
 
   private async lastUpdated(): Promise<Date> {
-    const s = await this.cache.get(this.cacheKey, 'last_updated')
-    return new Date(s || 0)
+    const plugin = await this.manifestInfo()
+    if (!plugin) return new Date(0)
+    return plugin.lastUpdated
+  }
+
+  private async manifestInfo() {
+    const plugins = await this.manifest.list('link')
+    const plugin = plugins.find(p => p.root === this.root)
+    return plugin
   }
 
   private async resetCache() {
     await this.cache.reset(this.cacheKey)
-    await this.cache.set(this.cacheKey, 'last_updated', new Date().toISOString())
+    const plugin = await this.manifestInfo()
+    if (plugin) await this.manifest.update('link', plugin.name)
   }
 }

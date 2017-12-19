@@ -34,6 +34,7 @@ export type ManifestJSON = {
   link: {
     name: string
     root: string
+    lastUpdated: string
   }[]
 }
 
@@ -66,7 +67,10 @@ export class PluginManifest {
   public async list(type: 'user' | 'link'): Promise<any> {
     await this.init()
     if (type === 'user') return this.manifest.user
-    return this.manifest.link
+    return this.manifest.link.map(l => ({
+      ...l,
+      lastUpdated: new Date(l.lastUpdated),
+    }))
   }
 
   public async add(opts: ManifestUserOpts | ManifestLinkOpts) {
@@ -75,7 +79,7 @@ export class PluginManifest {
     if (opts.type === 'user') {
       this.manifest.user.push({ name: opts.name, tag: opts.tag })
     } else {
-      this.manifest.link.push({ name: opts.name, root: opts.root })
+      this.manifest.link.push({ name: opts.name, root: opts.root, lastUpdated: new Date().toISOString() })
     }
     this.needsSave = true
   }
@@ -87,11 +91,13 @@ export class PluginManifest {
     this.needsSave = true
   }
 
-  public async update(name: string) {
+  public async update(type: 'link', name: string) {
     await this.init()
-    let p = this.manifest.link.find(p => [p.name, p.root].includes(name))
-    if (!p) throw new Error(`${name} not found in manifest`)
-    this.needsSave = true
+    if (type === 'link') {
+      let link = this.manifest.link.find(p => [p.name, p.root].includes(name))
+      if (!link) throw new Error(`${name} not found`)
+      await this.add({ type, name: link.name, root: link.root })
+    }
   }
 
   private manifest: ManifestJSON

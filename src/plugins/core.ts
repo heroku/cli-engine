@@ -17,6 +17,7 @@ export class CorePlugins extends PluginManager {
       type: 'core',
       config: this.config,
       cache: this.cache,
+      manifest: this.manifest,
       root: this.root(name),
       version: pjson.version,
       pjson,
