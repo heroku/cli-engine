@@ -48,6 +48,7 @@ export abstract class Plugin extends PluginManager {
 
   constructor(options: PluginOptions) {
     super(options)
+    if (options.pjson) this.pjson = options.pjson
     this.root = options.root
     this.cacheKey = [options.name, options.type, options.version].join(':')
     this.debug = require('debug')(`cli:plugins:${this.cacheKey}`)

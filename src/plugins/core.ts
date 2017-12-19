@@ -1,5 +1,5 @@
 import deps from '../deps'
-import { Plugin, PluginType } from './plugin'
+import { Plugin, PluginType, PluginOptions, PluginPJSON } from './plugin'
 import { PluginManager } from './manager'
 import * as path from 'path'
 
@@ -31,4 +31,9 @@ export class CorePlugins extends PluginManager {
 
 export class CorePlugin extends Plugin {
   public type: PluginType = 'core'
+  public pjson: PluginPJSON
+
+  constructor(options: PluginOptions & { pjson: PluginPJSON }) {
+    super(options)
+  }
 }
