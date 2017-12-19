@@ -84,6 +84,7 @@ export abstract class Plugin extends PluginManager {
   }
 
   public async aliases() {
+    await this.init()
     return deps.util.objValsToArrays(this.pjson['cli-engine'].aliases)
   }
 
