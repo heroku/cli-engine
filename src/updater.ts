@@ -44,11 +44,27 @@ export class Updater {
   get autoupdatelogfile(): string {
     return path.join(this.config.cacheDir, 'autoupdate.log')
   }
-  get binPath(): string | undefined {
-    return this.config.reexecBin || this.config.bin
-  }
   get versionFile(): string {
     return path.join(this.config.cacheDir, `${this.config.channel}.version`)
+  }
+
+  private get clientRoot(): string {
+    return path.join(this.config.dataDir, 'client')
+  }
+  private get clientBin(): string {
+    return path.join(this.clientRoot, 'bin', this.config.bin)
+  }
+
+  private _binPath: Promise<string | undefined>
+  private get binPath(): Promise<string | undefined> {
+    if (!this._binPath)
+      this._binPath = (async () => {
+        if (!this.config.updateDisabled && (await deps.file.exists(this.clientBin))) {
+          return this.clientBin
+        }
+        return this.config.reexecBin || this.config.bin
+      })()
+    return this._binPath
   }
 
   s3url(channel: string, p: string): string {
@@ -100,10 +116,9 @@ export class Updater {
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let { response: stream } = await deps.HTTP.stream(url)
 
-    let clientRoot = path.join(this.config.dataDir, 'client')
-    let output = path.join(clientRoot, manifest.version)
+    let output = path.join(this.clientRoot, manifest.version)
 
-    await this._mkdirp(clientRoot)
+    await this._mkdirp(this.clientRoot)
     await this._remove(output)
 
     if ((<any>cli.action).frames) {
@@ -124,8 +139,8 @@ export class Updater {
       })
     }
 
-    await this.extract(stream, clientRoot, manifest.sha256gz)
-    await this._rename(path.join(clientRoot, base), output)
+    await this.extract(stream, this.clientRoot, manifest.sha256gz)
+    await this._rename(path.join(this.clientRoot, base), output)
 
     await this._createBin(path.join(output, 'bin', this.config.bin), manifest)
     await downgrade()
@@ -229,7 +244,7 @@ export class Updater {
       debug('autoupdate running')
       await fs.outputFile(this.autoupdatefile, '')
 
-      const binPath = this.binPath
+      const binPath = await this.binPath
       if (!binPath) {
         debug('no binpath set')
         return
@@ -299,7 +314,8 @@ export class Updater {
   }
 
   private async _createBin(dst: string, manifest: Manifest) {
-    let src = path.join(this.config.dataDir, 'client', 'bin', this.config.bin)
+    await this._remove(this.clientRoot)
+    let src = this.clientBin
     let body
     if (this.config.windows) {
       body = `@echo off

@@ -112,7 +112,6 @@ export class LinkPlugin extends Plugin {
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
-    this.debug('update node modules')
     let modules = path.join(this.root, 'node_modules')
     if (!await deps.file.exists(modules)) return true
     let modulesInfo = await fs.stat(modules)
@@ -127,6 +126,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async updateNodeModules(): Promise<void> {
+    this.debug('update node modules')
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
     touch(path.join(this.root, 'node_modules'))
