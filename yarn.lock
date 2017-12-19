@@ -1617,6 +1617,16 @@ http-call@^4.0.4:
     is-stream "^1.1.0"
     tunnel-agent "^0.6.0"
 
+http-call@^4.0.5:
+  version "4.0.5"
+  resolved "https://registry.yarnpkg.com/http-call/-/http-call-4.0.5.tgz#1d95c1827e4b288b1ae1ebbbb6df82af5a205380"
+  dependencies:
+    content-type "1.0.4"
+    debug "^3.1.0"
+    is-retry-allowed "^1.1.0"
+    is-stream "^1.1.0"
+    tunnel-agent "^0.6.0"
+
 http-signature@~1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/http-signature/-/http-signature-1.1.1.tgz#df72e267066cd0ac67fb76adf8e134a8fbcf91bf"
