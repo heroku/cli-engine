@@ -44,7 +44,6 @@ export class UserPlugins extends PluginManager {
       root: this.userPluginPath(name),
       config: this.config,
       cache: this.cache,
-      lock: this.lock,
       version: pjson.version,
     })
   }

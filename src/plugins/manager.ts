@@ -3,7 +3,6 @@ import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
 import { Config, ICommand } from 'cli-engine-config'
 import { inspect } from 'util'
-import { Lock } from '../lock'
 import { PluginManifest } from './manifest'
 import { PluginCache } from './cache'
 import { Topic, Topics, Commands, CommandInfo } from './topic'
@@ -13,7 +12,6 @@ export type Aliases = { [from: string]: string[] }
 
 export interface PluginManagerOptions {
   config: Config
-  lock: Lock
   cache?: PluginCache
   manifest?: PluginManifest
 }
@@ -28,12 +26,10 @@ export abstract class PluginManager {
   protected manifest: PluginManifest
   protected cache: PluginCache
   protected cacheKey: string
-  protected lock: Lock
 
   constructor(opts: PluginManagerOptions) {
     this.cacheKey = 'plugins'
     this.config = opts.config
-    this.lock = opts.lock
     this.manifest = opts.manifest || new deps.PluginManifest(this.config)
     this.cache = opts.cache || new deps.PluginCache(this.config)
   }
@@ -43,21 +39,60 @@ export abstract class PluginManager {
     if (this._initPromise) return this._initPromise
     return (this._initPromise = (async () => {
       await this._init()
-      await this.load()
+      await this.initSubmanagers()
     })())
   }
+
+  private _needsRefreshPromise: Promise<boolean>
+  public get needsRefresh(): Promise<boolean> {
+    if (this._needsRefreshPromise) return this._needsRefreshPromise
+    return (this._needsRefreshPromise = (async () => {
+      if (await this._needsRefresh()) return true
+      const errHandle = (err: Error) => cli.warn(err, { context: `needsRefresh: ${this.constructor.name}` })
+      const promises = this.submanagers.map(m => m.needsRefresh.catch(errHandle))
+      for (let s of promises) if (await s) return true
+      return false
+    })())
+  }
+  protected async _needsRefresh(): Promise<boolean> {
+    return false
+  }
+
+  private _refreshPromise: Promise<void>
+  public refresh() {
+    if (this._refreshPromise) return this._refreshPromise
+    return (this._refreshPromise = (async () => {
+      await this._refresh()
+      const errHandle = (err: Error) => cli.warn(err, { context: `refresh: ${this.constructor.name}` })
+      const promises = this.submanagers.map(m => {
+        if (m.needsRefresh) return m.refresh().catch(errHandle)
+      })
+      for (let s of promises) await s
+    })())
+  }
+  protected async _refresh(): Promise<void> {}
 
   public findTopic(name: string): Topic | undefined {
     return Topic.findTopic(name, this.topics)
   }
 
-  protected async load() {
-    await this.initSubmanagers()
-    this.commandIDs = await this.fetchCommandIDs()
-    this.topics = await this.fetchTopics()
-    this.rootCommands = await this.fetchRootCommands()
-    this.aliases = await this.fetchAliases()
+  private _loadPromise?: Promise<void>
+  protected get load() {
+    if (!this._loadPromise) {
+      this._loadPromise = (async () => {
+        await this._load()
+        const errHandle = (err: Error) => cli.warn(err, { context: `load: ${this.constructor.name}` })
+        const promises = this.submanagers.map(m => m.load.catch(errHandle))
+        for (let s of promises) await s
+        this.commandIDs = await this.fetchCommandIDs()
+        this.topics = await this.fetchTopics()
+        this.rootCommands = await this.fetchRootCommands()
+        this.aliases = await this.fetchAliases()
+      })()
+    }
+    return this._loadPromise
   }
+  protected async _load() {}
 
   private async fetchCommandIDs(): Promise<string[]> {
     const fetch = () => this._commandIDs()
@@ -81,7 +116,7 @@ export abstract class PluginManager {
     })())
   }
 
-  public async findCommandInfo(id: string): Promise<CommandInfo | undefined> {
+  public findCommandInfo(id: string): CommandInfo | undefined {
     let cmd = this.rootCommands[id]
     if (cmd) return cmd
     let topic = Topic.findTopic(Topic.parentTopicIDof(id), this.topics)

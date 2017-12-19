@@ -18,7 +18,6 @@ export class CorePlugins extends PluginManager {
       config: this.config,
       cache: this.cache,
       root: this.root(name),
-      lock: this.lock,
       version: pjson.version,
       pjson,
     })

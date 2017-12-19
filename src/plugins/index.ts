@@ -10,6 +10,7 @@ import { Plugin, PluginType } from './plugin'
 import { PluginManager } from './manager'
 import _ from 'ts-lodash'
 import * as path from 'path'
+import { Lock } from '../lock'
 
 export type InstallOptions = LinkInstallOptions | UserInstallOptions
 export interface UserInstallOptions {
@@ -30,13 +31,14 @@ export class Plugins extends PluginManager {
   public user: UserPlugins
   public link: LinkPlugins
   protected debug = require('debug')('cli:plugins')
+  private lock: Lock
 
   constructor({ config }: { config: Config }) {
-    super({ config, lock: new deps.Lock(config, path.join(config.cacheDir, 'plugins.lock')) })
+    super({ config })
+    this.lock = new deps.Lock(config, path.join(config.cacheDir, 'plugins.lock'))
   }
 
   public async install(options: InstallOptions) {
-    if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
     let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
     if (!options.force && (await this.pluginType(name))) {
@@ -54,7 +56,6 @@ export class Plugins extends PluginManager {
   }
 
   public async update(): Promise<void> {
-    if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
     await this.migrate()
     await this.user.update()
@@ -63,7 +64,6 @@ export class Plugins extends PluginManager {
   }
 
   public async uninstall(name: string): Promise<void> {
-    if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
     const type = await this.pluginType(name)
     if (!type) {
@@ -76,6 +76,11 @@ export class Plugins extends PluginManager {
     await this.manifest.save()
     if (type === 'user') await this.user.uninstall(name)
     await downgrade()
+  }
+
+  public async init() {
+    await super.init()
+    await this.load
   }
 
   protected async _init() {
@@ -98,6 +103,16 @@ export class Plugins extends PluginManager {
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
   }
 
+  protected async _load() {
+    if (!await this.needsRefresh) return
+    let downgrade = await this.lock.upgrade()
+    cli.action.start('Refreshing plugins')
+    await this.refresh()
+    await this.save()
+    cli.action.stop()
+    await downgrade()
+  }
+
   public async findCommand(id: string, options: { must: true }): Promise<ICommand>
   public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
   public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
@@ -106,7 +121,7 @@ export class Plugins extends PluginManager {
     return cmd
   }
 
-  public async plugins(): Promise<Plugin[]> {
+  public get plugins(): Plugin[] {
     const managers = _.compact([this.link, this.user, this.core])
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
     return _.compact([...plugins, this.builtin])
@@ -134,9 +149,8 @@ export class Plugins extends PluginManager {
     return pjson.name
   }
 
-  private async pluginType(name: string): Promise<PluginType | undefined> {
-    const plugins = await this.plugins()
-    const plugin = plugins.find(p => p.name === name)
+  private pluginType(name: string): PluginType | undefined {
+    const plugin = this.plugins.find(p => p.name === name)
     return plugin && plugin.type
   }
 }

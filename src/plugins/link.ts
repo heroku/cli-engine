@@ -54,28 +54,6 @@ export class LinkPlugins extends PluginManager {
     const defs = await this.manifest.list('link')
     const promises = defs.map(p => this.loadPlugin(p.root))
     this.submanagers = this.plugins = await Promise.all(promises)
-    await this.refreshPlugins()
-  }
-
-  private async refreshPlugins() {
-    let toRefresh = []
-    for (let p of this.plugins) {
-      let refresh = await p.needsRefresh
-      if (refresh) toRefresh.push(p)
-    }
-    if (!toRefresh.length) return
-    const downgrade = await this.lock.upgrade()
-    for (let p of toRefresh.map(p => p.refresh())) {
-      toRefresh = toRefresh.filter(p => p.needsRefresh)
-      cli.action.start(
-        `Updating linked plugin${toRefresh.length > 1 ? 's' : ''}: ${toRefresh.map(p => p.root).join('\n')}`,
-      )
-      await p
-    }
-    cli.action.start('Updating linked plugins')
-    await this.cache.save()
-    await downgrade()
-    cli.action.stop()
   }
 
   private async loadPlugin(root: string, forceRefresh: boolean = false) {
@@ -86,7 +64,6 @@ export class LinkPlugins extends PluginManager {
       type: 'link',
       config: this.config,
       forceRefresh,
-      lock: this.lock,
       root,
       version: pjson.version,
       pjson,
@@ -96,26 +73,32 @@ export class LinkPlugins extends PluginManager {
 
 export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
-
-  public needsRefresh: Promise<'node_modules' | 'prepare' | undefined>
+  private forceRefresh: boolean
 
   constructor(opts: { pjson: any; forceRefresh: boolean } & PluginOptions) {
     super(opts)
     this.pjson = opts.pjson
-    this.needsRefresh = (async () => {
-      if (opts.forceRefresh) return 'node_modules'
-      if (await this.updateNodeModulesNeeded()) return 'node_modules'
-      if (await this.prepareNeeded()) return 'prepare'
-    })()
+    this.forceRefresh = opts.forceRefresh
   }
 
   public async refresh() {
-    switch (await this.needsRefresh) {
+    switch (await this.refreshType()) {
       case 'node_modules':
         return this.updateNodeModules()
       case 'prepare':
         return this.prepare()
     }
+  }
+
+  protected async _needsRefresh() {
+    if (await this.refreshType()) return true
+    return super._needsRefresh()
+  }
+
+  private async refreshType(): Promise<'node_modules' | 'prepare' | undefined> {
+    if (this.forceRefresh) return 'node_modules'
+    if (await this.updateNodeModulesNeeded()) return 'node_modules'
+    if (await this.prepareNeeded()) return 'prepare'
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
@@ -136,7 +119,7 @@ export class LinkPlugin extends Plugin {
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
     touch(path.join(this.root, 'node_modules'))
-    await this.saveCache()
+    await this.resetCache()
   }
 
   private async prepare() {
@@ -144,7 +127,7 @@ export class LinkPlugin extends Plugin {
     if (!scripts || !scripts.prepare) return
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec(['run', 'prepare'])
-    await this.saveCache()
+    await this.resetCache()
   }
 
   private async lastUpdated(): Promise<Date> {
@@ -152,11 +135,8 @@ export class LinkPlugin extends Plugin {
     return new Date(s || 0)
   }
 
-  private async saveCache() {
+  private async resetCache() {
     await this.cache.reset(this.cacheKey)
     await this.cache.set(this.cacheKey, 'last_updated', new Date().toISOString())
-    await this._init()
-    await this.load()
-    delete this.needsRefresh
   }
 }
