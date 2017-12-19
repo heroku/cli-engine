@@ -30,7 +30,7 @@ export class PluginsMigrate {
       debug('migrating link plugins')
       let linked = await deps.file.readJSON(linkedPath)
       for (let root of linked.plugins) {
-        const name = await deps.file.readJSON(path.join(linkedPath, 'package.json'))
+        const name = await deps.file.readJSON(path.join(root, 'package.json'))
         this.manifest.add({ type: 'link', name, root })
       }
       await deps.file.remove(linkedPath)

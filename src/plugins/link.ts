@@ -99,7 +99,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async refreshType(): Promise<'node_modules' | 'prepare' | undefined> {
-    if (this.forceRefresh) return 'node_modules'
+    if (this.forceRefresh || this.manifest.nodeVersionChanged) return 'node_modules'
     if (await this.updateNodeModulesNeeded()) return 'node_modules'
     if (await this.prepareNeeded()) return 'prepare'
   }
