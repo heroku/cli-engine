@@ -1,38 +1,31 @@
 import deps from '../deps'
+import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
-import { Config, Topic as BaseTopic, ICommand } from 'cli-engine-config'
-import { PluginTopic } from './plugin'
+import { Config, ICommand } from 'cli-engine-config'
 import { inspect } from 'util'
+import { PluginManifest } from './manifest'
+import { PluginCache } from './cache'
+import { Topic, Topics, Commands, CommandInfo } from './topic'
 
-export type Topic = BaseTopic & { commands: string[] }
-export type Topics = { [from: string]: Topic }
 export type Aliases = { [from: string]: string[] }
 
-export function mergeTopics(a: PluginTopic, b: PluginTopic): Topic {
-  return {
-    ...a,
-    ...b,
-    commands: [],
-  }
-}
-
-function topicFromID(id: string) {
-  return id
-    .split(':')
-    .slice(0, -1)
-    .join(':')
-}
-
-export type PluginManagerOptions = {
+export interface PluginManagerOptions {
   config: Config
+  cache?: PluginCache
+  manifest?: PluginManifest
 }
 
 export abstract class PluginManager {
   protected submanagers: PluginManager[] = []
   protected config: Config
+  protected manifest: PluginManifest
+  protected cache: PluginCache
+  protected cacheKey?: string
 
   constructor(opts: PluginManagerOptions) {
     this.config = opts.config
+    this.manifest = opts.manifest || new deps.PluginManifest(this.config)
+    this.cache = opts.cache || new deps.PluginCache(this.config)
   }
 
   private _initPromise: Promise<void>
@@ -43,26 +36,58 @@ export abstract class PluginManager {
       await this.initSubmanagers()
     })())
   }
-  protected async _init(): Promise<void> {}
-
-  protected async initSubmanagers() {
-    const errHandle = (err: Error) => cli.warn(err, { context: `init: ${this.constructor.name}` })
-    const promises = this.submanagers.map(m => m.init().catch(errHandle))
-    for (let s of promises) await s
-  }
 
   public async topics(): Promise<Topics> {
-    const topics: Topics = {}
     await this.init()
-    let promises = this.submanagers.map(m => {
-      return m.topics().catch(err => cli.warn(err))
-    })
-    for (let p of promises) {
-      for (let t of Object.values((await p) || {})) {
-        topics[t.name] = mergeTopics(topics[t.name], t)
-      }
+    const fetch = async () => {
+      const topics = await Topic.mergeSubtopics(
+        await this._topics(),
+        ...this.submanagers.map(async m => {
+          try {
+            return await m.topics()
+          } catch (err) {
+            cli.warn(err)
+          }
+        }),
+      )
+      await this.addCommandsToTopics(topics)
+      return topics
     }
-    return this.addMissingTopics(topics)
+    if (this.cacheKey) {
+      return this.cache.fetch(this.cacheKey, 'topics', fetch)
+    } else {
+      return fetch()
+    }
+  }
+
+  public async rootCommands(): Promise<Commands> {
+    await this.init()
+    const fetch = async () => {
+      const errHandle = (err: Error) => cli.warn(err, { context: `commandIDs: ${this.constructor.name}` })
+      const promises = this.submanagers.map(s => s.rootCommands().catch(errHandle))
+      let commands: Commands = await this._rootCommands()
+      for (let p of promises) {
+        let c = await p
+        commands = { ...c, ...commands }
+      }
+      return commands
+    }
+    if (this.cacheKey) {
+      return this.cache.fetch(this.cacheKey, 'root_commands', fetch)
+    } else {
+      return fetch()
+    }
+  }
+
+  protected async _rootCommands(): Promise<Commands> {
+    const commands: Commands = {}
+    for (let command of await this._commandIDs()) {
+      const topicID = Topic.parentTopicIDof(command)
+      if (topicID) continue
+      const info = await this.findCommandInfo(command)
+      commands[command] = info
+    }
+    return commands
   }
 
   public async findTopic(name: string): Promise<Topic | undefined> {
@@ -74,22 +99,25 @@ export abstract class PluginManager {
     return Object.keys(await this.topics())
   }
 
-  public async commandIDs(): Promise<string[]> {
-    await this.init()
-    const errHandle = (err: Error) => cli.warn(err, { context: `commandIDs: ${this.constructor.name}` })
-    const p = this.submanagers.map(s => s.commandIDs().catch(errHandle))
-    const ids = await deps.util.concatPromiseArrays(p)
-    return ids.sort()
-  }
-
-  public async rootCommandIDs(): Promise<string[]> {
-    let ids = await this.commandIDs()
-    return ids.filter(id => !id.includes(':'))
+  public commandIDs(): Promise<string[]> {
+    const fetch = async () => {
+      await this.init()
+      const errHandle = (err: Error) => cli.warn(err, { context: `commandIDs: ${this.constructor.name}` })
+      const p = this.submanagers.map(s => s.commandIDs().catch(errHandle))
+      const ids = await deps.util.concatPromiseArrays([this._commandIDs(), ...p])
+      ids.sort()
+      return ids
+    }
+    if (this.cacheKey) {
+      return this.cache.fetch(this.cacheKey, 'command:ids', fetch)
+    } else {
+      return fetch()
+    }
   }
 
   public async aliases(): Promise<Aliases> {
-    let aliases: Aliases = {}
     await this.init()
+    let aliases: Aliases = await this._aliases()
     let promises = this.submanagers.map(m => m.aliases())
     for (let a of promises) {
       for (let [k, v] of Object.entries(await a)) {
@@ -101,10 +129,24 @@ export abstract class PluginManager {
 
   public async findCommand(id: string): Promise<ICommand | undefined> {
     await this.init()
+    if (!(await this.commandIDs()).includes(id)) return
+    let cmd = await this._findCommand(await this.unalias(id))
+    if (cmd) return cmd
     for (let m of await this.submanagers) {
       const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
-      let cmd = await m.findCommand(await m.unalias(id)).catch(errHandle)
+      let cmd = await m.findCommand(id).catch(errHandle)
       if (cmd) return cmd
+    }
+  }
+
+  public async findCommandInfo(id: string): Promise<CommandInfo> {
+    let cmd = await this.findCommand(id)
+    if (!cmd) throw new Error(`${id} not found`)
+    return {
+      id,
+      hidden: cmd.hidden,
+      help: await this.findCommandHelp(id),
+      helpLine: await this.findCommandHelpLine(id),
     }
   }
 
@@ -126,24 +168,53 @@ export abstract class PluginManager {
   }
 
   protected debug = require('debug')(`cli:plugins:${this.constructor.name.split('Plugin')[0].toLowerCase()}`)
+  protected async _init(): Promise<void> {}
+  protected async _topics(): Promise<Topics> {
+    return {}
+  }
+  protected async _commandIDs(): Promise<string[]> {
+    return []
+  }
+  protected async _aliases(): Promise<Aliases> {
+    return {}
+  }
+  protected async _findCommand(_: string): Promise<ICommand | undefined> {
+    return undefined
+  }
 
   private async unalias(id: string): Promise<string> {
-    const aliases = Object.entries(await this.aliases())
+    const aliases = Object.entries(await this._aliases())
     const alias = aliases.find(([, aliases]) => aliases.includes(id))
     return alias ? alias[0] : id
   }
 
-  private async addMissingTopics(topics: Topics): Promise<Topics> {
-    for (let id of await this.commandIDs()) {
-      const topic = topicFromID(id)
-      if (!topic) continue
-      // create topic if none exist
-      topics[topic] = topics[topic] || { name: topic, commands: [] }
+  private async initSubmanagers() {
+    const errHandle = (err: Error) => cli.warn(err, { context: `init: ${this.constructor.name}` })
+    const promises = this.submanagers.map(m => m.init().catch(errHandle))
+    for (let s of promises) await s
+  }
 
-      // add this command to the topic
-      topics[topic].commands = topics[topic].commands || []
-      topics[topic].commands.push(id)
+  private async addCommandsToTopics(topics: Topics) {
+    for (let command of await this._commandIDs()) {
+      const topicID = Topic.parentTopicIDof(command)
+      if (!topicID) continue
+      const info = await this.findCommandInfo(command)
+      let topic = await Topic.findOrCreateTopic({ name: topicID }, topics)
+      topic.commands[command] = info
     }
-    return topics
+  }
+
+  private async findCommandHelpLine(id: string): Promise<[string, string | undefined]> {
+    const c = await this.findCommand(id)
+    if (!c) throw new Error('command not found')
+    return c.buildHelpLine(this.config)
+  }
+
+  private async findCommandHelp(id: string): Promise<string> {
+    const c = await this.findCommand(id)
+    if (!c) throw new Error('command not found')
+    let help = c.buildHelp(this.config)
+    if (!color.supportsColor) help = deps.stripAnsi(help)
+    return help
   }
 }

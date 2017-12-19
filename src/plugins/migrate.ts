@@ -1,36 +1,17 @@
 import { Config } from 'cli-engine-config'
 import cli from 'cli-ux'
 import deps from '../deps'
-import { UserPlugins } from './user'
-import { LinkPlugins } from './link'
 import { PluginManifest } from './manifest'
 import * as path from 'path'
-import { Lock } from '../lock'
 
 const debug = require('debug')('cli:migrate')
 
 export class PluginsMigrate {
   private config: Config
-  private user: UserPlugins
-  private lock: Lock
-  private link: LinkPlugins
   private manifest: PluginManifest
 
-  constructor({
-    config,
-    link,
-    user,
-    manifest,
-  }: {
-    config: Config
-    link: LinkPlugins
-    user: UserPlugins
-    manifest: PluginManifest
-  }) {
+  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
     this.config = config
-    this.lock = new deps.Lock(this.config)
-    this.link = link
-    this.user = user
     this.manifest = manifest
   }
 
@@ -46,13 +27,13 @@ export class PluginsMigrate {
   private async migrateLinked() {
     const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
     if (await deps.file.exists(linkedPath)) {
-      const downgrade = await this.lock.upgrade()
       debug('migrating link plugins')
       let linked = await deps.file.fetchJSONFile(linkedPath)
-      let promises = linked.plugins.map((l: string) => this.link.install(l))
-      for (let p of promises) await p
+      for (let root of linked.plugins) {
+        const name = await deps.file.fetchJSONFile(path.join(linkedPath, 'package.json'))
+        this.manifest.add({ type: 'link', name, root })
+      }
       await deps.file.remove(linkedPath)
-      await downgrade()
     }
   }
 
@@ -65,9 +46,8 @@ export class PluginsMigrate {
       user = await deps.file.readJSON(userPath)
       if (user['cli-engine']) return
       for (let [name, tag] of Object.entries(user.dependencies)) {
-        await this.user.install(name, tag)
+        this.manifest.add({ type: 'user', name, tag })
       }
-      await this.manifest.save()
       user = await deps.file.readJSON(userPath)
       user['cli-engine'] = { schema: 1 }
       await deps.file.outputJSON(userPath, user, { spaces: 2 })

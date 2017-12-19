@@ -2,13 +2,8 @@ import deps from '../deps'
 import { Config } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import { Plugin } from './plugin'
 
-const debug = require('debug')('cli:plugins:cache')
-
-function cacheKey(plugin: Plugin) {
-  return [plugin.name, plugin.type, plugin.version].join(':')
-}
+const debug = require('debug')('cli:cache')
 
 export type CachePlugin = {
   [k: string]: any
@@ -43,9 +38,8 @@ export class PluginCache {
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
-  public async fetch<T>(plugin: Plugin, prop: string, fn: () => Promise<T>): Promise<T> {
+  public async fetch<T>(key: string, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
-    const key = cacheKey(plugin)
     if (this.fetchPromises[key + prop]) return this.fetchPromises[key + prop]
     return (this.fetchPromises[key + prop] = (async () => {
       if (!this.cache.plugins[key]) {
@@ -60,9 +54,8 @@ export class PluginCache {
     })())
   }
 
-  public async reset(plugin: Plugin) {
+  public async reset(key: string) {
     await this.init()
-    const key = cacheKey(plugin)
     delete this.cache.plugins[key]
     this.needsSave = true
   }

@@ -4,6 +4,7 @@ import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { renderList } from 'cli-ux/lib/list'
 import { Plugins } from '../plugins'
+import { Topic, CommandInfo } from '../plugins/topic'
 import deps from '../deps'
 
 function topicSort(a: any, b: any) {
@@ -23,56 +24,47 @@ export default class Help extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
-      let topics = await this.topics()
+      await this.topics()
       if (this.flags.all) {
-        let rootCmds = await this.plugins.rootCommandIDs()
-        rootCmds = rootCmds.filter(c => !topics.find(t => c.startsWith(t[0])))
-        if (rootCmds) await this.listCommandsHelp(rootCmds)
+        let rootCmds = await this.plugins.rootCommands()
+        if (rootCmds) {
+          await this.listCommandsHelp(Object.values(rootCmds))
+        }
       }
-      await this.plugins.save()
       return
     }
 
     const topic = await this.plugins.findTopic(subject)
-    const commandHelp = await this.plugins.findCommandHelp(subject)
+    const command = await this.plugins.findCommandInfo(subject)
 
-    if (!topic && !commandHelp) {
+    if (!topic && !command) {
       return this.notFound(subject)
     }
 
-    if (commandHelp) cli.log(commandHelp)
+    if (command) cli.log(command.help)
 
     if (topic) {
-      await this.topics(topic.name)
-      await this.listCommandsHelp(topic.commands, subject)
+      await this.topics(topic)
+      await this.listCommandsHelp(Object.values(topic.commands), topic)
     }
-
-    await this.plugins.save()
   }
 
   private async notFound(subject: string) {
     await deps.NotFound.run({ ...this.config, argv: [subject] })
   }
 
-  private async topics(prefix?: string) {
-    const idPrefix = prefix ? `${prefix}:` : ''
-    // fetch topics
-    let topics = Object.values(await this.plugins.topics())
+  private async topics(parent?: Topic) {
+    let topics = Object.values(parent ? parent.subtopics : await this.plugins.topics())
       .filter(t => !t.hidden)
-      // only get from the prefix
-      .filter(t => t.name.startsWith(idPrefix))
-      // only get topics 1 level deep
-      .filter(t => t.name.split(':').length < (prefix || '').split(':').length + 1)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
     if (!topics.length) return topics
 
     // header
-    cli.log(`${color.bold('Usage:')} ${this.config.bin} ${idPrefix}COMMAND
+    cli.log(`${color.bold('Usage:')} ${this.config.bin} ${parent ? parent.name : ''}COMMAND
 
 Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
 
@@ -80,20 +72,18 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
     cli.log(renderList(topics))
 
     cli.log()
-    return topics
   }
 
-  private async listCommandsHelp(commandIDs: string[], topic?: string) {
-    let helpLines = await this.plugins.findCommandsHelpLines(commandIDs)
-    // commands = commands.filter(c => !c.hidden)
-    if (helpLines.length === 0) return
+  private async listCommandsHelp(commands: CommandInfo[], topic?: Topic) {
+    commands = commands.filter(c => !c.hidden)
+    if (commands.length === 0) return
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
     if (topic) {
-      cli.log(`${this.config.bin} ${color.bold(topic)} commands: (get help with ${helpCmd})\n`)
+      cli.log(`${this.config.bin} ${color.bold(topic.name)} commands: (get help with ${helpCmd})\n`)
     } else {
       cli.log('Root commands:\n')
     }
-    helpLines = helpLines.map(([a, b]) => [` ${a}`, b] as [string, string])
+    let helpLines = commands.map(c => c.helpLine).map(([a, b]) => [` ${a}`, b] as [string, string])
     cli.log(renderList(helpLines))
     cli.log()
   }

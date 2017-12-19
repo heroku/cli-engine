@@ -31,10 +31,7 @@ export default class PluginsInstall extends Command {
     const plugins = new Plugins({ config: this.config })
     const [plugin, tag = 'latest'] = this.argv[0].split('@')
     if (!this.config.debug) cli.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
-    if (!this.flags.force && (await plugins.pluginType(plugin))) {
-      throw new Error('Plugin is already installed. Run with --force to install anyways.')
-    }
-    await plugins.user.install(plugin, tag)
+    await plugins.install({ type: 'user', name: plugin, tag, force: this.flags.force })
     const hooks = new Hooks(this.config)
     await hooks.run('update')
   }

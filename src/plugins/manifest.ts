@@ -1,65 +1,76 @@
-import { Lock } from '../lock'
 import deps from '../deps'
 import { Config } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli:plugins:manifest')
 
-export type ManifestLink = {
+export interface ManifestLink {
   name: string
   root: string
-  last_updated: string
+  lastUpdated: Date
 }
 
-export type ManifestUser = {
+export interface ManifestUser {
   name: string
   tag: string
 }
 
-export type ManifestUserOpts = ManifestUser & { type: 'user' }
-export type ManifestLinkOpts = ManifestLink & { type: 'link' }
+export interface ManifestUserOpts {
+  type: 'user'
+  name: string
+  tag: string
+}
+
+export interface ManifestLinkOpts {
+  type: 'link'
+  name: string
+  root: string
+}
 
 export type ManifestJSON = {
   version: 1
   node_version?: string
   user: ManifestUser[]
-  link: ManifestLink[]
+  link: {
+    name: string
+    root: string
+    last_updated: string
+  }[]
 }
 
 export class PluginManifest {
   constructor(config: Config) {
     this.config = config
-    this.lock = new Lock(this.config, `${this.file}.lock`)
   }
 
   public config: Config
   public nodeVersionChanged: boolean = false
   public needsSave: boolean = false
   public mtime?: number
-  public lock: Lock
 
   private saving: Promise<void>
   public async save(): Promise<void> {
     if (!this.needsSave) return
     this.needsSave = false
     return (this.saving = (async () => {
-      const downgrade = await this.lock.upgrade()
       debug('saving')
       if (!await this.canWrite()) {
         throw new Error('manifest file modified, cannot save')
       }
       await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
       delete this._init
-      await downgrade()
     })())
   }
 
-  public async list(type: 'user'): Promise<ManifestJSON['user']>
-  public async list(type: 'link'): Promise<ManifestJSON['link']>
+  public async list(type: 'user'): Promise<ManifestUser[]>
+  public async list(type: 'link'): Promise<ManifestLink[]>
   public async list(type: 'user' | 'link'): Promise<any> {
     await this.init()
     if (type === 'user') return this.manifest.user
-    else return this.manifest.link
+    return this.manifest.link.map(p => ({
+      ...p,
+      lastUpdated: new Date(p.last_updated),
+    }))
   }
 
   public async add(opts: ManifestUserOpts | ManifestLinkOpts) {
@@ -68,7 +79,7 @@ export class PluginManifest {
     if (opts.type === 'user') {
       this.manifest.user.push({ name: opts.name, tag: opts.tag })
     } else {
-      this.manifest.link.push({ name: opts.name, root: opts.root, last_updated: opts.last_updated })
+      this.manifest.link.push({ name: opts.name, root: opts.root, last_updated: new Date().toISOString() })
     }
     this.needsSave = true
   }

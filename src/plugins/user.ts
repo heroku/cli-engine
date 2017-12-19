@@ -1,46 +1,25 @@
 import deps from '../deps'
 import cli from 'cli-ux'
-import { Config } from 'cli-engine-config'
 import { Plugin, PluginType, PluginOptions } from './plugin'
 import Yarn from './yarn'
 import * as path from 'path'
-import { Lock } from '../lock'
 import { PluginManager } from './manager'
-import { PluginCache } from './cache'
-import { PluginManifest } from './manifest'
 
 export class UserPlugins extends PluginManager {
   public plugins: UserPlugin[]
-  protected config: Config
-  protected cache?: PluginCache
-  protected lock: Lock
-
   private yarn: Yarn
-  private manifest: PluginManifest
-
-  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache?: PluginCache }) {
-    super({ config })
-    this.manifest = manifest
-    this.cache = cache
-  }
 
   public async update() {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
-    let downgrade = await this.lock.upgrade()
     const packages = (await this.manifest.list('user')).map(p => `${p.name}@${p.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
-    await downgrade()
   }
 
   public async install(name: string, tag: string): Promise<void> {
-    let downgrade = await this.lock.upgrade()
     await this.yarn.exec(['add', `${name}@${tag}`])
     const plugin = this.loadPlugin(name, tag)
     await plugin.init()
-    await this.manifest.add({ type: 'user', name, tag })
-    await this.manifest.save()
-    await downgrade()
   }
 
   public async uninstall(name: string): Promise<void> {
@@ -50,29 +29,19 @@ export class UserPlugins extends PluginManager {
 
   protected async _init() {
     this.debug('init')
-    this.lock = new deps.Lock(this.config, path.join(this.userPluginsDir, 'plugins.lock'))
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-    await this.refresh()
+    await this.createPJSON()
     const defs = await this.manifest.list('user')
     this.submanagers = this.plugins = defs.map(p => this.loadPlugin(p.name, p.tag))
   }
 
-  private async refresh() {
-    await this.createPJSON()
-    if (this.manifest.nodeVersionChanged) {
-      const downgrade = await this.lock.upgrade()
-      await this.yarn.exec()
-      await downgrade()
-    }
-  }
-
   private loadPlugin(name: string, tag: string) {
     return new UserPlugin({
+      name,
+      tag,
+      root: this.userPluginPath(name),
       config: this.config,
       cache: this.cache,
-      root: this.userPluginPath(name),
-      lock: this.lock,
-      tag,
     })
   }
 

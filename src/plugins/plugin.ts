@@ -1,16 +1,13 @@
 import deps from '../deps'
-import { PluginManager, mergeTopics, Topics } from './manager'
-import { ICommand, Config } from 'cli-engine-config'
+import { Topic, Topics } from './topic'
+import { PluginManager, PluginManagerOptions } from './manager'
+import { ICommand } from 'cli-engine-config'
 import * as path from 'path'
-import { Lock } from '../lock'
-import { PluginCache } from './cache'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
-export type PluginOptions = {
-  config: Config
-  cache: PluginCache | undefined
+export type PluginOptions = PluginManagerOptions & {
+  name: string
   root: string
-  lock?: Lock
 }
 
 export type PluginPJSON = {
@@ -44,51 +41,30 @@ export abstract class Plugin extends PluginManager {
   public tag?: string
   public pjson: PluginPJSON
 
-  // @ts-ignore
-  protected lock?: Lock
-  protected cache?: PluginCache
-
   constructor(options: PluginOptions) {
     super(options)
-    this.cache = options.cache
     this.root = options.root
-    this.lock = options.lock
   }
 
   protected async _init() {
-    this.pjson = await deps.file.fetchJSONFile(path.join(this.root, 'package.json'))
+    this.pjson = await deps.file.readJSON(path.join(this.root, 'package.json'))
     if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
     this.name = this.pjson.name
     this.version = this.pjson.version
     this.debug = require('debug')(`cli:plugins:${this.name}`)
+    this.cacheKey = [this.name, this.type, this.version].join(':')
   }
 
-  public get commandsDir(): string | undefined {
-    let d = this.pjson['cli-engine'].commandsDir
-    if (d) return path.join(this.root, d)
-  }
-
-  public async commandIDs() {
+  protected async _commandIDs() {
     return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
   }
 
-  public async topics(): Promise<Topics> {
-    let topics: Topics = {}
-    let promises = [this.fetchTopicsFromModule()]
-    for (let p of promises) {
-      for (let t of Object.values(await p)) {
-        topics[t.name] = mergeTopics(topics[t.name], t)
-      }
-    }
-    return topics
-  }
-
-  public async aliases() {
+  protected async _aliases() {
     await this.init()
     return deps.util.objValsToArrays(this.pjson['cli-engine'].aliases)
   }
 
-  public async findCommand(id: string): Promise<ICommand | undefined> {
+  protected async _findCommand(id: string): Promise<ICommand | undefined> {
     let cmd = await this.findCommandInModule(id)
     if (!cmd) cmd = await this.findCommandInDir(id)
     if (cmd) {
@@ -97,15 +73,27 @@ export abstract class Plugin extends PluginManager {
     }
   }
 
-  public async findCommandInModule(id: string) {
-    const ids = await this.fetchCommandIDsFromModule()
-    if (!ids.includes(id)) return
+  protected addPluginToCommand(cmd: ICommand): ICommand {
+    cmd.plugin = {
+      type: this.type,
+      root: this.root,
+      name: this.name,
+      version: this.version,
+    }
+    return cmd
+  }
+
+  protected _topics() {
+    return Topic.mergeSubtopics(this.fetchTopicsFromModule())
+  }
+
+  private async findCommandInModule(id: string) {
     const m = await this.fetchModule()
     if (!m) return
     return m.commands.find(c => c.id === id)
   }
 
-  public async findCommandInDir(id: string) {
+  private async findCommandInDir(id: string) {
     const dir = this.commandsDir
     if (!dir) return
     let p
@@ -117,16 +105,6 @@ export abstract class Plugin extends PluginManager {
     }
     if (!await deps.file.exists(p)) return
     return this.require(p, id)
-  }
-
-  protected addPluginToCommand(cmd: ICommand): ICommand {
-    cmd.plugin = {
-      type: this.type,
-      root: this.root,
-      name: this.name,
-      version: this.version,
-    }
-    return cmd
   }
 
   private commandPath(id: string): string {
@@ -160,21 +138,21 @@ export abstract class Plugin extends PluginManager {
   }
 
   private async fetchCommandIDsFromModule(): Promise<string[]> {
-    const fn = async () => {
-      const m = await this.fetchModule()
-      if (!m) return []
-      return m.commands.map(m => m.id)
-    }
-    return this.cache ? this.cache.fetch(this, 'commandIDs', fn) : fn()
+    const m = await this.fetchModule()
+    if (!m) return []
+    return m.commands.map(m => m.id)
   }
 
   private async fetchTopicsFromModule(): Promise<Topics> {
-    const fn = async () => {
-      const m = await this.fetchModule()
-      if (!m) return {}
-      return m.topics
-    }
-    return this.cache ? this.cache.fetch(this, 'topics', fn) : fn()
+    const m = await this.fetchModule()
+    if (!m) return {}
+    return m.topics.reduce(
+      (topics, t) => {
+        topics[t.name] = new Topic(t)
+        return topics
+      },
+      {} as Topics,
+    )
   }
 
   private commandIDsFromDir(): Promise<string[]> {
@@ -194,5 +172,10 @@ export abstract class Plugin extends PluginManager {
         .on('error', reject)
         .on('end', () => resolve(ids))
     })
+  }
+
+  private get commandsDir(): string | undefined {
+    let d = this.pjson['cli-engine'].commandsDir
+    if (d) return path.join(this.root, d)
   }
 }

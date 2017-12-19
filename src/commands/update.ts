@@ -1,4 +1,3 @@
-import CacheWarm from './cache/warm'
 import { Command, flags, IBooleanFlag } from 'cli-engine-command'
 import { Updater } from '../updater'
 import PluginsUpdate from './plugins/update'
@@ -65,8 +64,6 @@ export default class Update extends Command {
     await this.updater.fetchVersion(true)
     debug('plugins update')
     await PluginsUpdate.run({ ...this.config, argv: [] })
-    debug('cache warm')
-    await CacheWarm.run({ ...this.config, argv: [] })
     debug('log chop')
     await this.logChop()
     debug('autocomplete')
