@@ -34,7 +34,6 @@ export type ManifestJSON = {
   link: {
     name: string
     root: string
-    last_updated: string
   }[]
 }
 
@@ -67,10 +66,7 @@ export class PluginManifest {
   public async list(type: 'user' | 'link'): Promise<any> {
     await this.init()
     if (type === 'user') return this.manifest.user
-    return this.manifest.link.map(p => ({
-      ...p,
-      lastUpdated: new Date(p.last_updated),
-    }))
+    return this.manifest.link
   }
 
   public async add(opts: ManifestUserOpts | ManifestLinkOpts) {
@@ -79,7 +75,7 @@ export class PluginManifest {
     if (opts.type === 'user') {
       this.manifest.user.push({ name: opts.name, tag: opts.tag })
     } else {
-      this.manifest.link.push({ name: opts.name, root: opts.root, last_updated: new Date().toISOString() })
+      this.manifest.link.push({ name: opts.name, root: opts.root })
     }
     this.needsSave = true
   }
@@ -95,7 +91,6 @@ export class PluginManifest {
     await this.init()
     let p = this.manifest.link.find(p => [p.name, p.root].includes(name))
     if (!p) throw new Error(`${name} not found in manifest`)
-    p.last_updated = new Date().toISOString()
     this.needsSave = true
   }
 
@@ -106,13 +101,7 @@ export class PluginManifest {
     if (this._init) return this._init
     return (this._init = (async () => {
       debug('init')
-      this.manifest = (await this.read()) || {
-        version: 1,
-        link: [],
-        user: [],
-      }
-      if (!this.manifest.link) this.manifest.link = []
-      if (!this.manifest.user) this.manifest.user = []
+      this.manifest = await this.read()
       this.nodeVersionChanged = this.manifest.node_version !== process.versions.node
       if (this.nodeVersionChanged) {
         this.manifest.node_version = process.versions.node
@@ -125,13 +114,24 @@ export class PluginManifest {
     return path.join(this.config.dataDir, 'plugins', 'plugins.json')
   }
 
-  private async read(): Promise<ManifestJSON | undefined> {
+  private async read(retry: boolean = true): Promise<ManifestJSON> {
     try {
       this.mtime = await this.getLastUpdated()
-      return await deps.file.readJSON(this.file)
+      const manifest = await deps.file.readJSON(this.file)
+      if (!manifest.link) this.manifest.link = []
+      if (!manifest.user) this.manifest.user = []
+      return manifest
     } catch (err) {
-      if (err.code === 'ENOENT') {
+      if (err.code === 'ENOENT' && retry) {
         debug(err)
+        this.manifest = {
+          version: 1,
+          link: [],
+          user: [],
+        }
+        this.needsSave = true
+        await this.save()
+        return this.read(false)
       } else {
         throw err
       }
@@ -143,7 +143,7 @@ export class PluginManifest {
     return (await this.getLastUpdated()) === this.mtime
   }
 
-  private async getLastUpdated(): Promise<number | undefined> {
+  public async getLastUpdated(): Promise<number | undefined> {
     try {
       const stat = await deps.file.stat(this.file)
       return stat.mtime.getTime()

@@ -8,6 +8,9 @@ export type PluginType = 'builtin' | 'core' | 'user' | 'link'
 export type PluginOptions = PluginManagerOptions & {
   name: string
   root: string
+  version: string
+  type: PluginType
+  pjson?: PluginPJSON
 }
 
 export type PluginPJSON = {
@@ -44,17 +47,17 @@ export abstract class Plugin extends PluginManager {
   constructor(options: PluginOptions) {
     super(options)
     this.root = options.root
+    this.cacheKey = [options.name, options.type, options.version].join(':')
+    this.debug = require('debug')(`cli:plugins:${this.cacheKey}`)
   }
 
   protected async _init() {
     if (this.type !== 'builtin') {
-      this.pjson = await deps.file.readJSON(path.join(this.root, 'package.json'))
+      this.pjson = this.pjson || (await deps.file.readJSON(path.join(this.root, 'package.json')))
       if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
       this.name = this.pjson.name
       this.version = this.pjson.version
-      this.cacheKey = [this.name, this.type, this.version].join(':')
     }
-    this.debug = require('debug')(`cli:plugins:${this.name}`)
   }
 
   protected _commandIDs() {

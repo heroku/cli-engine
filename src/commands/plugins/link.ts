@@ -25,6 +25,7 @@ export default class PluginsLink extends Command {
 
   async run() {
     const plugins = new Plugins({ config: this.config })
+    await plugins.init()
     let p = path.resolve(this.argv[0] || process.cwd())
     cli.action.start(`Linking ${p}`)
     await plugins.install({ type: 'link', root: p, force: this.flags.force })

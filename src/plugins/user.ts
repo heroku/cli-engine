@@ -18,7 +18,7 @@ export class UserPlugins extends PluginManager {
 
   public async install(name: string, tag: string): Promise<void> {
     await this.yarn.exec(['add', `${name}@${tag}`])
-    const plugin = this.loadPlugin(name, tag)
+    const plugin = await this.loadPlugin(name, tag)
     await plugin.init()
   }
 
@@ -32,16 +32,20 @@ export class UserPlugins extends PluginManager {
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
     await this.createPJSON()
     const defs = await this.manifest.list('user')
-    this.submanagers = this.plugins = defs.map(p => this.loadPlugin(p.name, p.tag))
+    this.submanagers = this.plugins = await Promise.all(defs.map(p => this.loadPlugin(p.name, p.tag)))
   }
 
-  private loadPlugin(name: string, tag: string) {
+  private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
+    const pjson = await deps.file.fetchJSONFile(path.join(this.userPluginPath(name), 'package.json'))
     return new UserPlugin({
       name,
       tag,
+      type: 'user',
       root: this.userPluginPath(name),
       config: this.config,
       cache: this.cache,
+      lock: this.lock,
+      version: pjson.version,
     })
   }
 

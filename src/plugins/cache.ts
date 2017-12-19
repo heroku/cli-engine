@@ -38,26 +38,39 @@ export class PluginCache {
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
-  public async fetch<T>(key: string | undefined, prop: string, fn: () => Promise<T>): Promise<T> {
-    if (!key) return fn()
+  public async fetch<T>(key: string, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
     if (this.fetchPromises[key + prop]) return this.fetchPromises[key + prop]
     return (this.fetchPromises[key + prop] = (async () => {
-      if (!this.cache.plugins[key]) {
-        this.cache.plugins[key] = {} as CachePlugin
-      }
-      if (!(prop in this.cache.plugins[key])) {
+      let v = await this.get(key, prop)
+      if (!v) {
         debug('fetching', key, prop)
-        this.cache.plugins[key][prop] = await fn()
-        this.needsSave = true
+        await this.set(key, prop, await fn())
       }
-      return this.cache.plugins[key][prop]
+      return await this.get(key, prop)
     })())
+  }
+
+  public async get(key: string, prop: string) {
+    await this.init()
+    if (!this.cache.plugins[key]) return
+    return this.cache.plugins[key][prop]
+  }
+
+  public async set(key: string, prop: string, v: any) {
+    await this.init()
+    if (!this.cache.plugins[key]) {
+      this.cache.plugins[key] = {} as CachePlugin
+    }
+    this.cache.plugins[key][prop] = v
+    this.needsSave = true
+    return this.cache.plugins[key][prop]
   }
 
   public async reset(key: string) {
     await this.init()
     delete this.cache.plugins[key]
+    this.fetchPromises = {}
     this.needsSave = true
   }
 

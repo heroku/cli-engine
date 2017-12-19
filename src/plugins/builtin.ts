@@ -5,16 +5,33 @@ import { Topics, Topic } from './topic'
 import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
 import { PluginManifest } from './manifest'
+import { Lock } from '../lock'
 
 export class Builtin extends Plugin {
   public type: PluginType = 'builtin'
-  public name = 'builtin'
-  public version = require('../../package.json').version
-  protected cacheKey = 'builtin'
   private _commands: { [name: string]: string }
 
-  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
-    super({ name: 'builtin', config, cache, manifest, root: path.join(__dirname, '..', 'commands') })
+  constructor({
+    config,
+    manifest,
+    cache,
+    lock,
+  }: {
+    config: Config
+    manifest: PluginManifest
+    cache: PluginCache
+    lock: Lock
+  }) {
+    super({
+      type: 'builtin',
+      name: 'builtin',
+      config,
+      cache,
+      manifest,
+      root: path.join(__dirname, '..', 'commands'),
+      lock,
+      version: require('../../package.json').version,
+    })
 
     this._commands = {
       commands: 'commands',

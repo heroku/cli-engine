@@ -3,6 +3,7 @@ import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
 import { Config, ICommand } from 'cli-engine-config'
 import { inspect } from 'util'
+import { Lock } from '../lock'
 import { PluginManifest } from './manifest'
 import { PluginCache } from './cache'
 import { Topic, Topics, Commands, CommandInfo } from './topic'
@@ -12,6 +13,7 @@ export type Aliases = { [from: string]: string[] }
 
 export interface PluginManagerOptions {
   config: Config
+  lock: Lock
   cache?: PluginCache
   manifest?: PluginManifest
 }
@@ -25,10 +27,13 @@ export abstract class PluginManager {
   protected config: Config
   protected manifest: PluginManifest
   protected cache: PluginCache
-  protected cacheKey?: string
+  protected cacheKey: string
+  protected lock: Lock
 
   constructor(opts: PluginManagerOptions) {
+    this.cacheKey = 'plugins'
     this.config = opts.config
+    this.lock = opts.lock
     this.manifest = opts.manifest || new deps.PluginManifest(this.config)
     this.cache = opts.cache || new deps.PluginCache(this.config)
   }
@@ -38,16 +43,20 @@ export abstract class PluginManager {
     if (this._initPromise) return this._initPromise
     return (this._initPromise = (async () => {
       await this._init()
-      await this.initSubmanagers()
-      this.commandIDs = await this.fetchCommandIDs()
-      this.topics = await this.fetchTopics()
-      this.rootCommands = await this.fetchRootCommands()
-      this.aliases = await this.fetchAliases()
+      await this.load()
     })())
   }
 
   public findTopic(name: string): Topic | undefined {
     return Topic.findTopic(name, this.topics)
+  }
+
+  protected async load() {
+    await this.initSubmanagers()
+    this.commandIDs = await this.fetchCommandIDs()
+    this.topics = await this.fetchTopics()
+    this.rootCommands = await this.fetchRootCommands()
+    this.aliases = await this.fetchAliases()
   }
 
   private async fetchCommandIDs(): Promise<string[]> {
@@ -188,8 +197,8 @@ export abstract class PluginManager {
     const fetch = () => this._aliases()
     let aliases: Aliases = await this.cache.fetch(this.cacheKey, 'aliases', fetch)
     for (let s of this.submanagers) {
-      for (let [k, v] of Object.entries(s.aliases)) {
-        aliases[k] = [...(aliases[k] || []), ...deps.util.toArray(v)]
+      for (let [k, v] of Object.entries(s.aliases || {})) {
+        aliases[k] = _.uniq([...(aliases[k] || []), ...deps.util.toArray(v)])
       }
     }
     return aliases

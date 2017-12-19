@@ -7,7 +7,6 @@ import { Builtin } from './builtin'
 import { LinkPlugins } from './link'
 import { CorePlugins } from './core'
 import { Plugin, PluginType } from './plugin'
-import { Lock } from '../lock'
 import { PluginManager } from './manager'
 import _ from 'ts-lodash'
 import * as path from 'path'
@@ -31,11 +30,9 @@ export class Plugins extends PluginManager {
   public user: UserPlugins
   public link: LinkPlugins
   protected debug = require('debug')('cli:plugins')
-  private lock?: Lock
 
   constructor({ config }: { config: Config }) {
-    super({ config })
-    this.lock = new deps.Lock(this.config, path.join(this.config.cacheDir, 'plugins.lock'))
+    super({ config, lock: new deps.Lock(config, path.join(config.cacheDir, 'plugins.lock')) })
   }
 
   public async install(options: InstallOptions) {
@@ -82,7 +79,7 @@ export class Plugins extends PluginManager {
   }
 
   protected async _init() {
-    const submanagerOpts = { config: this.config, manifest: this.manifest, cache: this.cache }
+    const submanagerOpts = { config: this.config, manifest: this.manifest, cache: this.cache, lock: this.lock }
     this.builtin = new deps.Builtin(submanagerOpts)
     this.submanagers.push(this.builtin)
     try {
@@ -112,7 +109,7 @@ export class Plugins extends PluginManager {
   public async plugins(): Promise<Plugin[]> {
     const managers = _.compact([this.link, this.user, this.core])
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
-    return [...plugins, this.builtin]
+    return _.compact([...plugins, this.builtin])
   }
 
   private async save() {

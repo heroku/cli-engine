@@ -28,9 +28,9 @@ export class PluginsMigrate {
     const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
     if (await deps.file.exists(linkedPath)) {
       debug('migrating link plugins')
-      let linked = await deps.file.fetchJSONFile(linkedPath)
+      let linked = await deps.file.readJSON(linkedPath)
       for (let root of linked.plugins) {
-        const name = await deps.file.fetchJSONFile(path.join(linkedPath, 'package.json'))
+        const name = await deps.file.readJSON(path.join(linkedPath, 'package.json'))
         this.manifest.add({ type: 'link', name, root })
       }
       await deps.file.remove(linkedPath)
@@ -40,7 +40,7 @@ export class PluginsMigrate {
   private async migrateUser() {
     const userPath = path.join(this.config.dataDir, 'plugins', 'package.json')
     if (await deps.file.exists(userPath)) {
-      let user = await deps.file.fetchJSONFile(userPath)
+      let user = await deps.file.readJSON(userPath)
       if (!user.dependencies || user['cli-engine']) return
       debug('migrating user plugins')
       user = await deps.file.readJSON(userPath)
