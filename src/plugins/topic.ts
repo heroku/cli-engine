@@ -24,31 +24,44 @@ export class Topic {
       .join(':')
   }
 
-  static async findOrCreateTopic(opts: TopicOpts, topics: Topics): Promise<Topic> {
-    if (opts.name.includes(':')) {
-      let parent = await Topic.findOrCreateTopic({ name: this.parentTopicIDof(opts.name) }, topics)
+  static findTopic(name: string, topics: Topics): Topic | undefined {
+    let id = name.split(':')
+    name = id.pop()!
+    if (id.length > 0) {
+      let parent = Topic.findTopic(id.join(':'), topics)
+      if (!parent) return
+      topics = parent.subtopics
+    }
+    return topics[name]
+  }
+
+  static findOrCreateTopic(opts: TopicOpts, topics: Topics): Topic {
+    let id = opts.name.split(':')
+    opts.name = id.pop()!
+    if (id.length > 0) {
+      let parent = Topic.findOrCreateTopic({ name: id.join(':') }, topics)
       topics = parent.subtopics
     }
     if (!topics[opts.name]) {
       topics[opts.name] = new Topic(opts)
     } else {
-      topics[opts.name] = await Topic.mergeTopics(topics[opts.name], opts)
+      topics[opts.name] = Topic.mergeTopics(topics[opts.name], opts)
     }
     return topics[opts.name]
   }
 
-  static async mergeSubtopics(...subtopics: (Promise<Topics | undefined> | Topics | undefined)[]): Promise<Topics> {
+  static mergeSubtopics(...subtopics: (Topics | undefined)[]): Topics {
     const topics: Topics = {}
     for (let p of subtopics) {
-      for (let t of Object.values((await p) || {})) {
+      for (let t of Object.values(p || {})) {
         if (!(t as TopicOpts).name) continue
-        await Topic.findOrCreateTopic(t as TopicOpts, topics)
+        Topic.findOrCreateTopic(t as TopicOpts, topics)
       }
     }
     return topics
   }
 
-  static async mergeTopics(a: TopicOpts, b: TopicOpts) {
+  static mergeTopics(a: TopicOpts, b: TopicOpts) {
     return new Topic({
       ...b,
       ...a,
@@ -56,7 +69,7 @@ export class Topic {
         ...(b || {}).commands,
         ...(a || {}).commands,
       },
-      subtopics: await Topic.mergeSubtopics((a || {}).subtopics, (b || {}).subtopics),
+      subtopics: Topic.mergeSubtopics((a || {}).subtopics, (b || {}).subtopics),
     })
   }
 
@@ -67,6 +80,7 @@ export class Topic {
   public commands: Commands
 
   constructor(opts: TopicOpts) {
+    if (opts.name.includes(':')) throw new Error(`${this.name} should not have ":" in it`)
     this.name = opts.name
     this.description = opts.description
     this.hidden = !!opts.hidden

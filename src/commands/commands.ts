@@ -16,7 +16,8 @@ export default class Commands extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
-    const commands = await this.plugins.commandIDs()
+    await this.plugins.init()
+    const commands = await this.plugins.commandIDs
     if (this.flags.json) {
       cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
       await this.addV6Hack()
@@ -27,7 +28,7 @@ export default class Commands extends Command {
   }
 
   async outputJSON(ids: string[]) {
-    const topics = Object.values(await this.plugins.topics()).filter(t => !t.hidden)
+    const topics = Object.values(this.plugins.topics).filter(t => !t.hidden)
     const commands = await Promise.all(ids.map(id => this.plugins.findCommand(id)))
     const outputCommands = commands
       .filter(c => !!c)

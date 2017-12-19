@@ -38,7 +38,8 @@ export class PluginCache {
   }
 
   private fetchPromises: { [k: string]: Promise<any> } = {}
-  public async fetch<T>(key: string, prop: string, fn: () => Promise<T>): Promise<T> {
+  public async fetch<T>(key: string | undefined, prop: string, fn: () => Promise<T>): Promise<T> {
+    if (!key) return fn()
     await this.init()
     if (this.fetchPromises[key + prop]) return this.fetchPromises[key + prop]
     return (this.fetchPromises[key + prop] = (async () => {

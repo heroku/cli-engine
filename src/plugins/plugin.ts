@@ -47,20 +47,21 @@ export abstract class Plugin extends PluginManager {
   }
 
   protected async _init() {
-    this.pjson = await deps.file.readJSON(path.join(this.root, 'package.json'))
-    if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
-    this.name = this.pjson.name
-    this.version = this.pjson.version
+    if (this.type !== 'builtin') {
+      this.pjson = await deps.file.readJSON(path.join(this.root, 'package.json'))
+      if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
+      this.name = this.pjson.name
+      this.version = this.pjson.version
+      this.cacheKey = [this.name, this.type, this.version].join(':')
+    }
     this.debug = require('debug')(`cli:plugins:${this.name}`)
-    this.cacheKey = [this.name, this.type, this.version].join(':')
   }
 
-  protected async _commandIDs() {
+  protected _commandIDs() {
     return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
   }
 
   protected async _aliases() {
-    await this.init()
     return deps.util.objValsToArrays(this.pjson['cli-engine'].aliases)
   }
 
@@ -83,8 +84,8 @@ export abstract class Plugin extends PluginManager {
     return cmd
   }
 
-  protected _topics() {
-    return Topic.mergeSubtopics(this.fetchTopicsFromModule())
+  protected async _topics() {
+    return Topic.mergeSubtopics(await this.fetchTopicsFromModule())
   }
 
   private async findCommandInModule(id: string) {

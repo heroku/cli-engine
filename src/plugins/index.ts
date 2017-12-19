@@ -41,7 +41,6 @@ export class Plugins extends PluginManager {
   public async install(options: InstallOptions) {
     if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
-    await this.init()
     let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
     if (!options.force && (await this.pluginType(name))) {
       throw new Error(`${name} is already installed. Run with --force to install anyway`)
@@ -53,7 +52,6 @@ export class Plugins extends PluginManager {
       await this.user.install(name, options.tag)
       await this.manifest.add({ type: options.type, name, tag: options.tag })
     }
-    await this.warmCache()
     await this.save()
     await downgrade()
   }
@@ -61,10 +59,8 @@ export class Plugins extends PluginManager {
   public async update(): Promise<void> {
     if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
-    await this.init()
     await this.migrate()
     await this.user.update()
-    await this.warmCache()
     await this.save()
     await downgrade()
   }
@@ -72,7 +68,6 @@ export class Plugins extends PluginManager {
   public async uninstall(name: string): Promise<void> {
     if (!this.lock) throw new Error('no lock')
     let downgrade = await this.lock.upgrade()
-    await this.init()
     const type = await this.pluginType(name)
     if (!type) {
       const linked = await this.link.findByRoot(name)
@@ -114,16 +109,7 @@ export class Plugins extends PluginManager {
     return cmd
   }
 
-  private async warmCache() {
-    cli.action.start('Warming cache')
-    await this.commandIDs()
-    await this.rootCommands()
-    await this.topics()
-    cli.action.stop()
-  }
-
   public async plugins(): Promise<Plugin[]> {
-    await this.init()
     const managers = _.compact([this.link, this.user, this.core])
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
     return [...plugins, this.builtin]

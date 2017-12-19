@@ -68,6 +68,7 @@ export default class CLI {
 
     debug('command_manager')
     const plugins = new deps.Plugins({ config })
+    await plugins.init()
     if (this.cmdAskingForHelp) {
       debug('asking for help')
       this.Command = deps.Help

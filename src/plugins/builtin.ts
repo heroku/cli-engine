@@ -36,8 +36,6 @@ export class Builtin extends Plugin {
     }
   }
 
-  public async init() {}
-
   public async _aliases() {
     return {
       'plugins:uninstall': ['plugins:unlink'],

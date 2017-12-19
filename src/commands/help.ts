@@ -24,12 +24,13 @@ export default class Help extends Command {
 
   async run() {
     this.plugins = new Plugins({ config: this.config })
+    await this.plugins.init()
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
       await this.topics()
       if (this.flags.all) {
-        let rootCmds = await this.plugins.rootCommands()
+        let rootCmds = await this.plugins.rootCommands
         if (rootCmds) {
           await this.listCommandsHelp(Object.values(rootCmds))
         }
@@ -57,7 +58,7 @@ export default class Help extends Command {
   }
 
   private async topics(parent?: Topic) {
-    let topics = Object.values(parent ? parent.subtopics : await this.plugins.topics())
+    let topics = Object.values(parent ? parent.subtopics : this.plugins.topics)
       .filter(t => !t.hidden)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
