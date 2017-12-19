@@ -2,7 +2,7 @@ require('./fs')
 import deps from './deps'
 import { color } from 'heroku-cli-color'
 import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
-import { default as cli } from 'cli-ux'
+import cli from 'cli-ux'
 import * as path from 'path'
 import { Hooks } from './hooks'
 
@@ -48,6 +48,7 @@ export default class CLI {
     }
     this.config = buildConfig(config)
     if (this.config.debug) cli.config.debug = true
+    cli.config.errlog = this.config.errlog
   }
 
   async run() {
