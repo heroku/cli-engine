@@ -66,11 +66,13 @@ export class LinkPlugins extends PluginManager {
     if (!toRefresh.length) return
     const downgrade = await this.lock.upgrade()
     for (let p of toRefresh.map(p => p.refresh())) {
+      toRefresh = toRefresh.filter(p => p.needsRefresh)
       cli.action.start(
-        `Updating linked plugin${toRefresh.length > 1 ? 's' : ''}: ${toRefresh.map(p => p.root).join(', ')}`,
+        `Updating linked plugin${toRefresh.length > 1 ? 's' : ''}: ${toRefresh.map(p => p.root).join('\n')}`,
       )
       await p
     }
+    cli.action.start('Updating linked plugins')
     await this.cache.save()
     await downgrade()
     cli.action.stop()
@@ -155,5 +157,6 @@ export class LinkPlugin extends Plugin {
     await this.cache.set(this.cacheKey, 'last_updated', new Date().toISOString())
     await this._init()
     await this.load()
+    delete this.needsRefresh
   }
 }
