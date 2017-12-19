@@ -84,14 +84,10 @@ export default class Yarn {
 
   async exec(args: string[] = []): Promise<void> {
     if (args.length !== 0) await this.checkForYarnLock()
-    const cacheDir = path.join(this.config.cacheDir, 'yarn')
-    args = [
-      ...args,
-      '--non-interactive',
-      // '--link-duplicates',
-      `--preferred-cache-folder=${cacheDir}`,
-      ...this.proxyArgs(),
-    ]
+    if (args[0] !== 'run') {
+      const cacheDir = path.join(this.config.cacheDir, 'yarn')
+      args = [...args, '--non-interactive', `--preferred-cache-folder=${cacheDir}`, ...this.proxyArgs()]
+    }
 
     let options = {
       cwd: this.cwd,
