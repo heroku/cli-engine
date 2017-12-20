@@ -13,12 +13,11 @@ export class Builtin extends Plugin {
   constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
     super({
       type: 'builtin',
-      name: 'builtin',
       config,
       cache,
       manifest,
       root: path.join(__dirname, '..', 'commands'),
-      version: require('../../package.json').version,
+      pjson: require('../../package.json'),
     })
 
     this._commands = {
@@ -38,13 +37,6 @@ export class Builtin extends Plugin {
         'plugins:update': 'plugins/update',
         ...this._commands,
       }
-    }
-  }
-
-  public async _aliases() {
-    return {
-      'plugins:uninstall': ['plugins:unlink'],
-      version: ['-v', '--version'],
     }
   }
 

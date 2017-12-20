@@ -7,12 +7,10 @@ import * as path from 'path'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
 export type PluginOptions = PluginManagerOptions & {
-  name: string
   root: string
-  version: string
   type: PluginType
   manifest: PluginManifest
-  pjson?: PluginPJSON
+  pjson: PluginPJSON
 }
 
 export type PluginPJSON = {
@@ -48,21 +46,13 @@ export abstract class Plugin extends PluginManager {
 
   constructor(options: PluginOptions) {
     super(options)
-    if (options.pjson) this.pjson = options.pjson
-    this.name = options.name
-    this.version = options.version
+    this.pjson = options.pjson
+    if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
+    this.name = this.pjson.name
+    this.version = this.pjson.version
     this.root = options.root
-    this.cacheKey = [options.name, options.type, options.version].join(':')
+    this.cacheKey = [this.name, options.type, this.version].join(':')
     this.debug = require('debug')(`cli:plugins:${this.cacheKey}`)
-  }
-
-  protected async _init() {
-    if (this.type !== 'builtin') {
-      this.pjson = this.pjson || (await deps.file.readJSON(path.join(this.root, 'package.json')))
-      if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
-      this.name = this.pjson.name
-      this.version = this.pjson.version
-    }
   }
 
   protected async _refresh() {

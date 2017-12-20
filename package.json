@@ -4,6 +4,15 @@
   "version": "5.0.7",
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
+  "cli-engine": {
+    "aliases": {
+      "plugins:uninstall": "plugins:unlink",
+      "version": [
+        "-v",
+        "--version"
+      ]
+    }
+  },
   "dependencies": {
     "ansi-escapes": "^3.0.0",
     "cli-ux": "^2.0.10",
