@@ -672,9 +672,9 @@ cli-engine-command@11.0.3:
     cli-ux "^2.0.10"
     http-call "^4.0.5"
 
-cli-engine-config@5.0.3:
-  version "5.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.3.tgz#b143a0cd739bd5f9acafe0b7ab7ad9de4e4d2d63"
+cli-engine-config@5.0.4:
+  version "5.0.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.4.tgz#962f91c4a240d1d067f61c37817ff6b5dc2a7885"
   dependencies:
     uuid "^3.1.0"
 
