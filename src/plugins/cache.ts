@@ -33,7 +33,7 @@ export class PluginCache {
       if (!await this.canWrite()) {
         throw new Error('cache file modified, cannot save')
       }
-      await deps.file.outputJSON(this.file, this.cache, { spaces: 2 })
+      await deps.file.outputJSON(this.file, this.cache, { spaces: 0 })
     })()
   }
 

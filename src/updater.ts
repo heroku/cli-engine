@@ -1,7 +1,6 @@
 import deps from './deps'
 import _ from 'ts-lodash'
 import * as path from 'path'
-import * as fs from 'fs-extra'
 
 import { Lock } from './lock'
 import { Config } from 'cli-engine-config'
@@ -22,7 +21,7 @@ export type Manifest = {
 }
 
 async function mtime(f: string) {
-  const { mtime } = await fs.stat(f)
+  const { mtime } = await deps.file.stat(f)
   return deps.moment(mtime)
 }
 
@@ -87,7 +86,7 @@ export class Updater {
   async fetchVersion(download: boolean): Promise<Version> {
     let v: Version | undefined
     try {
-      if (!download) v = await fs.readJSON(this.versionFile)
+      if (!download) v = await deps.file.readJSON(this.versionFile)
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
@@ -95,7 +94,7 @@ export class Updater {
       debug('fetching latest %s version', this.config.channel)
       let { body } = await deps.HTTP.get(this.s3url(this.config.channel, 'version'))
       v = body
-      await this._catch(() => fs.writeJSON(this.versionFile, v))
+      await this._catch(() => deps.file.outputJSON(this.versionFile, v))
     }
     return v!
   }
@@ -206,20 +205,17 @@ export class Updater {
   }
 
   private async _rename(from: string, to: string) {
-    debug(`renaming ${from} to ${to}`)
-    await fs.rename(from, to)
+    await deps.file.rename(from, to)
   }
 
   private async _remove(dir: string) {
     if (await deps.file.exists(dir)) {
-      debug(`remove ${dir}`)
-      await fs.remove(dir)
+      await deps.file.remove(dir)
     }
   }
 
   private async _mkdirp(dir: string) {
-    debug(`mkdirp ${dir}`)
-    await fs.mkdirp(dir)
+    await deps.file.mkdirp(dir)
   }
 
   base(manifest: Manifest): string {
@@ -243,7 +239,7 @@ export class Updater {
       if (!force && !await this.autoupdateNeeded()) return
 
       debug('autoupdate running')
-      await fs.outputFile(this.autoupdatefile, '')
+      await deps.file.outputFile(this.autoupdatefile, '')
 
       const binPath = await this.binPath
       if (!binPath) {
@@ -252,9 +248,8 @@ export class Updater {
       }
       debug(`spawning autoupdate on ${binPath}`)
 
-      let fd = await fs.open(this.autoupdatelogfile, 'a')
-      // @ts-ignore
-      fs.write(
+      let fd = await deps.file.open(this.autoupdatelogfile, 'a')
+      deps.file.write(
         fd,
         timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
       )
@@ -329,6 +324,6 @@ fi
 "${dst}" "$@"
 `
     }
-    await fs.outputFile(src, body, { mode: 0o777 })
+    await deps.file.outputFile(src, body, { mode: 0o777 })
   }
 }

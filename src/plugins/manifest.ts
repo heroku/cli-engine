@@ -57,7 +57,7 @@ export class PluginManifest {
       if (!await this.canWrite()) {
         throw new Error('manifest file modified, cannot save')
       }
-      await deps.file.outputJSON(this.file, this.manifest, { spaces: 2 })
+      await deps.file.outputJSON(this.file, this.manifest)
       delete this._init
     })())
   }

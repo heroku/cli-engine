@@ -20,14 +20,24 @@ export function fetchJSONFile(f: string): Promise<any> {
   return jsonFiles[f]
 }
 
-export async function outputFile(file: string, data: any, options: any) {
+export async function rename(from: string, to: string): Promise<void> {
+  debug('rename', from, to)
+  return fs.rename(from, to)
+}
+
+export async function mkdirp(dir: string): Promise<void> {
+  debug('mkdirp', dir)
+  return fs.mkdirp(dir)
+}
+
+export async function outputFile(file: string, data: any, options?: fs.WriteFileOptions | string): Promise<void> {
   debug('outputFile', file)
   return fs.outputFile(file, data, options)
 }
 
-export async function outputJSON(file: string, data: any, options: any) {
+export async function outputJSON(file: string, data: any, options: fs.WriteOptions = {}) {
   debug('outputJSON', file)
-  return fs.outputJSON(file, data, options)
+  return fs.outputJSON(file, data, { spaces: 2, ...options })
 }
 
 export async function readJSON(file: string) {
@@ -48,6 +58,17 @@ export async function remove(file: string) {
 export async function stat(file: string): Promise<Stats> {
   debug('stat', file)
   return fs.stat(file)
+}
+
+export function open(path: string | Buffer, flags: string | number, mode?: number): Promise<number> {
+  debug('open', path, flags, mode)
+  return fs.open(path, flags, mode)
+}
+
+export function write(fd: number, data: any): Promise<Stats> {
+  debug('write', fd)
+  // @ts-ignore
+  return fs.write(fd, data)
 }
 
 export function walk(root: string, opts: klaw.Options = {}): Promise<klaw.Item[]> {

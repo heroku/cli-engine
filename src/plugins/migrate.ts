@@ -50,7 +50,7 @@ export class PluginsMigrate {
       }
       user = await deps.file.readJSON(userPath)
       user['cli-engine'] = { schema: 1 }
-      await deps.file.outputJSON(userPath, user, { spaces: 2 })
+      await deps.file.outputJSON(userPath, user)
     }
   }
 }
