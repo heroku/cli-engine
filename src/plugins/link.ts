@@ -52,17 +52,14 @@ export class LinkPlugins extends PluginManager {
   }
 
   private async loadPlugin(root: string, forceRefresh: boolean = false) {
-    const pjson = await linkPJSON(root)
     return new LinkPlugin({
-      name: pjson.name,
       cache: this.cache,
       type: 'link',
       config: this.config,
       forceRefresh,
       manifest: this.manifest,
       root,
-      version: pjson.version,
-      pjson,
+      pjson: await linkPJSON(root),
     })
   }
 }

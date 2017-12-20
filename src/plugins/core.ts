@@ -11,17 +11,18 @@ export class CorePlugins extends PluginManager {
   }
 
   private async initPlugin(name: string) {
-    const pjson = await deps.file.fetchJSONFile(path.join(this.root(name), 'package.json'))
     return new CorePlugin({
-      name,
       type: 'core',
       config: this.config,
       cache: this.cache,
       manifest: this.manifest,
       root: this.root(name),
-      version: pjson.version,
-      pjson,
+      pjson: await this.pjson(name),
     })
+  }
+
+  private pjson(name: string): Promise<PluginPJSON> {
+    return deps.file.fetchJSONFile(path.join(this.root(name), 'package.json'))
   }
 
   private root(name: string): string {

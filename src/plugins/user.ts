@@ -55,13 +55,12 @@ export class UserPlugins extends PluginManager {
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
     const pjson = await deps.file.fetchJSONFile(path.join(this.userPluginPath(name), 'package.json'))
     return new UserPlugin({
-      name,
+      pjson,
       tag,
       type: 'user',
       root: this.userPluginPath(name),
       config: this.config,
       cache: this.cache,
-      version: pjson.version,
       manifest: this.manifest,
     })
   }
