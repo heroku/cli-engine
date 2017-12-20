@@ -1,4 +1,4 @@
-import { Command, flags, IBooleanFlag } from 'cli-engine-command'
+import { Command, flags } from 'cli-engine-command'
 import { Plugins } from '../../plugins'
 import * as path from 'path'
 import { Hooks } from '../../hooks'
@@ -13,8 +13,8 @@ if (g.config) {
 export default class PluginsLink extends Command {
   static topic = 'plugins'
   static command = 'link'
-  static flags = {
-    force: flags.boolean({ char: 'f' }) as IBooleanFlag,
+  static flags: flags.Input = {
+    force: flags.boolean({ char: 'f' }),
   }
   static args = [{ name: 'path', optional: true, description: 'local file path to plugin root' }]
   static description = 'links a local plugin to the CLI for development'

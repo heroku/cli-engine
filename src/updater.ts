@@ -1,4 +1,5 @@
 import deps from './deps'
+import _ from 'ts-lodash'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 
@@ -126,8 +127,7 @@ export class Updater {
       // if spinner action
       let total = stream.headers['content-length']
       let current = 0
-      const throttle = require('lodash.throttle')
-      const updateStatus = throttle(
+      const updateStatus = _.throttle(
         (newStatus: string) => {
           cli.action.status = newStatus
         },

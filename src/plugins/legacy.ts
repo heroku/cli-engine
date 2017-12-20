@@ -1,5 +1,6 @@
 import deps from '../deps'
-import { IArg, InputFlags, flags as Flags } from 'cli-engine-command'
+import { args as Args } from 'cli-flags'
+import { flags as Flags } from 'cli-engine-command'
 import { cli } from 'cli-ux'
 import { color } from 'heroku-cli-color'
 import { Config, ICommand } from 'cli-engine-config'
@@ -45,7 +46,7 @@ export type V5Command = {
   command?: string
   aliases?: string[]
   variableArgs?: boolean
-  args: IArg[]
+  args: Args.IArg[]
   flags: LegacyFlag[]
   description?: string
   help?: string
@@ -180,7 +181,7 @@ export class PluginLegacy {
   }
 }
 
-function convertFlagsFromV5(flags: LegacyFlag[] | InputFlags | undefined): InputFlags {
+function convertFlagsFromV5(flags: LegacyFlag[] | Flags.Input | undefined): Flags.Input {
   if (!flags) return {}
   if (!Array.isArray(flags)) return flags
   return flags.reduce(
@@ -199,6 +200,6 @@ function convertFlagsFromV5(flags: LegacyFlag[] | InputFlags | undefined): Input
       flags[flag.name] = flag.hasValue ? Flags.string(opts as any) : Flags.boolean(opts as any)
       return flags
     },
-    {} as InputFlags,
+    {} as Flags.Input,
   )
 }

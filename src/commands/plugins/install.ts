@@ -1,4 +1,4 @@
-import { Command, flags, IBooleanFlag } from 'cli-engine-command'
+import { Command, flags } from 'cli-engine-command'
 import { Plugins } from '../../plugins'
 import { Hooks } from '../../hooks'
 import { cli } from 'cli-ux'
@@ -23,8 +23,8 @@ export default class PluginsInstall extends Command {
     $ ${bin} plugins:install ${examplePlugin}
   `
   static args = [{ name: 'plugin', description: 'plugin to install' }]
-  static flags = {
-    force: flags.boolean({ char: 'f' }) as IBooleanFlag,
+  static flags: flags.Input = {
+    force: flags.boolean({ char: 'f' }),
   }
 
   async run() {

@@ -1,6 +1,5 @@
 import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
-import { IBooleanFlag } from 'cli-flags'
 import { Command, flags } from 'cli-engine-command'
 import { renderList } from 'cli-ux/lib/list'
 import { Plugins } from '../plugins'
@@ -16,8 +15,8 @@ function topicSort(a: any, b: any) {
 export default class Help extends Command {
   static description = 'display help'
   static variableArgs = true
-  static flags = {
-    all: flags.boolean({ description: 'show all commands' }) as IBooleanFlag,
+  static flags: flags.Input = {
+    all: flags.boolean({ description: 'show all commands' }),
   }
 
   plugins: Plugins

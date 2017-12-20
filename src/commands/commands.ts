@@ -1,6 +1,6 @@
 import deps from '../deps'
 import { cli } from 'cli-ux'
-import { Command, flags, InputFlags } from 'cli-engine-command'
+import { Command, flags } from 'cli-engine-command'
 import { Plugins } from '../plugins'
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -10,7 +10,7 @@ const debug = require('debug')('cli:commands')
 export default class Commands extends Command {
   static topic = 'commands'
   static hidden = true
-  static flags: InputFlags = { json: flags.boolean() }
+  static flags: flags.Input = { json: flags.boolean() }
 
   plugins: Plugins
 

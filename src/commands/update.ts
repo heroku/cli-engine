@@ -1,4 +1,4 @@
-import { Command, flags, IBooleanFlag } from 'cli-engine-command'
+import { Command, flags } from 'cli-engine-command'
 import { Updater } from '../updater'
 import PluginsUpdate from './plugins/update'
 import { Hooks } from '../hooks'
@@ -21,8 +21,8 @@ export default class Update extends Command {
   static topic = 'update'
   static description = `update the ${cliBin} CLI`
   static args = [{ name: 'channel', optional: true }]
-  static flags = {
-    autoupdate: flags.boolean({ hidden: true }) as IBooleanFlag,
+  static flags: flags.Input = {
+    autoupdate: flags.boolean({ hidden: true }),
   }
   updater: Updater
 

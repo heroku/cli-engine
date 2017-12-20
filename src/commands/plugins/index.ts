@@ -1,6 +1,6 @@
 import { color } from 'heroku-cli-color'
 import { cli } from 'cli-ux'
-import { Command, flags, InputFlags } from 'cli-engine-command'
+import { Command, flags } from 'cli-engine-command'
 import { compare } from '../../util'
 import { Plugins } from '../../plugins'
 
@@ -22,7 +22,7 @@ const examplePluginsHelp = Object.entries(examplePlugins).map(([name, p]: [strin
 
 export default class extends Command {
   static topic = 'plugins'
-  static flags: InputFlags = { core: flags.boolean({ description: 'show core plugins' }) }
+  static flags: flags.Input = { core: flags.boolean({ description: 'show core plugins' }) }
   static description = 'list installed plugins'
   static help = `Example:
     $ ${bin} plugins
