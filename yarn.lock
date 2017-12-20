@@ -679,9 +679,9 @@ cli-engine-config@5.0.2:
     fs-extra "^5.0.0"
     uuid "^3.1.0"
 
-cli-engine-heroku@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.0.tgz#6fb1d564cfd4a5f5feaecb2b9c5365f58df50ac7"
+cli-engine-heroku@7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.1.tgz#def329f59b522f0fbcd7ccaf6de8ea8b702b5f07"
   dependencies:
     cli-ux "^2.0.9"
     heroku-client "3.0.4"
