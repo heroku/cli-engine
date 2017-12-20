@@ -63,7 +63,7 @@ export class Updater {
         if (!this.config.updateDisabled && (await deps.file.exists(this.clientBin))) {
           return this.clientBin
         }
-        return this.config.reexecBin || this.config.bin
+        return this.config.bin
       })()
     return this._binPath
   }
