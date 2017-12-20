@@ -341,4 +341,23 @@ fi
     }
     await deps.file.outputFile(src, body, { mode: 0o777 })
   }
+
+  public async tidy() {
+    try {
+      const { moment, file } = deps
+      let root = this.clientRoot
+      if (!await file.exists(root)) return
+      let files = await file.ls(root)
+      let promises = files.map(async f => {
+        if (['client', this.config.version].includes(path.basename(f.path))) return
+        let mtime = f.stat.isDirectory() ? await file.newestFileInDir(f.path) : f.stat.mtime
+        if (moment(mtime).isBefore(moment().subtract(24, 'hours'))) {
+          await file.remove(f.path)
+        }
+      })
+      for (let p of promises) await p
+    } catch (err) {
+      cli.warn(err)
+    }
+  }
 }

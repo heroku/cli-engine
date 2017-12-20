@@ -2,6 +2,7 @@ import deps from './deps'
 import { Stats } from 'fs'
 import * as fs from 'fs-extra'
 import * as klaw from 'klaw'
+import * as path from 'path'
 
 const debug = require('debug')('cli:file')
 
@@ -84,4 +85,33 @@ export function walk(root: string, opts: klaw.Options = {}): Promise<klaw.Item[]
       .on('error', reject)
       .on('end', () => resolve(items))
   })
+}
+
+export async function ls(dir: string) {
+  let files = await fs.readdir(dir)
+  let paths = files.map(f => path.join(dir, f))
+  return Promise.all(paths.map(path => fs.stat(path).then(stat => ({ path, stat }))))
+}
+
+export async function cleanup(dir: string): Promise<void> {
+  let files
+  try {
+    files = await ls(dir)
+  } catch (err) {
+    if (err.code === 'ENOENT') return
+    throw err
+  }
+  let dirs = files.filter(f => f.stat.isDirectory()).map(f => f.path)
+  for (let p of dirs.map(cleanup)) await p
+  files = await ls(dir)
+  if (!files.length) await remove(dir)
+}
+
+export async function newestFileInDir(dir: string): Promise<Date> {
+  let files = await walk(dir)
+  return files.reduce((prev, f): Date => {
+    if (f.stats.isDirectory()) return prev
+    if (f.stats.mtime > prev) return f.stats.mtime
+    return prev
+  }, new Date(0))
 }
