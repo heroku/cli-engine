@@ -68,8 +68,7 @@
   "main": "lib/cli.js",
   "peerDependencies": {
     "cli-engine-command": "^11.0.0",
-    "cli-engine-config": "^5.0.0",
-    "cli-engine-heroku": "^6.0.0"
+    "cli-engine-config": "^5.0.0"
   },
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
