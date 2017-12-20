@@ -16,11 +16,17 @@ export interface PluginManagerOptions {
   manifest?: PluginManifest
 }
 
+const errHandle = (context: string, m: PluginManager) => (err: Error) => {
+  m.errored = true
+  cli.warn(err, { context: `${context}: ${m.constructor.name}` })
+}
+
 export abstract class PluginManager {
   public topics: Topics
   public commandIDs: string[]
   public rootCommands: Commands
   public aliases: Aliases
+  public errored = false
   protected submanagers: PluginManager[] = []
   protected config: Config
   protected manifest: PluginManifest
@@ -48,8 +54,7 @@ export abstract class PluginManager {
     if (this._needsRefreshPromise) return this._needsRefreshPromise
     return (this._needsRefreshPromise = (async () => {
       if (await this._needsRefresh()) return true
-      const errHandle = (err: Error) => cli.warn(err, { context: `needsRefresh: ${this.constructor.name}` })
-      const promises = this.submanagers.map(m => m.needsRefresh.catch(errHandle))
+      const promises = this.okSubmanagers.map(m => m.needsRefresh.catch(errHandle('needsRefresh', m)))
       for (let s of promises) if (await s) return true
       return false
     })())
@@ -64,9 +69,8 @@ export abstract class PluginManager {
     return (this._refreshPromise = (async () => {
       this.debug('refresh')
       await this._refresh()
-      const errHandle = (err: Error) => cli.warn(err, { context: `refresh: ${this.constructor.name}` })
-      const promises = this.submanagers.map(async m => {
-        if (await m.needsRefresh) return m.refresh().catch(errHandle)
+      const promises = this.okSubmanagers.map(async m => {
+        if (await m.needsRefresh) return m.refresh().catch(errHandle('refresh', m))
       })
       for (let s of promises) await s
     })())
@@ -82,8 +86,7 @@ export abstract class PluginManager {
     if (!this._loadPromise) {
       this._loadPromise = (async () => {
         await this._load()
-        const errHandle = (err: Error) => cli.warn(err, { context: `load: ${this.constructor.name}` })
-        const promises = this.submanagers.map(m => m.load.catch(errHandle))
+        const promises = this.okSubmanagers.map(m => m.load.catch(errHandle('load', m)))
         for (let s of promises) await s
         this.commandIDs = await this.fetchCommandIDs()
         this.topics = await this.fetchTopics()
@@ -98,7 +101,7 @@ export abstract class PluginManager {
   private async fetchCommandIDs(): Promise<string[]> {
     const fetch = () => this._commandIDs()
     let ids = await this.cache.fetch(this.cacheKey, 'command:ids', fetch)
-    return _.uniq(ids.concat(...this.submanagers.map(s => s.commandIDs)).sort())
+    return _.uniq(ids.concat(...this.okSubmanagers.map(s => s.commandIDs)).sort())
   }
 
   private _commandFinders: { [k: string]: Promise<ICommand | undefined> } = {}
@@ -108,8 +111,7 @@ export abstract class PluginManager {
       if (!this.hasID(id)) return
       let cmd = await this._findCommand(await this.unalias(id))
       if (cmd) return cmd
-      const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
-      const promises = this.submanagers.map(s => s.findCommand(id).catch(errHandle))
+      const promises = this.okSubmanagers.map(m => m.findCommand(id).catch(errHandle('findCommand', m)))
       for (let p of promises) {
         let cmd = await p
         if (cmd) return cmd
@@ -165,7 +167,7 @@ export abstract class PluginManager {
 
   private async initSubmanagers() {
     const errHandle = (err: Error) => cli.warn(err, { context: `init: ${this.constructor.name}` })
-    const promises = this.submanagers.map(m => m.init().catch(errHandle))
+    const promises = this.okSubmanagers.map(m => m.init().catch(errHandle))
     for (let s of promises) await s
   }
 
@@ -200,13 +202,13 @@ export abstract class PluginManager {
       return topics
     }
     let topics = await this.cache.fetch(this.cacheKey, 'topics', fetch)
-    return Topic.mergeSubtopics(topics, ...this.submanagers.map(m => m.topics))
+    return Topic.mergeSubtopics(topics, ...this.okSubmanagers.map(m => m.topics))
   }
 
   private async fetchRootCommands(): Promise<Commands> {
     const fetch = async () => await this._rootCommands()
     let rootCommands = await this.cache.fetch(this.cacheKey, 'root_commands', fetch)
-    for (let s of this.submanagers) {
+    for (let s of this.okSubmanagers) {
       rootCommands = { ...rootCommands, ...s.rootCommands }
     }
     return rootCommands
@@ -237,7 +239,7 @@ export abstract class PluginManager {
   private async fetchAliases(): Promise<Aliases> {
     const fetch = () => this._aliases()
     let aliases: Aliases = await this.cache.fetch(this.cacheKey, 'aliases', fetch)
-    for (let s of this.submanagers) {
+    for (let s of this.okSubmanagers) {
       for (let [k, v] of Object.entries(s.aliases || {})) {
         aliases[k] = _.uniq([...(aliases[k] || []), ...deps.util.toArray(v)])
       }
@@ -248,5 +250,9 @@ export abstract class PluginManager {
   protected hasID(id: string) {
     if (this.commandIDs.includes(id)) return true
     if ((<string[]>[]).concat(...Object.values(this.aliases)).includes(id)) return true
+  }
+
+  private get okSubmanagers() {
+    return this.submanagers.filter(m => !m.errored)
   }
 }

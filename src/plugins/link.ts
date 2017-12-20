@@ -33,6 +33,7 @@ export class LinkPlugins extends PluginManager {
     this.debug('installing', root)
     const plugin = await this.loadPlugin(root, true)
     await plugin.refresh()
+    await plugin.load
     await plugin.init()
   }
 
