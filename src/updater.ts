@@ -312,36 +312,10 @@ export class Updater {
   }
 
   private async _createBin(manifest: Manifest) {
+    let bin = this.config.windows ? 'heroku.cmd' : 'heroku'
     let src = this.clientBin
-    let body
-    if (this.config.windows) {
-      body = `@echo off
-"%~dp0\\..\\${manifest.version}\\bin\\heroku.cmd" %*
-`
-    } else {
-      body = `#!/usr/bin/env bash
-get_script_dir () {
-  SOURCE="\${BASH_SOURCE[0]}"
-  # While $SOURCE is a symlink, resolve it
-  while [ -h "$SOURCE" ]; do
-    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-    SOURCE="$( readlink "$SOURCE" )"
-    # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
-    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
-  done
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  echo "$DIR"
-}
-SCRIPT_DIR=$(get_script_dir)
-CLIENT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
-export CLI_BINPATH="$CLIENT_DIR/${manifest.version}/bin/heroku"
-if [ "$DEBUG" == "*" ]; then
-  echo "running $CLI_BINPATH" "$@"
-fi
-"$CLI_BINPATH" "$@"
-`
-    }
-    await deps.file.outputFile(src, body, { mode: 0o777 })
+    let dst = path.join('..', manifest.version, 'bin', bin)
+    await deps.file.symlink(src, dst)
   }
 
   public async tidy() {

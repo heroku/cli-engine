@@ -115,3 +115,7 @@ export async function newestFileInDir(dir: string): Promise<Date> {
     return prev
   }, new Date(0))
 }
+
+export function symlink(src: string, dst: string): Promise<void> {
+  return fs.symlink(src, dst)
+}
