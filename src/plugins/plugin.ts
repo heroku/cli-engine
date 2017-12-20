@@ -63,8 +63,10 @@ export abstract class Plugin extends PluginManager {
     return !await this.cache.get(this.cacheKey, 'topics')
   }
 
-  protected _commandIDs() {
-    return deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
+  protected async _commandIDs() {
+    let ids = await deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
+    if (!ids.length) throw new Error(`${this.name} has no IDs`)
+    return ids
   }
 
   protected async _aliases() {
@@ -174,7 +176,7 @@ export abstract class Plugin extends PluginManager {
       deps
         .klaw(d, { depthLimit: 10 })
         .on('data', f => {
-          if (!f.stats.isDirectory() && f.path.endsWith('.js')) {
+          if (!f.stats.isDirectory() && f.path.endsWith('.js') && !f.path.endsWith('.test.js')) {
             let parsed = path.parse(f.path)
             let p = path.relative(d, path.join(parsed.dir, parsed.name))
             ids.push(p.split(path.sep).join(':'))
