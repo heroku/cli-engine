@@ -315,7 +315,6 @@ export class Updater {
   }
 
   private async _createBin(dst: string, manifest: Manifest) {
-    await this._remove(this.clientRoot)
     let src = this.clientBin
     let body
     if (this.config.windows) {
