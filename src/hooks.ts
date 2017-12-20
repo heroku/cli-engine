@@ -1,3 +1,4 @@
+import deps from './deps'
 import { PluginModule, PluginPJSON } from './plugins/plugin'
 import { Config, ICommand } from 'cli-engine-config'
 import * as path from 'path'
@@ -31,7 +32,7 @@ export class Hooks {
     for (let script of scripts) {
       script = path.join(this.config.root, script)
       debug(`%s %s`, event, script)
-      const m = require(script)
+      const m = deps.util.undefault(require(script))
       await m(this.config, options)
     }
   }
