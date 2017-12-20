@@ -95,7 +95,7 @@ export class PluginCache {
     try {
       this.mtime = await this.getLastUpdated()
       let cache = await fs.readJSON(this.file)
-      if (cache.version !== this.config.userAgent) {
+      if (cache.version !== this.config.version) {
         debug('cache version mismatch')
         return
       }
