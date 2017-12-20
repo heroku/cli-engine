@@ -120,7 +120,7 @@ export class PluginManifest {
     return path.join(this.config.dataDir, 'plugins', 'plugins.json')
   }
 
-  private async read(retry: boolean = true): Promise<ManifestJSON> {
+  private async read(): Promise<ManifestJSON> {
     try {
       this.mtime = await this.getLastUpdated()
       const manifest = await deps.file.readJSON(this.file)
@@ -128,11 +128,12 @@ export class PluginManifest {
       if (!manifest.user) this.manifest.user = []
       return manifest
     } catch (err) {
-      if (err.code === 'ENOENT' && retry) {
-        debug(err)
-        return this.manifest
-      } else {
-        throw err
+      if (err.code !== 'ENOENT') throw err
+      return {
+        version: 1,
+        node_version: process.versions.node,
+        link: [],
+        user: [],
       }
     }
   }

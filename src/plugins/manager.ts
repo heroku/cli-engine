@@ -77,7 +77,7 @@ export abstract class PluginManager {
   }
 
   private _loadPromise?: Promise<void>
-  protected get load() {
+  public get load() {
     if (!this._loadPromise) {
       this._loadPromise = (async () => {
         await this._load()

@@ -7,23 +7,27 @@ import { PluginManager } from './manager'
 
 export class UserPlugins extends PluginManager {
   public plugins: UserPlugin[]
-  private yarn: Yarn
 
   public async update() {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
+    const yarn = this.yarn()
     const packages = (await this.manifest.list('user')).map(p => `${p.name}@${p.tag}`)
-    await this.yarn.exec(['upgrade', ...packages])
+    await yarn.exec(['upgrade', ...packages])
   }
 
   public async install(name: string, tag: string): Promise<void> {
-    await this.yarn.exec(['add', `${name}@${tag}`])
+    await this.createPJSON()
+    const yarn = this.yarn()
+    await yarn.exec(['add', `${name}@${tag}`])
     const plugin = await this.loadPlugin(name, tag)
     await plugin.init()
+    await plugin.load
   }
 
   public async uninstall(name: string): Promise<void> {
-    await this.yarn.exec(['remove', name])
+    const yarn = this.yarn()
+    await yarn.exec(['remove', name])
     await this.manifest.remove(name)
   }
 
@@ -33,14 +37,14 @@ export class UserPlugins extends PluginManager {
   }
 
   protected async _refresh() {
-    await this.yarn.exec()
+    if (!this.plugins.length) return
+    const yarn = this.yarn()
+    await yarn.exec()
     for (let p of this.plugins.map(p => p.refresh())) await p
   }
 
   protected async _init() {
     this.debug('init')
-    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-    await this.createPJSON()
     const defs = await this.manifest.list('user')
     this.submanagers = this.plugins = await Promise.all(defs.map(p => this.loadPlugin(p.name, p.tag)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
@@ -69,6 +73,10 @@ export class UserPlugins extends PluginManager {
   }
   private get pjsonPath() {
     return path.join(this.userPluginsDir, 'package.json')
+  }
+
+  private yarn() {
+    return new Yarn({ config: this.config, cwd: this.userPluginsDir })
   }
 
   private async createPJSON() {
