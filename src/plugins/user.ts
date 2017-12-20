@@ -38,9 +38,11 @@ export class UserPlugins extends PluginManager {
 
   protected async _refresh() {
     if (!this.plugins.length) return
-    const yarn = this.yarn()
-    await yarn.exec()
-    for (let p of this.plugins.map(p => p.refresh())) await p
+    if (this.manifest.nodeVersionChanged) {
+      const yarn = this.yarn()
+      await yarn.exec()
+      for (let p of this.plugins.map(p => p.refresh())) await p
+    }
   }
 
   protected async _init() {

@@ -81,7 +81,7 @@ export class PluginCache {
     return (this._init = (async () => {
       debug('init')
       this.cache = (await this.read()) || {
-        version: this.config.userAgent,
+        version: this.config.version,
         plugins: {},
       }
     })())

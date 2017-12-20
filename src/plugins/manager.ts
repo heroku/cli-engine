@@ -62,10 +62,11 @@ export abstract class PluginManager {
   public refresh() {
     if (this._refreshPromise) return this._refreshPromise
     return (this._refreshPromise = (async () => {
+      this.debug('refresh')
       await this._refresh()
       const errHandle = (err: Error) => cli.warn(err, { context: `refresh: ${this.constructor.name}` })
-      const promises = this.submanagers.map(m => {
-        if (m.needsRefresh) return m.refresh().catch(errHandle)
+      const promises = this.submanagers.map(async m => {
+        if (await m.needsRefresh) return m.refresh().catch(errHandle)
       })
       for (let s of promises) await s
     })())
