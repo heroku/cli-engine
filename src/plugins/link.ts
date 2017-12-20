@@ -43,9 +43,11 @@ export class LinkPlugins extends PluginManager {
   }
 
   protected async _init(): Promise<void> {
+    this.debug('init')
     const defs = await this.manifest.list('link')
     const promises = defs.map(p => this.loadPlugin(p.root))
     this.submanagers = this.plugins = await Promise.all(promises)
+    if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
   }
 
   private async loadPlugin(root: string, forceRefresh: boolean = false) {
@@ -68,9 +70,8 @@ export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
   private forceRefresh: boolean
 
-  constructor(opts: { pjson: any; forceRefresh: boolean } & PluginOptions) {
+  constructor(opts: { forceRefresh: boolean } & PluginOptions) {
     super(opts)
-    this.pjson = opts.pjson
     this.forceRefresh = opts.forceRefresh
   }
 

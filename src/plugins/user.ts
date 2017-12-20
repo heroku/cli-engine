@@ -43,6 +43,7 @@ export class UserPlugins extends PluginManager {
     await this.createPJSON()
     const defs = await this.manifest.list('user')
     this.submanagers = this.plugins = await Promise.all(defs.map(p => this.loadPlugin(p.name, p.tag)))
+    if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
   }
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
