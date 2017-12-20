@@ -130,14 +130,7 @@ export class PluginManifest {
     } catch (err) {
       if (err.code === 'ENOENT' && retry) {
         debug(err)
-        this.manifest = {
-          version: 1,
-          link: [],
-          user: [],
-        }
-        this.needsSave = true
-        await this.save()
-        return this.read(false)
+        return this.manifest
       } else {
         throw err
       }

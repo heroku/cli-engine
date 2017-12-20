@@ -663,37 +663,36 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@11.0.2:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.2.tgz#ce5d09ca92343ef01ea7e035122b6efa450617fa"
+cli-engine-command@11.0.3:
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.3.tgz#af7dcf55babd5f2946c99a4588384cf004d1d793"
   dependencies:
     chalk "2.3.0"
-    cli-flags "2.0.1"
-    cli-ux "^2.0.9"
+    cli-flags "2.0.2"
+    cli-ux "^2.0.10"
     http-call "^4.0.5"
 
-cli-engine-config@5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.2.tgz#243c5f955e40b8ab5e927f0f2821c716398430b2"
+cli-engine-config@5.0.3:
+  version "5.0.3"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.3.tgz#b143a0cd739bd5f9acafe0b7ab7ad9de4e4d2d63"
   dependencies:
-    fs-extra "^5.0.0"
     uuid "^3.1.0"
 
-cli-engine-heroku@7.0.1:
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.1.tgz#def329f59b522f0fbcd7ccaf6de8ea8b702b5f07"
+cli-engine-heroku@7.0.2:
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.2.tgz#db0518bea9166f51e0ed982e4c344d2580bee128"
   dependencies:
-    cli-ux "^2.0.9"
+    cli-ux "^2.0.10"
     heroku-client "3.0.4"
     http-call "^4.0.5"
     netrc-parser "^2.0.3"
 
-cli-flags@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-2.0.1.tgz#70a5b46a0e0ddc53ed1cfe19ae09b540375521c0"
+cli-flags@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-2.0.2.tgz#65c81cf94bb0f76114dbc1c5deef81fc0b9167ed"
   dependencies:
-    cli-ux "^2.0.9"
-    ts-lodash "^4.0.7"
+    cli-ux "^2.0.10"
+    ts-lodash "^4.0.8"
 
 cli-spinners@^0.1.2:
   version "0.1.2"
@@ -706,16 +705,15 @@ cli-truncate@^0.2.1:
     slice-ansi "0.0.4"
     string-width "^1.0.1"
 
-cli-ux@^2.0.9:
-  version "2.0.9"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.9.tgz#8d4c630c821367154f32a1e204cc862f2f539c08"
+cli-ux@^2.0.10:
+  version "2.0.10"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.10.tgz#5c4d4742af4d75f609aed43d79ee8499f5434113"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     ansi-styles "^3.2.0"
     cardinal "^1.0.0"
     chalk "^2.3.0"
-    fs-extra "^5.0.0"
     lodash "^4.17.4"
     moment "^2.20.0"
     password-prompt "^1.0.3"
@@ -3680,7 +3678,7 @@ ts-jest@22.0.0:
     source-map-support "^0.5.0"
     yargs "^10.0.3"
 
-ts-lodash@4.0.8:
+ts-lodash@4.0.8, ts-lodash@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.8.tgz#4f424e687f9c89a3dcf1473779a251f134170f6a"
   dependencies:
@@ -3689,12 +3687,6 @@ ts-lodash@4.0.8:
 ts-lodash@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.6.tgz#1166589945e8a980dc809b875c9d6b70aadd8537"
-  dependencies:
-    lodash "^4.17.4"
-
-ts-lodash@^4.0.7:
-  version "4.0.7"
-  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.7.tgz#da926ec01529f6c15b2ce4e74dfc66cbeac0490c"
   dependencies:
     lodash "^4.17.4"
 
