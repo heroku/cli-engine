@@ -4,7 +4,7 @@ jobs:
   build:
     working_directory: /cli
     docker:
-      - image: node:8
+      - image: node:9
     steps:
       - checkout
       - restore_cache:
@@ -12,25 +12,18 @@ jobs:
             - v3-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
             - v3-yarn-{{ .Branch }}
             - v3-yarn-master
-      - restore_cache:
-          keys:
-            - yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
       - run: git submodule sync && git submodule update --init --recursive
-      - run: yarn --pure-lockfile
-      - run: cd example && yarn --pure-lockfile
-      - run: cd test/roots/test-foo && yarn --pure-lockfile
-      - run: {command: "./bin/run version", when: always}
-      - run: {command: "npx eslint .", when: always}
-      - run: {command: "npx flow check", when: always}
-      - run: {command: "npx jest --coverage --runInBand", when: always}
-      - run: {command: "bash <(curl -s https://codecov.io/bash)"}
+      - run: yarn
+      - run: yarn link
+      - run: cd example && yarn link cli-engine && yarn
+      - run: cd test/roots/test-foo && yarn
+      - run: yarn
+      - run: ./bin/run version
+      - run: yarn test --coverage
+      - run: bash <(curl -s https://codecov.io/bash)
       - save_cache:
           key: v3-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
             - /cli/node_modules
             - /usr/local/share/.cache/yarn
             - /root/.cache/cli-engine/yarn
-      - save_cache:
-          key: yarn-bin-v0.27.5-{{checksum "scripts/download-yarn"}}
-          paths:
-            - /cli/yarn

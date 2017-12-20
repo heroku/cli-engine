@@ -1,5 +1,3 @@
-// @flow
-
 import Update from './update'
 import PluginsUpdate from './plugins/update'
 
