@@ -142,7 +142,7 @@ export class Updater {
     await this.extract(stream, this.clientRoot, manifest.sha256gz)
     await this._rename(path.join(this.clientRoot, base), output)
 
-    await this._createBin(path.join(output, 'bin', this.config.bin), manifest)
+    await this._createBin(manifest)
     await downgrade()
   }
 
@@ -309,7 +309,7 @@ export class Updater {
     }
   }
 
-  private async _createBin(dst: string, manifest: Manifest) {
+  private async _createBin(manifest: Manifest) {
     let src = this.clientBin
     let body
     if (this.config.windows) {
@@ -318,10 +318,25 @@ export class Updater {
 `
     } else {
       body = `#!/usr/bin/env bash
+get_script_dir () {
+  SOURCE="\${BASH_SOURCE[0]}"
+  # While $SOURCE is a symlink, resolve it
+  while [ -h "$SOURCE" ]; do
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$( readlink "$SOURCE" )"
+    # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  echo "$DIR"
+}
+SCRIPT_DIR=$(get_script_dir)
+CLIENT_DIR=$(cd "$SCRIPT_DIR/../.." && pwd)
+export CLI_BINPATH="$CLIENT_DIR/${manifest.version}/bin/heroku"
 if [ "$DEBUG" == "*" ]; then
-  echo "running ${dst}" "$@"
+  echo "running $CLI_BINPATH" "$@"
 fi
-"${dst}" "$@"
+"$CLI_BINPATH" "$@"
 `
     }
     await deps.file.outputFile(src, body, { mode: 0o777 })
