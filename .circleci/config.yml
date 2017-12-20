@@ -19,7 +19,7 @@ jobs:
       - run: cd test/roots/test-foo && yarn
       - run: yarn
       - run: ./bin/run version
-      - run: yarn test --coverage
+      - run: yarn test
       - run: bash <(curl -s https://codecov.io/bash)
       - save_cache:
           key: v3-yarn-{{ .Branch }}-{{checksum "yarn.lock"}}
