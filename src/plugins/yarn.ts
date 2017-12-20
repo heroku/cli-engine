@@ -15,7 +15,7 @@ export default class Yarn {
   }
 
   get bin(): string {
-    return require.resolve('yarn/bin/yarn')
+    return require.resolve('yarn/bin/yarn.js')
   }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
@@ -47,7 +47,8 @@ export default class Yarn {
 
   fork(modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
     return new Promise((resolve, reject) => {
-      let forked = deps.crossSpawn(modulePath, args, options)
+      const { fork } = require('child_process')
+      let forked = fork(modulePath, args, options)
       let error = ''
 
       forked.stdout.setEncoding('utf8')
