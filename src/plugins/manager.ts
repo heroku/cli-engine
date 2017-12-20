@@ -105,7 +105,7 @@ export abstract class PluginManager {
   public findCommand(id: string): Promise<ICommand | undefined> {
     if (this._commandFinders[id]) return this._commandFinders[id]
     return (this._commandFinders[id] = (async () => {
-      if (!this.commandIDs.includes(id)) return
+      if (!this.hasID(id)) return
       let cmd = await this._findCommand(await this.unalias(id))
       if (cmd) return cmd
       const errHandle = (err: Error) => cli.warn(err, { context: `findCommand: ${this.constructor.name}` })
@@ -243,5 +243,10 @@ export abstract class PluginManager {
       }
     }
     return aliases
+  }
+
+  protected hasID(id: string) {
+    if (this.commandIDs.includes(id)) return true
+    if ((<string[]>[]).concat(...Object.values(this.aliases)).includes(id)) return true
   }
 }

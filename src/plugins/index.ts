@@ -64,6 +64,7 @@ export class Plugins extends PluginManager {
   }
 
   public async uninstall(name: string): Promise<void> {
+    await this.init()
     let downgrade = await this.lock.upgrade()
     const type = await this.pluginType(name)
     if (!type) {
