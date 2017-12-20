@@ -28,7 +28,7 @@ export class Builtin extends Plugin {
       version: 'version',
       which: 'which',
     }
-    if (true || this.config.userPlugins) {
+    if (this.config.userPlugins) {
       this._commands = {
         ...this._commands,
         plugins: 'plugins',
@@ -63,7 +63,7 @@ export class Builtin extends Plugin {
 
   public async _topics(): Promise<Topics> {
     const topics: Topics = {}
-    if (true || this.config.userPlugins) {
+    if (this.config.userPlugins) {
       topics['plugins'] = new Topic({
         name: 'plugins',
         description: 'manage plugins',

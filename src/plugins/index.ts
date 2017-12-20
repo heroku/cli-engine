@@ -101,7 +101,7 @@ export class Plugins extends PluginManager {
     } catch (err) {
       cli.warn(err, { context: 'core plugins' })
     }
-    if (true || this.config.userPlugins) {
+    if (this.config.userPlugins) {
       try {
         this.user = new deps.UserPlugins(submanagerOpts)
         this.link = new deps.LinkPlugins(submanagerOpts)
