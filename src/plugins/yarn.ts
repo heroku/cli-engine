@@ -88,6 +88,9 @@ export default class Yarn {
     if (args[0] !== 'run') {
       const cacheDir = path.join(this.config.cacheDir, 'yarn')
       args = [...args, '--non-interactive', `--preferred-cache-folder=${cacheDir}`, ...this.proxyArgs()]
+      if (this.config.npmRegistry) {
+        args.push(`--registry=${this.config.npmRegistry}`)
+      }
     }
 
     let options = {
