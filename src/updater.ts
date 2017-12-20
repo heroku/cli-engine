@@ -32,10 +32,12 @@ function timestamp(msg: string): string {
 export class Updater {
   config: Config
   lock: Lock
+  http: typeof deps.HTTP
 
   constructor(config: Config) {
     this.config = config
     this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
+    this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
   }
 
   get autoupdatefile(): string {
@@ -75,7 +77,7 @@ export class Updater {
 
   async fetchManifest(channel: string): Promise<Manifest> {
     try {
-      let { body } = await deps.HTTP.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let { body } = await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
       return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
@@ -92,7 +94,7 @@ export class Updater {
     }
     if (!v) {
       debug('fetching latest %s version', this.config.channel)
-      let { body } = await deps.HTTP.get(this.s3url(this.config.channel, 'version'))
+      let { body } = await this.http.get(this.s3url(this.config.channel, 'version'))
       v = body
       await this._catch(() => deps.file.outputJSON(this.versionFile, v))
     }
@@ -115,7 +117,7 @@ export class Updater {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
     let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let { response: stream } = await deps.HTTP.stream(url)
+    let { response: stream } = await this.http.stream(url)
 
     let output = path.join(this.clientRoot, manifest.version)
 
