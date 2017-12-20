@@ -333,7 +333,7 @@ get_script_dir () {
   echo "$DIR"
 }
 SCRIPT_DIR=$(get_script_dir)
-CLIENT_DIR=$(cd "$SCRIPT_DIR/../.." && pwd)
+CLIENT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 export CLI_BINPATH="$CLIENT_DIR/${manifest.version}/bin/heroku"
 if [ "$DEBUG" == "*" ]; then
   echo "running $CLI_BINPATH" "$@"
