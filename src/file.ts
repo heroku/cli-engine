@@ -1,5 +1,7 @@
+import deps from './deps'
 import { Stats } from 'fs'
 import * as fs from 'fs-extra'
+import * as klaw from 'klaw'
 
 const debug = require('debug')('cli:file')
 
@@ -46,4 +48,19 @@ export async function remove(file: string) {
 export async function stat(file: string): Promise<Stats> {
   debug('stat', file)
   return fs.stat(file)
+}
+
+export function walk(root: string, opts: klaw.Options = {}): Promise<klaw.Item[]> {
+  debug('walk', root)
+  return new Promise((resolve, reject) => {
+    const items: klaw.Item[] = []
+    deps
+      .klaw(root, {
+        ...opts,
+        depthLimit: 10000,
+      })
+      .on('data', f => items.push(f))
+      .on('error', reject)
+      .on('end', () => resolve(items))
+  })
 }

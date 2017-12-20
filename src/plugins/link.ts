@@ -13,24 +13,17 @@ function linkPJSON(root: string): Promise<PluginPJSON> {
 }
 
 async function getNewestJSFile(root: string): Promise<Date> {
-  let newest = new Date(0)
-  return new Promise<Date>((resolve, reject) => {
-    deps
-      .klaw(root, {
-        depthLimit: 10,
-        filter: f => {
-          return !['.git', 'node_modules'].includes(path.basename(f))
-        },
-      })
-      .on('data', f => {
-        if (f.stats.isDirectory()) return
-        if (f.path.endsWith('.js') || f.path.endsWith('.ts')) {
-          if (f.stats.mtime > newest) newest = f.stats.mtime
-        }
-      })
-      .on('error', reject)
-      .on('end', () => resolve(newest))
+  let files = await deps.file.walk(root, {
+    depthLimit: 10,
+    filter: f => !['.git', 'node_modules'].includes(path.basename(f)),
   })
+  return files.reduce((prev, f): Date => {
+    if (f.stats.isDirectory()) return prev
+    if (f.path.endsWith('.js') || f.path.endsWith('.ts')) {
+      if (f.stats.mtime > prev) return f.stats.mtime
+    }
+    return prev
+  }, new Date(0))
 }
 
 export class LinkPlugins extends PluginManager {
