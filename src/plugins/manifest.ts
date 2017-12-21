@@ -1,5 +1,5 @@
 import deps from '../deps'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli:plugins:manifest')
@@ -39,11 +39,8 @@ export type ManifestJSON = {
 }
 
 export class PluginManifest {
-  constructor(config: Config) {
-    this.config = config
-  }
+  constructor(public config: IConfig) {}
 
-  public config: Config
   public nodeVersionChanged: boolean = false
   public needsSave: boolean = false
   public mtime?: number

@@ -1,5 +1,5 @@
 import deps from '../deps'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 
@@ -17,7 +17,7 @@ export type CacheJSON = {
 }
 
 export class PluginCache {
-  constructor(protected config: Config) {}
+  constructor(protected config: IConfig) {}
 
   public needsSave: boolean = false
   private cache: CacheJSON

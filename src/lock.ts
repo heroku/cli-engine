@@ -1,13 +1,13 @@
 import deps from './deps'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
 import { cli } from 'cli-ux'
 
 export class Lock {
-  config: Config
+  config: IConfig
   lockfile: string
 
-  constructor(config: Config, lockfile?: string) {
+  constructor(config: IConfig, lockfile?: string) {
     this.config = config
     this.lockfile = lockfile || path.join(this.config.cacheDir, 'update.lock')
   }

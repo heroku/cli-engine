@@ -1,7 +1,7 @@
 require('./fs')
 import deps from './deps'
 import { color } from 'heroku-cli-color'
-import { buildConfig, Config, ConfigOptions, ICommand } from 'cli-engine-config'
+import { buildConfig, IConfig, ConfigOptions, ICommand } from 'cli-engine-config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import { Hooks } from './hooks'
@@ -29,7 +29,7 @@ if (!g.testing) {
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
-  private config: Config
+  private config: IConfig
   private Command: ICommand | undefined
   private hooks: Hooks
 

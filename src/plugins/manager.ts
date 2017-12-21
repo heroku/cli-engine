@@ -1,7 +1,7 @@
 import deps from '../deps'
 import { color } from 'heroku-cli-color'
 import cli from 'cli-ux'
-import { Config, ICommand } from 'cli-engine-config'
+import { IConfig, ICommand } from 'cli-engine-config'
 import { inspect } from 'util'
 import { PluginManifest } from './manifest'
 import { PluginCache } from './cache'
@@ -11,7 +11,7 @@ import _ from 'ts-lodash'
 export type Aliases = { [from: string]: string[] }
 
 export interface PluginManagerOptions {
-  config: Config
+  config: IConfig
   cache?: PluginCache
   manifest?: PluginManifest
 }
@@ -28,7 +28,7 @@ export abstract class PluginManager {
   public aliases: Aliases
   public errored = false
   protected submanagers: PluginManager[] = []
-  protected config: Config
+  protected config: IConfig
   protected manifest: PluginManifest
   protected cache: PluginCache
   protected cacheKey: string

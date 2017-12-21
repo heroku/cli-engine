@@ -1,15 +1,15 @@
 import deps from '../deps'
 import cli from 'cli-ux'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
-  config: Config
+  config: IConfig
   cwd: string
 
-  constructor({ config, cwd }: { config: Config; cwd: string }) {
+  constructor({ config, cwd }: { config: IConfig; cwd: string }) {
     this.config = config
     this.cwd = cwd
   }

@@ -1,6 +1,6 @@
 import deps from './deps'
 import { PluginModule, PluginPJSON } from './plugins/plugin'
-import { Config, ICommand } from 'cli-engine-config'
+import { IConfig, ICommand } from 'cli-engine-config'
 import * as path from 'path'
 
 const debug = require('debug')('cli:hooks')
@@ -16,9 +16,9 @@ export type PluginsParseHookOptions = {
 }
 
 export class Hooks {
-  config: Config
+  config: IConfig
 
-  constructor(config: Config) {
+  constructor(config: IConfig) {
     this.config = config
   }
 

@@ -1,4 +1,4 @@
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import { ICommand } from 'cli-engine-config'
 import cli from 'cli-ux'
 import deps from '../deps'
@@ -33,13 +33,14 @@ export class Plugins extends PluginManager {
   protected debug = require('debug')('cli:plugins')
   private lock: Lock
 
-  constructor({ config }: { config: Config }) {
+  constructor({ config }: { config: IConfig }) {
     super({ config })
     this.lock = new deps.Lock(config, path.join(config.cacheDir, 'plugins.lock'))
   }
 
   public async install(options: InstallOptions) {
     let downgrade = await this.lock.upgrade()
+    await this.init()
     let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
     if (!options.force && (await this.pluginType(name))) {
       throw new Error(`${name} is already installed. Run with --force to install anyway`)

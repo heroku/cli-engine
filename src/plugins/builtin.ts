@@ -1,6 +1,6 @@
 import { PluginCache } from './cache'
 import { Plugin, PluginType } from './plugin'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import { Topics, Topic } from './topic'
 import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
@@ -10,7 +10,7 @@ export class Builtin extends Plugin {
   public type: PluginType = 'builtin'
   private _commands: { [name: string]: string }
 
-  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
+  constructor({ config, manifest, cache }: { config: IConfig; manifest: PluginManifest; cache: PluginCache }) {
     super({
       type: 'builtin',
       config,

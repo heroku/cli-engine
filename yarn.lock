@@ -26,9 +26,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jest@21.1.8":
-  version "21.1.8"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-21.1.8.tgz#d497213725684f1e5a37900b17a47c9c018f1a97"
+"@types/jest@21.1.9":
+  version "21.1.9"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-21.1.9.tgz#a913d6224e9d8a1f24908af536f65b5bf4d489bc"
 
 "@types/klaw@2.1.1":
   version "2.1.1"
@@ -50,9 +50,9 @@
   version "8.0.58"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.58.tgz#5b3881c0be3a646874803fee3197ea7f1ed6df90"
 
-"@types/node@8.5.1":
-  version "8.5.1"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.1.tgz#4ec3020bcdfe2abffeef9ba3fbf26fca097514b5"
+"@types/node@8.5.2":
+  version "8.5.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.2.tgz#83b8103fa9a2c2e83d78f701a9aa7c9539739aa5"
 
 "@types/semver@5.4.0":
   version "5.4.0"
@@ -663,24 +663,22 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@11.0.3:
-  version "11.0.3"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.3.tgz#af7dcf55babd5f2946c99a4588384cf004d1d793"
+cli-engine-command@11.0.5:
+  version "11.0.5"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.5.tgz#2bd6bd0cb6ccce16acea5bf6b940403c19303045"
   dependencies:
     chalk "2.3.0"
     cli-flags "2.0.2"
     cli-ux "^2.0.10"
     http-call "^4.0.5"
 
-cli-engine-config@5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.4.tgz#962f91c4a240d1d067f61c37817ff6b5dc2a7885"
-  dependencies:
-    uuid "^3.1.0"
+cli-engine-config@5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.5.tgz#5d0736b58a9d23b4be55a9ba7f1c0fd9f81ac1fb"
 
-cli-engine-heroku@7.0.2:
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.2.tgz#db0518bea9166f51e0ed982e4c344d2580bee128"
+cli-engine-heroku@7.0.4:
+  version "7.0.4"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.4.tgz#b0cdc5fc08cf2a40f3b031b91adc464819425fc9"
   dependencies:
     cli-ux "^2.0.10"
     heroku-client "3.0.4"

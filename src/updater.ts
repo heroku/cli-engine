@@ -3,7 +3,7 @@ import _ from 'ts-lodash'
 import * as path from 'path'
 
 import { Lock } from './lock'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import { cli } from 'cli-ux'
 
 const debug = require('debug')('cli:updater')
@@ -30,11 +30,11 @@ function timestamp(msg: string): string {
 }
 
 export class Updater {
-  config: Config
+  config: IConfig
   lock: Lock
   http: typeof deps.HTTP
 
-  constructor(config: Config) {
+  constructor(config: IConfig) {
     this.config = config
     this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
     this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
