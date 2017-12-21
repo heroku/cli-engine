@@ -1,23 +1,23 @@
-import { PluginCache } from './cache'
-import { Plugin, PluginType } from './plugin'
-import { Config } from 'cli-engine-config'
-import { Topics, Topic } from './topic'
-import * as path from 'path'
+import { IConfig } from 'cli-engine-config'
 import { ICommand } from 'cli-engine-config'
+import * as path from 'path'
+import { ITopics, Topic } from '../topic'
+import { PluginCache } from './cache'
 import { PluginManifest } from './manifest'
+import { Plugin, PluginType } from './plugin'
 
 export class Builtin extends Plugin {
   public type: PluginType = 'builtin'
   private _commands: { [name: string]: string }
 
-  constructor({ config, manifest, cache }: { config: Config; manifest: PluginManifest; cache: PluginCache }) {
+  constructor({ config, manifest, cache }: { config: IConfig; manifest: PluginManifest; cache: PluginCache }) {
     super({
-      type: 'builtin',
-      config,
       cache,
+      config,
       manifest,
-      root: path.join(__dirname, '..', 'commands'),
       pjson: require('../../package.json'),
+      root: path.join(__dirname, '..', 'commands'),
+      type: 'builtin',
     })
 
     this._commands = {
@@ -48,20 +48,20 @@ export class Builtin extends Plugin {
     }
   }
 
-  protected require(p: string, id: string): ICommand {
-    let m = super.require(p, id)
-    return this.addPluginToCommand(m)
-  }
-
-  public async _topics(): Promise<Topics> {
-    const topics: Topics = {}
+  protected async _topics(): Promise<ITopics> {
+    const topics: ITopics = {}
     if (this.config.userPlugins) {
-      topics['plugins'] = new Topic({
-        name: 'plugins',
+      topics.plugins = new Topic({
         description: 'manage plugins',
+        name: 'plugins',
       })
     }
     return topics
+  }
+
+  protected require(p: string, id: string): ICommand {
+    let m = super.require(p, id)
+    return this.addPluginToCommand(m)
   }
 
   protected async _commandIDs() {

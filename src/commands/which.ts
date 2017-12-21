@@ -1,5 +1,5 @@
-import cli from 'cli-ux'
 import { Command } from 'cli-engine-command'
+import cli from 'cli-ux'
 import { Plugins } from '../plugins'
 
 export default class extends Command {

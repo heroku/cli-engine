@@ -1,14 +1,14 @@
-import { Plugin, PluginPJSON, PluginOptions, PluginType } from './plugin'
-import * as path from 'path'
 import * as fs from 'fs-extra'
-import { PluginManager } from './manager'
+import * as path from 'path'
 import deps from '../deps'
+import { PluginManager } from './manager'
+import { IPluginPJSON, Plugin, PluginOptions, PluginType } from './plugin'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
 
-function linkPJSON(root: string): Promise<PluginPJSON> {
+function linkPJSON(root: string): Promise<IPluginPJSON> {
   return deps.file.fetchJSONFile(path.join(root, 'package.json'))
 }
 
@@ -54,12 +54,11 @@ export class LinkPlugins extends PluginManager {
   private async loadPlugin(root: string, forceRefresh: boolean = false) {
     return new LinkPlugin({
       cache: this.cache,
-      type: 'link',
       config: this.config,
       forceRefresh,
       manifest: this.manifest,
-      root,
       pjson: await linkPJSON(root),
+      root,
     })
   }
 }

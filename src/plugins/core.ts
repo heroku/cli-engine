@@ -1,7 +1,7 @@
-import deps from '../deps'
-import { Plugin, PluginType, PluginOptions, PluginPJSON } from './plugin'
-import { PluginManager } from './manager'
 import * as path from 'path'
+import deps from '../deps'
+import { PluginManager } from './manager'
+import { IPluginPJSON, Plugin, PluginOptions, PluginType } from './plugin'
 
 export class CorePlugins extends PluginManager {
   public plugins: CorePlugin[]
@@ -12,16 +12,15 @@ export class CorePlugins extends PluginManager {
 
   private async initPlugin(name: string) {
     return new CorePlugin({
-      type: 'core',
-      config: this.config,
       cache: this.cache,
+      config: this.config,
       manifest: this.manifest,
-      root: this.root(name),
       pjson: await this.pjson(name),
+      root: this.root(name),
     })
   }
 
-  private pjson(name: string): Promise<PluginPJSON> {
+  private pjson(name: string): Promise<IPluginPJSON> {
     return deps.file.fetchJSONFile(path.join(this.root(name), 'package.json'))
   }
 
@@ -32,9 +31,9 @@ export class CorePlugins extends PluginManager {
 
 export class CorePlugin extends Plugin {
   public type: PluginType = 'core'
-  public pjson: PluginPJSON
+  public pjson: IPluginPJSON
 
-  constructor(options: PluginOptions & { pjson: PluginPJSON }) {
+  constructor(options: PluginOptions & { pjson: IPluginPJSON }) {
     super(options)
   }
 }

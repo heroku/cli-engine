@@ -1,20 +1,20 @@
-import deps from './deps'
-import _ from 'ts-lodash'
 import * as path from 'path'
+import _ from 'ts-lodash'
+import deps from './deps'
 
-import { Lock } from './lock'
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import { cli } from 'cli-ux'
+import { Lock } from './lock'
 
 const debug = require('debug')('cli:updater')
 
-export type Version = {
+export interface IVersion {
   version: string
   channel: string
   message?: string
 }
 
-export type Manifest = {
+export interface IManifest {
   version: string
   channel: string
   sha256gz: string
@@ -30,11 +30,12 @@ function timestamp(msg: string): string {
 }
 
 export class Updater {
-  config: Config
+  config: IConfig
   lock: Lock
   http: typeof deps.HTTP
+  private _binPath: Promise<string | undefined>
 
-  constructor(config: Config) {
+  constructor(config: IConfig) {
     this.config = config
     this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
     this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
@@ -58,7 +59,39 @@ export class Updater {
     return this.config.windows ? `${b}.cmd` : b
   }
 
-  private _binPath: Promise<string | undefined>
+  public async autoupdate(force: boolean = false) {
+    try {
+      await this.warnIfUpdateAvailable()
+      if (!force && !await this.autoupdateNeeded()) return
+
+      debug('autoupdate running')
+      await deps.file.outputFile(this.autoupdatefile, '')
+
+      const binPath = await this.binPath
+      if (!binPath) {
+        debug('no binpath set')
+        return
+      }
+      debug(`spawning autoupdate on ${binPath}`)
+
+      let fd = await deps.file.open(this.autoupdatelogfile, 'a')
+      deps.file.write(
+        fd,
+        timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
+      )
+
+      this.spawnBinPath(binPath, ['update', '--autoupdate'], {
+        detached: !this.config.windows,
+        env: this.autoupdateEnv,
+        stdio: ['ignore', fd, fd],
+      })
+        .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
+        .unref()
+    } catch (e) {
+      cli.warn(e, { context: 'autoupdate:' })
+    }
+  }
+
   private get binPath(): Promise<string | undefined> {
     if (!this._binPath)
       this._binPath = (async () => {
@@ -70,12 +103,16 @@ export class Updater {
     return this._binPath
   }
 
-  s3url(channel: string, p: string): string {
+  public async tidy() {
+    await this.tidyClientDir()
+  }
+
+  public s3url(channel: string, p: string): string {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
     return `https://${this.config.s3.host}/${this.config.name}/channels/${channel}/${p}`
   }
 
-  async fetchManifest(channel: string): Promise<Manifest> {
+  public async fetchManifest(channel: string): Promise<IManifest> {
     try {
       let { body } = await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
       return body
@@ -85,8 +122,8 @@ export class Updater {
     }
   }
 
-  async fetchVersion(download: boolean): Promise<Version> {
-    let v: Version | undefined
+  public async fetchVersion(download: boolean): Promise<IVersion> {
+    let v: IVersion | undefined
     try {
       if (!download) v = await deps.file.readJSON(this.versionFile)
     } catch (err) {
@@ -101,15 +138,7 @@ export class Updater {
     return v!
   }
 
-  async _catch(fn: Function) {
-    try {
-      return await Promise.resolve(fn())
-    } catch (err) {
-      debug(err)
-    }
-  }
-
-  async update(manifest: Manifest) {
+  public async update(manifest: IManifest) {
     const downgrade = await this.lock.write()
     let base = this.base(manifest)
     const filesize = require('filesize')
@@ -124,7 +153,7 @@ export class Updater {
     await this._mkdirp(this.clientRoot)
     await this._remove(output)
 
-    if ((<any>cli.action).frames) {
+    if ((cli.action as any).frames) {
       // if spinner action
       let total = stream.headers['content-length']
       let current = 0
@@ -180,7 +209,7 @@ export class Updater {
         }
       })
 
-      let ignore = function(_: any, header: any) {
+      let ignore = (_: any, header: any) => {
         switch (header.type) {
           case 'directory':
           case 'file':
@@ -220,7 +249,7 @@ export class Updater {
     await deps.file.mkdirp(dir)
   }
 
-  base(manifest: Manifest): string {
+  private base(manifest: IManifest): string {
     return `${this.config.name}-v${manifest.version}-${this.config.platform}-${this.config.arch}`
   }
 
@@ -229,42 +258,9 @@ export class Updater {
       const m = await mtime(this.autoupdatefile)
       return m.isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
-      if (err.code !== 'ENOENT') console.error(err.stack)
+      if (err.code !== 'ENOENT') cli.error(err)
       debug('autoupdate ENOENT')
       return true
-    }
-  }
-
-  async autoupdate(force: boolean = false) {
-    try {
-      await this.warnIfUpdateAvailable()
-      if (!force && !await this.autoupdateNeeded()) return
-
-      debug('autoupdate running')
-      await deps.file.outputFile(this.autoupdatefile, '')
-
-      const binPath = await this.binPath
-      if (!binPath) {
-        debug('no binpath set')
-        return
-      }
-      debug(`spawning autoupdate on ${binPath}`)
-
-      let fd = await deps.file.open(this.autoupdatelogfile, 'a')
-      deps.file.write(
-        fd,
-        timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
-      )
-
-      this.spawnBinPath(binPath, ['update', '--autoupdate'], {
-        detached: !this.config.windows,
-        stdio: ['ignore', fd, fd],
-        env: this.autoupdateEnv,
-      })
-        .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
-        .unref()
-    } catch (e) {
-      cli.warn(e, { context: 'autoupdate:' })
     }
   }
 
@@ -286,13 +282,11 @@ export class Updater {
     })
   }
 
-  async warnIfUpdateAvailable() {
+  private async warnIfUpdateAvailable() {
     await this._catch(async () => {
       if (!this.config.s3) return
       let v = await this.fetchVersion(false)
-      let local = this.config.version.split('.')
-      let remote = v.version.split('.')
-      if (parseInt(local[0]) < parseInt(remote[0]) || parseInt(local[1]) < parseInt(remote[1])) {
+      if (deps.util.minorVersionGreater(this.config.version, v.version)) {
         cli.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
       }
       if (v.message) {
@@ -301,7 +295,7 @@ export class Updater {
     })
   }
 
-  spawnBinPath(binPath: string, args: string[], options: Object) {
+  private spawnBinPath(binPath: string, args: string[], options: any) {
     debug(binPath, args)
     if (this.config.windows) {
       args = ['/c', binPath, ...args]
@@ -311,14 +305,14 @@ export class Updater {
     }
   }
 
-  private async _createBin(manifest: Manifest) {
+  private async _createBin(manifest: IManifest) {
     let bin = this.config.windows ? 'heroku.cmd' : 'heroku'
     let src = this.clientBin
     let dst = path.join('..', manifest.version, 'bin', bin)
     await deps.file.symlink(src, dst)
   }
 
-  public async tidy() {
+  private async tidyClientDir() {
     try {
       const { moment, file } = deps
       let root = this.clientRoot
@@ -336,4 +330,13 @@ export class Updater {
       cli.warn(err)
     }
   }
+
+  private async _catch(fn: () => void) {
+    try {
+      return await Promise.resolve(fn())
+    } catch (err) {
+      debug(err)
+    }
+  }
+
 }

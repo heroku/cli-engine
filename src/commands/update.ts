@@ -1,10 +1,10 @@
 import { Command, flags } from 'cli-engine-command'
+import cli from 'cli-ux'
+import { color } from 'heroku-cli-color'
+import * as path from 'path'
+import { Hooks } from '../hooks'
 import { Updater } from '../updater'
 import PluginsUpdate from './plugins/update'
-import { Hooks } from '../hooks'
-import cli from 'cli-ux'
-import * as path from 'path'
-import { color } from 'heroku-cli-color'
 
 const debug = require('debug')('cli:update')
 

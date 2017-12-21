@@ -1,9 +1,9 @@
-import deps from '../deps'
 import cli from 'cli-ux'
-import { Plugin, PluginType, PluginOptions } from './plugin'
-import Yarn from './yarn'
 import * as path from 'path'
+import deps from '../deps'
 import { PluginManager } from './manager'
+import { Plugin, PluginOptions, PluginType } from './plugin'
+import Yarn from './yarn'
 
 export class UserPlugins extends PluginManager {
   public plugins: UserPlugin[]
@@ -55,13 +55,12 @@ export class UserPlugins extends PluginManager {
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
     const pjson = await deps.file.fetchJSONFile(path.join(this.userPluginPath(name), 'package.json'))
     return new UserPlugin({
-      pjson,
-      tag,
-      type: 'user',
-      root: this.userPluginPath(name),
-      config: this.config,
       cache: this.cache,
+      config: this.config,
       manifest: this.manifest,
+      pjson,
+      root: this.userPluginPath(name),
+      tag,
     })
   }
 

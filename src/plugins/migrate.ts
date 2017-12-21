@@ -1,16 +1,16 @@
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
+import * as path from 'path'
 import deps from '../deps'
 import { PluginManifest } from './manifest'
-import * as path from 'path'
 
 const debug = require('debug')('cli:migrate')
 
 export class PluginsMigrate {
-  private config: Config
+  private config: IConfig
   private manifest: PluginManifest
 
-  constructor({ config, manifest }: { config: Config; manifest: PluginManifest }) {
+  constructor({ config, manifest }: { config: IConfig; manifest: PluginManifest }) {
     this.config = config
     this.manifest = manifest
   }

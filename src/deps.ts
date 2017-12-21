@@ -1,32 +1,32 @@
 // remote
-import { HTTP } from 'http-call'
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
-import * as moment from 'moment'
-import * as klaw from 'klaw'
 import Heroku = require('cli-engine-heroku')
-import stripAnsi = require('strip-ansi')
+import { HTTP } from 'http-call'
+import * as klaw from 'klaw'
+import * as moment from 'moment'
 import semver = require('semver')
+import stripAnsi = require('strip-ansi')
 
 // local
-import Hooks = require('./hooks')
 import help = require('./commands/help')
+import file = require('./file')
+import Hooks = require('./hooks')
+import lock = require('./lock')
 import notFound = require('./not_found')
 import updater = require('./updater')
 import util = require('./util')
-import file = require('./file')
-import lock = require('./lock')
 
 // plugins
-import Builtin = require('./plugins/builtin')
 import Plugins = require('./plugins')
-import linkPlugins = require('./plugins/link')
+import Builtin = require('./plugins/builtin')
+import pluginCache = require('./plugins/cache')
 import corePlugins = require('./plugins/core')
+import pluginLegacy = require('./plugins/legacy')
+import linkPlugins = require('./plugins/link')
+import pluginManifest = require('./plugins/manifest')
+import pluginsMigrate = require('./plugins/migrate')
 import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
-import pluginManifest = require('./plugins/manifest')
-import pluginCache = require('./plugins/cache')
-import pluginLegacy = require('./plugins/legacy')
-import pluginsMigrate = require('./plugins/migrate')
 
 export default {
   // remote

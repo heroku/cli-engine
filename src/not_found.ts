@@ -1,8 +1,8 @@
-import deps from './deps'
-import { color } from 'heroku-cli-color'
-import cli from 'cli-ux'
-import { Plugins } from './plugins'
 import { Command } from 'cli-engine-command'
+import cli from 'cli-ux'
+import { color } from 'heroku-cli-color'
+import deps from './deps'
+import { Plugins } from './plugins'
 
 export default class NotFound extends Command {
   static variableArgs = true

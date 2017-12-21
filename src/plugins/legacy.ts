@@ -1,15 +1,19 @@
-import deps from '../deps'
-import { args as Args } from 'cli-flags'
 import { flags as Flags } from 'cli-engine-command'
+import { ICommand, IConfig } from 'cli-engine-config'
+import { args as Args } from 'cli-flags'
 import { cli } from 'cli-ux'
 import { color } from 'heroku-cli-color'
-import { Config, ICommand } from 'cli-engine-config'
-import { PluginModule, PluginTopic } from './plugin'
 import { inspect } from 'util'
+import deps from '../deps'
+import { IPluginModule, IPluginTopic } from './plugin'
 
-export type LegacyTopic = {}
+export interface ILegacyTopic {
+  name?: string
+  id?: string
+  topic?: string
+}
 
-export type LegacyContext = {
+export interface ILegacyContext {
   version: string
   supportsColor: boolean
   auth: {
@@ -22,7 +26,7 @@ export type LegacyContext = {
   app?: string
   org?: string
   team?: string
-  config: Config
+  config: IConfig
   apiUrl: string
   herokuDir: string
   apiToken?: string
@@ -32,22 +36,22 @@ export type LegacyContext = {
   cwd: string
 }
 
-export type FlowCommand = {
+export interface IFlowCommand {
   id: string
 }
 
-export type LegacyCommand = V5Command | FlowCommand
+export type LegacyCommand = IV5Command | IFlowCommand
 
-export type AnyTopic = PluginTopic | LegacyTopic
+export type AnyTopic = IPluginTopic | ILegacyTopic
 export type AnyCommand = ICommand | LegacyCommand
 
-export type V5Command = {
+export interface IV5Command {
   topic: string
   command?: string
   aliases?: string[]
   variableArgs?: boolean
   args: Args.IArg[]
-  flags: LegacyFlag[]
+  flags: ILegacyFlag[]
   description?: string
   help?: string
   usage?: string
@@ -58,15 +62,15 @@ export type V5Command = {
   wantsOrg?: boolean
   hidden?: boolean
   default?: boolean
-  run: (ctx: LegacyContext) => Promise<any>
+  run: (ctx: ILegacyContext) => Promise<any>
 }
 
-export type LegacyModule = {
+export interface ILegacyModule {
   topics: AnyTopic[]
   commands: AnyCommand[]
 }
 
-export type LegacyFlag = {
+export interface ILegacyFlag {
   name: string
   description?: string
   char?: string
@@ -80,11 +84,11 @@ export type LegacyFlag = {
 const debug = require('debug')('cli:legacy')
 
 export class PluginLegacy {
-  constructor(_: Config) {}
+  constructor(_: IConfig) {}
 
-  public convert(m: PluginModule | LegacyModule): PluginModule {
+  public convert(m: IPluginModule | ILegacyModule): IPluginModule {
     m.commands = this.convertCommands(m.commands)
-    return m as PluginModule
+    return m as IPluginModule
   }
 
   private convertCommands(c: AnyCommand[]): ICommand[] {
@@ -104,7 +108,7 @@ export class PluginLegacy {
     return c
   }
 
-  private convertFromV5(c: V5Command): ICommand {
+  private convertFromV5(c: IV5Command): ICommand {
     class V5 extends deps.Heroku.Command {
       static topic = c.topic
       static command = c.command
@@ -123,25 +127,25 @@ export class PluginLegacy {
         if (c.aliases && c.aliases.length) {
           cli.warn(`Using aliases: ${c.aliases}`)
         }
-        const ctx: LegacyContext = {
-          version: this.config.userAgent,
-          supportsColor: color.enabled,
-          auth: {},
-          debug: !!this.config.debug,
-          debugHeaders: this.config.debug > 1 || ['1', 'true'].includes((<any>process).env.HEROKU_DEBUG_HEADERS),
-          flags: this.flags,
-          args: c.variableArgs ? this.argv : this.args,
-          app: this.flags.app,
-          org: this.flags.org,
-          team: this.flags.team,
-          config: this.config,
-          apiUrl: deps.Heroku.vars.apiUrl,
-          herokuDir: this.config.cacheDir,
-          apiToken: this.heroku.auth,
+        const ctx: ILegacyContext = {
           apiHost: deps.Heroku.vars.apiHost,
-          gitHost: deps.Heroku.vars.gitHost,
-          httpGitHost: deps.Heroku.vars.httpGitHost,
+          apiToken: this.heroku.auth,
+          apiUrl: deps.Heroku.vars.apiUrl,
+          app: this.flags.app,
+          args: c.variableArgs ? this.argv : this.args,
+          auth: {},
+          config: this.config,
           cwd: process.cwd(),
+          debug: !!this.config.debug,
+          debugHeaders: this.config.debug > 1 || ['1', 'true'].includes((process as any).env.HEROKU_DEBUG_HEADERS),
+          flags: this.flags,
+          gitHost: deps.Heroku.vars.gitHost,
+          herokuDir: this.config.cacheDir,
+          httpGitHost: deps.Heroku.vars.httpGitHost,
+          org: this.flags.org,
+          supportsColor: color.enabled,
+          team: this.flags.team,
+          version: this.config.userAgent,
         }
         ctx.auth.password = ctx.apiToken
         const ansi = require('ansi-escapes')
@@ -170,18 +174,18 @@ export class PluginLegacy {
     return !!(c.id && c._version)
   }
 
-  private isV5Command(command: AnyCommand): command is V5Command {
+  private isV5Command(command: AnyCommand): command is IV5Command {
     let c = command
     return !!(typeof c === 'object')
   }
 
-  private isFlowCommand(command: AnyCommand): command is FlowCommand {
-    let c = command as FlowCommand
+  private isFlowCommand(command: AnyCommand): command is IFlowCommand {
+    let c = command as IFlowCommand
     return !!(!('_version' in c) && c.id)
   }
 }
 
-function convertFlagsFromV5(flags: LegacyFlag[] | Flags.Input | undefined): Flags.Input {
+function convertFlagsFromV5(flags: ILegacyFlag[] | Flags.Input | undefined): Flags.Input {
   if (!flags) return {}
   if (!Array.isArray(flags)) return flags
   return flags.reduce(
@@ -190,11 +194,11 @@ function convertFlagsFromV5(flags: LegacyFlag[] | Flags.Input | undefined): Flag
         char: flag.char,
         description: flag.description,
         hidden: flag.hidden,
-        required: flag.required || flag.optional === false,
         parse: flag.parse,
+        required: flag.required || flag.optional === false,
       }
       for (let [k, v] of Object.entries(opts)) {
-        if (v === undefined) delete (<any>opts)[k]
+        if (v === undefined) delete (opts as any)[k]
       }
       if (!opts.parse) delete opts.parse
       flags[flag.name] = flag.hasValue ? Flags.string(opts as any) : Flags.boolean(opts as any)

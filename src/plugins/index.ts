@@ -1,28 +1,167 @@
-import { Config } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import { ICommand } from 'cli-engine-config'
 import cli from 'cli-ux'
-import deps from '../deps'
-import { UserPlugins } from './user'
-import { Builtin } from './builtin'
-import { LinkPlugins } from './link'
-import { CorePlugins } from './core'
-import { Plugin, PluginType } from './plugin'
-import { PluginManager } from './manager'
-import _ from 'ts-lodash'
 import * as path from 'path'
+import _ from 'ts-lodash'
+import deps from '../deps'
 import { Lock } from '../lock'
+import { Builtin } from './builtin'
+import { CorePlugins } from './core'
+import { LinkPlugins } from './link'
+import { PluginManager } from './manager'
+import { Plugin, PluginType } from './plugin'
+import { UserPlugins } from './user'
+import {LoadResult, Topic} from '../topic'
+import {CommandInfo} from '../command'
 
-export type InstallOptions = LinkInstallOptions | UserInstallOptions
-export interface UserInstallOptions {
+export type InstallOptions = ILinkInstallOptions | IUserInstallOptions
+export interface IUserInstallOptions {
   type: 'user'
   name: string
   tag: string
   force?: boolean
 }
-export interface LinkInstallOptions {
+export interface ILinkInstallOptions {
   type: 'link'
   root: string
   force?: boolean
+}
+
+interface IXPlugin {
+}
+
+interface IXLoadResult {
+  topics?: {[k: string]: Topic}
+  commands?: {[k: string]: CommandInfo}
+}
+
+interface IXCommandManager {
+  submanagers? (): Promise<IXCommandManager[]>
+  needsRefresh? (): Promise<boolean>
+  refresh? (): Promise<void>
+  load (): Promise<IXLoadResult>
+}
+
+abstract class XPlugin {
+}
+
+class XUserPlugin extends XPlugin {
+  constructor (protected config: IConfig, protected opts: {name: string}) {
+    super()
+  }
+  public async load () {
+    return {
+      topics: {
+        foo: new Topic({name: this.opts.name})
+      }
+    }
+  }
+}
+
+class XUserPluginManager implements IXCommandManager {
+  constructor (protected config: IConfig) {}
+
+  public async submanagers () {
+    return [
+      new XUserPlugin(this.config, {name: 'fooobarbaz'})
+    ]
+  }
+
+  public async load () {
+    return {
+      topics: {
+        bar: new Topic({name: 'bar'})
+      }
+    }
+  }
+}
+
+class XBuiltinPlugin implements IXPlugin {
+  constructor (protected config: IConfig) {}
+  public async load () {
+    return {
+      topics: {
+        builtin: new Topic({name: 'builtin'})
+      }
+    }
+  }
+}
+
+interface IXPluginManager {
+  load: () => Promise<IXPlugin[]>
+}
+
+class XPluginManager {
+  private debug = require('debug')('cli:plugins')
+
+  constructor (protected config: IConfig) {}
+
+  public async submanagers() {
+    return [
+      new XBuiltinPlugin(this.config),
+      new XUserPluginManager(this.config),
+    ]
+  }
+
+  public async load (): Promise<LoadResult> {
+    this.debug('load')
+    let managers = await this.allManagers()
+    let managersToRefresh = await this.managersNeedingRefresh(managers)
+    if (managersToRefresh.length) await this.refresh(managersToRefresh)
+    let result
+    this.debug('loading all managers')
+    let loads = managers.map(m => m.load())
+    for (let r of loads) result = this.mergeResults(result, await r)
+    return result!
+  }
+
+  public async refresh (managers: IXCommandManager[]) {
+    this.debug('get write lock')
+    let tasks = managers.map(m => m.refresh!())
+    for (let t of tasks) await t
+    this.debug('release write lock')
+  }
+
+  private async allManagers (manager: this | IXCommandManager = this): Promise<IXCommandManager[]> {
+    this.debug('fetching managers')
+    let managers: IXCommandManager[] = manager.submanagers ? await manager.submanagers() : []
+    for (let m of managers.map(m => this.allManagers(m))) {
+      managers = managers.concat(await m)
+    }
+    return managers
+  }
+
+  private async managersNeedingRefresh (managers: IXCommandManager[]): Promise<IXCommandManager[]> {
+    this.debug('checking which managers need refreshes')
+    let tasks = managers
+      .filter(m => m.needsRefresh)
+      .map(manager => ({manager, needsRefresh: manager.needsRefresh!()}))
+    let out = []
+    for (let task of tasks) {
+      if (!await task.needsRefresh) continue
+      out.push(task.manager)
+    }
+    return out
+  }
+
+  private mergeResults (a: LoadResult | undefined, b: IXLoadResult): LoadResult {
+    a = a || new LoadResult()
+    if (b.topics) a.addTopics(b.topics)
+    if (b.commands) a.addTopics(b.commands)
+    return a
+  }
+}
+
+class XBuiltinCommands {
+  constructor (private config: IConfig) {}
+  public async load () {
+    console.dir('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    let m = new XPluginManager(this.config)
+    let r = await m.load()
+    console.dir(r)
+    console.dir('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+    process.exit(1)
+  }
 }
 
 export class Plugins extends PluginManager {
@@ -33,7 +172,7 @@ export class Plugins extends PluginManager {
   protected debug = require('debug')('cli:plugins')
   private lock: Lock
 
-  constructor({ config }: { config: Config }) {
+  constructor({ config }: { config: IConfig }) {
     super({ config })
     this.lock = new deps.Lock(config, path.join(config.cacheDir, 'plugins.lock'))
   }
@@ -93,6 +232,16 @@ export class Plugins extends PluginManager {
     await this.load
   }
 
+  public async findCommand(id: string, options: { must: true }): Promise<ICommand>
+  public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
+  public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
+    const b = new XBuiltinCommands(this.config)
+    await b.load()
+    const cmd = await super.findCommand(id)
+    if (!cmd && options.must) throw new Error(`${id} not found`)
+    return cmd
+  }
+
   protected async _init() {
     const submanagerOpts = { config: this.config, manifest: this.manifest, cache: this.cache, lock: this.lock }
     this.builtin = new deps.Builtin(submanagerOpts)
@@ -113,14 +262,6 @@ export class Plugins extends PluginManager {
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
   }
 
-  public async findCommand(id: string, options: { must: true }): Promise<ICommand>
-  public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
-  public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
-    const cmd = await super.findCommand(id)
-    if (!cmd && options.must) throw new Error(`${id} not found`)
-    return cmd
-  }
-
   public get plugins(): Plugin[] {
     const managers = _.compact([this.link, this.user, this.core])
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
@@ -138,8 +279,8 @@ export class Plugins extends PluginManager {
 
   private async migrate() {
     const migrate = new deps.PluginsMigrate({
-      manifest: this.manifest,
       config: this.config,
+      manifest: this.manifest,
     })
     await migrate.migrate()
   }

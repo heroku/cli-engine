@@ -1,9 +1,9 @@
-import deps from '../deps'
-import { cli } from 'cli-ux'
 import { Command, flags } from 'cli-engine-command'
-import { Plugins } from '../plugins'
+import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import deps from '../deps'
+import { Plugins } from '../plugins'
 
 const debug = require('debug')('cli:commands')
 
@@ -35,12 +35,12 @@ export default class Commands extends Command {
       .map(c => c!)
       .map(c => ({
         command: c.command,
+        description: c.description,
+        fullHelp: c.help,
+        help: c.help,
+        hidden: c.hidden,
         topic: c.topic,
         usage: c.usage,
-        description: c.description,
-        help: c.help,
-        fullHelp: c.help,
-        hidden: c.hidden,
       }))
     cli.styledJSON({ topics, commands: outputCommands })
   }

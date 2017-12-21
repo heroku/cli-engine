@@ -1,32 +1,31 @@
-import deps from './deps'
-import { PluginModule, PluginPJSON } from './plugins/plugin'
-import { Config, ICommand } from 'cli-engine-config'
+import { ICommand, IConfig } from 'cli-engine-config'
 import * as path from 'path'
+import deps from './deps'
+import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 
 const debug = require('debug')('cli:hooks')
 
-export type PreRunOptions = {
+export interface IPreRunOptions {
   Command: ICommand
   argv: string[]
 }
 
-export type PluginsParseHookOptions = {
-  module: PluginModule
-  pjson: PluginPJSON
+export interface IPluginsParseHookOptions {
+  module: IPluginModule
+  pjson: IPluginPJSON
 }
 
 export class Hooks {
-  config: Config
+  config: IConfig
 
-  constructor(config: Config) {
+  constructor(config: IConfig) {
     this.config = config
   }
 
-  async run(event: 'init'): Promise<void>
-  async run(event: 'update'): Promise<void>
-  async run(event: 'prerun', options: PreRunOptions): Promise<void>
-  async run(event: 'plugins:parse', options: PluginsParseHookOptions): Promise<void>
-  async run(event: string, options: Object = {}): Promise<void> {
+  async run(event: 'init' | 'update'): Promise<void>
+  async run(event: 'prerun', options: IPreRunOptions): Promise<void>
+  async run(event: 'plugins:parse', options: IPluginsParseHookOptions): Promise<void>
+  async run(event: string, options: any = {}): Promise<void> {
     let scripts = this.config.hooks[event]
     if (!scripts) return
     for (let script of scripts) {
