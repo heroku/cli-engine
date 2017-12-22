@@ -1,14 +1,14 @@
 require('./fs')
-import deps from './deps'
-import { color } from 'heroku-cli-color'
-import { buildConfig, IConfig, ConfigOptions, ICommand } from 'cli-engine-config'
+import { buildConfig, ConfigOptions, ICommand, IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
+import { color } from 'heroku-cli-color'
 import * as path from 'path'
+import deps from './deps'
 import { Hooks } from './hooks'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: Error) => {
-  if ((<any>err).code !== 'EPIPE') throw err
+  if ((err as any).code !== 'EPIPE') throw err
 }
 
 const g = global as any

@@ -1,51 +1,53 @@
-import deps from '../deps'
 import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
+import deps from '../deps'
 
 const debug = require('debug')('cli:plugins:manifest')
 
-export interface ManifestLink {
+export interface IManifestLink {
   name: string
   root: string
   lastUpdated: Date
 }
 
-export interface ManifestUser {
+export interface IManifestUser {
   name: string
   tag: string
 }
 
-export interface ManifestUserOpts {
+export interface IManifestUserOpts {
   type: 'user'
   name: string
   tag: string
 }
 
-export interface ManifestLinkOpts {
+export interface IManifestLinkOpts {
   type: 'link'
   name: string
   root: string
 }
 
-export type ManifestJSON = {
+export interface IManifestJSON {
   version: 1
   node_version?: string
-  user: ManifestUser[]
-  link: {
+  user: IManifestUser[]
+  link: Array<{
     name: string
     root: string
     lastUpdated: string
-  }[]
+  }>
 }
 
 export class PluginManifest {
-  constructor(public config: IConfig) {}
-
   public nodeVersionChanged: boolean = false
   public needsSave: boolean = false
   public mtime?: number
-
+  private manifest: IManifestJSON
+  private _init: Promise<void>
   private saving: Promise<void>
+
+  constructor(public config: IConfig) {}
+
   public async save(): Promise<void> {
     if (!this.needsSave) return
     this.needsSave = false
@@ -59,8 +61,8 @@ export class PluginManifest {
     })())
   }
 
-  public async list(type: 'user'): Promise<ManifestUser[]>
-  public async list(type: 'link'): Promise<ManifestLink[]>
+  public async list(type: 'user'): Promise<IManifestUser[]>
+  public async list(type: 'link'): Promise<IManifestLink[]>
   public async list(type: 'user' | 'link'): Promise<any> {
     await this.init()
     if (type === 'user') return this.manifest.user
@@ -70,7 +72,7 @@ export class PluginManifest {
     }))
   }
 
-  public async add(opts: ManifestUserOpts | ManifestLinkOpts) {
+  public async add(opts: IManifestUserOpts | IManifestLinkOpts) {
     await this.init()
     await this.remove(opts.name)
     if (opts.type === 'user') {
@@ -97,8 +99,6 @@ export class PluginManifest {
     }
   }
 
-  private manifest: ManifestJSON
-  private _init: Promise<void>
   public async init() {
     await this.saving
     if (this._init) return this._init
@@ -113,11 +113,20 @@ export class PluginManifest {
     })())
   }
 
+  public async getLastUpdated(): Promise<number | undefined> {
+    try {
+      const stat = await deps.file.stat(this.file)
+      return stat.mtime.getTime()
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
+  }
+
   private get file() {
     return path.join(this.config.dataDir, 'plugins', 'plugins.json')
   }
 
-  private async read(): Promise<ManifestJSON> {
+  private async read(): Promise<IManifestJSON> {
     try {
       this.mtime = await this.getLastUpdated()
       const manifest = await deps.file.readJSON(this.file)
@@ -138,14 +147,5 @@ export class PluginManifest {
   private async canWrite() {
     if (!this.mtime) return true
     return (await this.getLastUpdated()) === this.mtime
-  }
-
-  public async getLastUpdated(): Promise<number | undefined> {
-    try {
-      const stat = await deps.file.stat(this.file)
-      return stat.mtime.getTime()
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-    }
   }
 }

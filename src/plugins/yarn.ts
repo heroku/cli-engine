@@ -1,7 +1,7 @@
-import deps from '../deps'
-import cli from 'cli-ux'
 import { IConfig } from 'cli-engine-config'
+import cli from 'cli-ux'
 import * as path from 'path'
+import deps from '../deps'
 
 const debug = require('debug')('cli:yarn')
 

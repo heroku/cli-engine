@@ -1,25 +1,25 @@
 import { IConfig } from 'cli-engine-config'
 import { ICommand } from 'cli-engine-config'
 import cli from 'cli-ux'
-import deps from '../deps'
-import { UserPlugins } from './user'
-import { Builtin } from './builtin'
-import { LinkPlugins } from './link'
-import { CorePlugins } from './core'
-import { Plugin, PluginType } from './plugin'
-import { PluginManager } from './manager'
-import _ from 'ts-lodash'
 import * as path from 'path'
+import _ from 'ts-lodash'
+import deps from '../deps'
 import { Lock } from '../lock'
+import { Builtin } from './builtin'
+import { CorePlugins } from './core'
+import { LinkPlugins } from './link'
+import { PluginManager } from './manager'
+import { Plugin, PluginType } from './plugin'
+import { UserPlugins } from './user'
 
-export type InstallOptions = LinkInstallOptions | UserInstallOptions
-export interface UserInstallOptions {
+export type InstallOptions = ILinkInstallOptions | IUserInstallOptions
+export interface IUserInstallOptions {
   type: 'user'
   name: string
   tag: string
   force?: boolean
 }
-export interface LinkInstallOptions {
+export interface ILinkInstallOptions {
   type: 'link'
   root: string
   force?: boolean
@@ -94,6 +94,20 @@ export class Plugins extends PluginManager {
     await this.load
   }
 
+  public async findCommand(id: string, options: { must: true }): Promise<ICommand>
+  public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
+  public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
+    const cmd = await super.findCommand(id)
+    if (!cmd && options.must) throw new Error(`${id} not found`)
+    return cmd
+  }
+
+  public get plugins(): Plugin[] {
+    const managers = _.compact([this.link, this.user, this.core])
+    const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
+    return _.compact([...plugins, this.builtin])
+  }
+
   protected async _init() {
     const submanagerOpts = { config: this.config, manifest: this.manifest, cache: this.cache, lock: this.lock }
     this.builtin = new deps.Builtin(submanagerOpts)
@@ -112,20 +126,6 @@ export class Plugins extends PluginManager {
       }
     }
     this.submanagers = _.compact([this.link, this.user, this.core, this.builtin])
-  }
-
-  public async findCommand(id: string, options: { must: true }): Promise<ICommand>
-  public async findCommand(id: string, options?: { must?: boolean }): Promise<ICommand | undefined>
-  public async findCommand(id: string, options: { must?: boolean } = {}): Promise<ICommand | undefined> {
-    const cmd = await super.findCommand(id)
-    if (!cmd && options.must) throw new Error(`${id} not found`)
-    return cmd
-  }
-
-  public get plugins(): Plugin[] {
-    const managers = _.compact([this.link, this.user, this.core])
-    const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
-    return _.compact([...plugins, this.builtin])
   }
 
   private async save() {

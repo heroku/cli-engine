@@ -18,12 +18,12 @@ export async function example(argv: string[]): Promise<IRootRun> {
   }
 }
 
-test('runs the version command', async function() {
+test('runs the version command', async () => {
   const { stdout } = await example(['version'])
   expect(stdout).toMatch(/^cli-engine\//)
 })
 
-test('errors with invalid arguments', async function() {
+test('errors with invalid arguments', async () => {
   expect.assertions(1)
   try {
     await example(['version', '--invalid-flag'])
@@ -32,7 +32,7 @@ test('errors with invalid arguments', async function() {
   }
 })
 
-test('errors when command not found', async function() {
+test('errors when command not found', async () => {
   expect.assertions(2)
   try {
     await example(['foobar12345'])
@@ -43,7 +43,7 @@ test('errors when command not found', async function() {
 })
 
 describe('edge cases', () => {
-  test.skip('shows help for `help` command itself', async function() {
+  test.skip('shows help for `help` command itself', async () => {
     let { stdout } = await example(['help'])
     expect(stdout).toMatch(/Usage: cli-engine COMMAND/)
   })

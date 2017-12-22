@@ -1,7 +1,7 @@
 import { Command, flags } from 'cli-engine-command'
-import { Plugins } from '../../plugins'
-import { Hooks } from '../../hooks'
 import { cli } from 'cli-ux'
+import { Hooks } from '../../hooks'
+import { Plugins } from '../../plugins'
 
 let examplePlugin = 'heroku-production-status'
 let bin = 'heroku'
@@ -9,8 +9,8 @@ const g = global as any
 if (g.config) {
   bin = g.config.bin
   let pjson = g.config.pjson['cli-engine']
-  if (pjson['help'] && pjson['help']['plugins']) {
-    examplePlugin = Object.keys(pjson['help']['plugins'])[0]
+  if (pjson.help && pjson.help.plugins) {
+    examplePlugin = Object.keys(pjson.help.plugins)[0]
   }
 }
 

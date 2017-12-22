@@ -1,20 +1,24 @@
-export type Commands = { [k: string]: CommandInfo }
-export type CommandInfo = {
+export interface ICommands {
+  [k: string]: ICommandInfo
+}
+export interface ICommandInfo {
   id: string
   hidden: boolean
   help: string
   helpLine: [string, string | undefined]
 }
 
-export type TopicOpts = {
+export interface ITopicOpts {
   name: string
   description?: string
   hidden?: boolean
-  commands?: Commands
-  subtopics?: Topics
+  commands?: ICommands
+  subtopics?: ITopics
 }
 
-export type Topics = { [k: string]: Topic }
+export interface ITopics {
+  [k: string]: Topic
+}
 
 export class Topic {
   static parentTopicIDof(id: string) {
@@ -24,7 +28,7 @@ export class Topic {
       .join(':')
   }
 
-  static findTopic(name: string, topics: Topics): Topic | undefined {
+  static findTopic(name: string, topics: ITopics): Topic | undefined {
     let id = name.split(':')
     name = id.pop()!
     if (id.length > 0) {
@@ -35,7 +39,7 @@ export class Topic {
     return topics[name]
   }
 
-  static findOrCreateTopic(opts: TopicOpts, topics: Topics): Topic {
+  static findOrCreateTopic(opts: ITopicOpts, topics: ITopics): Topic {
     let id = opts.name.split(':')
     opts.name = id.pop()!
     if (id.length > 0) {
@@ -50,18 +54,18 @@ export class Topic {
     return topics[opts.name]
   }
 
-  static mergeSubtopics(...subtopics: (Topics | undefined)[]): Topics {
-    const topics: Topics = {}
+  static mergeSubtopics(...subtopics: Array<ITopics | undefined>): ITopics {
+    const topics: ITopics = {}
     for (let p of subtopics) {
       for (let t of Object.values(p || {})) {
-        if (!(t as TopicOpts).name) continue
-        Topic.findOrCreateTopic(t as TopicOpts, topics)
+        if (!(t as ITopicOpts).name) continue
+        Topic.findOrCreateTopic(t as ITopicOpts, topics)
       }
     }
     return topics
   }
 
-  static mergeTopics(a: TopicOpts, b: TopicOpts) {
+  static mergeTopics(a: ITopicOpts, b: ITopicOpts) {
     return new Topic({
       ...b,
       ...a,
@@ -76,10 +80,10 @@ export class Topic {
   public name: string
   public description?: string
   public hidden: boolean
-  public subtopics: Topics
-  public commands: Commands
+  public subtopics: ITopics
+  public commands: ICommands
 
-  constructor(opts: TopicOpts) {
+  constructor(opts: ITopicOpts) {
     if (opts.name.includes(':')) throw new Error(`${this.name} should not have ":" in it`)
     this.name = opts.name
     this.description = opts.description

@@ -49,7 +49,7 @@
     "cli-engine-command": "11.0.5",
     "cli-engine-config": "5.0.5",
     "cli-engine-heroku": "7.0.4",
-    "cli-flags": "2.0.2",
+    "cli-flags": "^2.0.2",
     "del-cli": "1.1.0",
     "execa": "^0.8.0",
     "husky": "^0.14.3",
@@ -60,6 +60,8 @@
     "tmp": "^0.0.33",
     "ts-jest": "22.0.0",
     "ts-node": "4.0.2",
+    "tslint": "^5.8.0",
+    "tslint-cli-engine": "^1.0.2",
     "typescript": "2.6.2"
   },
   "engines": {
@@ -83,7 +85,7 @@
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
     "clean": "del-cli lib",
-    "posttest": "prettier -l 'src/**/*.ts'",
+    "posttest": "tslint -p . && prettier -l 'src/**/*.ts'",
     "precommit": "lint-staged",
     "prepare": "tsc",
     "prepublishOnly": "yarn run clean && yarn run prepare && yarn run prune",

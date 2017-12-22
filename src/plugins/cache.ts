@@ -1,29 +1,31 @@
-import deps from '../deps'
 import { IConfig } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import deps from '../deps'
 
 const debug = require('debug')('cli:cache')
 
-export type CachePlugin = {
+export interface ICachePlugin {
   [k: string]: any
   name: string
   type: string
 }
 
-export type CacheJSON = {
+interface ICacheJSON {
   version: string
-  plugins: { [k: string]: CachePlugin }
+  plugins: { [k: string]: ICachePlugin }
 }
 
 export class PluginCache {
+  public needsSave: boolean = false
+  private cache: ICacheJSON
+  private mtime?: number
+  private saving?: Promise<void>
+  private fetchPromises: { [k: string]: Promise<any> } = {}
+  private _init: Promise<void>
+
   constructor(protected config: IConfig) {}
 
-  public needsSave: boolean = false
-  private cache: CacheJSON
-  private mtime?: number
-
-  private saving?: Promise<void>
   public async save(): Promise<void> {
     await this.init()
     if (!this.needsSave) return
@@ -37,7 +39,6 @@ export class PluginCache {
     })()
   }
 
-  private fetchPromises: { [k: string]: Promise<any> } = {}
   public async fetch<T>(key: string, prop: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
     if (this.fetchPromises[key + prop]) return this.fetchPromises[key + prop]
@@ -60,7 +61,7 @@ export class PluginCache {
   public async set(key: string, prop: string, v: any) {
     await this.init()
     if (!this.cache.plugins[key]) {
-      this.cache.plugins[key] = {} as CachePlugin
+      this.cache.plugins[key] = {} as ICachePlugin
     }
     this.cache.plugins[key][prop] = v
     this.needsSave = true
@@ -74,7 +75,6 @@ export class PluginCache {
     this.needsSave = true
   }
 
-  private _init: Promise<void>
   private async init() {
     await this.saving
     if (this._init) return this._init
@@ -91,7 +91,7 @@ export class PluginCache {
     return path.join(this.config.cacheDir, 'plugins.json')
   }
 
-  private async read(): Promise<CacheJSON | undefined> {
+  private async read(): Promise<ICacheJSON | undefined> {
     try {
       this.mtime = await this.getLastUpdated()
       let cache = await fs.readJSON(this.file)

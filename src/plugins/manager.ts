@@ -1,16 +1,18 @@
-import deps from '../deps'
-import { color } from 'heroku-cli-color'
+import { ICommand, IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
-import { IConfig, ICommand } from 'cli-engine-config'
-import { inspect } from 'util'
-import { PluginManifest } from './manifest'
-import { PluginCache } from './cache'
-import { Topic, Topics, Commands, CommandInfo } from './topic'
+import { color } from 'heroku-cli-color'
 import _ from 'ts-lodash'
+import { inspect } from 'util'
+import deps from '../deps'
+import { PluginCache } from './cache'
+import { PluginManifest } from './manifest'
+import { ICommandInfo, ICommands, ITopics, Topic } from './topic'
 
-export type Aliases = { [from: string]: string[] }
+export interface IAliases {
+  [from: string]: string[]
+}
 
-export interface PluginManagerOptions {
+export interface IPluginManagerOptions {
   config: IConfig
   cache?: PluginCache
   manifest?: PluginManifest
@@ -22,25 +24,30 @@ const errHandle = (context: string, m: PluginManager) => (err: Error) => {
 }
 
 export abstract class PluginManager {
-  public topics: Topics
+  public topics: ITopics
   public commandIDs: string[]
-  public rootCommands: Commands
-  public aliases: Aliases
+  public rootCommands: ICommands
+  public aliases: IAliases
   public errored = false
   protected submanagers: PluginManager[] = []
   protected config: IConfig
   protected manifest: PluginManifest
   protected cache: PluginCache
   protected cacheKey: string
+  protected debug = require('debug')(`cli:plugins:${this.constructor.name.split('Plugin')[0].toLowerCase()}`)
+  private _needsRefreshPromise: Promise<boolean>
+  private _initPromise: Promise<void>
+  private _refreshPromise: Promise<void>
+  private _commandFinders: { [k: string]: Promise<ICommand | undefined> } = {}
+  private _loadPromise?: Promise<void>
 
-  constructor(opts: PluginManagerOptions) {
+  constructor(opts: IPluginManagerOptions) {
     this.cacheKey = 'plugins'
     this.config = opts.config
     this.manifest = opts.manifest || new deps.PluginManifest(this.config)
     this.cache = opts.cache || new deps.PluginCache(this.config)
   }
 
-  private _initPromise: Promise<void>
   public init(): Promise<void> {
     if (this._initPromise) return this._initPromise
     return (this._initPromise = (async () => {
@@ -49,7 +56,6 @@ export abstract class PluginManager {
     })())
   }
 
-  private _needsRefreshPromise: Promise<boolean>
   public get needsRefresh(): Promise<boolean> {
     if (this._needsRefreshPromise) return this._needsRefreshPromise
     return (this._needsRefreshPromise = (async () => {
@@ -59,11 +65,6 @@ export abstract class PluginManager {
       return false
     })())
   }
-  protected async _needsRefresh(): Promise<boolean> {
-    return false
-  }
-
-  private _refreshPromise: Promise<void>
   public refresh() {
     if (this._refreshPromise) return this._refreshPromise
     return (this._refreshPromise = (async () => {
@@ -75,13 +76,11 @@ export abstract class PluginManager {
       for (let s of promises) await s
     })())
   }
-  protected async _refresh(): Promise<void> {}
 
   public findTopic(name: string): Topic | undefined {
     return Topic.findTopic(name, this.topics)
   }
 
-  private _loadPromise?: Promise<void>
   public get load() {
     if (!this._loadPromise) {
       this._loadPromise = (async () => {
@@ -96,15 +95,7 @@ export abstract class PluginManager {
     }
     return this._loadPromise
   }
-  protected async _load() {}
 
-  private async fetchCommandIDs(): Promise<string[]> {
-    const fetch = () => this._commandIDs()
-    let ids = await this.cache.fetch(this.cacheKey, 'command:ids', fetch)
-    return _.uniq(ids.concat(...this.okSubmanagers.map(s => s.commandIDs)).sort())
-  }
-
-  private _commandFinders: { [k: string]: Promise<ICommand | undefined> } = {}
   public findCommand(id: string): Promise<ICommand | undefined> {
     if (this._commandFinders[id]) return this._commandFinders[id]
     return (this._commandFinders[id] = (async () => {
@@ -119,12 +110,19 @@ export abstract class PluginManager {
     })())
   }
 
-  public findCommandInfo(id: string): CommandInfo | undefined {
+  public findCommandInfo(id: string): ICommandInfo | undefined {
     let cmd = this.rootCommands[id]
     if (cmd) return cmd
     let topic = Topic.findTopic(Topic.parentTopicIDof(id), this.topics)
     if (!topic) return
     return topic.commands[id]
+  }
+
+  protected async _load() {}
+  protected async _refresh(): Promise<void> {}
+
+  protected async _needsRefresh(): Promise<boolean> {
+    return false
   }
 
   protected require(p: string, id: string): ICommand {
@@ -144,19 +142,34 @@ export abstract class PluginManager {
     return Command
   }
 
-  protected debug = require('debug')(`cli:plugins:${this.constructor.name.split('Plugin')[0].toLowerCase()}`)
   protected async _init(): Promise<void> {}
-  protected async _topics(): Promise<Topics> {
+  protected async _topics(): Promise<ITopics> {
     return {}
   }
   protected async _commandIDs(): Promise<string[]> {
     return []
   }
-  protected async _aliases(): Promise<Aliases> {
+  protected async _aliases(): Promise<IAliases> {
     return {}
   }
   protected async _findCommand(_: string): Promise<ICommand | undefined> {
     return undefined
+  }
+
+  protected async _rootCommands(): Promise<ICommands> {
+    const commands: ICommands = {}
+    for (let command of await this._commandIDs()) {
+      const topicID = Topic.parentTopicIDof(command)
+      if (topicID) continue
+      const info = await this.fetchCommandInfo(command)
+      commands[command] = info
+    }
+    return commands
+  }
+
+  protected hasID(id: string) {
+    if (this.commandIDs.includes(id)) return true
+    if (([] as string[]).concat(...Object.values(this.aliases)).includes(id)) return true
   }
 
   private async unalias(id: string): Promise<string> {
@@ -171,7 +184,7 @@ export abstract class PluginManager {
     for (let s of promises) await s
   }
 
-  private async addCommandsToTopics(topics: Topics) {
+  private async addCommandsToTopics(topics: ITopics) {
     for (let command of await this._commandIDs()) {
       const topicID = Topic.parentTopicIDof(command)
       if (!topicID) continue
@@ -195,7 +208,7 @@ export abstract class PluginManager {
     return help
   }
 
-  private async fetchTopics(): Promise<Topics> {
+  private async fetchTopics(): Promise<ITopics> {
     const fetch = async () => {
       let topics = await this._topics()
       await this.addCommandsToTopics(topics)
@@ -205,7 +218,7 @@ export abstract class PluginManager {
     return Topic.mergeSubtopics(topics, ...this.okSubmanagers.map(m => m.topics))
   }
 
-  private async fetchRootCommands(): Promise<Commands> {
+  private async fetchRootCommands(): Promise<ICommands> {
     const fetch = async () => await this._rootCommands()
     let rootCommands = await this.cache.fetch(this.cacheKey, 'root_commands', fetch)
     for (let s of this.okSubmanagers) {
@@ -214,18 +227,7 @@ export abstract class PluginManager {
     return rootCommands
   }
 
-  protected async _rootCommands(): Promise<Commands> {
-    const commands: Commands = {}
-    for (let command of await this._commandIDs()) {
-      const topicID = Topic.parentTopicIDof(command)
-      if (topicID) continue
-      const info = await this.fetchCommandInfo(command)
-      commands[command] = info
-    }
-    return commands
-  }
-
-  private async fetchCommandInfo(id: string): Promise<CommandInfo> {
+  private async fetchCommandInfo(id: string): Promise<ICommandInfo> {
     let cmd = await this.findCommand(id)
     if (!cmd) throw new Error(`${id} not found`)
     return {
@@ -236,9 +238,9 @@ export abstract class PluginManager {
     }
   }
 
-  private async fetchAliases(): Promise<Aliases> {
+  private async fetchAliases(): Promise<IAliases> {
     const fetch = () => this._aliases()
-    let aliases: Aliases = await this.cache.fetch(this.cacheKey, 'aliases', fetch)
+    let aliases: IAliases = await this.cache.fetch(this.cacheKey, 'aliases', fetch)
     for (let s of this.okSubmanagers) {
       for (let [k, v] of Object.entries(s.aliases || {})) {
         aliases[k] = _.uniq([...(aliases[k] || []), ...deps.util.toArray(v)])
@@ -247,12 +249,13 @@ export abstract class PluginManager {
     return aliases
   }
 
-  protected hasID(id: string) {
-    if (this.commandIDs.includes(id)) return true
-    if ((<string[]>[]).concat(...Object.values(this.aliases)).includes(id)) return true
-  }
-
   private get okSubmanagers() {
     return this.submanagers.filter(m => !m.errored)
+  }
+
+  private async fetchCommandIDs(): Promise<string[]> {
+    const fetch = () => this._commandIDs()
+    let ids = await this.cache.fetch(this.cacheKey, 'command:ids', fetch)
+    return _.uniq(ids.concat(...this.okSubmanagers.map(s => s.commandIDs)).sort())
   }
 }

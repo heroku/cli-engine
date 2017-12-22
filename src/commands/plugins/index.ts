@@ -1,8 +1,8 @@
-import { color } from 'heroku-cli-color'
-import { cli } from 'cli-ux'
 import { Command, flags } from 'cli-engine-command'
-import { compare } from '../../util'
+import { cli } from 'cli-ux'
+import { color } from 'heroku-cli-color'
 import { Plugins } from '../../plugins'
+import { compare } from '../../util'
 
 let examplePlugins = {
   'heroku-ci': { version: '1.8.0' },
@@ -14,8 +14,8 @@ const g = global as any
 if (g.config) {
   bin = g.config.bin
   let pjson = g.config.pjson['cli-engine']
-  if (pjson['help'] && pjson['help']['plugins']) {
-    examplePlugins = pjson['help']['plugins']
+  if (pjson.help && pjson.help.plugins) {
+    examplePlugins = pjson.help.plugins
   }
 }
 const examplePluginsHelp = Object.entries(examplePlugins).map(([name, p]: [string, any]) => `    ${name} ${p.version}`)

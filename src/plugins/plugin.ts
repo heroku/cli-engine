@@ -1,19 +1,19 @@
-import deps from '../deps'
-import { Topic, Topics } from './topic'
-import { PluginManager, PluginManagerOptions } from './manager'
 import { ICommand } from 'cli-engine-config'
-import { PluginManifest } from './manifest'
 import * as path from 'path'
+import deps from '../deps'
+import { IPluginManagerOptions, PluginManager } from './manager'
+import { PluginManifest } from './manifest'
+import { ITopics, Topic } from './topic'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
-export type PluginOptions = PluginManagerOptions & {
+export type PluginOptions = IPluginManagerOptions & {
   root: string
   type: PluginType
   manifest: PluginManifest
-  pjson: PluginPJSON
+  pjson: IPluginPJSON
 }
 
-export type PluginPJSON = {
+export interface IPluginPJSON {
   name: string
   version: string
   main?: string
@@ -24,16 +24,16 @@ export type PluginPJSON = {
   }
 }
 
-export type PluginTopic = {
+export interface IPluginTopic {
   name: string
   description?: string
   hidden?: boolean
 }
 
-export type PluginModule = {
+export interface IPluginModule {
   commands: ICommand[]
-  topic?: PluginTopic
-  topics: PluginTopic[]
+  topic?: IPluginTopic
+  topics: IPluginTopic[]
 }
 
 export abstract class Plugin extends PluginManager {
@@ -42,7 +42,8 @@ export abstract class Plugin extends PluginManager {
   public abstract type: PluginType
   public root: string
   public tag?: string
-  public pjson: PluginPJSON
+  public pjson: IPluginPJSON
+  private _module: Promise<IPluginModule | undefined>
 
   constructor(options: PluginOptions) {
     super(options)
@@ -125,14 +126,13 @@ export abstract class Plugin extends PluginManager {
     return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
   }
 
-  private _module: Promise<PluginModule | undefined>
-  private async fetchModule(): Promise<PluginModule | undefined> {
+  private async fetchModule(): Promise<IPluginModule | undefined> {
     if (this._module) return this._module
     return (this._module = (async () => {
       if (!this.pjson.main) return
       this.debug(`requiring ${this.name}@${this.version}`)
 
-      const m: PluginModule = {
+      const m: IPluginModule = {
         commands: [],
         topics: [],
         ...require(path.join(this.root, this.pjson.main!)),
@@ -156,7 +156,7 @@ export abstract class Plugin extends PluginManager {
     return m.commands.map(m => m.id)
   }
 
-  private async fetchTopicsFromModule(): Promise<Topics> {
+  private async fetchTopicsFromModule(): Promise<ITopics> {
     const m = await this.fetchModule()
     if (!m) return {}
     return m.topics.reduce(
@@ -164,7 +164,7 @@ export abstract class Plugin extends PluginManager {
         topics[t.name] = new Topic(t)
         return topics
       },
-      {} as Topics,
+      {} as ITopics,
     )
   }
 

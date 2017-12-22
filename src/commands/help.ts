@@ -1,10 +1,10 @@
-import { color } from 'heroku-cli-color'
-import cli from 'cli-ux'
 import { Command, flags } from 'cli-engine-command'
+import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
-import { Plugins } from '../plugins'
-import { Topic, CommandInfo } from '../plugins/topic'
+import { color } from 'heroku-cli-color'
 import deps from '../deps'
+import { Plugins } from '../plugins'
+import { ICommandInfo, Topic } from '../plugins/topic'
 
 function topicSort(a: any, b: any) {
   if (a[0] < b[0]) return -1
@@ -74,7 +74,7 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
     cli.log()
   }
 
-  private async listCommandsHelp(commands: CommandInfo[], topic?: Topic) {
+  private async listCommandsHelp(commands: ICommandInfo[], topic?: Topic) {
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)

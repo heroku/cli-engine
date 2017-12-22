@@ -1,9 +1,9 @@
-import deps from '../deps'
-import { cli } from 'cli-ux'
 import { Command, flags } from 'cli-engine-command'
-import { Plugins } from '../plugins'
+import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import deps from '../deps'
+import { Plugins } from '../plugins'
 
 const debug = require('debug')('cli:commands')
 

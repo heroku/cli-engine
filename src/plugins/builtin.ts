@@ -1,10 +1,10 @@
-import { PluginCache } from './cache'
-import { Plugin, PluginType } from './plugin'
 import { IConfig } from 'cli-engine-config'
-import { Topics, Topic } from './topic'
-import * as path from 'path'
 import { ICommand } from 'cli-engine-config'
+import * as path from 'path'
+import { PluginCache } from './cache'
 import { PluginManifest } from './manifest'
+import { Plugin, PluginType } from './plugin'
+import { ITopics, Topic } from './topic'
 
 export class Builtin extends Plugin {
   public type: PluginType = 'builtin'
@@ -40,6 +40,17 @@ export class Builtin extends Plugin {
     }
   }
 
+  public async _topics(): Promise<ITopics> {
+    const topics: ITopics = {}
+    if (this.config.userPlugins) {
+      topics.plugins = new Topic({
+        name: 'plugins',
+        description: 'manage plugins',
+      })
+    }
+    return topics
+  }
+
   public async _findCommand(id: string): Promise<ICommand | undefined> {
     let p = this._commands[id]
     if (p) {
@@ -51,17 +62,6 @@ export class Builtin extends Plugin {
   protected require(p: string, id: string): ICommand {
     let m = super.require(p, id)
     return this.addPluginToCommand(m)
-  }
-
-  public async _topics(): Promise<Topics> {
-    const topics: Topics = {}
-    if (this.config.userPlugins) {
-      topics['plugins'] = new Topic({
-        name: 'plugins',
-        description: 'manage plugins',
-      })
-    }
-    return topics
   }
 
   protected async _commandIDs() {

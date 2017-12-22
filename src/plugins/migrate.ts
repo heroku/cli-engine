@@ -1,8 +1,8 @@
 import { IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
+import * as path from 'path'
 import deps from '../deps'
 import { PluginManifest } from './manifest'
-import * as path from 'path'
 
 const debug = require('debug')('cli:migrate')
 

@@ -1,7 +1,7 @@
-import deps from './deps'
 import { IConfig } from 'cli-engine-config'
-import * as path from 'path'
 import { cli } from 'cli-ux'
+import * as path from 'path'
+import deps from './deps'
 
 export class Lock {
   config: IConfig

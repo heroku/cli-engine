@@ -1,3 +1,4 @@
+import deps from './deps'
 const debug = require('debug')('util')
 
 export function compare(...props: any[]) {
@@ -23,13 +24,13 @@ export function timeout(p: Promise<any>, ms: number): Promise<void> {
   return Promise.race([p, wait(ms, true).then(() => debug('timed out'))])
 }
 
-export type ESModule<T> = {
+export interface IESModule<T> {
   __esModule: true
   default: T
 }
 
-export function undefault<T>(obj: T | ESModule<T>): T {
-  if ((<any>obj).__esModule === true) return (<any>obj).default
+export function undefault<T>(obj: T | IESModule<T>): T {
+  if ((obj as any).__esModule === true) return (obj as any).default
   return obj as any
 }
 
@@ -45,7 +46,7 @@ export function isEmpty(obj: any) {
   // Otherwise, does it have any properties of its own?
   // Note that this doesn't handle
   // toString and toValue enumeration bugs in IE < 9
-  for (var key in obj) {
+  for (let key in obj) {
     if (obj.hasOwnProperty(key)) return false
   }
 
@@ -66,10 +67,18 @@ export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: stri
   )
 }
 
-export async function concatPromiseArrays<T>(promises: Promise<void | T[]>[]): Promise<T[]> {
+export async function concatPromiseArrays<T>(promises: Array<Promise<void | T[]>>): Promise<T[]> {
   let out: T[] = []
   for (let p of promises) {
     out = out.concat((await p) || [])
   }
   return out
+}
+
+export function minorVersionGreater(fromString: string, toString: string): boolean {
+  const from = deps.semver.parse(fromString)!
+  const to = deps.semver.parse(toString)!
+  if (from.major < to.major) return true
+  if (from.minor < to.minor) return true
+  return false
 }

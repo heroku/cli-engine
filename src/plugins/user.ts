@@ -1,9 +1,9 @@
-import deps from '../deps'
 import cli from 'cli-ux'
-import { Plugin, PluginType, PluginOptions } from './plugin'
-import Yarn from './yarn'
 import * as path from 'path'
+import deps from '../deps'
 import { PluginManager } from './manager'
+import { Plugin, PluginOptions, PluginType } from './plugin'
+import Yarn from './yarn'
 
 export class UserPlugins extends PluginManager {
   public plugins: UserPlugin[]

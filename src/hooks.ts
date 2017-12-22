@@ -1,39 +1,54 @@
-import deps from './deps'
-import { PluginModule, PluginPJSON } from './plugins/plugin'
-import { IConfig, ICommand } from 'cli-engine-config'
+import { ICommand, IConfig } from 'cli-engine-config'
 import * as path from 'path'
+import deps from './deps'
+import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 
 const debug = require('debug')('cli:hooks')
 
-export type PreRunOptions = {
-  Command: ICommand
-  argv: string[]
+export abstract class Hook<T extends keyof IHooks> {
+  constructor(protected config: IConfig) {}
+  public abstract run(options: IHooks[T]): Promise<void>
 }
 
-export type PluginsParseHookOptions = {
-  module: PluginModule
-  pjson: PluginPJSON
+export interface IHooks {
+  init: {}
+  update: {}
+  'plugins:parse': {
+    module: IPluginModule
+    pjson: IPluginPJSON
+  }
+  prerun: {
+    Command: ICommand
+    argv: string[]
+  }
 }
+
+interface IConstructor<T> {
+  new (config: IConfig): T
+}
+type LegacyHook<T extends keyof IHooks> = (config: IConfig, options: IHooks[T]) => Promise<void>
+type HookConstructor<T extends keyof IHooks> = IConstructor<Hook<T>>
 
 export class Hooks {
-  config: IConfig
+  constructor(private config: IConfig) {}
 
-  constructor(config: IConfig) {
-    this.config = config
-  }
-
-  async run(event: 'init'): Promise<void>
-  async run(event: 'update'): Promise<void>
-  async run(event: 'prerun', options: PreRunOptions): Promise<void>
-  async run(event: 'plugins:parse', options: PluginsParseHookOptions): Promise<void>
-  async run(event: string, options: Object = {}): Promise<void> {
+  async run<T extends keyof IHooks>(event: T, options: IHooks[T] = {}): Promise<void> {
     let scripts = this.config.hooks[event]
     if (!scripts) return
     for (let script of scripts) {
       script = path.join(this.config.root, script)
       debug(`%s %s`, event, script)
-      const m = deps.util.undefault(require(script))
-      await m(this.config, options)
+      const Hook: HookConstructor<T> | LegacyHook<T> = deps.util.undefault(require(script))
+      if (this.isLegacyHook(Hook)) {
+        await Hook(this.config, options)
+      } else {
+        const hook = new Hook(this.config)
+        await hook.run(options)
+      }
     }
+  }
+
+  private isLegacyHook<T extends keyof IHooks>(Hook: HookConstructor<T> | LegacyHook<T>): Hook is LegacyHook<T> {
+    return !Hook.prototype
   }
 }

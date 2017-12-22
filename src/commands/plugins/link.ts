@@ -1,8 +1,8 @@
 import { Command, flags } from 'cli-engine-command'
-import { Plugins } from '../../plugins'
+import { cli } from 'cli-ux'
 import * as path from 'path'
 import { Hooks } from '../../hooks'
-import { cli } from 'cli-ux'
+import { Plugins } from '../../plugins'
 
 let bin = 'heroku'
 const g = global as any
