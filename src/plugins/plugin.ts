@@ -1,3 +1,4 @@
+import assync from 'assync'
 import { ICommand } from 'cli-engine-config'
 import * as path from 'path'
 import deps from '../deps'
@@ -65,7 +66,7 @@ export abstract class Plugin extends PluginManager {
   }
 
   protected async _commandIDs() {
-    let ids = await deps.util.concatPromiseArrays([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()])
+    let ids = await assync<any>([this.commandIDsFromDir(), this.fetchCommandIDsFromModule()]).flatMap<string>()
     if (!ids.length) throw new Error(`${this.name} has no IDs`)
     return ids
   }

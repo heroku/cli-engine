@@ -9,8 +9,8 @@ export interface IRootRun {
 
 export async function example(argv: string[]): Promise<IRootRun> {
   let code = 0
-  argv = ['cli-engine', ...argv]
-  await run({ config: { argv } })
+  argv = ['node', 'cli-engine', ...argv]
+  await run(argv)
   return {
     stdout: cli.stdout.output,
     stderr: cli.stderr.output,

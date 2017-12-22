@@ -29,7 +29,6 @@ if (!g.testing) {
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
-  private Command: ICommand | undefined
   private hooks: Hooks
 
   constructor(private config: IConfig) {}
@@ -50,43 +49,45 @@ export default class CLI {
 
     debug('command_manager')
     const plugins = new deps.Plugins({ config })
+    let Command: ICommand | undefined
     await plugins.init()
-    if (this.cmdAskingForHelp) {
+    if (this.cmdAskingForHelp(argv)) {
       debug('asking for help')
-      this.Command = deps.Help
-      argv = this.config.argv
+      Command = deps.Help
+      argv = [argv[0], argv[1], 'help', ...argv.slice(2)]
     } else {
-      this.Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
+      Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
     }
 
-    if (!this.Command) {
+    if (!Command) {
       const topic = await plugins.findTopic(id)
       if (topic) {
         debug('showing help for %s topic', id)
-        this.Command = deps.Help
-        argv = this.config.argv
+        Command = deps.Help
       } else {
         debug('no command found')
-        this.Command = deps.NotFound
+        Command = deps.NotFound
       }
     }
 
-    const { _version } = this.Command
+    let run
+    const { _version } = Command
     if (_version === '0.0.0') {
       debug('legacy cli-engine-command version', _version)
-      argv = this.config.argv.slice(2)
+      let c: any = Command
+      run = () => c.run({ ...this.config, argv: argv.slice(2) })
     } else if (deps.semver.lt(_version, '10.0.0')) {
       debug(`legacy cli-engine-command version`, _version)
-      argv = this.config.argv.slice(0)
+      let c: any = Command
+      run = () => c.run({ ...this.config, argv: argv.slice(1) })
+    } else {
+      run = () => Command!.run(argv.slice(3), this.config)
     }
 
-    await this.hooks.run('prerun', {
-      Command: this.Command!,
-      argv,
-    })
+    await this.hooks.run('prerun', { argv, Command: Command! })
 
-    debug('running %s', this.Command!.id)
-    const cmd = await this.Command!.run({ ...this.config, argv })
+    debug('running %s', Command!.id)
+    const cmd = await run()
     debug('exited normally')
 
     await this.exitAfterStdoutFlush()
@@ -106,8 +107,8 @@ export default class CLI {
     return p
   }
 
-  get cmdAskingForHelp(): boolean {
-    for (let arg of this.config.argv) {
+  cmdAskingForHelp(argv: string[]): boolean {
+    for (let arg of argv) {
       if (['--help', '-h'].includes(arg)) return true
       if (arg === '--') return false
     }

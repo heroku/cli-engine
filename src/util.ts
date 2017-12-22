@@ -67,14 +67,6 @@ export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: stri
   )
 }
 
-export async function concatPromiseArrays<T>(promises: Array<Promise<void | T[]>>): Promise<T[]> {
-  let out: T[] = []
-  for (let p of promises) {
-    out = out.concat((await p) || [])
-  }
-  return out
-}
-
 export function minorVersionGreater(fromString: string, toString: string): boolean {
   const from = deps.semver.parse(fromString)!
   const to = deps.semver.parse(toString)!

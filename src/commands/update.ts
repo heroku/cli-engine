@@ -63,7 +63,7 @@ export default class Update extends Command {
     debug('fetch version')
     await this.updater.fetchVersion(true)
     debug('plugins update')
-    await PluginsUpdate.run({ ...this.config, argv: [] })
+    await PluginsUpdate.run([], this.config)
     debug('log chop')
     await this.logChop()
     debug('tidy')
