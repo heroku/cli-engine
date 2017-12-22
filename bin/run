@@ -4,10 +4,8 @@ require('ts-node').register()
 const path = require('path')
 const root = path.join(__dirname, '..', 'example')
 const {run} = require('../src/cli')
-process.env.CLI_BINPATH = __filename
-run({
-  config: {
-    root,
-    updateDisabled: `add update disable message here`
-  }
-})
+const config = {
+  root,
+  updateDisabled: `add update disable message here`
+}
+run(config)

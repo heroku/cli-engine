@@ -29,33 +29,15 @@ if (!g.testing) {
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
-  private config: IConfig
   private Command: ICommand | undefined
   private hooks: Hooks
 
-  constructor({ config }: { config?: ConfigOptions } = {}) {
-    if (!config) config = {}
-    if (!config.initPath) {
-      config.initPath = module.parent!.filename
-    }
-    if (!config.root) {
-      const findUp = require('find-up')
-      config.root = path.dirname(
-        findUp.sync('package.json', {
-          cwd: module.parent!.filename,
-        }),
-      )
-    }
-    this.config = buildConfig(config)
-    if (this.config.debug) cli.config.debug = true
-    cli.config.errlog = this.config.errlog
-  }
+  constructor(private config: IConfig) {}
 
-  async run() {
-    debug('starting run')
+  async run(argv: string[]) {
+    debug('starting run: %o', argv)
     const config = this.config
-    let argv = config.argv.slice(1)
-    const id = this.config.argv[1]
+    const id = argv[2]
 
     if (id !== 'update') {
       const updater = new deps.Updater(this.config)
@@ -133,8 +115,19 @@ export default class CLI {
   }
 }
 
-export function run({ config }: { config?: ConfigOptions } = {}) {
-  if (!config) config = {}
-  const cli = new CLI({ config })
-  return cli.run()
+export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigOptions = {}) {
+  const argv = Array.isArray(arg1) ? arg1 : opts.argv || process.argv
+  if (!opts.initPath) opts.initPath = module.parent!.filename
+  if (!opts.root) {
+    const findUp = require('find-up')
+    opts.root = path.dirname(
+      findUp.sync('package.json', {
+        cwd: opts.initPath,
+      }),
+    )
+  }
+  const config = buildConfig(opts)
+  if (config.debug) cli.config.debug = true
+  cli.config.errlog = config.errlog
+  return new CLI(config).run(argv)
 }
