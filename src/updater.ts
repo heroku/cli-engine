@@ -320,8 +320,9 @@ export class Updater {
 
   private async _createBin(manifest: IManifest) {
     let bin = this.config.windows ? 'heroku.cmd' : 'heroku'
-    let src = this.clientBin
-    let dst = path.join('..', manifest.version, 'bin', bin)
+    let dst = this.clientBin
+    let src = path.join('..', manifest.version, 'bin', bin)
+    await deps.file.mkdirp(path.dirname(dst))
     await deps.file.symlink(src, dst)
   }
 
