@@ -23,7 +23,7 @@ test('runs the version command', async () => {
   expect(stdout).toMatch(/^cli-engine\//)
 })
 
-test('errors with invalid arguments', async () => {
+test.skip('errors with invalid arguments', async () => {
   expect.assertions(1)
   try {
     await example(['version', '--invalid-flag'])
@@ -32,7 +32,7 @@ test('errors with invalid arguments', async () => {
   }
 })
 
-test('errors when command not found', async () => {
+test.skip('errors when command not found', async () => {
   expect.assertions(2)
   try {
     await example(['foobar12345'])

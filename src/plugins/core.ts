@@ -1,40 +1,30 @@
+import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
-import deps from '../deps'
-import { PluginManager } from './manager'
-import { IPluginPJSON, Plugin, PluginOptions, PluginType } from './plugin'
+import { IPluginPJSON, Plugin, PluginType } from './plugin'
 
-export class CorePlugins extends PluginManager {
+export class CorePlugins {
   public plugins: CorePlugin[]
 
-  protected async _init() {
-    this.plugins = this.submanagers = await Promise.all(this.config.corePlugins.map(name => this.initPlugin(name)))
+  constructor(private config: IConfig) {}
+
+  public async submanagers() {
+    await this.init()
+    return this.plugins
   }
 
-  private async initPlugin(name: string) {
-    return new CorePlugin({
-      type: 'core',
-      config: this.config,
-      cache: this.cache,
-      manifest: this.manifest,
-      root: this.root(name),
-      pjson: await this.pjson(name),
-    })
-  }
-
-  private pjson(name: string): Promise<IPluginPJSON> {
-    return deps.file.fetchJSONFile(path.join(this.root(name), 'package.json'))
-  }
-
-  private root(name: string): string {
-    return path.join(this.config.root, 'node_modules', name)
+  public init() {
+    if (this.plugins) return
+    return this.config.corePlugins.map(
+      name =>
+        new CorePlugin({
+          root: path.join(this.config.root, 'node_modules', name),
+          config: this.config,
+        }),
+    )
   }
 }
 
 export class CorePlugin extends Plugin {
   public type: PluginType = 'core'
   public pjson: IPluginPJSON
-
-  constructor(options: PluginOptions & { pjson: IPluginPJSON }) {
-    super(options)
-  }
 }

@@ -43,9 +43,8 @@ ${examplePluginsHelp.join('\n')}
     }
   }
 
-  private async fetchPlugins() {
-    const plugins = new Plugins({ config: this.config })
-    await plugins.init()
-    return plugins.plugins
+  private fetchPlugins() {
+    const plugins = new Plugins(this.config)
+    return plugins.list()
   }
 }

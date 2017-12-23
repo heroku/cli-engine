@@ -2,8 +2,8 @@ import { Command, flags } from 'cli-engine-command'
 import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
 import { color } from 'heroku-cli-color'
+import { CommandManager } from '../command'
 import deps from '../deps'
-import { Plugins } from '../plugins'
 import { ICommandInfo, Topic } from '../plugins/topic'
 
 function topicSort(a: any, b: any) {
@@ -19,17 +19,16 @@ export default class Help extends Command {
     all: flags.boolean({ description: 'show all commands' }),
   }
 
-  plugins: Plugins
+  cm: CommandManager
 
   async run() {
-    this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
+    this.cm = new CommandManager(this.config)
     let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
     if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[2])) subject = this.config.argv[2]
     if (!subject) {
       await this.topics()
       if (this.flags.all) {
-        let rootCmds = await this.plugins.rootCommands
+        let rootCmds = await this.cm.rootCommands()
         if (rootCmds) {
           await this.listCommandsHelp(Object.values(rootCmds))
         }
@@ -37,8 +36,8 @@ export default class Help extends Command {
       return
     }
 
-    const topic = await this.plugins.findTopic(subject)
-    const command = await this.plugins.findCommandInfo(subject)
+    const topic = await this.cm.findTopic(subject)
+    const command = await this.cm.findCommand(subject)
 
     if (!topic && !command) {
       return this.notFound(subject)
@@ -57,7 +56,7 @@ export default class Help extends Command {
   }
 
   private async topics(parent?: Topic) {
-    let topics = Object.values(parent ? parent.subtopics : this.plugins.topics)
+    let topics = Object.values(parent ? parent.subtopics : await this.cm.topics())
       .filter(t => !t.hidden)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)

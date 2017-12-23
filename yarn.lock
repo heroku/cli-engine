@@ -18,6 +18,12 @@
   version "2.0.30"
   resolved "https://registry.yarnpkg.com/@types/ansi-styles/-/ansi-styles-2.0.30.tgz#9a645299020a224afc6a8cd055195850b3c2af85"
 
+"@types/chalk@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@types/chalk/-/chalk-2.2.0.tgz#b7f6e446f4511029ee8e3f43075fb5b73fbaa0ba"
+  dependencies:
+    chalk "*"
+
 "@types/fs-extra@5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-5.0.0.tgz#d3e225b35eb5c6d3a5a782c28219df365c781413"
@@ -612,7 +618,7 @@ center-align@^0.1.1:
     deep-eql "^0.1.3"
     type-detect "^1.0.0"
 
-chalk@2.3.0, chalk@^2.0.0, chalk@^2.3.0:
+chalk@*, chalk@2.3.0, chalk@^2.0.0, chalk@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.3.0.tgz#b5ea48efc9c1793dccc9b4767c93914d3f2d52ba"
   dependencies:
@@ -671,9 +677,9 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@11.0.7:
-  version "11.0.7"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.7.tgz#98ec524ebbf824121a0beb4917ac0ae9b07816c7"
+cli-engine-command@11.0.10:
+  version "11.0.10"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.10.tgz#39c5a8b50b6736dc817e5aa0e94e0fd3afa3be9c"
   dependencies:
     chalk "2.3.0"
     cli-flags "^2.0.3"
@@ -3748,9 +3754,9 @@ ts-lodash@4.0.8, ts-lodash@^4.0.8:
   dependencies:
     lodash "^4.17.4"
 
-ts-node@4.0.2:
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-4.0.2.tgz#cb3d039b9898fdc79ad09ab7e69c84564c8c41ee"
+ts-node@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-4.1.0.tgz#36d9529c7b90bb993306c408cd07f7743de20712"
   dependencies:
     arrify "^1.0.0"
     chalk "^2.3.0"

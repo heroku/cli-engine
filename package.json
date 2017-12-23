@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@types/ansi-styles": "^2.0.30",
+    "@types/chalk": "^2.2.0",
     "@types/fs-extra": "5.0.0",
     "@types/graceful-fs": "4.1.2",
     "@types/jest": "21.1.9",
@@ -49,7 +50,7 @@
     "@types/semver": "5.4.0",
     "@types/strip-ansi": "3.0.0",
     "@types/supports-color": "3.1.0",
-    "cli-engine-command": "11.0.7",
+    "cli-engine-command": "11.0.10",
     "cli-engine-config": "5.0.6",
     "cli-engine-heroku": "7.0.5",
     "cli-flags": "^2.0.3",
@@ -62,7 +63,7 @@
     "prettier": "1.9.2",
     "tmp": "^0.0.33",
     "ts-jest": "22.0.0",
-    "ts-node": "4.0.2",
+    "ts-node": "4.1.0",
     "tslint": "^5.8.0",
     "tslint-cli-engine": "^1.0.3",
     "typescript": "2.6.2"

@@ -1,151 +1,107 @@
-import { IConfig } from 'cli-engine-config'
-import * as path from 'path'
+import * as fs from 'fs-extra'
 import deps from '../deps'
 
-const debug = require('debug')('cli:plugins:manifest')
-
-export interface IManifestLink {
+export interface IManifestOpts {
+  file: string
+  invalidate?: string
   name: string
-  root: string
-  lastUpdated: Date
-}
-
-export interface IManifestUser {
-  name: string
-  tag: string
-}
-
-export interface IManifestUserOpts {
-  type: 'user'
-  name: string
-  tag: string
-}
-
-export interface IManifestLinkOpts {
-  type: 'link'
-  name: string
-  root: string
-}
-
-export interface IManifestJSON {
-  version: 1
-  node_version?: string
-  user: IManifestUser[]
-  link: Array<{
-    name: string
-    root: string
-    lastUpdated: string
-  }>
 }
 
 export class PluginManifest {
-  public nodeVersionChanged: boolean = false
   public needsSave: boolean = false
-  public mtime?: number
-  private manifest: IManifestJSON
-  private _init: Promise<void>
-  private saving: Promise<void>
+  public file: string
+  public invalidate: string | undefined
+  public name: string
+  private body: { [k: string]: any }
+  private mtime?: number
+  private saving?: Promise<void>
+  private debug: any
 
-  constructor(public config: IConfig) {}
+  constructor(opts: IManifestOpts) {
+    this.file = opts.file
+    this.invalidate = opts.invalidate
+    this.name = opts.name
+    this.debug = require('debug')(`cli:manifest:${this.name}`)
+  }
 
   public async save(): Promise<void> {
+    await this.init()
     if (!this.needsSave) return
     this.needsSave = false
-    return (this.saving = (async () => {
-      debug('saving')
-      if (!await this.canWrite()) {
-        throw new Error('manifest file modified, cannot save')
-      }
-      await deps.file.outputJSON(this.file, this.manifest)
-      delete this._init
-    })())
-  }
-
-  public async list(type: 'user'): Promise<IManifestUser[]>
-  public async list(type: 'link'): Promise<IManifestLink[]>
-  public async list(type: 'user' | 'link'): Promise<any> {
-    await this.init()
-    if (type === 'user') return this.manifest.user
-    return this.manifest.link.map(l => ({
-      ...l,
-      lastUpdated: new Date(l.lastUpdated),
-    }))
-  }
-
-  public async add(opts: IManifestUserOpts | IManifestLinkOpts) {
-    await this.init()
-    await this.remove(opts.name)
-    if (opts.type === 'user') {
-      this.manifest.user.push({ name: opts.name, tag: opts.tag })
-    } else {
-      this.manifest.link.push({ name: opts.name, root: opts.root, lastUpdated: new Date().toISOString() })
+    this.debug('saving')
+    if (!await this.canWrite()) {
+      throw new Error('manifest file modified, cannot save')
     }
-    this.needsSave = true
+    await deps.file.outputJSON(this.file, this.body)
   }
 
-  public async remove(name: string) {
+  public async fetch<T>(key: string, fn: () => Promise<T>): Promise<T> {
     await this.init()
-    this.manifest.user = this.manifest.user.filter(p => p.name !== name)
-    this.manifest.link = this.manifest.link.filter(p => p.name !== name)
-    this.needsSave = true
-  }
-
-  public async update(type: 'link', name: string) {
-    await this.init()
-    if (type === 'link') {
-      let link = this.manifest.link.find(p => [p.name, p.root].includes(name))
-      if (!link) throw new Error(`${name} not found`)
-      await this.add({ type, name: link.name, root: link.root })
+    let v = await this.get(key)
+    if (!v) {
+      this.debug('fetching', key)
+      await this.set(key, await fn())
     }
+    return await this.get(key)
   }
 
-  public async init() {
+  public async get(key: string) {
+    await this.init()
+    return this.body.manifest[key]
+  }
+
+  public async set(key: string, v: any) {
+    if (!key) throw new Error('key is empty')
+    await this.init()
+    this.body.manifest[key] = v
+    this.needsSave = true
+    return this.body.manifest[key]
+  }
+
+  public async reset() {
+    await deps.file.remove(this.file)
+    delete this.body
+    this.needsSave = false
+  }
+
+  private async init() {
     await this.saving
-    if (this._init) return this._init
-    return (this._init = (async () => {
-      debug('init')
-      this.manifest = await this.read()
-      this.nodeVersionChanged = this.manifest.node_version !== process.versions.node
-      if (this.nodeVersionChanged) {
-        this.manifest.node_version = process.versions.node
-        this.needsSave = true
-      }
-    })())
-  }
-
-  public async getLastUpdated(): Promise<number | undefined> {
-    try {
-      const stat = await deps.file.stat(this.file)
-      return stat.mtime.getTime()
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
+    if (this.body) return this.body
+    this.debug('init')
+    this.body = (await this.read()) || {
+      invalidate: this.invalidate,
+      manifest: {},
     }
   }
 
-  private get file() {
-    return path.join(this.config.dataDir, 'plugins', 'plugins.json')
-  }
-
-  private async read(): Promise<IManifestJSON> {
+  private async read(): Promise<any> {
     try {
       this.mtime = await this.getLastUpdated()
-      const manifest = await deps.file.readJSON(this.file)
-      if (!manifest.link) this.manifest.link = []
-      if (!manifest.user) this.manifest.user = []
-      return manifest
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-      return {
-        version: 1,
-        node_version: process.versions.node,
-        link: [],
-        user: [],
+      let body = await fs.readJSON(this.file)
+      if (body.invalidate !== this.invalidate) {
+        this.debug('manifest version mismatch')
+        return
       }
+      if (!body.manifest) this.body.manifest = {}
+      return body
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        this.debug(err)
+      } else throw err
     }
   }
 
   private async canWrite() {
     if (!this.mtime) return true
     return (await this.getLastUpdated()) === this.mtime
+  }
+
+  private async getLastUpdated(): Promise<number | undefined> {
+    try {
+      const stat = await deps.file.stat(this.file)
+      return stat.mtime.getTime()
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
   }
 }

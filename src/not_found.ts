@@ -1,23 +1,21 @@
 import { Command } from 'cli-engine-command'
 import cli from 'cli-ux'
 import { color } from 'heroku-cli-color'
+import { CommandManager } from './command'
 import deps from './deps'
-import { Plugins } from './plugins'
 
 export default class NotFound extends Command {
   static variableArgs = true
 
-  plugins: Plugins
+  cm: CommandManager
 
   async run() {
-    this.plugins = new deps.Plugins({ config: this.config })
-    await this.plugins.init()
-
+    this.cm = new deps.CommandManager(this.config)
     let closest
     let binHelp = `${this.config.bin} help`
-    let id = this.config.argv[0]
+    let id = this.argv[0]
     let idSplit = id.split(':')
-    if (await this.plugins.findTopic(idSplit[0])) {
+    if (await this.cm.findTopic(idSplit[0])) {
       // if valid topic, update binHelp with topic
       binHelp = `${binHelp} ${idSplit[0]}`
       // if topic:COMMAND present, try closest for id
@@ -26,7 +24,7 @@ export default class NotFound extends Command {
       closest = this.closest(id)
     }
 
-    let perhaps = closest ? `Perhaps you meant ${color.yellow(closest)}\n` : ''
+    let perhaps = closest ? `Perhaps you meant ${color.yellow(await closest)}\n` : ''
     cli.error(
       `${color.yellow(id)} is not a ${this.config.bin} command.
 ${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`,
@@ -34,17 +32,17 @@ ${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`,
     )
   }
 
-  private allCommands() {
-    let ids = this.plugins.commandIDs
-    return ids
+  private async allCommands() {
+    let commands = await this.cm.commands()
+    return commands.map(c => c.id)
     // TODO add aliases
     // return this.commandManager.listCommandIDs().reduce((commands, c) => {
     //   return commands.concat([c.id]).concat(c.aliases || [])
     // }, [])
   }
 
-  private closest(cmd: string) {
+  private async closest(cmd: string) {
     const DCE = require('string-similarity')
-    return DCE.findBestMatch(cmd, this.allCommands()).bestMatch.target
+    return DCE.findBestMatch(cmd, await this.allCommands()).bestMatch.target
   }
 }

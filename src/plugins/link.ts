@@ -1,8 +1,11 @@
+import { IConfig } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import { ILoadResult } from '../command'
 import deps from '../deps'
-import { PluginManager } from './manager'
-import { IPluginPJSON, Plugin, PluginOptions, PluginType } from './plugin'
+import { Lock } from '../lock'
+import { PluginManifest } from './manifest'
+import { IPluginPJSON, Plugin, PluginType } from './plugin'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
@@ -10,6 +13,11 @@ function touch(f: string) {
 
 function linkPJSON(root: string): Promise<IPluginPJSON> {
   return deps.file.fetchJSONFile(path.join(root, 'package.json'))
+}
+
+export interface IManifestPlugin {
+  name: string
+  root: string
 }
 
 async function getNewestJSFile(root: string): Promise<Date> {
@@ -26,15 +34,22 @@ async function getNewestJSFile(root: string): Promise<Date> {
   }, new Date(0))
 }
 
-export class LinkPlugins extends PluginManager {
+export class LinkPlugins {
   public plugins: LinkPlugin[]
+  private manifest: PluginManifest
+  private lock: Lock
+  private debug: any
+
+  constructor(private config: IConfig) {
+    this.debug = require('debug')('cli:plugins:user')
+  }
 
   public async install(root: string): Promise<void> {
+    await this.init()
     this.debug('installing', root)
-    const plugin = await this.loadPlugin(root, true)
-    await plugin.refresh()
-    await plugin.load
-    await plugin.init()
+    const plugin = await this.loadPlugin(root)
+    await plugin.refresh(true)
+    await plugin.load()
   }
 
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
@@ -43,21 +58,48 @@ export class LinkPlugins extends PluginManager {
     return this.plugins.find(p => path.resolve(p.root) === root)
   }
 
-  protected async _init(): Promise<void> {
+  public async submanagers() {
+    return this.plugins
+  }
+
+  public async init(): Promise<void> {
+    if (this.plugins) return
     this.debug('init')
-    const defs = await this.manifest.list('link')
-    const promises = defs.map(p => this.loadPlugin(p.root))
-    this.submanagers = this.plugins = await Promise.all(promises)
+    this.manifest = new deps.PluginManifest({
+      name: 'link',
+      file: path.join(this.config.dataDir, 'plugins', 'link.json'),
+    })
+    this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
+    await this.migrate()
+    this.plugins = await deps
+      .assync<IManifestPlugin>(await this.manifest.get('plugins'))
+      .map(p => this.loadPlugin(p.root))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
   }
 
-  private async loadPlugin(root: string, forceRefresh: boolean = false) {
+  private async migrate() {
+    const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
+    if (!await deps.file.exists(linkedPath)) return
+    let downgrade = await this.lock.upgrade()
+    this.debug('migrating link plugins')
+    let linked = await deps.file.readJSON(linkedPath)
+    for (let root of linked.plugins) {
+      const name = await deps.file.readJSON(path.join(root, 'package.json'))
+      await this.addPlugin(root, name)
+    }
+    await deps.file.remove(linkedPath)
+    await downgrade()
+  }
+
+  private async addPlugin(root: string, name: string) {
+    let plugins = await this.manifest.get('plugins')
+    await this.manifest.set(plugins, [...plugins, { root, name }])
+    await this.manifest.save()
+  }
+
+  private async loadPlugin(root: string) {
     return new LinkPlugin({
-      cache: this.cache,
-      type: 'link',
       config: this.config,
-      forceRefresh,
-      manifest: this.manifest,
       root,
       pjson: await linkPJSON(root),
     })
@@ -66,20 +108,24 @@ export class LinkPlugins extends PluginManager {
 
 export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
-  private forceRefresh: boolean
+  private manifest: PluginManifest
 
-  constructor(opts: { forceRefresh: boolean } & PluginOptions) {
-    super(opts)
-    this.forceRefresh = opts.forceRefresh
+  public async load(): Promise<ILoadResult> {
+    await this.init()
+    this.manifest = new deps.PluginManifest({
+      name: 'link',
+      file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
+    })
+    return super.load()
   }
 
-  protected async resetCache() {
+  public async resetCache() {
     await super.resetCache()
-    const plugin = await this.manifestInfo()
-    if (plugin) await this.manifest.update('link', plugin.name)
+    await this.manifest.set('lastUpdated', new Date().toISOString())
   }
 
-  protected async _refresh() {
+  public async refresh(force = false) {
+    if (force) return this.updateNodeModules()
     let type = await this.refreshType()
     switch (type) {
       case 'node_modules':
@@ -89,16 +135,14 @@ export class LinkPlugin extends Plugin {
         await this.prepare()
         break
     }
-    await super._refresh()
   }
 
-  protected async _needsRefresh() {
-    if (await this.refreshType()) return true
-    return super._needsRefresh()
+  public async init() {
+    await super.init()
+    this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
   }
 
   private async refreshType(): Promise<'node_modules' | 'prepare' | undefined> {
-    if (this.forceRefresh || this.manifest.nodeVersionChanged) return 'node_modules'
     if (await this.updateNodeModulesNeeded()) return 'node_modules'
     if (await this.prepareNeeded()) return 'prepare'
   }
@@ -135,14 +179,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async lastUpdated(): Promise<Date> {
-    const plugin = await this.manifestInfo()
-    if (!plugin) return new Date(0)
-    return plugin.lastUpdated
-  }
-
-  private async manifestInfo() {
-    const plugins = await this.manifest.list('link')
-    const plugin = plugins.find(p => p.root === this.root)
-    return plugin
+    const lastUpdated = await this.manifest.get('lastUpdated')
+    return lastUpdated ? new Date(lastUpdated) : new Date(0)
   }
 }

@@ -24,8 +24,7 @@ export default class PluginsLink extends Command {
     Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`
 
   async run() {
-    const plugins = new Plugins({ config: this.config })
-    await plugins.init()
+    const plugins = new Plugins(this.config)
     let p = path.resolve(this.argv[0] || process.cwd())
     cli.action.start(`Linking ${p}`)
     await plugins.install({ type: 'link', root: p, force: this.flags.force })

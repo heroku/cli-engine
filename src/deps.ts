@@ -1,4 +1,5 @@
 // remote
+import assync = require('assync')
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
 import Heroku = require('cli-engine-heroku')
 import { HTTP } from 'http-call'
@@ -6,11 +7,10 @@ import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
 import stripAnsi = require('strip-ansi')
-import assync = require('assync')
 
 // local
-import help = require('./commands/help')
 import command = require('./command')
+import help = require('./commands/help')
 import file = require('./file')
 import Hooks = require('./hooks')
 import lock = require('./lock')
@@ -21,12 +21,10 @@ import util = require('./util')
 // plugins
 import Plugins = require('./plugins')
 import Builtin = require('./plugins/builtin')
-import pluginCache = require('./plugins/cache')
 import corePlugins = require('./plugins/core')
 import pluginLegacy = require('./plugins/legacy')
 import linkPlugins = require('./plugins/link')
 import pluginManifest = require('./plugins/manifest')
-import pluginsMigrate = require('./plugins/migrate')
 import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
 
@@ -60,9 +58,7 @@ export default {
   get CorePlugins(): typeof corePlugins.CorePlugins { return fetch('./plugins/core').CorePlugins },
   get Yarn(): typeof yarn.default { return fetch('./plugins/yarn').default },
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
-  get PluginCache(): typeof pluginCache.PluginCache { return fetch('./plugins/cache').PluginCache },
   get PluginLegacy(): typeof pluginLegacy.PluginLegacy { return fetch('./plugins/legacy').PluginLegacy },
-  get PluginsMigrate(): typeof pluginsMigrate.PluginsMigrate { return fetch('./plugins/migrate').PluginsMigrate },
   get CommandManager(): typeof command.CommandManager { return fetch('./command').CommandManager },
 }
 

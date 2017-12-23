@@ -1,6 +1,6 @@
-import {ICommandInfo} from './command'
-import {  IConfig } from 'cli-engine-config'
+import { IConfig } from 'cli-engine-config'
 import * as path from 'path'
+import { ICommandInfo } from './command'
 import deps from './deps'
 import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 

@@ -2,8 +2,8 @@ import { Command, flags } from 'cli-engine-command'
 import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import { CommandManager, ICommandInfo } from '../command'
 import deps from '../deps'
-import { Plugins } from '../plugins'
 
 const debug = require('debug')('cli:commands')
 
@@ -12,12 +12,11 @@ export default class Commands extends Command {
   static hidden = true
   static flags: flags.Input = { json: flags.boolean() }
 
-  plugins: Plugins
+  commands: CommandManager
 
   async run() {
-    this.plugins = new Plugins({ config: this.config })
-    await this.plugins.init()
-    const commands = await this.plugins.commandIDs
+    this.commands = new CommandManager(this.config)
+    const commands = await this.commands.commands()
     if (this.flags.json) {
       cli.warn('heroku-cli: This CLI is deprecated. Please reinstall from https://cli.heroku.com')
       await this.addV6Hack()
@@ -27,15 +26,20 @@ export default class Commands extends Command {
     }
   }
 
-  async outputJSON(ids: string[]) {
-    const topics = Object.values(this.plugins.topics).filter(t => !t.hidden)
-    const commands = await Promise.all(ids.map(id => this.plugins.findCommand(id)))
+  async outputJSON(commands: ICommandInfo[]) {
+    const topics = Object.values(await this.commands.topics()).filter(t => !t.hidden)
     const outputCommands = commands
       .filter(c => !!c)
       .map(c => c!)
       .map(c => ({
-        command: c.command,
-        topic: c.topic,
+        command: c.id
+          .split(':')
+          .slice(1)
+          .join(':'),
+        topic: c.id
+          .split(':')
+          .slice(0, -1)
+          .join(':'),
         usage: c.usage,
         description: c.description,
         help: c.help,
@@ -45,8 +49,8 @@ export default class Commands extends Command {
     cli.styledJSON({ topics, commands: outputCommands })
   }
 
-  outputPlain(commands: string[]) {
-    for (let id of commands) {
+  outputPlain(commands: ICommandInfo[]) {
+    for (let id of commands.map(c => c.id)) {
       cli.log(id)
     }
   }
