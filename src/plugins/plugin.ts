@@ -69,7 +69,7 @@ export abstract class Plugin implements ICommandManager {
 
   public async yarnNodeVersion(): Promise<string | undefined> {
     try {
-      let f = await deps.file.fetchJSONFile(path.join(this.root, 'node_modules', '.yarn-integrity'))
+      let f = await deps.file.readJSON(path.join(this.root, '..', '.yarn-integrity'))
       return f.nodeVersion
     } catch (err) {
       if (err.code !== 'ENOENT') throw err

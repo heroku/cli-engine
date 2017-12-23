@@ -55,7 +55,7 @@ export class UserPlugins {
     await this.init()
     if (!this.plugins.length) return false
     let plugin = this.plugins[0]
-    if ((await plugin.yarnNodeVersion()) !== process.versions.node) return true
+    if ((await plugin.yarnNodeVersion()) !== process.version) return true
     return false
   }
 
@@ -78,6 +78,7 @@ export class UserPlugins {
     const manifest = await this.manifest.get('plugins')
     this.plugins = await Promise.all(Object.entries(manifest || {}).map(([k, v]) => this.loadPlugin(k, v.tag)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
+    await this.refresh()
   }
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {

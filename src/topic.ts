@@ -80,7 +80,6 @@ export class RootTopic extends TopicBase {
       this.mergeTopics(topic, t)
       this.addTopics(topicsToArray(t.subtopics, t.name))
       this.addCommands(t.commands)
-      this.allTopics.push(topic)
     }
   }
 
@@ -101,7 +100,11 @@ export class RootTopic extends TopicBase {
       let parent = this.findOrCreateTopic(parentID)
       topics = parent.subtopics
     }
-    return (topics[key] = topics[key] || new Topic({ name }))
+    if (!topics[key]) {
+      topics[key] = new Topic({ name })
+      this.allTopics.push(topics[key])
+    }
+    return topics[key]
   }
 
   private mergeTopics(a: Topic, b: ITopic) {

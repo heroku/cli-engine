@@ -28,8 +28,6 @@ export interface ILoadResult {
 
 export interface ICommandManager {
   submanagers?(): Promise<ICommandManager[]>
-  needsRefresh?(): Promise<boolean>
-  refresh?(): Promise<void>
   load?(): Promise<ILoadResult>
 }
 
@@ -37,7 +35,8 @@ export class CommandManager {
   private managers = [new Builtin(this.config), new Plugins(this.config)]
   private hooks: Hooks
   private debug = require('debug')('cli:plugins')
-  private result = new RootTopic()
+  private result: RootTopic
+  private _submanagers: ICommandManager[]
 
   constructor(protected config: IConfig) {
     this.hooks = new deps.Hooks(this.config)
@@ -47,7 +46,7 @@ export class CommandManager {
     await this.hooks.run('init')
     const id = argv[2]
     await this.load()
-    if (this.cmdAskingForHelp(argv)) return this.help(argv)
+    if (this.cmdAskingForHelp(argv)) return this.help(argv.slice(3))
     let cmd = this.result.findCommand(id)
     if (!cmd) {
       let topic = await this.findTopic(id)
@@ -99,23 +98,18 @@ export class CommandManager {
   }
 
   private async load(): Promise<void> {
+    if (this.result) return
     this.debug('load')
+    this.result = new RootTopic()
     await this.hooks.run('init')
     let managers = await this.submanagers()
-    let managersToRefresh = await this.managersNeedingRefresh(managers)
-    if (managersToRefresh.length) await this.refresh(managersToRefresh)
     this.debug('loading all managers')
     let loads = managers.filter(m => m.load).map(m => m.load!())
     for (let r of loads) this.addResult(await r)
   }
 
-  private async refresh(managers: ICommandManager[]) {
-    this.debug('refreshing')
-    let tasks = managers.map(m => m.refresh!())
-    for (let t of tasks) await t
-  }
-
   private async submanagers(): Promise<ICommandManager[]> {
+    if (this._submanagers) return this._submanagers
     const fetch = async (managers: ICommandManager[]): Promise<ICommandManager[]> => {
       const submanagers = await assync(managers)
         .filter(m => !!m.submanagers)
@@ -125,18 +119,9 @@ export class CommandManager {
     }
 
     this.debug('fetching command managers')
-    const managers = await fetch(this.managers)
-    this.debug('received command %d managers', managers.length)
-    return managers
-  }
-
-  private async managersNeedingRefresh(managers: ICommandManager[]): Promise<ICommandManager[]> {
-    this.debug('checking which managers need refreshes')
-    managers = managers.filter(m => m.needsRefresh)
-    let tasks = await Promise.all(
-      managers.filter(m => m.needsRefresh).map(async m => ((await m.needsRefresh!()) ? m : null)),
-    )
-    return assync<ICommandManager | null>(tasks).compact()
+    this._submanagers = await fetch(this.managers)
+    this.debug('received command %d managers', this._submanagers.length)
+    return this._submanagers
   }
 
   private addResult(result: ILoadResult) {
@@ -145,6 +130,7 @@ export class CommandManager {
   }
 
   private cmdAskingForHelp(argv: string[]): boolean {
+    if (argv[2] === 'help') return true
     for (let arg of argv) {
       if (['--help', '-h'].includes(arg)) return true
       if (arg === '--') return false
