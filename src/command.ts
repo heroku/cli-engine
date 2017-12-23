@@ -97,6 +97,11 @@ export class CommandManager {
     return this.result.allTopics
   }
 
+  public async rootTopics() {
+    await this.load()
+    return this.result.subtopics
+  }
+
   private async load(): Promise<void> {
     if (this.result) return
     this.debug('load')

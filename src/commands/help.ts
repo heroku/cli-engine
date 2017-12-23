@@ -56,7 +56,7 @@ export default class Help extends Command {
   }
 
   private async topics(parent?: Topic) {
-    let topics = Object.values(parent ? parent.subtopics : await this.cm.topics())
+    let topics = Object.values(parent ? parent.subtopics : await this.cm.rootTopics())
       .filter(t => !t.hidden)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
