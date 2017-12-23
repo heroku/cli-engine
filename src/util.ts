@@ -71,6 +71,6 @@ export function minorVersionGreater(fromString: string, toString: string): boole
   const from = deps.semver.parse(fromString)!
   const to = deps.semver.parse(toString)!
   if (from.major < to.major) return true
-  if (from.minor < to.minor) return true
+  if (from.major === to.major && from.minor < to.minor) return true
   return false
 }

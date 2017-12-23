@@ -1,10 +1,9 @@
 require('./fs')
-import { buildConfig, ConfigOptions, ICommand, IConfig } from 'cli-engine-config'
+import { buildConfig, ConfigOptions, IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
 import { color } from 'heroku-cli-color'
 import * as path from 'path'
 import deps from './deps'
-import { Hooks } from './hooks'
 
 const debug = require('debug')('cli')
 const handleEPIPE = (err: Error) => {
@@ -29,82 +28,52 @@ if (!g.testing) {
 process.env.CLI_ENGINE_VERSION = require('../package.json').version
 
 export default class CLI {
-  private hooks: Hooks
-
   constructor(private config: IConfig) {}
 
-  async run(argv: string[]) {
+  async run(argv: string[]): Promise<any> {
     debug('starting run: %o', argv)
-    const config = this.config
     const id = argv[2]
 
     if (id !== 'update') {
       const updater = new deps.Updater(this.config)
-      debug('checking autoupdater')
       await updater.autoupdate()
     }
 
-    this.hooks = new deps.Hooks(this.config)
-    await this.hooks.run('init')
+    const commands = new deps.CommandManager(this.config)
+    return await commands.run(argv)
 
-    debug('command_manager')
-    const plugins = new deps.Plugins({ config })
-    let Command: ICommand | undefined
-    await plugins.init()
-    if (this.cmdAskingForHelp(argv)) {
-      debug('asking for help')
-      Command = deps.Help
-      argv = [argv[0], argv[1], 'help', ...argv.slice(2)]
-    } else {
-      Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
-    }
+    // if (this.cmdAskingForHelp(argv)) {
+    //   debug('asking for help')
+    //   Command = deps.Help
+    //   argv = [argv[0], argv[1], 'help', ...argv.slice(2)]
+    // } else {
+    //   Command = await plugins.findCommand(id || this.config.defaultCommand || 'help')
+    // }
 
-    if (!Command) {
-      const topic = await plugins.findTopic(id)
-      if (topic) {
-        debug('showing help for %s topic', id)
-        Command = deps.Help
-      } else {
-        debug('no command found')
-        Command = deps.NotFound
-      }
-    }
+    // if (!Command) {
+    //   const topic = await plugins.findTopic(id)
+    //   if (topic) {
+    //     debug('showing help for %s topic', id)
+    //     Command = deps.Help
+    //   } else {
+    //     debug('no command found')
+    //     Command = deps.NotFound
+    //   }
+    // }
 
-    let run
-    const { _version } = Command
-    if (_version === '0.0.0') {
-      debug('legacy cli-engine-command version', _version)
-      let c: any = Command
-      run = () => c.run({ ...this.config, argv: argv.slice(2) })
-    } else if (deps.semver.lt(_version, '10.0.0')) {
-      debug(`legacy cli-engine-command version`, _version)
-      let c: any = Command
-      run = () => c.run({ ...this.config, argv: argv.slice(1) })
-    } else {
-      run = () => Command!.run(argv.slice(3), this.config)
-    }
-
-    await this.hooks.run('prerun', { argv, Command: Command! })
-
-    debug('running %s', Command!.id)
-    const cmd = await run()
-    debug('exited normally')
-
-    await this.exitAfterStdoutFlush()
-    return cmd
-  }
-
-  async exitAfterStdoutFlush() {
-    const { timeout } = require('./util')
-    cli.done()
-    await timeout(this.flush(), 10000)
-  }
-
-  flush(): Promise<any> {
-    if (g.testing) return Promise.resolve()
-    let p = new Promise(resolve => process.stdout.once('drain', resolve))
-    process.stdout.write('')
-    return p
+    // let run
+    // const { _version } = Command
+    // if (_version === '0.0.0') {
+    //   debug('legacy cli-engine-command version', _version)
+    //   let c: any = Command
+    //   run = () => c.run({ ...this.config, argv: argv.slice(2) })
+    // } else if (deps.semver.lt(_version, '10.0.0')) {
+    //   debug(`legacy cli-engine-command version`, _version)
+    //   let c: any = Command
+    //   run = () => c.run({ ...this.config, argv: argv.slice(1) })
+    // } else {
+    //   run = () => Command!.run(argv.slice(3), this.config)
+    // }
   }
 
   cmdAskingForHelp(argv: string[]): boolean {

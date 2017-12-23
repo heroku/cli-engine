@@ -1,4 +1,5 @@
-import { ICommand, IConfig } from 'cli-engine-config'
+import {ICommandInfo} from './command'
+import {  IConfig } from 'cli-engine-config'
 import * as path from 'path'
 import deps from './deps'
 import { IPluginModule, IPluginPJSON } from './plugins/plugin'
@@ -18,7 +19,7 @@ export interface IHooks {
     pjson: IPluginPJSON
   }
   prerun: {
-    Command: ICommand
+    Command: ICommandInfo
     argv: string[]
   }
 }

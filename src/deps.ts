@@ -9,6 +9,7 @@ import stripAnsi = require('strip-ansi')
 
 // local
 import help = require('./commands/help')
+import command = require('./command')
 import file = require('./file')
 import Hooks = require('./hooks')
 import lock = require('./lock')
@@ -60,6 +61,7 @@ export default {
   get PluginCache(): typeof pluginCache.PluginCache { return fetch('./plugins/cache').PluginCache },
   get PluginLegacy(): typeof pluginLegacy.PluginLegacy { return fetch('./plugins/legacy').PluginLegacy },
   get PluginsMigrate(): typeof pluginsMigrate.PluginsMigrate { return fetch('./plugins/migrate').PluginsMigrate },
+  get CommandManager(): typeof command.CommandManager { return fetch('./command').CommandManager },
 }
 
 const cache: any = {}
