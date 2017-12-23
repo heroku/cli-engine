@@ -323,6 +323,7 @@ export class Updater {
     let dst = this.clientBin
     let src = path.join('..', manifest.version, 'bin', bin)
     await deps.file.mkdirp(path.dirname(dst))
+    await deps.file.remove(dst)
     await deps.file.symlink(src, dst)
   }
 
