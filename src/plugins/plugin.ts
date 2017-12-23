@@ -94,6 +94,18 @@ export abstract class Plugin implements ICommandManager {
     this.debug('init')
   }
 
+  public async findCommand(id: string, must: true): Promise<ICommand>
+  public async findCommand(id: string, must?: boolean): Promise<ICommand | undefined>
+  public async findCommand(id: string, must = false): Promise<ICommand | undefined> {
+    let cmd = await this.findCommandInModule(id)
+    if (!cmd) cmd = await this.findCommandInDir(id)
+    if (cmd) {
+      cmd = this.addPluginToCommand(cmd)
+      return cmd
+    }
+    if (must) throw new Error(`${id} not found`)
+  }
+
   protected async commands(): Promise<ICommandInfo[]> {
     const cache: ICommandInfo[] = await this.cache.fetch('commands', async () => {
       this.debug('fetching commands')
@@ -155,18 +167,6 @@ export abstract class Plugin implements ICommandManager {
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
     } as ICommandInfo
-  }
-
-  private async findCommand(id: string, must: true): Promise<ICommand>
-  private async findCommand(id: string, must?: boolean): Promise<ICommand | undefined>
-  private async findCommand(id: string, must = false): Promise<ICommand | undefined> {
-    let cmd = await this.findCommandInModule(id)
-    if (!cmd) cmd = await this.findCommandInDir(id)
-    if (cmd) {
-      cmd = this.addPluginToCommand(cmd)
-      return cmd
-    }
-    if (must) throw new Error(`${id} not found`)
   }
 
   private findCommandInDir(id: string): ICommand {
