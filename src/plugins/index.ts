@@ -32,10 +32,11 @@ export class Plugins {
   constructor(private config: IConfig) {
     this.core = new CorePlugins(this.config)
     this.user = new UserPlugins(this.config)
+    this.link = new LinkPlugins(this.config)
   }
 
   public async submanagers() {
-    return [this.user, this.core]
+    return [this.link, this.user, this.core]
   }
 
   public async install(options: InstallOptions) {
@@ -74,7 +75,7 @@ export class Plugins {
   private async init() {
     if (this.plugins) return
     const managers = _.compact([this.link, this.user, this.core])
-    await Promise.all(managers.map(m => m.submanagers()))
+    await Promise.all(managers.map(m => m.init()))
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
     this.plugins = _.compact([...plugins, this.builtin])
     await await this.plugins.map(p => p.load())

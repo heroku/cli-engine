@@ -12,7 +12,7 @@ export class CorePlugins {
     return this.plugins
   }
 
-  public init() {
+  public async init() {
     if (this.plugins) return
     return this.config.corePlugins.map(
       name =>

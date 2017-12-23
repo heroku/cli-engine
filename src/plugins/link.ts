@@ -1,7 +1,6 @@
 import { IConfig } from 'cli-engine-config'
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import { ILoadResult } from '../command'
 import deps from '../deps'
 import { Lock } from '../lock'
 import { PluginManifest } from './manifest'
@@ -46,10 +45,14 @@ export class LinkPlugins {
 
   public async install(root: string): Promise<void> {
     await this.init()
+    let downgrade = await this.lock.upgrade()
     this.debug('installing', root)
     const plugin = await this.loadPlugin(root)
+    await plugin.init()
     await plugin.refresh(true)
     await plugin.load()
+    await this.addPlugin(plugin.name, plugin.root)
+    await downgrade()
   }
 
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
@@ -59,6 +62,7 @@ export class LinkPlugins {
   }
 
   public async submanagers() {
+    await this.init()
     return this.plugins
   }
 
@@ -71,9 +75,8 @@ export class LinkPlugins {
     })
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
     await this.migrate()
-    this.plugins = await deps
-      .assync<IManifestPlugin>(await this.manifest.get('plugins'))
-      .map(p => this.loadPlugin(p.root))
+    const manifest = await this.manifest.get('plugins')
+    this.plugins = await Promise.all(Object.values(manifest || {}).map(v => this.loadPlugin(v.root)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
   }
 
@@ -85,15 +88,16 @@ export class LinkPlugins {
     let linked = await deps.file.readJSON(linkedPath)
     for (let root of linked.plugins) {
       const name = await deps.file.readJSON(path.join(root, 'package.json'))
-      await this.addPlugin(root, name)
+      await this.addPlugin(name, root)
     }
     await deps.file.remove(linkedPath)
     await downgrade()
   }
 
-  private async addPlugin(root: string, name: string) {
-    let plugins = await this.manifest.get('plugins')
-    await this.manifest.set(plugins, [...plugins, { root, name }])
+  private async addPlugin(name: string, root: string) {
+    let plugins = (await this.manifest.get('plugins')) || {}
+    plugins[name] = { root }
+    await this.manifest.set('plugins', plugins)
     await this.manifest.save()
   }
 
@@ -110,18 +114,10 @@ export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
   private manifest: PluginManifest
 
-  public async load(): Promise<ILoadResult> {
-    await this.init()
-    this.manifest = new deps.PluginManifest({
-      name: 'link',
-      file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
-    })
-    return super.load()
-  }
-
   public async resetCache() {
     await super.resetCache()
     await this.manifest.set('lastUpdated', new Date().toISOString())
+    await this.manifest.save()
   }
 
   public async refresh(force = false) {
@@ -139,6 +135,10 @@ export class LinkPlugin extends Plugin {
 
   public async init() {
     await super.init()
+    this.manifest = new deps.PluginManifest({
+      name: 'link',
+      file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
+    })
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
   }
 

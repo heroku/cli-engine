@@ -67,7 +67,6 @@ export class PluginManifest {
   private async init() {
     await this.saving
     if (this.body) return this.body
-    this.debug('init')
     this.body = (await this.read()) || {
       invalidate: this.invalidate,
       manifest: {},

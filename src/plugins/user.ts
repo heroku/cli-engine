@@ -23,6 +23,7 @@ export class UserPlugins {
   }
 
   public async update() {
+    await this.init()
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     const yarn = this.yarn()
@@ -83,12 +84,14 @@ export class UserPlugins {
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
     const pjson = await deps.file.fetchJSONFile(path.join(this.userPluginPath(name), 'package.json'))
-    return new UserPlugin({
+    let p = new UserPlugin({
       pjson,
       tag,
       root: this.userPluginPath(name),
       config: this.config,
     })
+    await p.init()
+    return p
   }
 
   private userPluginPath(name: string): string {

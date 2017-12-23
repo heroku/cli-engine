@@ -64,7 +64,7 @@ export class Updater {
         if (!this.config.updateDisabled && (await deps.file.exists(this.clientBin))) {
           return this.clientBin
         }
-        return process.env.CLI_BINPATH || this.config.bin
+        return this.config.initPath || this.config.bin
       })()
     return this._binPath
   }

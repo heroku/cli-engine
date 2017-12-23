@@ -34,7 +34,7 @@ export interface ICommandManager {
 export class CommandManager {
   private managers = [new Builtin(this.config), new Plugins(this.config)]
   private hooks: Hooks
-  private debug = require('debug')('cli:plugins')
+  private debug = require('debug')('cli:command')
   private result: RootTopic
   private _submanagers: ICommandManager[]
 

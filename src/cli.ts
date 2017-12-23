@@ -40,7 +40,21 @@ export default class CLI {
     }
 
     const commands = new deps.CommandManager(this.config)
-    return await commands.run(argv)
+    const result = await commands.run(argv)
+    await this.exitAfterStdoutFlush()
+    return result
+  }
+
+  private async exitAfterStdoutFlush() {
+    if (g.testing) return
+    const { timeout } = require('./util')
+    await timeout(this.flush(), 10000)
+  }
+
+  private flush(): Promise<any> {
+    let p = new Promise(resolve => process.stdout.once('drain', resolve))
+    process.stdout.write('')
+    return p
   }
 }
 

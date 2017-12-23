@@ -91,6 +91,7 @@ export abstract class Plugin implements ICommandManager {
     this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
     this.lock = new deps.Lock(this.config, cacheFile + '.lock')
     this.debug = require('debug')(`cli:plugins:${[this.type, this.name, this.version].join(':')}`)
+    this.debug('init')
   }
 
   protected async commands(): Promise<ICommandInfo[]> {
@@ -108,12 +109,12 @@ export abstract class Plugin implements ICommandManager {
         let cmd = await this.findCommand(c.id, true)
         if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy cli-engine-command version', c._version)
-          ;(cmd as any).run({ ...this.config, argv: argv.slice(4) })
+          return (cmd as any).run({ ...this.config, argv: argv.slice(4) })
         } else if (deps.semver.lt(c._version || '', '11.0.0')) {
           // this.debug(`legacy cli-engine-command version`, c._version)
-          ;(cmd as any).run({ ...this.config, argv: argv.slice(2) })
+          return (cmd as any).run({ ...this.config, argv: argv.slice(2) })
         } else {
-          cmd.run(argv.slice(3), this.config)
+          return cmd.run(argv.slice(3), this.config)
         }
       },
     }))

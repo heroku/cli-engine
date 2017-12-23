@@ -57,7 +57,6 @@ export async function remove(file: string) {
 }
 
 export async function stat(file: string): Promise<Stats> {
-  debug('stat', file)
   return fs.stat(file)
 }
 
