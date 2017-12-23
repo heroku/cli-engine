@@ -46,7 +46,7 @@ export class CommandManager {
     await this.hooks.run('init')
     const id = argv[2]
     await this.load()
-    if (this.cmdAskingForHelp(argv)) return this.help(argv.slice(3))
+    if (!id || this.cmdAskingForHelp(argv)) return this.help(argv.slice(3))
     let cmd = this.result.findCommand(id)
     if (!cmd) {
       let topic = await this.findTopic(id)

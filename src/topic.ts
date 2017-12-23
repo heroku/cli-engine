@@ -12,6 +12,7 @@ export interface ITopic extends INestedTopic {
 }
 
 function topicOf(id: string): string {
+  if (!id) return ''
   return id
     .split(':')
     .slice(0, -1)
@@ -19,6 +20,7 @@ function topicOf(id: string): string {
 }
 
 function keyOf(id: string): string {
+  if (!id) return ''
   return id
     .split(':')
     .slice(-1)
