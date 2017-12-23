@@ -200,6 +200,7 @@ export abstract class Plugin implements ICommandManager {
           if (
             !f.stats.isDirectory() &&
             (f.path.endsWith('.js') || (f.path.endsWith('.ts') && this.type === 'builtin')) &&
+            !f.path.endsWith('.d.ts') &&
             !f.path.endsWith('.test.js')
           ) {
             let parsed = path.parse(f.path)
