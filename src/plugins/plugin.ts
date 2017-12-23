@@ -1,5 +1,5 @@
 import assync from 'assync'
-import { ICommand } from 'cli-engine-config'
+import { IConfig, ICommand } from 'cli-engine-config'
 import * as path from 'path'
 import deps from '../deps'
 import { IPluginManagerOptions, PluginManager } from './manager'
@@ -7,10 +7,10 @@ import { PluginManifest } from './manifest'
 import { ITopics, Topic } from './topic'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
-export type PluginOptions = IPluginManagerOptions & {
+export type PluginOptions = {
+  config: IConfig
   root: string
   type: PluginType
-  manifest: PluginManifest
   pjson: IPluginPJSON
 }
 

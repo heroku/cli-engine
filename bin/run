@@ -8,4 +8,4 @@ const config = {
   root,
   updateDisabled: `add update disable message here`
 }
-run(config)
+run(process.argv, config)

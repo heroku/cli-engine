@@ -5,6 +5,7 @@
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
+    "commandsDir": "./lib/commands",
     "aliases": {
       "plugins:uninstall": "plugins:unlink",
       "version": [

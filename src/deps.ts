@@ -6,6 +6,7 @@ import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
 import stripAnsi = require('strip-ansi')
+import assync = require('assync')
 
 // local
 import help = require('./commands/help')
@@ -40,6 +41,7 @@ export default {
   get Heroku(): typeof Heroku { return fetch('cli-engine-heroku') },
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
+  get assync(): typeof assync.default { return fetch('assync').default },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },

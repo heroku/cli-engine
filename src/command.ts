@@ -5,12 +5,13 @@ import {Builtin} from './plugins/builtin'
 import {ITopic, RootTopic} from './topic'
 import {Hooks} from './hooks'
 
+export type RunFn = (argv: string[]) => Promise<void>
 export interface ICommandInfo {
   id: string
   hidden: boolean
   help: string
   helpLine: [string, string | undefined]
-  run: (argv: string[]) => Promise<void>
+  run: RunFn
 }
 
 export interface ILoadResult {
