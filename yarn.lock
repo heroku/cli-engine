@@ -268,9 +268,9 @@ assertion-error@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/assertion-error/-/assertion-error-1.0.2.tgz#13ca515d86206da0bac66e834dd397d87581094c"
 
-assync@^1.0.0:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/assync/-/assync-1.0.2.tgz#55a6d5e1b6fb6e4fd65079fb53ef73c9598a60dc"
+assync@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/assync/-/assync-1.0.3.tgz#abfac18b29cdd51aa062b9dba4e2ceaaf3063f58"
 
 astral-regex@^1.0.0:
   version "1.0.0"
@@ -677,9 +677,9 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@11.0.10:
-  version "11.0.10"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.10.tgz#39c5a8b50b6736dc817e5aa0e94e0fd3afa3be9c"
+cli-engine-command@11.0.11:
+  version "11.0.11"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.11.tgz#afa632d05dec59a506b27003c50886f4aeb18f56"
   dependencies:
     chalk "2.3.0"
     cli-flags "^2.0.3"
