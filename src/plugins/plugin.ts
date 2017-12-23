@@ -1,4 +1,5 @@
 import { ICommand, IConfig } from 'cli-engine-config'
+import cli from 'cli-ux'
 import * as path from 'path'
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
 import deps from '../deps'
@@ -158,15 +159,17 @@ export abstract class Plugin implements ICommandManager {
 
   private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<ICommandInfo> {
     return {
+      id,
       _version: icommand._version,
       description: icommand.description,
       usage: icommand.usage,
-      id,
+      plugin: { name: this.name, version: this.version },
       hidden: icommand.hidden,
       aliases: (icommand as any).aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
-    } as ICommandInfo
+      run: () => cli.warn(`run ${this.name}`),
+    }
   }
 
   private findCommandInDir(id: string): ICommand {

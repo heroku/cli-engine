@@ -4,7 +4,6 @@ import deps from './deps'
 import { Hooks } from './hooks'
 import { Plugins } from './plugins'
 import { Builtin } from './plugins/builtin'
-import { Plugin } from './plugins/plugin'
 import { ITopic, RootTopic, Topic } from './topic'
 
 export type RunFn = (argv: string[]) => Promise<void>
@@ -17,7 +16,7 @@ export interface ICommandInfo {
   aliases: string[]
   description: string | undefined
   usage: string | undefined
-  plugin: Plugin
+  plugin: { name: string; version: string }
   run: RunFn
 }
 
