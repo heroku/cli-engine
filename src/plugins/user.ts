@@ -28,7 +28,7 @@ export class UserPlugins {
     cli.action.start(`${this.config.name}: Updating plugins`)
     const yarn = this.yarn()
     const manifest = await this.manifest.get('plugins')
-    const packages = Object.entries(manifest || {}).map(([k, v]) => `${k}@${v}`)
+    const packages = Object.entries(manifest || {}).map(([k, v]) => `${k}@${v.tag}`)
     await yarn.exec(['upgrade', ...packages])
   }
 
