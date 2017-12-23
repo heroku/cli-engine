@@ -42,8 +42,13 @@ export class Plugins {
   public async install(options: InstallOptions) {
     await this.init()
     let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
-    if (!options.force && (await this.pluginType(name))) {
-      throw new Error(`${name} is already installed, run with --force to install anyway`)
+    let currentType = await this.pluginType(name)
+    if (currentType) {
+      if (!options.force) {
+        throw new Error(`${name} is already installed, run with --force to install anyway`)
+      } else if (['link', 'user'].includes(currentType)) {
+        await (this as any)[currentType].uninstall(name)
+      }
     }
     if (options.type === 'link') {
       await this.link.install(options.root)

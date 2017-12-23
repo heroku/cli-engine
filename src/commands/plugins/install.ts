@@ -22,7 +22,7 @@ export default class PluginsInstall extends Command {
   Example:
     $ ${bin} plugins:install ${examplePlugin}
   `
-  static args = [{ name: 'plugin', description: 'plugin to install' }]
+  static args = [{ name: 'plugin', description: 'plugin to install', required: true }]
   static flags: flags.Input = {
     force: flags.boolean({ char: 'f' }),
   }

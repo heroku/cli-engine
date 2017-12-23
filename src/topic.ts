@@ -88,8 +88,11 @@ export class RootTopic extends TopicBase {
   public addCommands(commands: ICommandInfo[] | { [k: string]: ICommandInfo } | undefined) {
     for (let c of Object.values(commands || {})) {
       this.allCommands.push(c)
-      let topicID = topicOf(c.id)
-      let topic = topicID ? this.findOrCreateTopic(topicID) : this
+      let topic: TopicBase | undefined = this.findTopic(c.id)
+      if (!topic) {
+        let topicID = topicOf(c.id)
+        topic = topicID ? this.findOrCreateTopic(topicID) : this
+      }
       topic.commands[keyOf(c.id)] = c
     }
   }

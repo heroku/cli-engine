@@ -208,6 +208,7 @@ export abstract class Plugin implements ICommandManager {
           ) {
             let parsed = path.parse(f.path)
             let p = path.relative(d, path.join(parsed.dir, parsed.name))
+            if (path.basename(p) === 'index') p = path.dirname(p)
             ids.push(p.split(path.sep).join(':'))
           }
         })
