@@ -152,16 +152,16 @@ export abstract class Plugin implements ICommandManager {
     const ids = await this.commandIDsFromDir()
     return deps
       .assync(ids)
-      .map(id => this.findCommandInDir(id))
-      .map(c => this.commandInfoFromICommand(c))
+      .map(id => ({ cmd: this.findCommandInDir(id), id }))
+      .map(({ cmd, id }) => this.commandInfoFromICommand(cmd, id))
   }
 
-  private async commandInfoFromICommand(icommand: ICommand): Promise<ICommandInfo> {
+  private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<ICommandInfo> {
     return {
       _version: icommand._version,
       description: icommand.description,
       usage: icommand.usage,
-      id: icommand.id,
+      id,
       hidden: icommand.hidden,
       aliases: (icommand as any).aliases || [],
       help: await icommand.buildHelp(this.config),
