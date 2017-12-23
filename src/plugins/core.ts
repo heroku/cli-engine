@@ -7,14 +7,14 @@ export class CorePlugins {
 
   constructor(private config: IConfig) {}
 
-  public async submanagers() {
+  public async submanagers(): Promise<CorePlugin[]> {
     await this.init()
     return this.plugins
   }
 
-  public async init() {
+  public async init(): Promise<void> {
     if (this.plugins) return
-    return this.config.corePlugins.map(
+    this.plugins = this.config.corePlugins.map(
       name =>
         new CorePlugin({
           root: path.join(this.config.root, 'node_modules', name),
