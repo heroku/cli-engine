@@ -112,16 +112,20 @@ export abstract class Plugin implements ICommandManager {
     return cache.map(c => ({
       ...c,
       run: async (argv: string[]) => {
+        if (this.lock) await this.lock.read()
         let cmd = await this.findCommand(c.id, true)
+        let res
         if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy cli-engine-command version', c._version)
-          return (cmd as any).run({ ...this.config, argv: argv.slice(4) })
+          res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
         } else if (deps.semver.lt(c._version || '', '11.0.0')) {
           // this.debug(`legacy cli-engine-command version`, c._version)
-          return (cmd as any).run({ ...this.config, argv: argv.slice(2) })
+          res = await (cmd as any).run({ ...this.config, argv: argv.slice(2) })
         } else {
-          return cmd.run(argv.slice(3), this.config)
+          res = await cmd.run(argv.slice(3), this.config)
         }
+        if (this.lock) await this.lock.unread()
+        return res
       },
     }))
   }

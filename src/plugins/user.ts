@@ -56,9 +56,9 @@ export class UserPlugins {
   public async uninstall(name: string): Promise<void> {
     await this.init()
     await this.lock.write()
-    await this.yarn.exec(['remove', name])
     await this.manifest.set(name, undefined)
     await this.manifest.save()
+    await this.yarn.exec(['remove', name])
     await this.lock.unwrite()
   }
 

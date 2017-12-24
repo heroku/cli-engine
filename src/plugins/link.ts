@@ -172,9 +172,10 @@ export class LinkPlugin extends Plugin {
     await this.lock.write()
     this.debug('prepare')
     const { scripts } = this.pjson
-    if (!scripts || !scripts.prepare) return
-    const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
-    await yarn.exec(['run', 'prepare'])
+    if (scripts && scripts.prepare) {
+      const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
+      await yarn.exec(['run', 'prepare'])
+    }
     await this.resetCache()
     await this.lock.unwrite()
   }

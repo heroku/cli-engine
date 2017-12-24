@@ -1,5 +1,6 @@
 import assync from 'assync'
 import { IConfig } from 'cli-engine-config'
+import cli from 'cli-ux'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { Plugins } from './plugins'
@@ -108,7 +109,7 @@ export class CommandManager {
     await this.hooks.run('init')
     let managers = await this.submanagers()
     this.debug('loading all managers')
-    let loads = managers.filter(m => m.load).map(m => m.load!())
+    let loads = managers.filter(m => m.load).map(m => m.load!().catch(err => cli.warn(err)))
     for (let r of loads) this.addResult(await r)
   }
 
@@ -119,6 +120,10 @@ export class CommandManager {
         .filter(m => !!m.submanagers)
         .map(m => Promise.resolve(m.submanagers!()).then(fetch))
         .flatMap()
+        .catch(err => {
+          cli.warn(err)
+          return []
+        })
       return [...(managers || []), ...(submanagers || [])]
     }
 
@@ -128,7 +133,8 @@ export class CommandManager {
     return this._submanagers
   }
 
-  private addResult(result: ILoadResult) {
+  private addResult(result: ILoadResult | undefined) {
+    if (!result) return
     this.result.addTopics(result.topics)
     this.result.addCommands(result.commands)
   }
