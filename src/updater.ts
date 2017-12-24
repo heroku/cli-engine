@@ -59,14 +59,7 @@ export class Updater {
   }
 
   private get binPath(): Promise<string | undefined> {
-    if (!this._binPath)
-      this._binPath = (async () => {
-        if (!this.config.updateDisabled && (await deps.file.exists(this.clientBin))) {
-          return this.clientBin
-        }
-        return this.config.initPath || this.config.bin
-      })()
-    return this._binPath
+    return this.config.reexecBin || this.config.bin
   }
 
   s3url(channel: string, p: string): string {

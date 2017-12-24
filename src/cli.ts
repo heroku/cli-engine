@@ -60,12 +60,11 @@ export default class CLI {
 
 export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigOptions = {}) {
   const argv = Array.isArray(arg1) ? arg1 : opts.argv || process.argv
-  if (!opts.initPath) opts.initPath = module.parent!.filename
   if (!opts.root) {
     const findUp = require('find-up')
     opts.root = path.dirname(
       findUp.sync('package.json', {
-        cwd: opts.initPath,
+        cwd: module.parent!.filename,
       }),
     )
   }

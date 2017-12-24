@@ -1,8 +1,12 @@
 import { ICommandInfo } from './command'
 
+export interface ITopics {
+  [k: string]: INestedTopic
+}
+
 export interface INestedTopic {
   description?: string
-  subtopics?: { [k: string]: INestedTopic }
+  subtopics?: ITopics
   commands?: { [k: string]: ICommandInfo }
   hidden?: boolean
 }
@@ -62,9 +66,9 @@ export class Topic extends TopicBase implements ITopic {
   }
 }
 
-function topicsToArray(input: ITopic[] | { [k: string]: ITopic } | undefined): ITopic[]
-function topicsToArray(input: { [k: string]: INestedTopic } | undefined, base: string): ITopic[]
-function topicsToArray(input: ITopic[] | { [k: string]: ITopic | INestedTopic } | undefined, base?: string): ITopic[] {
+export function topicsToArray(input: ITopic[] | { [k: string]: ITopic } | undefined): ITopic[]
+export function topicsToArray(input: ITopics | undefined, base: string): ITopic[]
+export function topicsToArray(input: ITopic[] | ITopics | undefined, base?: string): ITopic[] {
   if (Array.isArray(input)) return input
   base = base ? `${base}:` : ''
   return Object.entries(input || {}).map(([k, v]) => new Topic({ ...v, name: `${base}${k}` }))

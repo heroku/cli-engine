@@ -1,8 +1,8 @@
-import '../src/fs'
-import { defaultConfig, buildConfig } from 'cli-engine-config'
+import { buildConfig } from 'cli-engine-config'
+import { cli } from 'cli-ux'
 import * as nock from 'nock'
 import * as path from 'path'
-import { cli } from 'cli-ux'
+import '../src/fs'
 
 process.setMaxListeners(0)
 
@@ -11,7 +11,7 @@ g.columns = 80
 g.testing = true
 g.exampleConfig = buildConfig({ root: path.join(__dirname, '..', 'example') })
 g.testFooConfig = buildConfig({ root: path.join(__dirname, 'roots', 'test-foo') })
-g.yarnCacheDir = path.join(defaultConfig.cacheDir, 'yarn')
+g.yarnCacheDir = path.join(buildConfig().cacheDir, 'yarn')
 nock.disableNetConnect()
 
 beforeEach(() => {

@@ -4,6 +4,7 @@ import * as path from 'path'
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
 import deps from '../deps'
 import { Lock } from '../lock'
+import { ITopic, ITopics, topicsToArray } from '../topic'
 import { PluginManifest } from './manifest'
 
 export type PluginType = 'builtin' | 'core' | 'user' | 'link'
@@ -16,6 +17,7 @@ export interface IPluginPJSON {
   'cli-engine': {
     commandsDir?: string
     aliases?: { [k: string]: string | string[] }
+    topics?: ITopics
   }
 }
 
@@ -59,6 +61,7 @@ export abstract class Plugin implements ICommandManager {
     await this.init()
     const results = {
       commands: await this.commands(),
+      topics: await this.topics(),
     }
     if (this.cache.needsSave) {
       if (this.lock) await this.lock.write()
@@ -105,9 +108,10 @@ export abstract class Plugin implements ICommandManager {
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
-      if (this.lock) await this.lock.unread()
       if (!commands.length) throw new Error(`${this.name} has no commands`)
-      return Promise.all(commands)
+      const r = await Promise.all(commands)
+      if (this.lock) await this.lock.unread()
+      return r
     })
     return cache.map(c => ({
       ...c,
@@ -128,6 +132,20 @@ export abstract class Plugin implements ICommandManager {
         return res
       },
     }))
+  }
+
+  protected async topics(): Promise<ITopic[]> {
+    const cache: ITopic[] = await this.cache.fetch('topics', async () => {
+      if (this.lock) await this.lock.read()
+      this.debug('fetching commands')
+      const m = await this.fetchModule()
+      if (this.lock) await this.lock.unread()
+      if (!m) return []
+      return m.topics
+    })
+    let pjsonTopics = this.pjson['cli-engine'].topics
+    if (pjsonTopics) cache.push(topicsToArray(pjsonTopics))
+    return cache
   }
 
   protected get commandsDir(): string | undefined {
