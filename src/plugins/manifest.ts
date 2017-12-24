@@ -33,6 +33,8 @@ export class PluginManifest {
       throw new Error('manifest file modified, cannot save')
     }
     await deps.file.outputJSON(this.file, this.body)
+    delete this.body
+    delete this.mtime
   }
 
   public async fetch<T>(key: string, fn: () => Promise<T>): Promise<T> {

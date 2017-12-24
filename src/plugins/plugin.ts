@@ -46,7 +46,7 @@ export abstract class Plugin implements ICommandManager {
   public root: string
   protected config: IConfig
   protected debug: any
-  protected lock: Lock
+  protected lock?: Lock
   private _module: Promise<IPluginModule>
   private cache: PluginManifest
 
@@ -61,20 +61,11 @@ export abstract class Plugin implements ICommandManager {
       commands: await this.commands(),
     }
     if (this.cache.needsSave) {
-      let downgrade = await this.lock.write()
+      if (this.lock) await this.lock.write()
       await this.cache.save()
-      await downgrade()
+      if (this.lock) await this.lock.unwrite()
     }
     return results
-  }
-
-  public async yarnNodeVersion(): Promise<string | undefined> {
-    try {
-      let f = await deps.file.readJSON(path.join(this.root, '..', '.yarn-integrity'))
-      return f.nodeVersion
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-    }
   }
 
   public async resetCache() {
@@ -90,7 +81,7 @@ export abstract class Plugin implements ICommandManager {
     let cacheKey = [this.config.version, this.version].join(path.sep)
     let cacheFile = path.join(this.config.cacheDir, 'plugins', [this.type, this.name + '.json'].join(path.sep))
     this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
-    this.lock = new deps.Lock(this.config, cacheFile + '.lock')
+    if (['user', 'link'].includes(this.type)) this.lock = new deps.Lock(this.config, cacheFile + '.lock')
     this.debug = require('debug')(`cli:plugins:${[this.type, this.name, this.version].join(':')}`)
     this.debug('init')
   }
@@ -109,10 +100,12 @@ export abstract class Plugin implements ICommandManager {
 
   protected async commands(): Promise<ICommandInfo[]> {
     const cache: ICommandInfo[] = await this.cache.fetch('commands', async () => {
+      if (this.lock) await this.lock.read()
       this.debug('fetching commands')
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
+      if (this.lock) await this.lock.unread()
       if (!commands.length) throw new Error(`${this.name} has no commands`)
       return Promise.all(commands)
     })

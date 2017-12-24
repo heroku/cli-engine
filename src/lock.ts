@@ -6,19 +6,41 @@ import deps from './deps'
 export class Lock {
   config: IConfig
   lockfile: string
+  actuallyUnlock?: () => Promise<void>
+  private numWriters = 0
+  private numReaders = 0
+  private debug: any
 
   constructor(config: IConfig, lockfile?: string) {
     this.config = config
     this.lockfile = lockfile || path.join(this.config.cacheDir, 'update.lock')
+    this.debug = require('debug')('cli:lock')
+  }
+
+  get status(): 'write' | 'read' | undefined {
+    if (this.numWriters) return 'write'
+    if (this.numReaders) return 'read'
   }
 
   // get read lock
   async read() {
-    return deps.rwlockfile.read(this.lockfile)
+    this.debug('read', this.lockfile)
+    if (!this.status) await deps.rwlockfile.read(this.lockfile)
+    this.numReaders++
   }
 
   async unread() {
+    this.debug('unread', this.lockfile)
+    if (this.status !== 'read') throw new Error(`has ${this.status} lock`)
     await deps.rwlockfile.unread(this.lockfile)
+    this.numReaders--
+  }
+
+  async unwrite() {
+    this.debug('unwrite', this.lockfile)
+    if (this.status !== 'write') return
+    if (this.numWriters === 1) await this.actuallyUnlock!()
+    this.numWriters--
   }
 
   async canRead() {
@@ -27,13 +49,13 @@ export class Lock {
   }
 
   async write() {
-    return this.upgrade()
-  }
-
-  // upgrade to writer
-  async upgrade() {
-    // take off reader
-    await this.unread()
+    this.debug('write', this.lockfile)
+    if (this.numReaders) {
+      // take off reader
+      await deps.rwlockfile.unread(this.lockfile)
+    }
+    if (this.numWriters) return
+    this.numWriters++
 
     // check for other readers
     if (await deps.rwlockfile.hasReaders(this.lockfile)) {
@@ -44,10 +66,10 @@ export class Lock {
     let unlock = await deps.rwlockfile.write(this.lockfile)
 
     // return downgrade function
-    return async () => {
+    this.actuallyUnlock = async () => {
       // turn back into reader when unlocking
       await unlock()
-      return deps.rwlockfile.read(this.lockfile)
+      if (this.numReaders) return deps.rwlockfile.read(this.lockfile)
     }
   }
 }

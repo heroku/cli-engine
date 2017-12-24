@@ -9,6 +9,7 @@ import Yarn from './yarn'
 
 export class UserPlugins {
   public plugins: UserPlugin[]
+  public yarn: Yarn
   private manifest: PluginManifest
   private lock: Lock
   private debug: any
@@ -26,45 +27,48 @@ export class UserPlugins {
     await this.init()
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
-    const yarn = this.yarn()
+    await this.lock.write()
     const manifest = await this.manifest.get('plugins')
     const packages = Object.entries(manifest || {}).map(([k, v]) => `${k}@${v.tag}`)
-    await yarn.exec(['upgrade', ...packages])
+    await this.yarn.exec(['upgrade', ...packages])
+    await this.lock.unwrite()
   }
 
   public async install(name: string, tag: string): Promise<void> {
     await this.init()
-    let downgrade = await this.lock.upgrade()
+    await this.lock.write()
     await this.createPJSON()
-    const yarn = this.yarn()
-    await yarn.exec(['add', `${name}@${tag}`])
-    const plugin = await this.loadPlugin(name, tag)
-    await plugin.init()
-    await plugin.resetCache()
-    await plugin.load()
-    await this.addPlugin(name, tag)
-    await downgrade()
+    await this.yarn.exec(['add', `${name}@${tag}`])
+    try {
+      const plugin = await this.loadPlugin(name, tag)
+      await plugin.init()
+      await plugin.resetCache()
+      await plugin.load()
+      await this.addPlugin(name, tag)
+    } catch (err) {
+      await this.manifest.set(name, undefined)
+      await this.manifest.save()
+      throw err
+    }
+    await this.lock.unwrite()
   }
 
   public async uninstall(name: string): Promise<void> {
-    const yarn = this.yarn()
-    await yarn.exec(['remove', name])
-    await this.manifest.set(name, undefined)
-  }
-
-  public async needsRefresh() {
     await this.init()
-    if (!this.plugins.length) return false
-    let plugin = this.plugins[0]
-    if ((await plugin.yarnNodeVersion()) !== process.version) return true
-    return false
+    await this.lock.write()
+    await this.yarn.exec(['remove', name])
+    await this.manifest.set(name, undefined)
+    await this.manifest.save()
+    await this.lock.unwrite()
   }
 
   public async refresh() {
-    if (!await this.needsRefresh()) return
-    const yarn = this.yarn()
-    await yarn.exec()
+    if (!this.plugins.length) return
+    if ((await this.yarnNodeVersion()) === process.version) return
+    await this.lock.write()
+    await this.yarn.exec()
     for (let p of this.plugins.map(p => p.resetCache())) await p
+    await this.lock.unwrite()
   }
 
   public async init() {
@@ -75,11 +79,14 @@ export class UserPlugins {
       file: path.join(this.config.dataDir, 'plugins', 'user.json'),
     })
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
+    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
+    await this.lock.read()
     await this.migrate()
     const manifest = await this.manifest.get('plugins')
     this.plugins = await Promise.all(Object.entries(manifest || {}).map(([k, v]) => this.loadPlugin(k, v.tag)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.refresh()
+    await this.lock.unread()
   }
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
@@ -103,10 +110,6 @@ export class UserPlugins {
   }
   private get pjsonPath() {
     return path.join(this.userPluginsDir, 'package.json')
-  }
-
-  private yarn() {
-    return new Yarn({ config: this.config, cwd: this.userPluginsDir })
   }
 
   private async createPJSON() {
@@ -136,6 +139,15 @@ export class UserPlugins {
     plugins[name] = { tag }
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
+  }
+
+  private async yarnNodeVersion(): Promise<string | undefined> {
+    try {
+      let f = await deps.file.readJSON(path.join(this.userPluginsDir, 'node_modules', '.yarn-integrity'))
+      return f.nodeVersion
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
   }
 }
 

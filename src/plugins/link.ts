@@ -45,14 +45,14 @@ export class LinkPlugins {
 
   public async install(root: string): Promise<void> {
     await this.init()
-    let downgrade = await this.lock.upgrade()
+    await this.lock.write()
     this.debug('installing', root)
     const plugin = await this.loadPlugin(root)
     await plugin.init()
     await plugin.refresh(true)
     await plugin.load()
     await this.addPlugin(plugin.name, plugin.root)
-    await downgrade()
+    await this.lock.unwrite()
   }
 
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
@@ -74,16 +74,18 @@ export class LinkPlugins {
       file: path.join(this.config.dataDir, 'plugins', 'link.json'),
     })
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
+    await this.lock.read()
     await this.migrate()
     const manifest = await this.manifest.get('plugins')
     this.plugins = await Promise.all(Object.values(manifest || {}).map(v => this.loadPlugin(v.root)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
+    await this.lock.unread()
   }
 
   private async migrate() {
     const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
     if (!await deps.file.exists(linkedPath)) return
-    let downgrade = await this.lock.upgrade()
+    await this.lock.write()
     this.debug('migrating link plugins')
     let linked = await deps.file.readJSON(linkedPath)
     for (let root of linked.plugins) {
@@ -91,7 +93,7 @@ export class LinkPlugins {
       await this.addPlugin(name, root)
     }
     await deps.file.remove(linkedPath)
-    await downgrade()
+    await this.lock.unwrite()
   }
 
   private async addPlugin(name: string, root: string) {
@@ -102,52 +104,47 @@ export class LinkPlugins {
   }
 
   private async loadPlugin(root: string) {
-    return new LinkPlugin({
+    let p = new LinkPlugin({
       config: this.config,
       root,
       pjson: await linkPJSON(root),
     })
+    await p.init()
+    return p
   }
 }
 
 export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
+  protected lock: Lock
   private manifest: PluginManifest
 
   public async resetCache() {
+    await this.init()
+    await this.lock.write()
     await super.resetCache()
     await this.manifest.set('lastUpdated', new Date().toISOString())
     await this.manifest.save()
+    await this.lock.unwrite()
   }
 
   public async refresh(force = false) {
-    if (force) return this.updateNodeModules()
-    let type = await this.refreshType()
-    switch (type) {
-      case 'node_modules':
-        await this.updateNodeModules()
-        break
-      case 'prepare':
-        await this.prepare()
-        break
-    }
+    if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
+    else if (await this.prepareNeeded()) await this.prepare()
   }
 
-  public async init() {
+  public async init(forceRefresh = false) {
+    if (this.manifest) return
     await super.init()
     this.manifest = new deps.PluginManifest({
       name: 'link',
       file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
     })
-    this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
-  }
-
-  private async refreshType(): Promise<'node_modules' | 'prepare' | undefined> {
-    if (await this.updateNodeModulesNeeded()) return 'node_modules'
-    if (await this.prepareNeeded()) return 'prepare'
+    await this.refresh(forceRefresh)
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
+    if ((await this.yarnNodeVersion()) !== process.version) return true
     let modules = path.join(this.root, 'node_modules')
     if (!await deps.file.exists(modules)) return true
     let modulesInfo = await fs.stat(modules)
@@ -162,24 +159,37 @@ export class LinkPlugin extends Plugin {
   }
 
   private async updateNodeModules(): Promise<void> {
+    await this.lock.write()
     this.debug('update node modules')
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
     touch(path.join(this.root, 'node_modules'))
     await this.resetCache()
+    await this.lock.unwrite()
   }
 
   private async prepare() {
+    await this.lock.write()
     this.debug('prepare')
     const { scripts } = this.pjson
     if (!scripts || !scripts.prepare) return
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec(['run', 'prepare'])
     await this.resetCache()
+    await this.lock.unwrite()
   }
 
   private async lastUpdated(): Promise<Date> {
     const lastUpdated = await this.manifest.get('lastUpdated')
     return lastUpdated ? new Date(lastUpdated) : new Date(0)
+  }
+
+  private async yarnNodeVersion(): Promise<string | undefined> {
+    try {
+      let f = await deps.file.readJSON(path.join(this.root, 'node_modules', '.yarn-integrity'))
+      return f.nodeVersion
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
   }
 }
