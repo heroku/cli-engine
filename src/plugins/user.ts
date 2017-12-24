@@ -65,6 +65,7 @@ export class UserPlugins {
   public async refresh() {
     if (!this.plugins.length) return
     if ((await this.yarnNodeVersion()) === process.version) return
+    cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
     await this.lock.write()
     await this.yarn.exec()
     for (let p of this.plugins.map(p => p.resetCache())) await p
@@ -123,6 +124,7 @@ export class UserPlugins {
     if (!await deps.file.exists(userPath)) return
     let user = await deps.file.readJSON(userPath)
     if (!user.dependencies || user['cli-engine']) return
+    cli.action.start('Refreshing plugins')
     this.debug('migrating user plugins')
     user = await deps.file.readJSON(userPath)
     if (user['cli-engine']) return

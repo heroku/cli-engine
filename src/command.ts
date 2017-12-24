@@ -114,6 +114,7 @@ export class CommandManager {
       let result = await r
       if (result) this.addResult(result)
     }
+    cli.action.stop()
   }
 
   private async submanagers(): Promise<ICommandManager[]> {

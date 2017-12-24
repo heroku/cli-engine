@@ -1,4 +1,5 @@
 import { IConfig } from 'cli-engine-config'
+import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import deps from '../deps'
@@ -168,6 +169,7 @@ export class LinkPlugin extends Plugin {
 
   private async updateNodeModules(): Promise<void> {
     await this.lock.write()
+    cli.action.start(`Refreshing linked plugin ${this.name}`)
     this.debug('update node modules')
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
