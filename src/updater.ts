@@ -146,7 +146,7 @@ export class Updater {
     }
   }
   async update(manifest: IManifest) {
-    const downgrade = await this.lock.write()
+    await this.lock.write()
     let base = this.base(manifest)
     const filesize = require('filesize')
 
@@ -181,7 +181,7 @@ export class Updater {
     await this._rename(path.join(this.clientRoot, base), output)
 
     await this._createBin(manifest)
-    await downgrade()
+    await this.lock.unwrite()
   }
 
   public async tidy() {

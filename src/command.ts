@@ -110,7 +110,10 @@ export class CommandManager {
     let managers = await this.submanagers()
     this.debug('loading all managers')
     let loads = managers.filter(m => m.load).map(m => m.load!().catch(err => cli.warn(err)))
-    for (let r of loads) this.addResult(await r)
+    for (let r of loads) {
+      let result = await r
+      if (result) this.addResult(result)
+    }
   }
 
   private async submanagers(): Promise<ICommandManager[]> {
@@ -133,7 +136,7 @@ export class CommandManager {
     return this._submanagers
   }
 
-  private addResult(result: ILoadResult | undefined) {
+  private addResult(result?: ILoadResult) {
     if (!result) return
     this.result.addTopics(result.topics)
     this.result.addCommands(result.commands)
