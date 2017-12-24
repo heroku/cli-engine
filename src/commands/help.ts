@@ -2,6 +2,7 @@ import { Command, flags } from 'cli-engine-command'
 import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
 import { color } from 'heroku-cli-color'
+import _ from 'ts-lodash'
 import { CommandManager } from '../command'
 import deps from '../deps'
 import { ICommandInfo, Topic } from '../plugins/topic'
@@ -63,7 +64,7 @@ export default class Help extends Command {
     if (!topics.length) return topics
 
     // header
-    cli.log(`${color.bold('Usage:')} ${this.config.bin} ${parent ? parent.name : ''}COMMAND
+    cli.log(`${color.bold('Usage:')} ${this.config.bin} ${parent ? `${parent.name}:` : ''}COMMAND
 
 Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details:\n`)
 
@@ -74,9 +75,10 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
   }
 
   private async listCommandsHelp(commands: ICommandInfo[], topic?: Topic) {
+    commands = _.sortBy(commands, 'id')
     commands = commands.filter(c => !c.hidden)
     if (commands.length === 0) return
-    let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic}:` : ''}COMMAND`)
+    let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic.name}:` : ''}COMMAND`)
     if (topic) {
       cli.log(`${this.config.bin} ${color.bold(topic.name)} commands: (get help with ${helpCmd})\n`)
     } else {

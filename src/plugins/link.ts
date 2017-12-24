@@ -55,6 +55,14 @@ export class LinkPlugins {
     await this.lock.unwrite()
   }
 
+  public async uninstall(name: string): Promise<void> {
+    await this.init()
+    await this.lock.write()
+    await this.manifest.set(name, undefined)
+    await this.manifest.save()
+    await this.lock.unwrite()
+  }
+
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
     await this.init()
     root = path.resolve(root)
