@@ -48,6 +48,7 @@ export class UserPlugins {
     } catch (err) {
       await this.manifest.set(name, undefined)
       await this.manifest.save()
+      await this.yarn.exec(['remove', name])
       throw err
     }
     await this.lock.unwrite()

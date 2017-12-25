@@ -33,8 +33,9 @@ export default class PluginsInstall extends Command {
     const plugins = new Plugins(this.config)
     for (let plugin of this.argv) {
       const [name, tag = 'latest'] = plugin.split('@')
-      if (!this.config.debug) cli.action.start(`Installing plugin ${name}${tag === 'latest' ? '' : '@' + tag}`)
+      cli.action.start(`Installing plugin ${name}${tag === 'latest' ? '' : '@' + tag}`)
       await plugins.install({ type: 'user', name, tag, force: this.flags.force })
+      cli.action.stop()
     }
     const hooks = new Hooks(this.config)
     await hooks.run('update')
