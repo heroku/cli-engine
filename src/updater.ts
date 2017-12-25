@@ -32,7 +32,6 @@ export class Updater {
   config: IConfig
   lock: Lock
   http: typeof deps.HTTP
-  private _binPath: Promise<string | undefined>
 
   constructor(config: IConfig) {
     this.config = config
@@ -58,7 +57,7 @@ export class Updater {
     return this.config.windows ? `${b}.cmd` : b
   }
 
-  private get binPath(): Promise<string | undefined> {
+  private get binPath(): string {
     return this.config.reexecBin || this.config.bin
   }
 
@@ -114,20 +113,15 @@ export class Updater {
       debug('autoupdate running')
       await deps.file.outputFile(this.autoupdatefile, '')
 
-      const binPath = await this.binPath
-      if (!binPath) {
-        debug('no binpath set')
-        return
-      }
-      debug(`spawning autoupdate on ${binPath}`)
+      debug(`spawning autoupdate on ${this.binPath}`)
 
       let fd = await deps.file.open(this.autoupdatelogfile, 'a')
       deps.file.write(
         fd,
-        timestamp(`starting \`${binPath} update --autoupdate\` from ${process.argv.slice(2, 3).join(' ')}\n`),
+        timestamp(`starting \`${this.binPath} update --autoupdate\` from ${process.argv.slice(1, 3).join(' ')}\n`),
       )
 
-      this.spawnBinPath(binPath, ['update', '--autoupdate'], {
+      this.spawnBinPath(this.binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv,
