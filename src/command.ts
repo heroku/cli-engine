@@ -47,7 +47,7 @@ export class CommandManager {
     const id = argv[2]
     await this.load()
     if (!id || this.cmdAskingForHelp(argv)) return this.help(argv.slice(3))
-    let cmd = this.result.findCommand(id)
+    let cmd = await this.findCommand(id)
     if (!cmd) {
       let topic = await this.findTopic(id)
       if (topic) return this.help([id])
@@ -144,7 +144,6 @@ export class CommandManager {
   }
 
   private cmdAskingForHelp(argv: string[]): boolean {
-    if (argv[2] === 'help') return true
     for (let arg of argv) {
       if (['--help', '-h'].includes(arg)) return true
       if (arg === '--') return false

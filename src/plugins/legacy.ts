@@ -3,6 +3,7 @@ import { ICommand, IConfig } from 'cli-engine-config'
 import { args as Args } from 'cli-flags'
 import { cli } from 'cli-ux'
 import { color } from 'heroku-cli-color'
+import _ from 'ts-lodash'
 import { inspect } from 'util'
 import deps from '../deps'
 import { IPluginModule, IPluginTopic } from './plugin'
@@ -110,8 +111,7 @@ export class PluginLegacy {
 
   private convertFromV5(c: IV5Command): ICommand {
     class V5 extends deps.Heroku.Command {
-      static topic = c.topic
-      static command = c.command
+      static id = _.compact([c.topic, c.command]).join(':')
       static description = c.description
       static hidden = !!c.hidden
       static args = (c.args || []).map(a => ({

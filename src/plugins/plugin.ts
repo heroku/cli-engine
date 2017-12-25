@@ -144,7 +144,7 @@ export abstract class Plugin implements ICommandManager {
       return m.topics
     })
     let pjsonTopics = this.pjson['cli-engine'].topics
-    if (pjsonTopics) cache.push(topicsToArray(pjsonTopics))
+    if (pjsonTopics) return cache.concat(topicsToArray(pjsonTopics))
     return cache
   }
 
@@ -188,7 +188,9 @@ export abstract class Plugin implements ICommandManager {
   }
 
   private findCommandInDir(id: string): ICommand {
-    return deps.util.undefault(require(this.commandPath(id)))
+    let c = deps.util.undefault(require(this.commandPath(id)))
+    if (!c.id) c.id = id
+    return c
   }
 
   private async findCommandInModule(id: string) {

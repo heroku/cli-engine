@@ -66,7 +66,7 @@ export class Topic extends TopicBase implements ITopic {
   }
 }
 
-export function topicsToArray(input: ITopic[] | { [k: string]: ITopic } | undefined): ITopic[]
+export function topicsToArray(input: ITopic[] | ITopics | undefined): ITopic[]
 export function topicsToArray(input: ITopics | undefined, base: string): ITopic[]
 export function topicsToArray(input: ITopic[] | ITopics | undefined, base?: string): ITopic[] {
   if (Array.isArray(input)) return input
@@ -101,11 +101,12 @@ export class RootTopic extends TopicBase {
   private findOrCreateTopic(name: string): Topic {
     let key = keyOf(name)
     let parentID = topicOf(name)
-    let topics = this.subtopics
+    let topic: TopicBase = this
     if (parentID) {
       let parent = this.findOrCreateTopic(parentID)
-      topics = parent.subtopics
+      topic = parent
     }
+    let topics = topic.subtopics
     if (!topics[key]) {
       topics[key] = new Topic({ name })
       this.allTopics.push(topics[key])

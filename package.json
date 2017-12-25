@@ -6,6 +6,11 @@
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
     "commandsDir": "./lib/commands",
+    "topics": {
+      "plugins": {
+        "description": "add/remove CLI plugins"
+      }
+    },
     "aliases": {
       "plugins:uninstall": "plugins:unlink",
       "version": [
@@ -50,7 +55,7 @@
     "@types/semver": "5.4.0",
     "@types/strip-ansi": "3.0.0",
     "@types/supports-color": "3.1.0",
-    "cli-engine-command": "11.0.11",
+    "cli-engine-command": "11.0.12",
     "cli-engine-config": "5.0.7",
     "cli-engine-heroku": "7.0.5",
     "cli-flags": "^2.0.3",

@@ -9,6 +9,7 @@ const debug = require('debug')('cli:commands')
 
 export default class Commands extends Command {
   static topic = 'commands'
+  static description = 'list all commands'
   static hidden = true
   static flags: flags.Input = { json: flags.boolean() }
 

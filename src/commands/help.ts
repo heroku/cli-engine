@@ -58,7 +58,7 @@ export default class Help extends Command {
 
   private async topics(parent?: Topic) {
     let topics = Object.values(parent ? parent.subtopics : await this.cm.rootTopics())
-      .filter(t => !t.hidden)
+      .filter(t => this.flags.all || !t.hidden)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)
     if (!topics.length) return topics
@@ -76,7 +76,7 @@ Help topics, type ${color.cmd(this.config.bin + ' help TOPIC')} for more details
 
   private async listCommandsHelp(commands: ICommandInfo[], topic?: Topic) {
     commands = _.sortBy(commands, 'id')
-    commands = commands.filter(c => !c.hidden)
+    commands = commands.filter(c => this.flags.all || !c.hidden)
     if (commands.length === 0) return
     let helpCmd = color.cmd(`${this.config.bin} help ${topic ? `${topic.name}:` : ''}COMMAND`)
     if (topic) {
