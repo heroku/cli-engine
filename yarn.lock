@@ -676,14 +676,14 @@ cli-engine-config@5.0.7:
   version "5.0.7"
   resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.7.tgz#3a341b1b8fa4e840f41af1ae5b223dc926c3d5ee"
 
-cli-engine-heroku@7.0.5:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.5.tgz#205f9b034215a5b4a6d7168a2023a8e52bdc98e8"
+cli-engine-heroku@7.0.6:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.6.tgz#720706cb4722a7b7b752b6822c8fa9f8e7fe1a95"
   dependencies:
     cli-ux "^2.0.12"
-    heroku-client "3.0.4"
+    heroku-client "3.0.5"
     http-call "^4.0.5"
-    netrc-parser "^2.0.3"
+    netrc-parser "^2.0.5"
 
 cli-flags@^2.0.3:
   version "2.0.3"
@@ -889,7 +889,7 @@ debug@^2.2.0, debug@^2.6.8:
   dependencies:
     ms "2.0.0"
 
-debug@^3.0.1, debug@^3.1.0:
+debug@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   dependencies:
@@ -1491,11 +1491,10 @@ heroku-cli-color@1.0.2:
     chalk "2.3.0"
     supports-color "5.1.0"
 
-heroku-client@3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.4.tgz#3a70a25655fe069d0535333903b6ce50c0f4fced"
+heroku-client@3.0.5:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.5.tgz#3a8a9445236cfc0e418bf795f51a2228610a575d"
   dependencies:
-    debug "^3.1.0"
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.6.0"
 
@@ -2550,11 +2549,10 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
 
-netrc-parser@^2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.3.tgz#b8bdd1c7170d349daaf1f81e3ef436959aa5ee42"
+netrc-parser@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.5.tgz#28484c0f6e47a9f386a0953bcb7b9b55d8a83f9e"
   dependencies:
-    debug "^3.0.1"
     lex "^1.7.9"
 
 nock@^9.1.5:
