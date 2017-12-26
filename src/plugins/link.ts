@@ -45,22 +45,20 @@ export class LinkPlugins {
   }
 
   public async install(root: string): Promise<void> {
+    cli.action.start(`Linking ${root}`)
     await this.init()
     await this.lock.write()
-    this.debug('installing', root)
-    const plugin = await this.loadPlugin(root)
-    await plugin.init()
-    await plugin.refresh(true)
+    const plugin = await this.loadPlugin(root, true)
     await plugin.load()
     await this.addPlugin(plugin.name, plugin.root)
     await this.lock.unwrite()
+    cli.action.stop()
   }
 
   public async uninstall(name: string): Promise<void> {
     await this.init()
     await this.lock.write()
-    await this.manifest.set(name, undefined)
-    await this.manifest.save()
+    await this.removePlugin(name)
     await this.lock.unwrite()
   }
 
@@ -85,8 +83,7 @@ export class LinkPlugins {
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
     await this.lock.read()
     await this.migrate()
-    const manifest = await this.manifest.get('plugins')
-    this.plugins = await Promise.all(Object.values(manifest || {}).map(v => this.loadPlugin(v.root)))
+    this.plugins = await Promise.all(Object.values(await this.manifestPlugins()).map(v => this.loadPlugin(v.root)))
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.lock.unread()
   }
@@ -106,19 +103,30 @@ export class LinkPlugins {
   }
 
   private async addPlugin(name: string, root: string) {
-    let plugins = (await this.manifest.get('plugins')) || {}
+    let plugins = await this.manifestPlugins()
     plugins[name] = { root }
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
   }
 
-  private async loadPlugin(root: string) {
+  private async removePlugin(name: string) {
+    let plugins = await this.manifestPlugins()
+    delete plugins[name]
+    await this.manifest.set('plugins', plugins)
+    await this.manifest.save()
+  }
+
+  private async manifestPlugins(): Promise<{ [k: string]: { root: string } }> {
+    return (await this.manifest.get('plugins')) || {}
+  }
+
+  private async loadPlugin(root: string, refresh = false) {
     let p = new LinkPlugin({
       config: this.config,
       root,
       pjson: await linkPJSON(root),
     })
-    await p.init()
+    await p.init(refresh)
     return p
   }
 }
@@ -137,11 +145,6 @@ export class LinkPlugin extends Plugin {
     await this.lock.unwrite()
   }
 
-  public async refresh(force = false) {
-    if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
-    else if (await this.prepareNeeded()) await this.prepare()
-  }
-
   public async init(forceRefresh = false) {
     if (this.manifest) return
     await super.init()
@@ -150,6 +153,11 @@ export class LinkPlugin extends Plugin {
       file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
     })
     await this.refresh(forceRefresh)
+  }
+
+  private async refresh(force = false) {
+    if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
+    else if (await this.prepareNeeded()) await this.prepare()
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
@@ -169,7 +177,9 @@ export class LinkPlugin extends Plugin {
 
   private async updateNodeModules(): Promise<void> {
     await this.lock.write()
-    cli.action.start(`Refreshing linked plugin ${this.name}`)
+    if (!cli.action.running) {
+      cli.action.start(`Refreshing linked plugin ${this.name}`, 'yarn install')
+    }
     this.debug('update node modules')
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
@@ -180,7 +190,9 @@ export class LinkPlugin extends Plugin {
 
   private async prepare() {
     await this.lock.write()
-    this.debug('prepare')
+    if (!cli.action.running) {
+      cli.action.start(`Refreshing linked plugin ${this.name}`, 'yarn run prepare')
+    }
     const { scripts } = this.pjson
     if (scripts && scripts.prepare) {
       const yarn = new deps.Yarn({ config: this.config, cwd: this.root })

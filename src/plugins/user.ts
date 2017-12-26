@@ -34,6 +34,7 @@ export class UserPlugins {
   }
 
   public async install(name: string, tag: string): Promise<void> {
+    cli.action.start(`Installing ${name}@${tag}`)
     await this.init()
     await this.lock.write()
     await this.createPJSON()
@@ -50,6 +51,7 @@ export class UserPlugins {
       throw err
     }
     await this.lock.unwrite()
+    cli.action.stop()
   }
 
   public async uninstall(name: string): Promise<void> {

@@ -97,15 +97,21 @@ export class PluginLegacy {
   }
 
   private convertCommand(c: AnyCommand): ICommand {
-    if (this.isICommand(c)) return c
+    if (this.isICommand(c)) return this.convertFromICommand(c)
     if (this.isV5Command(c)) return this.convertFromV5(c)
     if (this.isFlowCommand(c)) return this.convertFromFlow(c)
     debug(c)
     throw new Error(`Invalid command: ${inspect(c)}`)
   }
 
+  private convertFromICommand(c: any): ICommand {
+    if (!c.id) c.id = _.compact([c.topic, c.command]).join(':')
+    return c
+  }
+
   private convertFromFlow(c: any): ICommand {
-    c._version = '0.0.0'
+    if (!c.id) c.id = _.compact([c.topic, c.command]).join(':')
+    c._version = c._version || '0.0.0'
     return c
   }
 
@@ -171,7 +177,8 @@ export class PluginLegacy {
 
   private isICommand(command: AnyCommand): command is ICommand {
     let c = command as ICommand
-    return !!(c.id && c._version)
+    if (!c._version) return false
+    return deps.semver.gte(c._version, '11.0.0')
   }
 
   private isV5Command(command: AnyCommand): command is IV5Command {
@@ -181,7 +188,8 @@ export class PluginLegacy {
 
   private isFlowCommand(command: AnyCommand): command is IFlowCommand {
     let c = command as IFlowCommand
-    return !!(!('_version' in c) && c.id)
+    return typeof c === 'function'
+    // if (c._version && deps.semver.lt(c._version, '11.0.0')) return true
   }
 }
 
