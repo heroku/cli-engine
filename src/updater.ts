@@ -4,6 +4,7 @@ import * as path from 'path'
 import _ from 'ts-lodash'
 import deps from './deps'
 import { Lock } from './lock'
+import { spawn } from 'child_process'
 
 const debug = require('debug')('cli:updater')
 
@@ -299,9 +300,9 @@ export class Updater {
     debug(binPath, args)
     if (this.config.windows) {
       args = ['/c', binPath, ...args]
-      return deps.crossSpawn(process.env.comspec || 'cmd.exe', args, options)
+      return spawn(process.env.comspec || 'cmd.exe', args, options)
     } else {
-      return deps.crossSpawn(binPath, args, options)
+      return spawn(binPath, args, options)
     }
   }
 
