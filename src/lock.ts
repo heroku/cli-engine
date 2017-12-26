@@ -1,17 +1,16 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import { cli } from 'cli-ux'
 import * as path from 'path'
 import deps from './deps'
 
 export class Lock {
-  config: IConfig
   lockfile: string
   actuallyUnlock?: () => Promise<void>
   private numWriters = 0
   private numReaders = 0
   private debug: any
 
-  constructor(config: IConfig, lockfile?: string) {
+  constructor(private config: Config, lockfile?: string) {
     this.config = config
     this.lockfile = lockfile || path.join(this.config.cacheDir, 'update.lock')
     this.debug = require('debug')('cli:lock')

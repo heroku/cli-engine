@@ -1,4 +1,4 @@
-import { Command, flags } from 'cli-engine-command'
+import { Command, flags } from '@cli-engine/command'
 import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
 import { color } from 'heroku-cli-color'

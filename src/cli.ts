@@ -1,12 +1,12 @@
 require('./fs')
-import { buildConfig, ConfigOptions, IConfig } from 'cli-engine-config'
+import { ConfigOptions, Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import { color } from 'heroku-cli-color'
 import * as path from 'path'
 import deps from './deps'
 
 export default class CLI {
-  constructor(private config: IConfig) {}
+  constructor(private config: Config) {}
 
   public async run(argv: string[]): Promise<any> {
     this.debug('starting run: %o', argv)
@@ -73,7 +73,7 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
     opts.pjson = require(f)
     deps.validate.cliPjson(opts.pjson, f)
   }
-  const config = buildConfig(opts)
+  const config = new Config(opts)
   if (config.debug) cli.config.debug = true
   cli.config.errlog = config.errlog
   return new CLI(config).run(argv)

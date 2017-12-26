@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import deps from '../deps'
@@ -6,10 +6,10 @@ import deps from '../deps'
 const debug = require('debug')('cli:yarn')
 
 export default class Yarn {
-  config: IConfig
+  config: Config
   cwd: string
 
-  constructor({ config, cwd }: { config: IConfig; cwd: string }) {
+  constructor({ config, cwd }: { config: Config; cwd: string }) {
     this.config = config
     this.cwd = cwd
   }

@@ -1,5 +1,5 @@
-import { flags as Flags } from 'cli-engine-command'
-import { ICommand, IConfig } from 'cli-engine-config'
+import { flags as Flags } from '@cli-engine/command'
+import { ICommand, Config } from '@cli-engine/config'
 import { args as Args } from 'cli-flags'
 import { cli } from 'cli-ux'
 import { color } from 'heroku-cli-color'
@@ -27,7 +27,7 @@ export interface ILegacyContext {
   app?: string
   org?: string
   team?: string
-  config: IConfig
+  config: Config
   apiUrl: string
   herokuDir: string
   apiToken?: string
@@ -85,7 +85,7 @@ export interface ILegacyFlag {
 const debug = require('debug')('cli:legacy')
 
 export class PluginLegacy {
-  constructor(_: IConfig) {}
+  constructor(_: Config) {}
 
   public convert(m: IPluginModule | ILegacyModule): IPluginModule {
     m.commands = this.convertCommands(m.commands)

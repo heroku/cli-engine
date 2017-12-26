@@ -1,4 +1,4 @@
-import { Command } from 'cli-engine-command'
+import { Command } from '@cli-engine/command'
 import cli from 'cli-ux'
 import { CommandManager } from '../command'
 

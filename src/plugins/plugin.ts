@@ -1,4 +1,4 @@
-import { ICommand, IConfig } from 'cli-engine-config'
+import { ICommand, Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
@@ -16,7 +16,6 @@ export interface IPluginPJSON {
   scripts?: { [k: string]: string }
   'cli-engine': {
     commands?: string
-    aliases?: { [k: string]: string | string[] }
     topics?: ITopics
   }
 }
@@ -34,7 +33,7 @@ export interface IPluginModule {
 }
 
 export interface IPluginOptions {
-  config: IConfig
+  config: Config
   root: string
   pjson?: IPluginPJSON
 }
@@ -46,7 +45,7 @@ export abstract class Plugin implements ICommandManager {
   public tag?: string
   public pjson: IPluginPJSON
   public root: string
-  protected config: IConfig
+  protected config: Config
   protected debug: any
   protected lock?: Lock
   private _module: Promise<IPluginModule>
@@ -121,10 +120,10 @@ export abstract class Plugin implements ICommandManager {
         let cmd = await this.findCommand(c.id, true)
         let res
         if (!c._version || c._version === '0.0.0') {
-          // this.debug('legacy cli-engine-command version', c._version)
+          // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
-        } else if (deps.semver.lt(c._version || '', '11.0.0')) {
-          // this.debug(`legacy cli-engine-command version`, c._version)
+        } else if (deps.semver.lt(c._version || '', '11.0.0-beta.0')) {
+          // this.debug(`legacy @cli-engine/command version`, c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(2) })
         } else {
           res = await cmd.run(argv.slice(3), this.config)
@@ -185,7 +184,7 @@ export abstract class Plugin implements ICommandManager {
       usage: icommand.usage,
       plugin: { name: this.name, version: this.version },
       hidden: icommand.hidden,
-      aliases: (icommand as any).aliases || [],
+      aliases: icommand.aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
       run: async () => cli.warn(`run ${this.name}`),

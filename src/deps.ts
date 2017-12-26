@@ -1,6 +1,6 @@
 import assync = require('assync')
-import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
-import Heroku = require('cli-engine-heroku')
+import {Help as CLICommandHelp} from '@cli-engine/command/lib/help'
+import Heroku = require('@heroku-cli/command')
 import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
 import * as moment from 'moment'
@@ -26,12 +26,12 @@ import yarn = require('./plugins/yarn')
 
 export default {
   // remote
-  get CLICommandHelp (): typeof CLICommandHelp { return require('cli-engine-command/lib/help').Help },
+  get CLICommandHelp (): typeof CLICommandHelp { return require('@cli-engine/command/lib/help').Help },
   get HTTP(): typeof HTTP { return fetch('http-call').HTTP },
   get moment(): typeof moment { return fetch('moment') },
   get rwlockfile(): any { return fetch('rwlockfile') },
   get klaw(): typeof klaw { return fetch('klaw') },
-  get Heroku(): typeof Heroku { return fetch('cli-engine-heroku') },
+  get Heroku(): typeof Heroku { return fetch('@heroku-cli/command') },
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
   get assync(): typeof assync.default { return fetch('assync').default },

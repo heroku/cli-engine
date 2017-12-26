@@ -3,7 +3,7 @@ import { inspect } from 'util'
 
 function validate(type: string) {
   return (o: any, filename: string) => {
-    let validate = require('cli-engine-config/lib/schema')
+    let validate = require('@cli-engine/config/lib/schema')
     if (validate({ [type]: o }, filename)) return
     const errors = validate.errors
       .map((v: any) => `${v.dataPath}: ${v.message}${v.params ? ': ' + inspect(v.params) : ''}`)

@@ -5,11 +5,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.convertFromV5 = convertFromV5;
 
-require('cli-engine-command');
+require('@cli-engine/command');
 
-var _cliEngineHeroku = require('cli-engine-heroku');
+var _cliEngineHeroku = require('@heroku-cli/command');
 
-var _vars = require('cli-engine-heroku/lib/vars');
+var _vars = require('@heroku-cli/command/lib/vars');
 
 var _vars2 = _interopRequireDefault(_vars);
 

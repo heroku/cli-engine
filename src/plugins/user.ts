@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import deps from '../deps'
@@ -14,7 +14,7 @@ export class UserPlugins {
   private lock: Lock
   private debug: any
 
-  constructor(private config: IConfig) {
+  constructor(private config: Config) {
     this.debug = require('debug')('cli:plugins:user')
   }
 

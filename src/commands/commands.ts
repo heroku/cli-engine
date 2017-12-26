@@ -1,4 +1,4 @@
-import { Command, flags } from 'cli-engine-command'
+import { Command, flags } from '@cli-engine/command'
 import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'

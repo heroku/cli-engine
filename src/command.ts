@@ -1,5 +1,5 @@
 import assync from 'assync'
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import _ from 'ts-lodash'
 import deps from './deps'
@@ -38,7 +38,7 @@ export class CommandManager {
   private result: RootTopic
   private _submanagers: ICommandManager[]
 
-  constructor(protected config: IConfig) {
+  constructor(protected config: Config) {
     this.hooks = new deps.Hooks(this.config)
   }
 

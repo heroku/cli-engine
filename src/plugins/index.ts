@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import _ from 'ts-lodash'
@@ -31,15 +31,15 @@ export class Plugins {
   protected debug = require('debug')('cli:plugins')
   private plugins: Plugin[]
 
-  constructor(private config: IConfig) {
+  constructor(private config: Config) {
     this.builtin = new Builtin({config, root: path.join(__dirname, '..', '..'), type: 'builtin'})
-    if (config.commandsDir) {
+    if (config.commandsDir && config.root) {
       this.main = new Builtin({config, root: config.root, type: 'main'})
     }
     if (config.corePlugins) {
       this.core = new CorePlugins(this.config)
     }
-    if (config.userPlugins) {
+    if (config.userPluginsEnabled) {
       this.user = new UserPlugins(this.config)
       this.link = new LinkPlugins(this.config)
     }

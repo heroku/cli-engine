@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -40,7 +40,7 @@ export class LinkPlugins {
   private lock: Lock
   private debug: any
 
-  constructor(private config: IConfig) {
+  constructor(private config: Config) {
     this.debug = require('debug')('cli:plugins:user')
   }
 

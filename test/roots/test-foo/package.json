@@ -9,9 +9,9 @@
     ]
   },
   "dependencies": {
-    "cli-engine-command": "^8.0.15",
-    "cli-engine-config": "^3.2.0",
-    "cli-engine-heroku": "^4.0.1",
+    "@cli-engine/command": "^8.0.15",
+    "@cli-engine/config": "^3.2.0",
+    "@heroku-cli/command": "^4.0.1",
     "cli-engine-test-foo": "^0.0.0"
   }
 }

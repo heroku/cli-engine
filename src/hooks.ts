@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import * as path from 'path'
 import { ICommandInfo } from './command'
 import deps from './deps'
@@ -7,7 +7,7 @@ import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 const debug = require('debug')('cli:hooks')
 
 export abstract class Hook<T extends keyof IHooks> {
-  constructor(protected config: IConfig) {}
+  constructor(protected config: Config) {}
   public abstract run(options: IHooks[T]): Promise<void>
 }
 
@@ -25,17 +25,17 @@ export interface IHooks {
 }
 
 interface IConstructor<T> {
-  new (config: IConfig): T
+  new (config: Config): T
 }
-type LegacyHook<T extends keyof IHooks> = (config: IConfig, options: IHooks[T]) => Promise<void>
+type LegacyHook<T extends keyof IHooks> = (config: Config, options: IHooks[T]) => Promise<void>
 type HookConstructor<T extends keyof IHooks> = IConstructor<Hook<T>>
 
 export class Hooks {
-  constructor(private config: IConfig) {}
+  constructor(private config: Config) {}
 
   async run<T extends keyof IHooks>(event: T, options: IHooks[T] = {}): Promise<void> {
     let scripts = this.config.hooks[event]
-    if (!scripts) return
+    if (!scripts || !this.config.root) return
     for (let script of scripts) {
       script = path.join(this.config.root, script)
       debug(`%s %s`, event, script)

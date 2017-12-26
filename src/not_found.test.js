@@ -1,11 +1,9 @@
-// @flow
-
 import {NotFound} from './not_found'
-import {buildConfig} from 'cli-engine-config'
+import {Config} from '@cli-engine/config'
 
 jest.unmock('fs-extra')
 
-const config = buildConfig({mock: true})
+const config = new Config({mock: true})
 
 test('it exits with 127', async () => {
   expect.assertions(2)

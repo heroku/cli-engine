@@ -1,10 +1,10 @@
-import { buildConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import * as path from 'path'
 import { Hooks } from './hooks'
 
 let init = (options = {}) => {
   process.env.RAN_HOOK = '0'
-  let config = buildConfig(options)
+  let config = new Config(options)
   return new Hooks(config)
 }
 

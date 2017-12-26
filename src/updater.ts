@@ -1,4 +1,4 @@
-import { IConfig } from 'cli-engine-config'
+import { Config } from '@cli-engine/config'
 import { cli } from 'cli-ux'
 import * as path from 'path'
 import _ from 'ts-lodash'
@@ -30,11 +30,11 @@ function timestamp(msg: string): string {
 }
 
 export class Updater {
-  config: IConfig
+  config: Config
   lock: Lock
   http: typeof deps.HTTP
 
-  constructor(config: IConfig) {
+  constructor(config: Config) {
     this.config = config
     this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
     this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
@@ -283,7 +283,7 @@ export class Updater {
   }
 
   get timestampEnvVar(): string {
-    // TODO: use function from cli-engine-config
+    // TODO: use function from @cli-engine/config
     let bin = this.config.bin.replace('-', '_').toUpperCase()
     return `${bin}_TIMESTAMPS`
   }

@@ -1,5 +1,3 @@
 {
-  "extends": [
-    "tslint-cli-engine"
-  ]
+  "extends": "@heroku-cli/tslint"
 }

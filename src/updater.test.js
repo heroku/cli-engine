@@ -1,6 +1,6 @@
 // @flow
 
-import {type Config, buildConfig} from 'cli-engine-config'
+import {type Config, buildConfig} from '@cli-engine/config'
 import {Updater} from './updater'
 import nock from 'nock'
 import fs from 'fs-extra'

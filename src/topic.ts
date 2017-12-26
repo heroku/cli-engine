@@ -80,6 +80,13 @@ export class RootTopic extends TopicBase {
   public allCommands: ICommandInfo[] = []
   public allTopics: Topic[] = []
 
+  public findCommand(id: string) {
+    for (let c of this.allCommands) {
+      if (c.aliases.find(a => a === id)) return c
+    }
+    return super.findCommand(id)
+  }
+
   public addTopics(topics: ITopic[] | { [k: string]: ITopic } | undefined) {
     for (let t of topicsToArray(topics)) {
       let topic = this.findOrCreateTopic(t.name)

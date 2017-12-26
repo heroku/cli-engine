@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import Plugins from '../src/plugins'
 import Yarn from '../src/plugins/yarn'
 
-import {buildConfig} from 'cli-engine-config'
+import {buildConfig} from '@cli-engine/config'
 
 export async function tmpDirs (cfg: any = {}) {
   Yarn.extraOpts = ['--prefer-offline']
