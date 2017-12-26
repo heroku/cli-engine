@@ -21,6 +21,37 @@
   version "5.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.0-beta.2.tgz#9d3c210ea14b063549fd3c8ceae1e0b0939cd323"
 
+"@cli-engine/engine@^5.0.0-beta.0":
+  version "5.0.0-beta.0"
+  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-5.0.0-beta.0.tgz#f0a36d2fb557015f4011069d04bd2d974bbf1780"
+  dependencies:
+    "@heroku-cli/color" "^1.0.3"
+    assync "^1.0.3"
+    cli-ux "^2.0.15"
+    debug "^3.1.0"
+    fs-extra "^5.0.0"
+    graceful-fs "^4.1.11"
+    http-call "^4.0.5"
+    klaw "^2.1.1"
+    log-chopper "^1.0.1"
+    moment "^2.20.1"
+    rwlockfile "^1.4.11"
+    semver "5.4.1"
+    string-similarity "^1.2.0"
+    strip-ansi "4.0.0"
+    ts-lodash "4.0.8"
+
+"@cli-engine/util@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.3.tgz#7f2e66578773fa73cf657783fafc62b134345cf3"
+  dependencies:
+    "@cli-engine/command" "^11.0.0-beta.2"
+    "@cli-engine/config" "^5.0.0-beta.2"
+    "@cli-engine/engine" "^5.0.0-beta.0"
+    cli-ux "^2.0.15"
+    del "^3.0.0"
+    fs-extra "^5.0.0"
+
 "@heroku-cli/color@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@heroku-cli/color/-/color-1.0.3.tgz#f94866b351f20771ee958f07c790011ceb36c066"

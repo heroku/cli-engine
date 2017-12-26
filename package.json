@@ -32,6 +32,7 @@
   "devDependencies": {
     "@cli-engine/command": "^11.0.0-beta.2",
     "@cli-engine/config": "^5.0.0-beta.2",
+    "@cli-engine/util": "^1.0.3",
     "@heroku-cli/command": "^7.0.0-beta.1",
     "@heroku-cli/tslint": "^1.0.3",
     "@types/ansi-styles": "^2.0.30",
@@ -75,9 +76,9 @@
   "main": "lib/cli.js",
   "repository": "https://github.com/heroku/cli-engine",
   "scripts": {
-    "clean": "del-cli lib",
-    "prepare": "yarn run clean && tsc && yarn run prune",
-    "prune": "del-cli 'lib/**/*.test.+(d.ts|js)'",
+    "posttest": "cli-engine-util",
+    "precommit": "cli-engine-util",
+    "prepare": "cli-engine-util",
     "test": "jest"
   },
   "types": "lib/cli.d.ts"
