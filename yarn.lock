@@ -148,15 +148,15 @@ ansi-regex@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/ansi-regex/-/ansi-regex-3.0.0.tgz#ed0317c322064f79466c02966bddb605ab37d998"
 
-ansi-styles@3.2.0, ansi-styles@^3.1.0, ansi-styles@^3.2.0:
+ansi-styles@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
+
+ansi-styles@^3.1.0, ansi-styles@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-3.2.0.tgz#c159b8d5be0f9e5a6f346dab94f16ce022161b88"
   dependencies:
     color-convert "^1.9.0"
-
-ansi-styles@^2.2.1:
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/ansi-styles/-/ansi-styles-2.2.1.tgz#b432dd3358b634cf75e1e4664368240533c1ddbe"
 
 ansicolors@~0.2.1:
   version "0.2.1"
@@ -665,9 +665,9 @@ cli-cursor@^1.0.2:
   dependencies:
     restore-cursor "^1.0.1"
 
-cli-engine-command@11.0.12:
-  version "11.0.12"
-  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.12.tgz#54480f6b2591d9882ab6bf5600afc88d6a92022a"
+cli-engine-command@11.0.14:
+  version "11.0.14"
+  resolved "https://registry.yarnpkg.com/cli-engine-command/-/cli-engine-command-11.0.14.tgz#409ac27a7cef1e5d2e85be4b59785c3422cc7cef"
   dependencies:
     chalk "2.3.0"
     cli-flags "^2.0.3"
@@ -676,11 +676,11 @@ cli-engine-config@5.0.7:
   version "5.0.7"
   resolved "https://registry.yarnpkg.com/cli-engine-config/-/cli-engine-config-5.0.7.tgz#3a341b1b8fa4e840f41af1ae5b223dc926c3d5ee"
 
-cli-engine-heroku@7.0.6:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.6.tgz#720706cb4722a7b7b752b6822c8fa9f8e7fe1a95"
+cli-engine-heroku@7.0.9:
+  version "7.0.9"
+  resolved "https://registry.yarnpkg.com/cli-engine-heroku/-/cli-engine-heroku-7.0.9.tgz#76a438d04491a2896e9d42449968dafde9dc01eb"
   dependencies:
-    cli-ux "^2.0.12"
+    cli-ux "^2.0.14"
     heroku-client "3.0.5"
     http-call "^4.0.5"
     netrc-parser "^2.0.5"
@@ -703,15 +703,16 @@ cli-truncate@^0.2.1:
     slice-ansi "0.0.4"
     string-width "^1.0.1"
 
-cli-ux@^2.0.12:
-  version "2.0.12"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.12.tgz#1b02cb3c0f8346618d62e4a9b13294736801c713"
+cli-ux@^2.0.14:
+  version "2.0.14"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.14.tgz#37c3610566729ca88a0579d6e3f1f8ab75cb84c6"
   dependencies:
     "@heroku/linewrap" "^1.0.0"
     ansi-escapes "^3.0.0"
     ansi-styles "^3.2.0"
     cardinal "^1.0.0"
     chalk "^2.3.0"
+    heroku-cli-color "^1.0.3"
     lodash "^4.17.4"
     moment "^2.20.1"
     password-prompt "^1.0.3"
@@ -1483,13 +1484,13 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
-heroku-cli-color@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/heroku-cli-color/-/heroku-cli-color-1.0.2.tgz#0668da8b8d5daeb1b690d97dc14cd02669c2eadc"
+heroku-cli-color@1.0.3, heroku-cli-color@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/heroku-cli-color/-/heroku-cli-color-1.0.3.tgz#44c125d2ba3e27df94e927d694dbc740d7712b80"
   dependencies:
-    ansi-styles "3.2.0"
-    chalk "2.3.0"
-    supports-color "5.1.0"
+    ansi-styles "^3.2.0"
+    chalk "^2.3.0"
+    supports-color "^5.1.0"
 
 heroku-client@3.0.5:
   version "3.0.5"
@@ -3439,12 +3440,6 @@ subarg@^1.0.0:
   dependencies:
     minimist "^1.1.0"
 
-supports-color@5.1.0, supports-color@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.1.0.tgz#058a021d1b619f7ddf3980d712ea3590ce7de3d5"
-  dependencies:
-    has-flag "^2.0.0"
-
 supports-color@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-2.0.0.tgz#535d045ce6b6363fa40117084629995e9df324c7"
@@ -3458,6 +3453,12 @@ supports-color@^3.1.2:
 supports-color@^4.0.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-4.5.0.tgz#be7a0de484dec5c5cddf8b3d59125044912f635b"
+  dependencies:
+    has-flag "^2.0.0"
+
+supports-color@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.1.0.tgz#058a021d1b619f7ddf3980d712ea3590ce7de3d5"
   dependencies:
     has-flag "^2.0.0"
 
