@@ -1,7 +1,7 @@
 {
   "name": "@cli-engine/engine",
   "description": "Generic CLI Framework",
-  "version": "5.0.13",
+  "version": "5.0.0-beta.0",
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
