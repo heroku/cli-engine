@@ -1,5 +1,5 @@
 {
-  "name": "cli-engine",
+  "name": "@cli-engine/engine",
   "description": "Generic CLI Framework",
   "version": "5.0.13",
   "author": "Jeff Dickey @jdxcode",
