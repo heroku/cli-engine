@@ -15,7 +15,6 @@
   "dependencies": {
     "assync": "^1.0.3",
     "cli-ux": "^2.0.14",
-    "cross-spawn": "5.1.0",
     "debug": "^3.1.0",
     "filesize": "^3.5.11",
     "find-up": "^2.1.0",

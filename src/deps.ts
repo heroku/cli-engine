@@ -36,7 +36,6 @@ export default {
   get moment(): typeof moment { return fetch('moment') },
   get rwlockfile(): any { return fetch('rwlockfile') },
   get klaw(): typeof klaw { return fetch('klaw') },
-  get crossSpawn(): any { return fetch('cross-spawn') },
   get Heroku(): typeof Heroku { return fetch('cli-engine-heroku') },
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
