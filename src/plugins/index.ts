@@ -1,4 +1,5 @@
 import { IConfig } from 'cli-engine-config'
+import cli from 'cli-ux'
 import * as path from 'path'
 import _ from 'ts-lodash'
 import deps from '../deps'
@@ -47,7 +48,7 @@ export class Plugins {
       if (!options.force) {
         throw new Error(`${name} is already installed, run with --force to install anyway`)
       } else if (['link', 'user'].includes(currentType)) {
-        await (this as any)[currentType].uninstall(name)
+        await this.uninstall(name)
       }
     }
     if (options.type === 'link') {
@@ -69,7 +70,9 @@ export class Plugins {
         name = linked.name
       } else throw new Error(`${name} is not installed`)
     }
+    cli.action.start(`Uninstalling ${name}`)
     if (type === 'user') await this.user.uninstall(name)
+    cli.action.stop()
   }
 
   public async list() {

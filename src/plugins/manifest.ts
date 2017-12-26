@@ -53,6 +53,7 @@ export class PluginManifest {
   }
 
   public async set(key: string, v: any) {
+    this.debug('set', key)
     if (!key) throw new Error('key is empty')
     await this.init()
     this.body.manifest[key] = v
@@ -61,6 +62,7 @@ export class PluginManifest {
   }
 
   public async reset() {
+    this.debug('reset')
     await deps.file.remove(this.file)
     delete this.body
     this.needsSave = false

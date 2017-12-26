@@ -28,8 +28,7 @@ export class UserPlugins {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     await this.lock.write()
-    const manifest = await this.manifest.get('plugins')
-    const packages = Object.entries(manifest || {}).map(([k, v]) => `${k}@${v.tag}`)
+    const packages = Object.entries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
     await this.lock.unwrite()
   }
@@ -46,8 +45,7 @@ export class UserPlugins {
       await plugin.load()
       await this.addPlugin(name, tag)
     } catch (err) {
-      await this.manifest.set(name, undefined)
-      await this.manifest.save()
+      await this.removePlugin(name)
       await this.yarn.exec(['remove', name])
       throw err
     }
@@ -57,8 +55,7 @@ export class UserPlugins {
   public async uninstall(name: string): Promise<void> {
     await this.init()
     await this.lock.write()
-    await this.manifest.set(name, undefined)
-    await this.manifest.save()
+    await this.removePlugin(name)
     await this.yarn.exec(['remove', name])
     await this.lock.unwrite()
   }
@@ -84,8 +81,9 @@ export class UserPlugins {
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
     await this.lock.read()
     await this.migrate()
-    const manifest = await this.manifest.get('plugins')
-    this.plugins = await Promise.all(Object.entries(manifest || {}).map(([k, v]) => this.loadPlugin(k, v.tag)))
+    this.plugins = await Promise.all(
+      Object.entries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
+    )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.refresh()
     await this.lock.unread()
@@ -138,10 +136,21 @@ export class UserPlugins {
   }
 
   private async addPlugin(name: string, tag: string) {
-    let plugins = (await this.manifest.get('plugins')) || {}
+    let plugins = await this.manifestPlugins()
     plugins[name] = { tag }
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
+  }
+
+  private async removePlugin(name: string) {
+    let plugins = await this.manifestPlugins()
+    delete plugins[name]
+    await this.manifest.set('plugins', plugins)
+    await this.manifest.save()
+  }
+
+  private async manifestPlugins(): Promise<{ [k: string]: { tag: string } }> {
+    return (await this.manifest.get('plugins')) || {}
   }
 
   private async yarnNodeVersion(): Promise<string | undefined> {
