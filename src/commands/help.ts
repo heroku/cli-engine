@@ -31,6 +31,8 @@ export default class Help extends Command {
       if (this.flags.all) {
         let rootCmds = await this.cm.rootCommands()
         if (rootCmds) {
+          let rootTopics = await this.cm.rootTopics()
+          rootCmds = rootCmds.filter(r => !Object.keys(rootTopics).includes(r.id))
           await this.listCommandsHelp(Object.values(rootCmds))
         }
       }
