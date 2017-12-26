@@ -1,6 +1,6 @@
 import { Command } from '@cli-engine/command'
 import cli from 'cli-ux'
-import { color } from 'heroku-cli-color'
+import { color } from '@heroku-cli/color'
 import { CommandManager } from './command'
 import deps from './deps'
 

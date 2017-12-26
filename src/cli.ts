@@ -1,7 +1,7 @@
 require('./fs')
 import { ConfigOptions, Config } from '@cli-engine/config'
 import cli from 'cli-ux'
-import { color } from 'heroku-cli-color'
+import { color } from '@heroku-cli/color'
 import * as path from 'path'
 import deps from './deps'
 

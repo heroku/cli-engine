@@ -1,6 +1,6 @@
 import { Command, flags } from '@cli-engine/command'
 import { cli } from 'cli-ux'
-import { color } from 'heroku-cli-color'
+import { color } from '@heroku-cli/color'
 import { Plugins } from '../../plugins'
 import { compare } from '../../util'
 
