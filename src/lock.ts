@@ -58,12 +58,15 @@ export class Lock {
     this.numWriters++
 
     // check for other readers
+    let prevStatus
     if (await deps.rwlockfile.hasReaders(this.lockfile)) {
+      prevStatus = cli.action.status
       cli.action.status = `Waiting for all commands to finish`
     }
 
     // grab writer lock
     let unlock = await deps.rwlockfile.write(this.lockfile)
+    if (prevStatus) cli.action.status = prevStatus
 
     // return downgrade function
     this.actuallyUnlock = async () => {
