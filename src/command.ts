@@ -1,6 +1,7 @@
 import assync from 'assync'
 import { IConfig } from 'cli-engine-config'
 import cli from 'cli-ux'
+import _ from 'ts-lodash'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { Plugins } from './plugins'
@@ -70,12 +71,12 @@ export class CommandManager {
 
   public async commands(): Promise<ICommandInfo[]> {
     await this.load()
-    return this.result.allCommands
+    return _.sortBy(this.result.allCommands, 'id')
   }
 
   public async rootCommands(): Promise<ICommandInfo[]> {
     await this.load()
-    return Object.values(this.result.commands)
+    return _.sortBy(Object.values(this.result.commands), 'id')
   }
 
   public async findTopic(id: string): Promise<Topic | undefined> {
