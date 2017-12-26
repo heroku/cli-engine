@@ -30,10 +30,10 @@
     "ts-lodash": "4.0.8"
   },
   "devDependencies": {
-    "@cli-engine/command": "https://github.com/heroku/cli-engine-command#050162b",
-    "@cli-engine/config": "https://github.com/heroku/cli-engine-config#8681882",
-    "@cli-engine/util": "^1.0.3",
-    "@heroku-cli/command": "https://github.com/heroku/cli-engine-heroku#a433dd1",
+    "@cli-engine/command": "^11.0.0-beta.3",
+    "@cli-engine/config": "^5.0.0-beta.4",
+    "@cli-engine/util": "^1.0.4",
+    "@heroku-cli/command": "^7.0.0-beta.0",
     "@heroku-cli/tslint": "^1.0.3",
     "@types/ansi-styles": "^2.0.30",
     "@types/chalk": "^2.2.0",
