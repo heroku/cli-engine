@@ -134,7 +134,7 @@ export class CommandManager {
 
     this.debug('fetching command managers')
     this._submanagers = await fetch(this.managers)
-    this.debug('received command %d managers', this._submanagers.length)
+    this.debug('received %d command managers', this._submanagers.length)
     return this._submanagers
   }
 
