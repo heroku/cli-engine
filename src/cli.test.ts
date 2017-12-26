@@ -1,4 +1,6 @@
+import { ConfigOptions } from '@cli-engine/config'
 import { cli } from 'cli-ux'
+import * as path from 'path'
 
 import { run } from './cli'
 
@@ -8,10 +10,10 @@ export interface IRootRun {
   stderr: string
 }
 
-export async function example(argv: string[]): Promise<IRootRun> {
+export async function example(argv: string[], config: ConfigOptions = {}): Promise<IRootRun> {
   let code = 0
   argv = ['node', 'cli-engine', ...argv]
-  await run(argv)
+  await run(argv, config)
   return {
     stdout: cli.stdout.output,
     stderr: cli.stderr.output,
@@ -20,8 +22,8 @@ export async function example(argv: string[]): Promise<IRootRun> {
 }
 
 test('runs the version command', async () => {
-  const { stdout } = await example(['version'])
-  expect(stdout).toMatch(/^cli-engine\//)
+  const { stdout } = await example(['version'], { root: path.join(__dirname, '..', 'example') })
+  expect(stdout).toMatch(/^cli-engine-example\//)
 })
 
 test.skip('errors with invalid arguments', async () => {

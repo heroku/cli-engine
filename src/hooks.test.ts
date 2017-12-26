@@ -17,8 +17,12 @@ test('does not error when no hooks', async () => {
 test('fires a hook', async () => {
   let hooks = init({
     root: path.join(__dirname, '..'),
-    hooks: {
-      init: ['test/fixtures/hooks/prerun.js'],
+    pjson: {
+      'cli-engine': {
+        hooks: {
+          init: ['test/fixtures/hooks/prerun.js'],
+        },
+      },
     },
   })
   await hooks.run('init')
