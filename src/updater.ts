@@ -136,7 +136,6 @@ export class Updater {
   async update(manifest: IManifest) {
     await this.lock.write()
     let base = this.base(manifest)
-    const filesize = require('filesize')
 
     if (!this.config.s3.host) throw new Error('S3 host not defined')
 
@@ -148,7 +147,8 @@ export class Updater {
     await this._mkdirp(this.clientRoot)
     await this._remove(output)
 
-    if ((cli.action as any).frames) {
+    // TODO: use cli.action.type
+    if (deps.filesize && (cli.action as any).frames) {
       // if spinner action
       let total = stream.headers['content-length']
       let current = 0
@@ -161,7 +161,7 @@ export class Updater {
       )
       stream.on('data', data => {
         current += data.length
-        updateStatus(`${filesize(current)}/${filesize(total)}`)
+        updateStatus(`${deps.filesize(current)}/${deps.filesize(total)}`)
       })
     }
 

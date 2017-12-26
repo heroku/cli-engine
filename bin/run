@@ -2,11 +2,10 @@
 
 require('ts-node').register()
 const path = require('path')
-const root = path.join(__dirname, '..', 'example')
 const {run} = require('../src/cli')
 const config = {
   reexecBin: __filename,
-  root,
+  root: path.join(__dirname, '..', 'example'),
   updateDisabled: `add update disable message here`
 }
 run(process.argv, config)

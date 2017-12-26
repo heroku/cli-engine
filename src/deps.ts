@@ -1,4 +1,3 @@
-// remote
 import assync = require('assync')
 import {Help as CLICommandHelp} from 'cli-engine-command/lib/help'
 import Heroku = require('cli-engine-heroku')
@@ -7,8 +6,6 @@ import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
 import stripAnsi = require('strip-ansi')
-
-// local
 import command = require('./command')
 import help = require('./commands/help')
 import file = require('./file')
@@ -18,8 +15,6 @@ import notFound = require('./not_found')
 import updater = require('./updater')
 import util = require('./util')
 import validate = require('./validate')
-
-// plugins
 import Plugins = require('./plugins')
 import Builtin = require('./plugins/builtin')
 import corePlugins = require('./plugins/core')
@@ -40,6 +35,7 @@ export default {
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
   get assync(): typeof assync.default { return fetch('assync').default },
+  get filesize(): any { return fetch('filesize', {optional: true}) },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
@@ -65,9 +61,12 @@ export default {
 
 const cache: any = {}
 
-function fetch(s: string) {
-  if (!cache[s]) {
-    cache[s] = require(s)
+function fetch(s: string, {optional = false} = {}) {
+  if (s in cache) return cache[s]
+  try {
+    return cache[s] = require(s)
+  } catch (err) {
+    if (!optional || err.code !== 'ENOENT') throw err
+    cache[s] = undefined
   }
-  return cache[s]
 }
