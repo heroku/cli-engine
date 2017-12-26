@@ -88,7 +88,10 @@ export class PluginManifest {
     } catch (err) {
       if (err.code === 'ENOENT') {
         this.debug(err)
-      } else throw err
+      } else {
+        await deps.file.remove(this.file)
+        throw err
+      }
     }
   }
 
