@@ -2,7 +2,9 @@ import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import _ from 'ts-lodash'
+
 import deps from '../deps'
+
 import { Builtin } from './builtin'
 import { CorePlugins } from './core'
 import { LinkPlugins } from './link'
@@ -32,9 +34,9 @@ export class Plugins {
   private plugins: Plugin[]
 
   constructor(private config: Config) {
-    this.builtin = new Builtin({config, root: path.join(__dirname, '..', '..'), type: 'builtin'})
+    this.builtin = new Builtin({ config, root: path.join(__dirname, '..', '..'), type: 'builtin' })
     if (config.commandsDir && config.root) {
-      this.main = new Builtin({config, root: config.root, type: 'main'})
+      this.main = new Builtin({ config, root: config.root, type: 'main' })
     }
     if (config.corePlugins) {
       this.core = new CorePlugins(this.config)

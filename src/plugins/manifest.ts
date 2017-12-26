@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra'
+
 import deps from '../deps'
 
 export interface IManifestOpts {

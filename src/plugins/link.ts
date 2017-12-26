@@ -2,8 +2,10 @@ import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+
 import deps from '../deps'
 import { Lock } from '../lock'
+
 import { PluginManifest } from './manifest'
 import { IPluginPJSON, Plugin, PluginType } from './plugin'
 

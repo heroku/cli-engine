@@ -1,8 +1,10 @@
 import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
+
 import deps from '../deps'
 import { Lock } from '../lock'
+
 import { PluginManifest } from './manifest'
 import { IPluginOptions, Plugin, PluginType } from './plugin'
 import Yarn from './yarn'

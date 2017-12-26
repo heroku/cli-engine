@@ -9,24 +9,24 @@ const herokuApps = {
   type: 'user',
   name: 'heroku-apps',
   pluginPath: {
-    path: '/users/jeff/.local/share/heroku/plugins/node_modules/heroku-apps'
-  }
+    path: '/users/jeff/.local/share/heroku/plugins/node_modules/heroku-apps',
+  },
 }
 
 const builtin = {
   type: 'builtin',
   pluginPath: {
-    path: '/usr/local/lib/heroku/node_modules/heroku-apps'
-  }
+    path: '/usr/local/lib/heroku/node_modules/heroku-apps',
+  },
 }
 
 // flow$ignore
 Plugins.mockImplementation(() => {
   return {
-    findPluginWithCommand (cmd) {
+    findPluginWithCommand(cmd) {
       if (cmd === `apps:info`) return herokuApps
       if (cmd === `plugins:install`) return builtin
-    }
+    },
   }
 })
 

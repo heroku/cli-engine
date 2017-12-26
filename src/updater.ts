@@ -1,10 +1,11 @@
 import { Config } from '@cli-engine/config'
+import { spawn } from 'child_process'
 import { cli } from 'cli-ux'
 import * as path from 'path'
 import _ from 'ts-lodash'
+
 import deps from './deps'
 import { Lock } from './lock'
-import { spawn } from 'child_process'
 
 const debug = require('debug')('cli:updater')
 

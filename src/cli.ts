@@ -1,8 +1,9 @@
 require('./fs')
-import { ConfigOptions, Config } from '@cli-engine/config'
-import cli from 'cli-ux'
+import { Config, ConfigOptions } from '@cli-engine/config'
 import { color } from '@heroku-cli/color'
+import cli from 'cli-ux'
 import * as path from 'path'
+
 import deps from './deps'
 
 export default class CLI {
@@ -24,15 +25,15 @@ export default class CLI {
     return result
   }
 
-  private get debug () {
+  private get debug() {
     return require('debug')('cli')
   }
 
-  private get global(): {testing?: boolean} {
+  private get global(): { testing?: boolean } {
     return global as any
   }
 
-  private setupHandlers () {
+  private setupHandlers() {
     process.env.CLI_ENGINE_VERSION = require('../package.json').version
     if (this.global.testing) return
     process.once('SIGINT', () => {

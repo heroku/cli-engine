@@ -2,7 +2,7 @@
 
 import CLI from './cli'
 
-import {tmpDirs} from '../test/helpers'
+import { tmpDirs } from '../test/helpers'
 
 jest.unmock('fs-extra')
 
@@ -18,13 +18,13 @@ afterEach(async () => {
   tmpDir.clean()
 })
 
-async function run (...argv: string[]) {
+async function run(...argv: string[]) {
   let config = {
     ...tmpDir.config,
     argv: ['cli'].concat(argv),
-    mock: true
+    mock: true,
   }
-  let cli = new CLI({config})
+  let cli = new CLI({ config })
   try {
     await cli.run()
   } catch (err) {
@@ -33,7 +33,7 @@ async function run (...argv: string[]) {
   return cli.cmd
 }
 
-async function plugins (): Promise<string> {
+async function plugins(): Promise<string> {
   const index = await run('plugins')
   return index.out.stdout.output
 }
@@ -56,7 +56,7 @@ test('installs, runs, and uninstalls heroku-debug', async () => {
   await run('debug')
   await run('plugins:uninstall', 'heroku-debug')
   expect(await plugins()).not.toContain('heroku-debug')
-  expect(mockDir.mock.calls[0][0]).toMatchObject({context: {apiHost: 'api.heroku.com'}})
+  expect(mockDir.mock.calls[0][0]).toMatchObject({ context: { apiHost: 'api.heroku.com' } })
 })
 
 test('tries to install a non-existant tag', async () => {
@@ -64,7 +64,9 @@ test('tries to install a non-existant tag', async () => {
   try {
     await run('plugins:install', 'heroku-debug@not-found')
   } catch (err) {
-    expect(err.message).toContain('exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n')
+    expect(err.message).toContain(
+      'exited with code 1\nerror Couldn\'t find any versions for "heroku-debug" that matches "not-found"\n',
+    )
   }
 })
 

@@ -1,4 +1,4 @@
-import { Plugin, PluginType, IPluginOptions } from './plugin'
+import { IPluginOptions, Plugin, PluginType } from './plugin'
 
 export interface IBuiltinPluginOptions extends IPluginOptions {
   type: PluginType

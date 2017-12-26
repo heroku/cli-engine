@@ -7,7 +7,7 @@ let mockInstall
 jest.mock('../../plugins', () => {
   return class Plugins {
     install = mockInstall
-    list () {
+    list() {
       return []
     }
   }

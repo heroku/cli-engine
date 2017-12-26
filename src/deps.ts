@@ -1,20 +1,18 @@
-import assync = require('assync')
 import {Help as CLICommandHelp} from '@cli-engine/command/lib/help'
 import Heroku = require('@heroku-cli/command')
+import assync = require('assync')
 import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
 import stripAnsi = require('strip-ansi')
+
 import command = require('./command')
 import help = require('./commands/help')
 import file = require('./file')
 import Hooks = require('./hooks')
 import lock = require('./lock')
 import notFound = require('./not_found')
-import updater = require('./updater')
-import util = require('./util')
-import validate = require('./validate')
 import Plugins = require('./plugins')
 import Builtin = require('./plugins/builtin')
 import corePlugins = require('./plugins/core')
@@ -23,6 +21,9 @@ import linkPlugins = require('./plugins/link')
 import pluginManifest = require('./plugins/manifest')
 import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
+import updater = require('./updater')
+import util = require('./util')
+import validate = require('./validate')
 
 export default {
   // remote

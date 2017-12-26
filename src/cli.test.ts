@@ -1,4 +1,5 @@
 import { cli } from 'cli-ux'
+
 import { run } from './cli'
 
 export interface IRootRun {

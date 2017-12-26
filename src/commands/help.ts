@@ -1,8 +1,9 @@
 import { Command, flags } from '@cli-engine/command'
+import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
-import { color } from '@heroku-cli/color'
 import _ from 'ts-lodash'
+
 import { CommandManager } from '../command'
 import deps from '../deps'
 import { ICommandInfo, Topic } from '../plugins/topic'
