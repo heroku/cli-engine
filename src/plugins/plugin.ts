@@ -159,6 +159,31 @@ export abstract class Plugin implements ICommandManager {
     return path.join(this.root, 'package.json')
   }
 
+  protected commandIDsFromDir(): Promise<string[]> {
+    const d = this.commandsDir
+    if (!d) return Promise.resolve([])
+    return new Promise((resolve, reject) => {
+      let ids: string[] = []
+      deps
+        .klaw(d, { depthLimit: 10 })
+        .on('data', f => {
+          if (
+            !f.stats.isDirectory() &&
+            (f.path.endsWith('.js') || (f.path.endsWith('.ts') && this.type === 'builtin')) &&
+            !f.path.endsWith('.d.ts') &&
+            !f.path.endsWith('.test.js')
+          ) {
+            let parsed = path.parse(f.path)
+            let p = path.relative(d, path.join(parsed.dir, parsed.name))
+            if (path.basename(p) === 'index') p = path.dirname(p)
+            ids.push(p.split(path.sep).join(':'))
+          }
+        })
+        .on('error', reject)
+        .on('end', () => resolve(ids))
+    })
+  }
+
   private commandPath(id: string): string {
     if (!this.commandsDir) throw new Error('commandsDir not set')
     return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
@@ -213,31 +238,6 @@ export abstract class Plugin implements ICommandManager {
       version: this.version,
     }
     return cmd
-  }
-
-  private commandIDsFromDir(): Promise<string[]> {
-    const d = this.commandsDir
-    if (!d) return Promise.resolve([])
-    return new Promise((resolve, reject) => {
-      let ids: string[] = []
-      deps
-        .klaw(d, { depthLimit: 10 })
-        .on('data', f => {
-          if (
-            !f.stats.isDirectory() &&
-            (f.path.endsWith('.js') || (f.path.endsWith('.ts') && this.type === 'builtin')) &&
-            !f.path.endsWith('.d.ts') &&
-            !f.path.endsWith('.test.js')
-          ) {
-            let parsed = path.parse(f.path)
-            let p = path.relative(d, path.join(parsed.dir, parsed.name))
-            if (path.basename(p) === 'index') p = path.dirname(p)
-            ids.push(p.split(path.sep).join(':'))
-          }
-        })
-        .on('error', reject)
-        .on('end', () => resolve(ids))
-    })
   }
 
   private async fetchModule(): Promise<IPluginModule | undefined> {

@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@cli-engine/command": "https://github.com/heroku/cli-engine-command#050162b",
-    "@cli-engine/config": "https://github.com/heroku/cli-engine-config#1f30ac8",
+    "@cli-engine/config": "https://github.com/heroku/cli-engine-config#8681882",
     "@cli-engine/util": "^1.0.3",
     "@heroku-cli/command": "https://github.com/heroku/cli-engine-heroku#a433dd1",
     "@heroku-cli/tslint": "^1.0.3",

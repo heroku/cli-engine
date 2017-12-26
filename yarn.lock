@@ -21,9 +21,9 @@
   version "5.0.0-beta.2"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.0-beta.2.tgz#9d3c210ea14b063549fd3c8ceae1e0b0939cd323"
 
-"@cli-engine/config@^5.0.0-beta.3", "@cli-engine/config@https://github.com/heroku/cli-engine-config#1f30ac8":
+"@cli-engine/config@^5.0.0-beta.3", "@cli-engine/config@https://github.com/heroku/cli-engine-config#8681882":
   version "5.0.0-beta.3"
-  resolved "https://github.com/heroku/cli-engine-config#1f30ac89eebf9c2ebf55a2c11ee64ebc43533f75"
+  resolved "https://github.com/heroku/cli-engine-config#86818826ca4ead35b7658617985b7c2dbbab6dfb"
 
 "@cli-engine/engine@^5.0.0-beta.0":
   version "5.0.0-beta.0"

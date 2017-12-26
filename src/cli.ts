@@ -65,8 +65,15 @@ export default class CLI {
   }
 }
 
-export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigOptions = {}) {
-  const argv = Array.isArray(arg1) ? arg1 : opts.argv || process.argv
+export function run(argv?: string[], opts?: ConfigOptions): Promise<any>
+export function run(opts: ConfigOptions): Promise<any>
+export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigOptions = {}): Promise<any> {
+  let argv: string[]
+  if (Array.isArray(arg1)) argv = arg1
+  else {
+    opts = arg1
+    argv = opts.argv || process.argv
+  }
   if (!opts.reexecBin) opts.reexecBin = module.parent!.filename
   if (!opts.root) opts.root = path.join(module.parent!.filename, '..', '..')
   if (!opts.pjson) {

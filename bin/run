@@ -8,4 +8,4 @@ const config = {
   root: path.join(__dirname, '..', 'example'),
   updateDisabled: `add update disable message here`
 }
-run(process.argv, config)
+run(config)

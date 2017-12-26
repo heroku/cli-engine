@@ -8,6 +8,7 @@ import deps from '../deps'
 import { Builtin } from './builtin'
 import { CorePlugins } from './core'
 import { LinkPlugins } from './link'
+import { MainPlugin } from './main'
 import { Plugin, PluginType } from './plugin'
 import { UserPlugins } from './user'
 
@@ -26,7 +27,7 @@ export interface ILinkInstallOptions {
 
 export class Plugins {
   public builtin: Builtin
-  public main: Builtin
+  public main: MainPlugin
   public core: CorePlugins
   public user: UserPlugins
   public link: LinkPlugins
@@ -34,14 +35,9 @@ export class Plugins {
   private plugins: Plugin[]
 
   constructor(private config: Config) {
-    this.builtin = new Builtin({
-      config,
-      root: path.join(__dirname, '..', '..'),
-      commandsDir: path.join(__dirname, '..', 'commands'),
-      type: 'builtin',
-    })
-    if (config.commandsDir && config.root) {
-      this.main = new Builtin({ config, root: config.root, commandsDir: config.commandsDir, type: 'main' })
+    this.builtin = new Builtin(this.config)
+    if (config.commandsDir) {
+      this.main = new MainPlugin(this.config)
     }
     if (config.corePlugins) {
       this.core = new CorePlugins(this.config)

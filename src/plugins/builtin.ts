@@ -1,21 +1,22 @@
-import { IPluginOptions, Plugin, PluginType } from './plugin'
+import { Config } from '@cli-engine/config'
+import * as path from 'path'
 
-export interface IBuiltinPluginOptions extends IPluginOptions {
-  commandsDir: string
-  type: PluginType
-}
+import { Plugin, PluginType } from './plugin'
 
 export class Builtin extends Plugin {
-  public type: PluginType
-  private _commandsDir: string
+  public type: PluginType = 'builtin'
 
-  constructor(opts: IBuiltinPluginOptions) {
-    super(opts)
-    this.type = opts.type
-    this._commandsDir = opts.commandsDir
+  constructor(config: Config) {
+    super({ config, root: path.join(__dirname, '..', '..') })
   }
 
   public get commandsDir() {
-    return this._commandsDir
+    return path.join(__dirname, '..', 'commands')
+  }
+
+  protected async commandIDsFromDir(): Promise<string[]> {
+    const ids = ['commands', 'help', 'update', 'version', 'which']
+    if (!this.config.userPluginsEnabled) return ids
+    return [...ids, 'plugins', 'plugins:install', 'plugins:link', 'plugins:uninstall', 'plugins:update']
   }
 }
