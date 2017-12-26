@@ -24,6 +24,7 @@ export interface ILinkInstallOptions {
 
 export class Plugins {
   public builtin: Builtin
+  public main: Builtin
   public core: CorePlugins
   public user: UserPlugins
   public link: LinkPlugins
@@ -31,13 +32,21 @@ export class Plugins {
   private plugins: Plugin[]
 
   constructor(private config: IConfig) {
-    this.core = new CorePlugins(this.config)
-    this.user = new UserPlugins(this.config)
-    this.link = new LinkPlugins(this.config)
+    this.builtin = new Builtin({config, root: path.join(__dirname, '..', '..'), type: 'builtin'})
+    if (config.commandsDir) {
+      this.main = new Builtin({config, root: config.root, type: 'main'})
+    }
+    if (config.corePlugins) {
+      this.core = new CorePlugins(this.config)
+    }
+    if (config.userPlugins) {
+      this.user = new UserPlugins(this.config)
+      this.link = new LinkPlugins(this.config)
+    }
   }
 
   public async submanagers() {
-    return [this.link, this.user, this.core]
+    return _.compact([this.link, this.user, this.core, this.main, this.builtin])
   }
 
   public async install(options: InstallOptions) {

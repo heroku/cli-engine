@@ -7,7 +7,7 @@ import { Lock } from '../lock'
 import { ITopic, ITopics, topicsToArray } from '../topic'
 import { PluginManifest } from './manifest'
 
-export type PluginType = 'builtin' | 'core' | 'user' | 'link'
+export type PluginType = 'builtin' | 'main' | 'core' | 'user' | 'link'
 
 export interface IPluginPJSON {
   name: string
@@ -55,6 +55,7 @@ export abstract class Plugin implements ICommandManager {
   constructor(opts: IPluginOptions) {
     this.config = opts.config
     this.root = opts.root
+    if (opts.pjson) this.pjson = opts.pjson
   }
 
   public async load(): Promise<ILoadResult> {

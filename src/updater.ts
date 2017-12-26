@@ -62,9 +62,13 @@ export class Updater {
     return this.config.reexecBin || this.config.bin
   }
 
+  private get s3Host(): string | undefined {
+    return this.config.s3 && this.config.s3.host
+  }
+
   s3url(channel: string, p: string): string {
-    if (!this.config.s3.host) throw new Error('S3 host not defined')
-    return `https://${this.config.s3.host}/${this.config.name}/channels/${channel}/${p}`
+    if (!this.s3Host) throw new Error('S3 host not defined')
+    return `https://${this.s3Host}/${this.config.name}/channels/${channel}/${p}`
   }
 
   async fetchManifest(channel: string): Promise<IManifest> {
@@ -95,7 +99,7 @@ export class Updater {
 
   public async warnIfUpdateAvailable() {
     await this._catch(async () => {
-      if (!this.config.s3) return
+      if (!this.s3Host) return
       let v = await this.fetchVersion(false)
       if (deps.util.minorVersionGreater(this.config.version, v.version)) {
         cli.warn(`${this.config.name}: update available from ${this.config.version} to ${v.version}`)
@@ -137,9 +141,9 @@ export class Updater {
     await this.lock.write()
     let base = this.base(manifest)
 
-    if (!this.config.s3.host) throw new Error('S3 host not defined')
+    if (!this.s3Host) throw new Error('S3 host not defined')
 
-    let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
+    let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
     let { response: stream } = await this.http.stream(url)
 
     let output = path.join(this.clientRoot, manifest.version)

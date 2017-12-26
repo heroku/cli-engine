@@ -1,26 +1,14 @@
-import { IConfig } from 'cli-engine-config'
-import * as path from 'path'
-import { Plugin, PluginType } from './plugin'
+import { Plugin, PluginType, IPluginOptions } from './plugin'
+
+export interface IBuiltinPluginOptions extends IPluginOptions {
+  type: PluginType
+}
 
 export class Builtin extends Plugin {
-  public type: PluginType = 'builtin'
+  public type: PluginType
 
-  constructor(protected config: IConfig) {
-    super({
-      config,
-      root: path.join(__dirname, '..', '..'),
-      pjson: require('../../package.json'),
-    })
+  constructor(opts: IBuiltinPluginOptions) {
+    super(opts)
+    this.type = opts.type
   }
-
-  // public async _topics(): Promise<ITopics> {
-  //   const topics: ITopics = {}
-  //   if (this.config.userPlugins) {
-  //     topics.plugins = new Topic({
-  //       name: 'plugins',
-  //       description: 'manage plugins',
-  //     })
-  //   }
-  //   return topics
-  // }
 }

@@ -5,7 +5,6 @@ import _ from 'ts-lodash'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { Plugins } from './plugins'
-import { Builtin } from './plugins/builtin'
 import { ITopic, RootTopic, Topic } from './topic'
 
 export type RunFn = (argv: string[]) => Promise<void>
@@ -33,7 +32,7 @@ export interface ICommandManager {
 }
 
 export class CommandManager {
-  private managers = [new Builtin(this.config), new Plugins(this.config)]
+  private managers = [new Plugins(this.config)]
   private hooks: Hooks
   private debug = require('debug')('cli:command')
   private result: RootTopic
@@ -109,7 +108,6 @@ export class CommandManager {
     this.result = new RootTopic()
     await this.hooks.run('init')
     let managers = await this.submanagers()
-    this.debug('loading all managers')
     let loads = managers.filter(m => m.load).map(m => m.load!().catch(err => cli.warn(err)))
     for (let r of loads) {
       let result = await r
@@ -132,9 +130,7 @@ export class CommandManager {
       return [...(managers || []), ...(submanagers || [])]
     }
 
-    this.debug('fetching command managers')
     this._submanagers = await fetch(this.managers)
-    this.debug('received %d command managers', this._submanagers.length)
     return this._submanagers
   }
 
