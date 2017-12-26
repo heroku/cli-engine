@@ -10,27 +10,27 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@cli-engine/command@^11.0.0-beta.1", "@cli-engine/command@^11.0.0-beta.3":
+"@cli-engine/command@^11.0.0-beta.3":
   version "11.0.0-beta.3"
   resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-11.0.0-beta.3.tgz#0c36ad9124c073004bc89668b3a59ae01f6b40d7"
   dependencies:
     chalk "^2.3.0"
     cli-flags "^2.0.3"
 
-"@cli-engine/command@git+https://github.com/heroku/cli-engine-command.git#050162b":
+"@cli-engine/command@https://github.com/heroku/cli-engine-command#050162b":
   version "11.0.0-beta.2"
-  resolved "git+https://github.com/heroku/cli-engine-command.git#050162bc24fd0e1432613a801ec695eb86c78832"
+  resolved "https://github.com/heroku/cli-engine-command#050162bc24fd0e1432613a801ec695eb86c78832"
   dependencies:
     chalk "^2.3.0"
     cli-flags "^2.0.3"
 
-"@cli-engine/config@^5.0.0-beta.1", "@cli-engine/config@^5.0.0-beta.4":
+"@cli-engine/config@^5.0.0-beta.4":
   version "5.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.0-beta.4.tgz#c61dd31b92163e986b3c8f102c823d31c997ae79"
 
-"@cli-engine/engine@git+https://github.com/heroku/cli-engine.git#5aacdd61":
+"@cli-engine/engine@https://github.com/heroku/cli-engine#5aacdd61":
   version "5.0.0-beta.0"
-  resolved "git+https://github.com/heroku/cli-engine.git#5aacdd611255e7df38f04c04ff2e225ae8fa9140"
+  resolved "https://github.com/heroku/cli-engine#5aacdd611255e7df38f04c04ff2e225ae8fa9140"
   dependencies:
     "@heroku-cli/color" "^1.0.3"
     assync "^1.0.3"
@@ -67,12 +67,12 @@
     chalk "^2.3.0"
     supports-color "^5.1.0"
 
-"@heroku-cli/command@^7.0.0-beta.0":
-  version "7.0.0-beta.0"
-  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.0-beta.0.tgz#78cd24adb364696bfa31362a69198f03828d556a"
+"@heroku-cli/command@^7.0.0-beta.2":
+  version "7.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.0-beta.2.tgz#216cb426325df0d303732edf2ca9185f95633fe6"
   dependencies:
-    "@cli-engine/command" "^11.0.0-beta.1"
-    "@cli-engine/config" "^5.0.0-beta.1"
+    "@cli-engine/command" "^11.0.0-beta.3"
+    "@cli-engine/config" "^5.0.0-beta.4"
     cli-ux "^2.0.15"
     heroku-client "3.0.5"
     http-call "^4.0.5"
