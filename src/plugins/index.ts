@@ -34,9 +34,14 @@ export class Plugins {
   private plugins: Plugin[]
 
   constructor(private config: Config) {
-    this.builtin = new Builtin({ config, root: path.join(__dirname, '..', '..'), type: 'builtin' })
+    this.builtin = new Builtin({
+      config,
+      root: path.join(__dirname, '..', '..'),
+      commandsDir: path.join(__dirname, '..', 'commands'),
+      type: 'builtin',
+    })
     if (config.commandsDir && config.root) {
-      this.main = new Builtin({ config, root: config.root, type: 'main' })
+      this.main = new Builtin({ config, root: config.root, commandsDir: config.commandsDir, type: 'main' })
     }
     if (config.corePlugins) {
       this.core = new CorePlugins(this.config)
