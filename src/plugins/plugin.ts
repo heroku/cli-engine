@@ -15,7 +15,7 @@ export interface IPluginPJSON {
   main?: string
   scripts?: { [k: string]: string }
   'cli-engine': {
-    commandsDir?: string
+    commands?: string
     aliases?: { [k: string]: string | string[] }
     topics?: ITopics
   }
@@ -77,7 +77,7 @@ export abstract class Plugin implements ICommandManager {
   }
 
   public async init() {
-    this.pjson = this.pjson || (await deps.file.fetchJSONFile(path.join(this.root, 'package.json')))
+    this.pjson = this.pjson || (await deps.file.fetchJSONFile(this.pjsonPath))
     if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
     this.name = this.name || this.pjson.name
     this.version = this.version || this.pjson.version
@@ -149,8 +149,12 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected get commandsDir(): string | undefined {
-    let d = this.pjson['cli-engine'].commandsDir
+    let d = this.pjson['cli-engine'].commands
     if (d) return path.join(this.root, d)
+  }
+
+  protected get pjsonPath() {
+    return path.join(this.root, 'package.json')
   }
 
   private commandPath(id: string): string {

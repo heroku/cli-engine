@@ -17,6 +17,7 @@ import lock = require('./lock')
 import notFound = require('./not_found')
 import updater = require('./updater')
 import util = require('./util')
+import validate = require('./validate')
 
 // plugins
 import Plugins = require('./plugins')
@@ -49,6 +50,7 @@ export default {
   get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
   get util(): typeof util { return fetch('./util') },
   get file(): typeof file { return fetch('./file') },
+  get validate(): typeof validate { return fetch('./validate') },
 
   // plugins
   get Builtin(): typeof Builtin.Builtin { return fetch('./plugins/builtin').Builtin },

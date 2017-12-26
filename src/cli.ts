@@ -68,6 +68,11 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
       }),
     )
   }
+  if (!opts.pjson) {
+    const f = path.join(opts.root, 'package.json')
+    opts.pjson = require(f)
+    deps.validate.cliPjson(opts.pjson, f)
+  }
   const config = buildConfig(opts)
   if (config.debug) cli.config.debug = true
   cli.config.errlog = config.errlog

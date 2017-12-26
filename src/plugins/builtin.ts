@@ -13,10 +13,6 @@ export class Builtin extends Plugin {
     })
   }
 
-  protected get commandsDir(): string | undefined {
-    return path.join(__dirname, '..', 'commands')
-  }
-
   // public async _topics(): Promise<ITopics> {
   //   const topics: ITopics = {}
   //   if (this.config.userPlugins) {

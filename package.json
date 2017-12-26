@@ -5,18 +5,11 @@
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
-    "commandsDir": "./lib/commands",
+    "commands": "./lib/commands",
     "topics": {
       "plugins": {
         "description": "add/remove CLI plugins"
       }
-    },
-    "aliases": {
-      "plugins:uninstall": "plugins:unlink",
-      "version": [
-        "-v",
-        "--version"
-      ]
     }
   },
   "dependencies": {

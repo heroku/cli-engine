@@ -158,6 +158,7 @@ export class LinkPlugin extends Plugin {
   private async refresh(force = false) {
     if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
     else if (await this.prepareNeeded()) await this.prepare()
+    deps.validate.pluginPjson(this.pjson, this.pjsonPath)
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
