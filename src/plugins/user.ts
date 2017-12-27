@@ -30,7 +30,7 @@ export class UserPlugins {
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     await this.lock.write()
-    const packages = Object.entries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
+    const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
     await this.lock.unwrite()
   }
@@ -86,7 +86,7 @@ export class UserPlugins {
     await this.lock.read()
     await this.migrate()
     this.plugins = await Promise.all(
-      Object.entries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
+      deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.refresh()
@@ -131,7 +131,7 @@ export class UserPlugins {
     this.debug('migrating user plugins')
     user = await deps.file.readJSON(userPath)
     if (user['cli-engine']) return
-    for (let [name, tag] of Object.entries(user.dependencies)) {
+    for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
       await this.addPlugin(name, tag)
     }
     user = await deps.file.readJSON(userPath)

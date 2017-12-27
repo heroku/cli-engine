@@ -3,7 +3,7 @@ import { color } from '@heroku-cli/color'
 import { cli } from 'cli-ux'
 
 import { Plugins } from '../../plugins'
-import { compare } from '../../util'
+import { compare, objEntries } from '../../util'
 
 let examplePlugins = {
   'heroku-ci': { version: '1.8.0' },
@@ -19,7 +19,7 @@ if (g.config) {
     examplePlugins = pjson.help.plugins
   }
 }
-const examplePluginsHelp = Object.entries(examplePlugins).map(([name, p]: [string, any]) => `    ${name} ${p.version}`)
+const examplePluginsHelp = objEntries(examplePlugins).map(([name, p]: [string, any]) => `    ${name} ${p.version}`)
 
 export default class extends Command {
   static topic = 'plugins'

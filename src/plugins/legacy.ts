@@ -207,7 +207,7 @@ function convertFlagsFromV5(flags: ILegacyFlag[] | Flags.Input | undefined): Fla
         required: flag.required || flag.optional === false,
         parse: flag.parse,
       }
-      for (let [k, v] of Object.entries(opts)) {
+      for (let [k, v] of deps.util.objEntries(opts)) {
         if (v === undefined) delete (opts as any)[k]
       }
       if (!opts.parse) delete opts.parse

@@ -69,9 +69,22 @@ export class Topic extends TopicBase implements ITopic {
 export function topicsToArray(input: ITopic[] | ITopics | undefined): ITopic[]
 export function topicsToArray(input: ITopics | undefined, base: string): ITopic[]
 export function topicsToArray(input: ITopic[] | ITopics | undefined, base?: string): ITopic[] {
+  if (!input) return []
   if (Array.isArray(input)) return input
   base = base ? `${base}:` : ''
-  return Object.entries(input || {}).map(([k, v]) => new Topic({ ...v, name: `${base}${k}` }))
+  return Object.keys(input).map(k => new Topic({ ...input[k], name: `${base}${k}` }))
+}
+
+export function commandsToArray(input: ICommandInfo[] | { [k: string]: ICommandInfo } | undefined): ICommandInfo[]
+export function commandsToArray(input: { [k: string]: ICommandInfo } | undefined, base: string): ICommandInfo[]
+export function commandsToArray(
+  input: ICommandInfo[] | { [k: string]: ICommandInfo } | undefined,
+  base?: string,
+): ICommandInfo[] {
+  if (!input) return []
+  if (Array.isArray(input)) return input
+  base = base ? `${base}:` : ''
+  return Object.keys(input).map(k => input[k])
 }
 
 export class RootTopic extends TopicBase {
@@ -92,12 +105,13 @@ export class RootTopic extends TopicBase {
       let topic = this.findOrCreateTopic(t.name)
       this.mergeTopics(topic, t)
       this.addTopics(topicsToArray(t.subtopics, t.name))
-      this.addCommands(t.commands)
+      this.addCommands(commandsToArray(t.commands, t.name))
     }
   }
 
-  public addCommands(commands: ICommandInfo[] | { [k: string]: ICommandInfo } | undefined) {
-    for (let c of Object.values(commands || {})) {
+  public addCommands(commands: ICommandInfo[] | undefined) {
+    if (!commands) return
+    for (const c of commands) {
       this.allCommands.push(c)
       let topicID = topicOf(c.id)
       let topic = topicID ? this.findOrCreateTopic(topicID) : this

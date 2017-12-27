@@ -58,13 +58,22 @@ export function toArray<T>(o: T | T[]): T[] {
 }
 
 export function objValsToArrays<T>(input?: { [k: string]: T | T[] }): { [k: string]: T[] } {
-  return Object.entries(input || {}).reduce(
+  return objEntries(input).reduce(
     (output, [k, v]) => {
       output[k] = toArray(v)
       return output
     },
     {} as { [k: string]: T[] },
   )
+}
+
+export function objEntries<T>(input?: { [k: string]: T }): [string, T][] {
+  if (!input) return []
+  return Object.keys(input).map(k => [k, input[k]] as [string, T])
+}
+
+export function objValues<T>(input?: { [k: string]: T }): T[] {
+  return objEntries<T>(input).map(([, v]) => v)
 }
 
 export function minorVersionGreater(fromString: string, toString: string): boolean {

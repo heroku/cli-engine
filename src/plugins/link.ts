@@ -85,7 +85,9 @@ export class LinkPlugins {
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
     await this.lock.read()
     await this.migrate()
-    this.plugins = await Promise.all(Object.values(await this.manifestPlugins()).map(v => this.loadPlugin(v.root)))
+    this.plugins = await Promise.all(
+      deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root)),
+    )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.lock.unread()
   }

@@ -76,7 +76,8 @@ export class CommandManager {
 
   public async rootCommands(): Promise<ICommandInfo[]> {
     await this.load()
-    return _.sortBy(Object.values(this.result.commands), 'id')
+    let commands = Object.keys(this.result.commands).map(k => this.result.commands[k])
+    return _.sortBy(commands, 'id')
   }
 
   public async findTopic(id: string): Promise<Topic | undefined> {

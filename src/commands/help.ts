@@ -34,7 +34,7 @@ export default class Help extends Command {
         if (rootCmds) {
           let rootTopics = await this.cm.rootTopics()
           rootCmds = rootCmds.filter(r => !Object.keys(rootTopics).includes(r.id))
-          await this.listCommandsHelp(Object.values(rootCmds))
+          await this.listCommandsHelp(rootCmds)
         }
       }
       return
@@ -51,7 +51,7 @@ export default class Help extends Command {
 
     if (topic) {
       await this.topics(topic)
-      await this.listCommandsHelp(Object.values(topic.commands), topic)
+      await this.listCommandsHelp(deps.util.objValues(topic.commands), topic)
     }
   }
 
@@ -60,7 +60,8 @@ export default class Help extends Command {
   }
 
   private async topics(parent?: Topic) {
-    let topics = Object.values(parent ? parent.subtopics : await this.cm.rootTopics())
+    let topics = deps.util
+      .objValues(parent ? parent.subtopics : await this.cm.rootTopics())
       .filter(t => this.flags.all || !t.hidden)
       .map(t => [` ${t.name}`, t.description ? color.dim(t.description) : null] as [string, string])
     topics.sort(topicSort)

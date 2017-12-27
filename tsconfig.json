@@ -1,17 +1,14 @@
 {
   "compilerOptions": {
-    "strict": true,
     "alwaysStrict": true,
-    "module": "commonjs",
-    "outDir": "./lib",
     "declaration": true,
+    "importHelpers": true,
+    "module": "commonjs",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "target": "es2017",
-    "lib": [
-      "es7",
-      "es2017.object"
-    ]
+    "outDir": "./lib",
+    "strict": true,
+    "target": "es2016"
   },
   "include": [
     "src/**/*"

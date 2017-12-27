@@ -29,7 +29,7 @@ export default class Commands extends Command {
   }
 
   async outputJSON(commands: ICommandInfo[]) {
-    const topics = Object.values(await this.commands.topics()).filter(t => !t.hidden)
+    const topics = (await this.commands.topics()).filter(t => !t.hidden)
     const outputCommands = commands
       .filter(c => !!c)
       .map(c => c!)

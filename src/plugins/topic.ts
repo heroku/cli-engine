@@ -57,7 +57,9 @@ export class Topic {
   static mergeSubtopics(...subtopics: Array<ITopics | undefined>): ITopics {
     const topics: ITopics = {}
     for (let p of subtopics) {
-      for (let t of Object.values(p || {})) {
+      if (!p) continue
+      for (let k of Object.keys(p)) {
+        const t = p[k]
         if (!(t as ITopicOpts).name) continue
         Topic.findOrCreateTopic(t as ITopicOpts, topics)
       }
