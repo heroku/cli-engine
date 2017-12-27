@@ -15,7 +15,7 @@
   "dependencies": {
     "@heroku-cli/color": "^1.0.4",
     "assync": "^1.0.4",
-    "cli-ux": "^2.0.15",
+    "cli-ux": "^2.0.16",
     "debug": "^3.1.0",
     "fs-extra": "^5.0.0",
     "graceful-fs": "^4.1.11",
