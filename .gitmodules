@@ -4,3 +4,6 @@
 [submodule "example"]
 	path = example
 	url = https://github.com/heroku/cli-engine-example
+[submodule "plugins/heroku-kafka-jsplugin"]
+	path = plugins/heroku-kafka-jsplugin
+	url = https://github.com/heroku/heroku-kafka-jsplugin
