@@ -32,7 +32,7 @@
   "devDependencies": {
     "@cli-engine/command": "^11.0.0-beta.4",
     "@cli-engine/config": "^5.0.0-beta.5",
-    "@cli-engine/util": "^1.0.5",
+    "@cli-engine/util": "^1.0.6",
     "@heroku-cli/command": "^7.0.0-beta.3",
     "@heroku-cli/tslint": "^1.0.3",
     "@types/ansi-styles": "^2.0.30",

@@ -10,47 +10,48 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@cli-engine/command@^11.0.0-beta.3", "@cli-engine/command@^11.0.0-beta.4":
+"@cli-engine/command@^11.0.0-beta.4":
   version "11.0.0-beta.4"
   resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-11.0.0-beta.4.tgz#b0d1510a8ca61f8a7c26bf9190ac1b9545475305"
   dependencies:
     chalk "^2.3.0"
     cli-flags "^2.0.4"
 
-"@cli-engine/config@^5.0.0-beta.4", "@cli-engine/config@^5.0.0-beta.5":
+"@cli-engine/config@^5.0.0-beta.5":
   version "5.0.0-beta.5"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.0-beta.5.tgz#bbb683111b7736b477ee745b958450c9a4f566d0"
 
-"@cli-engine/engine@^5.0.0-beta.1":
-  version "5.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-5.0.0-beta.1.tgz#cb6b7ab910e2efd738157132e40369d265e0d67c"
+"@cli-engine/engine@^6.1.5":
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-6.1.5.tgz#96114bc666cf283077cf299ba3d174cdaadef4cf"
   dependencies:
-    "@heroku-cli/color" "^1.0.3"
-    assync "^1.0.3"
-    cli-ux "^2.0.15"
+    "@heroku-cli/color" "^1.0.4"
+    assync "^1.0.4"
+    cli-ux "^2.0.16"
     debug "^3.1.0"
     fs-extra "^5.0.0"
     graceful-fs "^4.1.11"
-    http-call "^4.0.5"
+    http-call "^4.0.6"
     klaw "^2.1.1"
-    log-chopper "^1.0.1"
+    log-chopper "^1.0.2"
     moment "^2.20.1"
-    rwlockfile "^1.4.11"
+    rwlockfile "^1.4.12"
     semver "5.4.1"
     string-similarity "^1.2.0"
     strip-ansi "4.0.0"
     ts-lodash "4.0.8"
 
-"@cli-engine/util@^1.0.5":
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.5.tgz#a77d2fe637b88911c6c43d326bae5809dcd50274"
+"@cli-engine/util@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.6.tgz#8fb1804da11a89468d49fecf6239023d849914bf"
   dependencies:
-    "@cli-engine/command" "^11.0.0-beta.3"
-    "@cli-engine/config" "^5.0.0-beta.4"
-    "@cli-engine/engine" "^5.0.0-beta.1"
-    cli-ux "^2.0.15"
+    "@cli-engine/command" "^11.0.0-beta.4"
+    "@cli-engine/config" "^5.0.0-beta.5"
+    "@cli-engine/engine" "^6.1.5"
+    cli-ux "^2.0.16"
     del "^3.0.0"
     fs-extra "^5.0.0"
+    tslib "^1.8.1"
 
 "@heroku-cli/color@^1.0.3", "@heroku-cli/color@^1.0.4":
   version "1.0.4"
@@ -308,10 +309,6 @@ assert-plus@^0.2.0:
 assertion-error@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/assertion-error/-/assertion-error-1.0.2.tgz#13ca515d86206da0bac66e834dd397d87581094c"
-
-assync@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/assync/-/assync-1.0.3.tgz#abfac18b29cdd51aa062b9dba4e2ceaaf3063f58"
 
 assync@^1.0.4:
   version "1.0.4"
@@ -1397,7 +1394,7 @@ html-encoding-sniffer@^1.0.1:
   dependencies:
     whatwg-encoding "^1.0.1"
 
-http-call@^4.0.5, http-call@^4.0.6:
+http-call@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/http-call/-/http-call-4.0.6.tgz#d6160b89736be792a94f125ea86dd61103903e91"
   dependencies:
@@ -2089,12 +2086,6 @@ lodash@^4.13.1, lodash@^4.14.0, lodash@^4.17.4, lodash@~4.17.2:
   version "4.17.4"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.4.tgz#78203a4d1c328ae1d86dca6460e369b57f4055ae"
 
-log-chopper@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/log-chopper/-/log-chopper-1.0.1.tgz#85052864c888eb1fca91bc7b4565b68c7cfc952a"
-  dependencies:
-    byline "5.x"
-
 log-chopper@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/log-chopper/-/log-chopper-1.0.2.tgz#a88da7a47a9f0e511eda4d5e1dc840e0eaf4547a"
@@ -2754,12 +2745,6 @@ rimraf@2, rimraf@^2.2.8, rimraf@^2.5.1, rimraf@^2.5.4, rimraf@^2.6.1:
   resolved "https://registry.yarnpkg.com/rimraf/-/rimraf-2.6.2.tgz#2ed8150d24a16ea8651e6d6ef0f47c4158ce7a36"
   dependencies:
     glob "^7.0.5"
-
-rwlockfile@^1.4.11:
-  version "1.4.11"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.11.tgz#6c54079b70c2f2a2501c7d0877a8044681f1fdc2"
-  dependencies:
-    fs-extra "^5.0.0"
 
 rwlockfile@^1.4.12:
   version "1.4.12"
