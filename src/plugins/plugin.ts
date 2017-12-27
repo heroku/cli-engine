@@ -49,7 +49,7 @@ export abstract class Plugin implements ICommandManager {
   public root: string
   protected config: Config
   protected debug: any
-  protected lock?: Lock
+  protected lock: Lock
   private _module: Promise<IPluginModule>
   private cache: PluginManifest
 
@@ -66,9 +66,9 @@ export abstract class Plugin implements ICommandManager {
       topics: await this.topics(),
     }
     if (this.cache.needsSave) {
-      if (this.lock) await this.lock.write()
+      await this.lock.write()
       await this.cache.save()
-      if (this.lock) await this.lock.unwrite()
+      await this.lock.unwrite()
     }
     return results
   }
@@ -86,7 +86,7 @@ export abstract class Plugin implements ICommandManager {
     let cacheKey = [this.config.version, this.version].join(path.sep)
     let cacheFile = path.join(this.config.cacheDir, 'plugins', [this.type, this.name + '.json'].join(path.sep))
     this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
-    if (['user', 'link'].includes(this.type)) this.lock = new deps.Lock(this.config, cacheFile + '.lock')
+    this.lock = new deps.Lock(this.config, cacheFile + '.lock')
     this.debug = require('debug')(`cli:plugins:${[this.type, this.name, this.version].join(':')}`)
     this.debug('init')
   }
