@@ -4,9 +4,3 @@
 [submodule "example"]
 	path = example
 	url = https://github.com/heroku/cli-engine-example
-[submodule "cli-engine-test-foo"]
-	path = cli-engine-test-foo
-	url = https://github.com/jdxcode/cli-engine-test-foo.git
-[submodule "test/links/cli-engine-test-foo"]
-	path = test/links/cli-engine-test-foo
-	url = https://github.com/jdxcode/cli-engine-test-foo.git
