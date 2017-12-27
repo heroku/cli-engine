@@ -15,7 +15,7 @@ jobs:
       - run: git submodule sync && git submodule update --init --recursive
       - run: yarn
       - run: yarn link
-      - run: cd example && yarn link cli-engine && yarn
+      - run: cd example && yarn link @cli-engine/engine && yarn
       - run: yarn
       - run: ./bin/run version
       - run: yarn test --coverage
