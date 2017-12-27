@@ -25,7 +25,6 @@ export default class PluginsInstall extends Command {
     $ ${bin} plugins:install ${examplePlugin}
   `
   static variableArgs = true
-  static aliases = ['plugins:unlink']
   static args = [{ name: 'plugin', description: 'plugin to install', required: true }]
   static flags: flags.Input = {
     force: flags.boolean({ char: 'f' }),

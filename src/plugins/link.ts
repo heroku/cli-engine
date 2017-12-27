@@ -15,7 +15,7 @@ function touch(f: string) {
 }
 
 function linkPJSON(root: string): Promise<IPluginPJSON> {
-  return deps.file.fetchJSONFile(path.join(root, 'package.json'))
+  return deps.file.readJSON(path.join(root, 'package.json'))
 }
 
 export interface IManifestPlugin {
@@ -25,13 +25,15 @@ export interface IManifestPlugin {
 
 async function getNewestJSFile(root: string): Promise<Date> {
   let files = await deps.file.walk(root, {
-    depthLimit: 10,
+    depthLimit: 20,
     filter: f => !['.git', 'node_modules'].includes(path.basename(f)),
   })
   return files.reduce((prev, f): Date => {
     if (f.stats.isDirectory()) return prev
     if (f.path.endsWith('.js') || f.path.endsWith('.ts')) {
-      if (f.stats.mtime > prev) return f.stats.mtime
+      if (f.stats.mtime > prev) {
+        return f.stats.mtime
+      }
     }
     return prev
   }, new Date(0))

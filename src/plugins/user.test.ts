@@ -45,6 +45,6 @@ test('installs heroku-cli-status', async () => {
   expect((await run(['plugins'])).stdout).not.toContain('heroku-cli-status')
 
   // ensure plugin help is gone
-  expect((await run(['help'])).stdout).not.toContain('heroku-cli-status')
+  expect((await run(['help'])).stdout).not.toContain('status')
   await expect(run(['help', 'status'])).rejects.toThrow(/Exited with code: 127/)
 })

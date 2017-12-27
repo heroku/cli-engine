@@ -65,9 +65,6 @@ test('run help plugins:install', async () => {
 
 installs a plugin into the CLI
 
-Aliases:
-  $ cli-engine plugins:unlink
-
 PLUGIN  plugin to install
 
 Flags:
