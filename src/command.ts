@@ -45,9 +45,12 @@ export class CommandManager {
 
   public async run(argv: string[]): Promise<any> {
     await this.hooks.run('init')
-    const id = argv[2]
+    const id = argv[2] || 'help'
     await this.load()
-    if (!id || this.cmdAskingForHelp(argv)) return this.help(argv.slice(3))
+    if (this.cmdAskingForHelp(argv)) {
+      this.debug('cmdAskingForHelp')
+      return this.help(argv.slice(2))
+    }
     let cmd = await this.findCommand(id)
     if (!cmd) {
       let topic = await this.findTopic(id)
@@ -56,17 +59,23 @@ export class CommandManager {
     }
     await this.hooks.run('prerun', { argv, Command: cmd })
     this.debug('running %s', cmd.id)
-    const result = await cmd.run(argv)
+    let result
+    try {
+      result = await cmd.run(argv)
+    } catch (err) {
+      if (err.showHelp) return this.help(argv.slice(2))
+      throw err
+    }
     this.debug('exited normally')
     return result
   }
 
   public async help(argv: string[]) {
-    deps.Help.run(argv, this.config)
+    await deps.Help.run(argv, this.config)
   }
 
   public async notFound(id: string) {
-    deps.NotFound.run([id], this.config)
+    await deps.NotFound.run([id], this.config)
   }
 
   public async commands(): Promise<ICommandInfo[]> {
@@ -144,7 +153,7 @@ export class CommandManager {
 
   private cmdAskingForHelp(argv: string[]): boolean {
     for (let arg of argv) {
-      if (['--help', '-h'].includes(arg)) return true
+      if (arg === '--help') return true
       if (arg === '--') return false
     }
     return false

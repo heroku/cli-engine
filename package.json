@@ -5,6 +5,7 @@
   "author": "Jeff Dickey @jdxcode",
   "bugs": "https://github.com/heroku/cli-engine/issues",
   "cli-engine": {
+    "bin": "cli-engine",
     "commands": "./lib/commands",
     "topics": {
       "plugins": {
@@ -30,10 +31,10 @@
     "ts-lodash": "4.0.8"
   },
   "devDependencies": {
-    "@cli-engine/command": "^11.0.0-beta.4",
-    "@cli-engine/config": "^5.0.0-beta.5",
-    "@cli-engine/util": "^1.0.6",
-    "@heroku-cli/command": "^7.0.0-beta.3",
+    "@cli-engine/command": "^12.0.2",
+    "@cli-engine/config": "^5.0.10",
+    "@cli-engine/util": "^1.0.7",
+    "@heroku-cli/command": "^7.0.10",
     "@heroku-cli/tslint": "^1.0.3",
     "@types/ansi-styles": "^2.0.30",
     "@types/chalk": "^2.2.0",

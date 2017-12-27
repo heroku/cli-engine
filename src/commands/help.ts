@@ -17,7 +17,10 @@ function topicSort(a: any, b: any) {
 export default class Help extends Command {
   static description = 'display help'
   static variableArgs = true
+  static aliases = ['-h']
+  static args = [{ name: 'subject', required: false }]
   static flags: flags.Input = {
+    help: flags.boolean({ hidden: true }),
     all: flags.boolean({ description: 'show all commands' }),
   }
 
@@ -25,8 +28,7 @@ export default class Help extends Command {
 
   async run() {
     this.cm = new CommandManager(this.config)
-    let subject = this.argv.find(arg => !['-h', '--help'].includes(arg))
-    if (!subject && !['-h', '--help', 'help'].includes(this.config.argv[1])) subject = this.config.argv[1]
+    let subject = this.args.subject
     if (!subject) {
       await this.topics()
       if (this.flags.all) {
