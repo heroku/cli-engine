@@ -1,8 +1,0 @@
-{
-  "name": "heroku-debug-latest",
-  "version": "0.0.0",
-  "dependencies": {
-    "heroku-debug": "5.0.2"
-  }
-}
-

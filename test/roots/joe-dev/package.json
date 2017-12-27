@@ -1,9 +1,0 @@
-{
-  "name": "joe-dev-cli",
-  "private": true,
-  "version": "0.0.1",
-  "author": "Jeff Dickey @dickeyxxx",
-  "cli-engine": {
-    "commands": "./lib/commands"
-  }
-}
