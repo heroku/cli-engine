@@ -1,6 +1,6 @@
 import cli from 'cli-ux'
 
-import { run } from '../test/run'
+import { run } from './__test__/run'
 
 test('shows the not found command', async () => {
   expect.assertions(2)

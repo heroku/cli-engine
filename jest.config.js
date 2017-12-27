@@ -1,5 +1,5 @@
 module.exports = {
-  setupTestFrameworkScriptFile: "./test/init.ts",
+  setupTestFrameworkScriptFile: "./src/__test__/init.ts",
   mapCoverage: true,
   moduleFileExtensions: ['ts', 'js'],
   testMatch: ['**/*.test.ts'],

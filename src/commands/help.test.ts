@@ -1,4 +1,4 @@
-import { run } from '../../test/run'
+import { run } from '../__test__/run'
 
 test('shows help by default', async () => {
   const { stdout } = await run()
