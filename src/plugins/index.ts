@@ -49,7 +49,7 @@ export class Plugins {
   }
 
   public async submanagers() {
-    return _.compact([this.link, this.user, this.core, this.main, this.builtin])
+    return _.compact([this.builtin, this.main, this.core, this.user, this.link])
   }
 
   public async install(options: InstallOptions) {
@@ -94,7 +94,7 @@ export class Plugins {
 
   private async init() {
     if (this.plugins) return
-    const managers = _.compact([this.link, this.user, this.core])
+    const managers = _.compact([this.core, this.user, this.link])
     await Promise.all(managers.map(m => m.init()))
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
     this.plugins = _.compact([...plugins, this.builtin])
