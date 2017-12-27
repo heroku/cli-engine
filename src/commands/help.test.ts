@@ -13,6 +13,27 @@ Help topics, type cli-engine help TOPIC for more details:
 `)
 })
 
+test('run help --all', async () => {
+  const { stdout } = await run(['help', '--all'])
+  expect(stdout).toEqual(`Usage: cli-engine COMMAND
+
+Help topics, type cli-engine help TOPIC for more details:
+
+ cli
+ jobs
+ plugins  add/remove CLI plugins
+
+Root commands:
+
+ commands          list all commands
+ help [SUBJECT]    display help
+ update [CHANNEL]  update the heroku CLI
+ version           show CLI version
+ which COMMAND     show which plugin a command is from
+
+`)
+})
+
 test('run help plugins', async () => {
   const { stdout } = await run(['help', 'plugins'])
   expect(stdout).toEqual(`Usage: cli-engine plugins [flags]
