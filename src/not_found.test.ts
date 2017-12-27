@@ -7,6 +7,7 @@ test('shows the not found command', async () => {
   try {
     await run(['vursion'])
   } catch (err) {
+    if (typeof err.code !== 'number') throw err
     expect(err.code).toEqual(127)
     expect(cli.stderr.output).toMatch(/vursion is not a cli-engine command/)
   }

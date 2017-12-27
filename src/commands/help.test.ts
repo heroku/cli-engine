@@ -6,6 +6,8 @@ test('shows help by default', async () => {
 
 Help topics, type cli-engine help TOPIC for more details:
 
+ cli
+ jobs
  plugins  add/remove CLI plugins
 
 `)
