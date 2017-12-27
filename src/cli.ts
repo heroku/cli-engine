@@ -11,7 +11,7 @@ export default class CLI {
 
   public async run(argv: string[]): Promise<any> {
     this.debug('starting run: %o', argv)
-    if (!this.global.testing) this.setupHandlers()
+    this.setupHandlers()
     const id = argv[2]
 
     if (id !== 'update') {
@@ -54,8 +54,7 @@ export default class CLI {
 
   private async exitAfterStdoutFlush() {
     if (this.global.testing) return
-    const { timeout } = require('./util')
-    await timeout(this.flush(), 10000)
+    await deps.util.timeout(this.flush(), 10000)
   }
 
   private flush(): Promise<any> {
