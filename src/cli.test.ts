@@ -21,6 +21,8 @@ export async function example(argv: string[], config: ConfigOptions = {}): Promi
   }
 }
 
+jest.setTimeout(60000)
+
 test('runs the version command', async () => {
   const { stdout } = await example(['version'], { root: path.join(__dirname, '..', 'example') })
   expect(stdout).toMatch(/^cli-engine-example\//)
