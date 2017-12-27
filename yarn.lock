@@ -10,13 +10,6 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@cli-engine/command@^11.0.0-beta.4":
-  version "11.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-11.0.0-beta.4.tgz#b0d1510a8ca61f8a7c26bf9190ac1b9545475305"
-  dependencies:
-    chalk "^2.3.0"
-    cli-flags "^2.0.4"
-
 "@cli-engine/command@^12.0.1":
   version "12.0.1"
   resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.0.1.tgz#abb1dc4d68bf3a720ea39ce9a5032dfaa2e821f8"
@@ -31,17 +24,13 @@
     chalk "^2.3.0"
     cli-flags "^2.0.4"
 
-"@cli-engine/config@^5.0.0-beta.5":
-  version "5.0.0-beta.5"
-  resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.0-beta.5.tgz#bbb683111b7736b477ee745b958450c9a4f566d0"
-
 "@cli-engine/config@^5.0.10":
   version "5.0.10"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.10.tgz#f8420b9c4cd44e4feafeb90165d9557168bb484c"
 
-"@cli-engine/engine@^6.1.7":
-  version "6.1.7"
-  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-6.1.7.tgz#f471d3b77b0699f73c94492f0f10ab1bd7c09da7"
+"@cli-engine/engine@^6.1.8":
+  version "6.1.8"
+  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-6.1.8.tgz#d8711a9f91136e2239d0c9bb846d2ee60899ca40"
   dependencies:
     "@heroku-cli/color" "^1.0.4"
     assync "^1.0.4"
@@ -59,13 +48,13 @@
     strip-ansi "4.0.0"
     ts-lodash "4.0.8"
 
-"@cli-engine/util@^1.0.7":
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.7.tgz#24aead74cda967c61523d856b5c4fea5af415b36"
+"@cli-engine/util@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.8.tgz#c0b00b49bed996ebe49c7908924f0f47396ccb69"
   dependencies:
-    "@cli-engine/command" "^11.0.0-beta.4"
-    "@cli-engine/config" "^5.0.0-beta.5"
-    "@cli-engine/engine" "^6.1.7"
+    "@cli-engine/command" "^12.0.2"
+    "@cli-engine/config" "^5.0.10"
+    "@cli-engine/engine" "^6.1.8"
     cli-ux "^2.0.16"
     del "^3.0.0"
     fs-extra "^5.0.0"
