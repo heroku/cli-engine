@@ -75,6 +75,7 @@ export class Plugins {
   }
 
   public async uninstall(name: string): Promise<void> {
+    await this.init()
     const type = await this.pluginType(name)
     if (!type) {
       const linked = await this.link.findByRoot(name)
@@ -84,6 +85,7 @@ export class Plugins {
     }
     cli.action.start(`Uninstalling ${name}`)
     if (type === 'user') await this.user.uninstall(name)
+    else await this.link.uninstall(name)
     cli.action.stop()
   }
 

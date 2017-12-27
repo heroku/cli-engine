@@ -2,6 +2,7 @@ import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import _ from 'ts-lodash'
 
 import deps from '../deps'
 import { Lock } from '../lock'
@@ -51,8 +52,8 @@ export class LinkPlugins {
     await this.init()
     await this.lock.write()
     const plugin = await this.loadPlugin(root, true)
-    await plugin.load()
-    await this.addPlugin(plugin.name, plugin.root)
+    await plugin!.load()
+    await this.addPlugin(plugin!.name, plugin!.root)
     await this.lock.unwrite()
     cli.action.stop()
   }
@@ -85,8 +86,8 @@ export class LinkPlugins {
     this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
     await this.lock.read()
     await this.migrate()
-    this.plugins = await Promise.all(
-      deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root)),
+    this.plugins = _.compact(
+      await Promise.all(deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root))),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.lock.unread()
@@ -125,6 +126,7 @@ export class LinkPlugins {
   }
 
   private async loadPlugin(root: string, refresh = false) {
+    if (!await deps.file.exists(root)) return
     let p = new LinkPlugin({
       config: this.config,
       root,
