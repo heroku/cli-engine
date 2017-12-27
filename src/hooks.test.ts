@@ -20,7 +20,7 @@ test('fires a hook', async () => {
     pjson: {
       'cli-engine': {
         hooks: {
-          init: ['test/fixtures/hooks/prerun.js'],
+          init: ['src/__test__/fixtures/hooks/prerun.ts'],
         },
       },
     },
