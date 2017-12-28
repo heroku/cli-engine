@@ -12,6 +12,7 @@ install:
   - yarn
   - git submodule sync
   - git submodule update --init --recursive --remote
+  - cd example && yarn
 test_script:
   - yarn test
 
