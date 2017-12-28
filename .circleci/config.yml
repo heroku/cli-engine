@@ -4,7 +4,7 @@ jobs:
   node-latest: &test-build
     docker:
       - image: node:latest
-    working_directory: /cli
+    working_directory: ~/cli
     steps:
       - checkout
       - restore_cache:
@@ -24,11 +24,11 @@ jobs:
       - save_cache:
           key: v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
-            - /cli/node_modules
-            - /cli/tmp/cache
-            - /cli/example/node_modules
-            - /cli/plugins/example-plugin/node_modules
-            - /cli/plugins/heroku-kafka-jsplugin/node_modules
+            - ~/cli/node_modules
+            - ~/cli/tmp/cache
+            - ~/cli/example/node_modules
+            - ~/cli/plugins/example-plugin/node_modules
+            - ~/cli/plugins/heroku-kafka-jsplugin/node_modules
             - /usr/local/share/.cache/yarn
             - /root/.cache/cli-engine/yarn
 
