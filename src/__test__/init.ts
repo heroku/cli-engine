@@ -14,8 +14,6 @@ nock.disableNetConnect()
 const config = new Config({ root: path.join(__dirname, '..', '..') })
 
 fs.removeSync(config.dataDir)
-fs.removeSync(config.cacheDir)
-fs.removeSync(config.configDir)
 
 beforeEach(() => {
   cli.config.mock = true
