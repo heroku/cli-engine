@@ -24,20 +24,20 @@ export class Lock {
 
   // get read lock
   async read() {
-    this.debug(`+read ${this.numReaders + 1} ${this.numWriters}`, this.lockfile)
+    this.debug(`+read ${this.numReaders} ${this.numWriters}`, this.lockfile)
     if (!this.status) await deps.rwlockfile.read(this.lockfile)
     this.numReaders++
   }
 
   async unread() {
-    this.debug(`-read ${this.numReaders - 1} ${this.numWriters}`, this.lockfile)
+    this.debug(`-read ${this.numReaders} ${this.numWriters}`, this.lockfile)
     if (this.status !== 'read') throw new Error(`has ${this.status} lock`)
     await deps.rwlockfile.unread(this.lockfile)
     this.numReaders--
   }
 
   async unwrite() {
-    this.debug(`-write ${this.numReaders} ${this.numWriters - 1}`, this.lockfile)
+    this.debug(`-write ${this.numReaders} ${this.numWriters}`, this.lockfile)
     if (this.status !== 'write') return
     if (this.numWriters === 1) await this.actuallyUnlock!()
     this.numWriters--
@@ -49,7 +49,7 @@ export class Lock {
   }
 
   async write() {
-    this.debug(`+write ${this.numReaders - 1} ${this.numWriters + 1}`, this.lockfile)
+    this.debug(`+write ${this.numReaders} ${this.numWriters}`, this.lockfile)
     if (this.numReaders) {
       // take off reader
       await deps.rwlockfile.unread(this.lockfile)

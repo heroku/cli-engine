@@ -89,9 +89,8 @@ export class PluginManifest {
       if (!body.manifest) this.body.manifest = {}
       return body
     } catch (err) {
-      if (err.code === 'ENOENT') {
-        this.debug(err)
-      } else {
+      if (err.code === 'ENOENT') this.debug('manifest not found')
+      else {
         await deps.file.remove(this.file)
         throw err
       }
