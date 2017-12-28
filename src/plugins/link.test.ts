@@ -5,7 +5,7 @@ import * as fs from '../file'
 
 import { run } from '../__test__/run'
 
-jest.setTimeout(120000)
+jest.setTimeout(400000)
 
 test('links example-plugin', async () => {
   let newFiles = []
