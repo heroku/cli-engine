@@ -1,9 +1,9 @@
-import { Config } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import _ from 'ts-lodash'
 
+import Config from '../config'
 import deps from '../deps'
 import { Lock } from '../lock'
 

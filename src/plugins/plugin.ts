@@ -1,8 +1,9 @@
-import { Config, ICommand } from '@cli-engine/config'
+import { ICommand } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
+import Config from '../config'
 import deps from '../deps'
 import { Lock } from '../lock'
 import { ITopic, ITopics, topicsToArray } from '../topic'

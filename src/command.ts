@@ -1,8 +1,8 @@
-import { Config } from '@cli-engine/config'
 import assync from 'assync'
 import cli from 'cli-ux'
 import _ from 'ts-lodash'
 
+import Config from './config'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { Plugins } from './plugins'

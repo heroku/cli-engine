@@ -1,9 +1,8 @@
-import { Config } from '@cli-engine/config'
 import * as path from 'path'
 
-import * as fs from '../file'
-
 import { run } from '../__test__/run'
+import Config from '../config'
+import * as fs from '../file'
 
 jest.setTimeout(400000)
 

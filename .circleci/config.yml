@@ -25,11 +25,13 @@ jobs:
           key: v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
             - /cli/node_modules
+            - /cli/tmp/cache
             - /cli/example/node_modules
             - /cli/plugins/example-plugin/node_modules
             - /cli/plugins/heroku-kafka-jsplugin/node_modules
             - /usr/local/share/.cache/yarn
             - /root/.cache/cli-engine/yarn
+
   node-8:
     <<: *test-build
     docker:

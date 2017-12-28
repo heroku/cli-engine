@@ -5,9 +5,8 @@ import { run as runCLI } from '../cli'
 
 export async function run(argv: string[] = []) {
   cli.config.mock = true
-  await runCLI(['node', 'run', ...argv], {
-    root: path.join(__dirname, '..', '..', 'example'),
-  })
+  const root = path.join(__dirname, '../../example')
+  await runCLI(['node', 'run', ...argv], { root })
   return {
     stdout: cli.stdout.output,
     stderr: cli.stderr.output,

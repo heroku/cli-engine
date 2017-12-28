@@ -1,5 +1,6 @@
-import { Config } from '@cli-engine/config'
 import * as path from 'path'
+
+import Config from '../config'
 
 import { IPluginPJSON, Plugin, PluginType } from './plugin'
 

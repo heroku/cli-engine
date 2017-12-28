@@ -1,4 +1,4 @@
-import { Config } from '@cli-engine/config'
+import Config from '../config'
 
 import { Plugin, PluginType } from './plugin'
 
