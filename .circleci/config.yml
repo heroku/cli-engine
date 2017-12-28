@@ -9,9 +9,9 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v0-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
-            - v0-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-
-            - v0-yarn-{{ .Environment.CIRCLE_JOB }}-master
+            - v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
+            - v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-
+            - v1-yarn-{{ .Environment.CIRCLE_JOB }}-master
       - run: git submodule sync && git submodule update --init --recursive
       - run: yarn
       - run: yarn link
@@ -22,9 +22,12 @@ jobs:
       - run: yarn test --coverage
       - run: curl -s https://codecov.io/bash | bash
       - save_cache:
-          key: v0-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
+          key: v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
             - /cli/node_modules
+            - /cli/example/node_modules
+            - /cli/plugins/example-plugin/node_modules
+            - /cli/plugins/heroku-kafka-jsplugin/node_modules
             - /usr/local/share/.cache/yarn
             - /root/.cache/cli-engine/yarn
   node-8:

@@ -4,7 +4,7 @@ import * as fs from 'fs-extra'
 import * as nock from 'nock'
 import * as path from 'path'
 
-process.setMaxListeners(0)
+require('events').defaultMaxListeners = 100
 
 let g: any = global
 g.columns = 80

@@ -47,7 +47,7 @@ export async function readJSON(file: string) {
   return fs.readJSON(file)
 }
 
-export async function read(file: string) {
+export async function readFile(file: string) {
   debug('read', file)
   return fs.readFile(file, 'utf8')
 }

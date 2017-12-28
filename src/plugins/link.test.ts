@@ -1,5 +1,7 @@
-import * as fs from 'fs-extra'
+import { Config } from '@cli-engine/config'
 import * as path from 'path'
+
+import * as fs from '../file'
 
 import { run } from '../__test__/run'
 
@@ -41,7 +43,7 @@ export default class extends Command {
 
     // edit old command
     let existingCommand = path.join('plugins', 'example-plugin', 'src', 'commands', 'cli', 'test.ts')
-    existingFiles.push({ path: existingCommand, body: fs.readFileSync(existingCommand) })
+    existingFiles.push({ path: existingCommand, body: await fs.readFile(existingCommand) })
 
     await fs.outputFile(
       existingCommand,
@@ -56,7 +58,7 @@ export default class extends Command {
     )
     // add topic
     let pjsonPath = path.join('plugins', 'example-plugin', 'package.json')
-    existingFiles.push({ path: pjsonPath, body: fs.readFileSync(pjsonPath) })
+    existingFiles.push({ path: pjsonPath, body: await fs.readFile(pjsonPath) })
     let pjson = await fs.readJSON(pjsonPath)
     pjson['cli-engine'].topics.foo = { description: 'this is my new topic desc' }
     await fs.outputJSON(path.join('plugins', 'example-plugin', 'package.json'), pjson, { spaces: 2 })
@@ -77,7 +79,23 @@ export default class extends Command {
     expect((await run(['help', 'cli:test'])).stdout).toContain('this is an example command for cli-engine')
     await expect(run(['help', 'foo:bar'])).rejects.toThrow(/Exited with code: 127/)
   } finally {
-    for (let f of newFiles) fs.removeSync(f)
-    for (let f of existingFiles) fs.writeFileSync(f.path, f.body)
+    for (let f of newFiles) await fs.remove(f)
+    for (let f of existingFiles) await fs.outputFile(f.path, f.body)
   }
+})
+
+describe('migrate', () => {
+  test('migrates heroku-kafka-jsplugin', async () => {
+    const config = new Config()
+    const legacyPath = path.join(config.dataDir, 'linked_plugins.json')
+    await fs.outputJSON(legacyPath, {
+      version: '1',
+      updated_at: '2017-12-28T00:26:11.624Z',
+      plugins: ['/Users/jdickey/src/github.com/heroku/cli-engine/plugins/heroku-kafka-jsplugin'],
+    })
+    expect((await run(['help', 'kafka'])).stdout).toMatch(
+      /kafka:consumer-groups \[CLUSTER\] +lists available Kafka consumer groups/,
+    )
+    await expect(fs.exists(legacyPath)).resolves.toBeFalsy()
+  })
 })
