@@ -126,7 +126,6 @@ export class LinkPlugins {
   private async addPlugin(root: string) {
     const plugin = await this.loadPlugin(root, true)
     if (!plugin) return
-    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${plugin.name}.json`))
     await plugin.load()
     let plugins = await this.manifestPlugins()
     plugins[plugin.name] = { root }
@@ -180,6 +179,13 @@ export class LinkPlugin extends Plugin {
     deps.validate.pluginPjson(this.pjson, this.pjsonPath)
   }
 
+  @rwlockfile('lock', 'write')
+  public async reset() {
+    await super.reset(true)
+    await this.manifest.set('lastUpdated', new Date().toISOString())
+    await this.manifest.save()
+  }
+
   private async updateNodeModulesNeeded(): Promise<boolean> {
     if ((await this.yarnNodeVersion()) !== process.version) return true
     let modules = path.join(this.root, 'node_modules')
@@ -218,12 +224,6 @@ export class LinkPlugin extends Plugin {
       await yarn.exec(['run', 'prepare'])
     }
     await this.reset()
-  }
-
-  private async reset() {
-    await this.resetCache()
-    await this.manifest.set('lastUpdated', new Date().toISOString())
-    await this.manifest.save()
   }
 
   private async lastUpdated(): Promise<Date> {

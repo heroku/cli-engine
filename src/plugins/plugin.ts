@@ -89,8 +89,9 @@ export abstract class Plugin implements ICommandManager {
   }
 
   @rwlockfile('lock', 'write')
-  public async resetCache() {
+  public async reset(reload = false) {
     await this.cache.reset()
+    if (reload) await this.load()
   }
 
   public async findCommand(id: string, must: true): Promise<ICommand>

@@ -38,6 +38,7 @@ export class UserPlugins {
     cli.action.start(`${this.config.name}: Updating plugins`)
     const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
+    await this.refresh(true)
   }
 
   @rwlockfile('lock', 'write')
@@ -47,9 +48,6 @@ export class UserPlugins {
     await this.createPJSON()
     await this.yarn.exec(['add', `${name}@${tag}`])
     try {
-      const plugin = await this.loadPlugin(name, tag)
-      await plugin.resetCache()
-      await plugin.load()
       await this.addPlugin(name, tag)
     } catch (err) {
       await this.removePlugin(name)
@@ -66,14 +64,14 @@ export class UserPlugins {
     await this.yarn.exec(['remove', name])
   }
 
-  public async refresh() {
+  public async refresh(force = false) {
     if (!this.plugins.length) return
-    if ((await this.yarnNodeVersion()) === process.version) return
+    if (!force || (await this.yarnNodeVersion()) === process.version) return
     cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
     await this.lock.add('write', { reason: 'refresh' })
     try {
       await this.yarn.exec()
-      for (let p of this.plugins.map(p => p.resetCache())) await p
+      for (let p of this.plugins.map(p => p.reset())) await p
     } finally {
       await this.lock.remove('write')
     }
@@ -132,26 +130,33 @@ export class UserPlugins {
   private async migrate() {
     const userPath = path.join(this.config.dataDir, 'plugins', 'package.json')
     if (!await deps.file.exists(userPath)) return
-    await this.lock.add('write', { reason: 'migrate' })
+    await this.lock.add('read', { reason: 'migrate' })
     try {
       let user = await deps.file.readJSON(userPath)
       if (!user.dependencies || user['cli-engine']) return
-      cli.action.start('Refreshing plugins')
-      this.debug('migrating user plugins')
-      user = await deps.file.readJSON(userPath)
-      if (user['cli-engine']) return
-      for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
-        await this.addPlugin(name, tag)
+      await this.lock.add('write', { reason: 'migrate' })
+      try {
+        cli.action.start('Refreshing plugins')
+        this.debug('migrating user plugins')
+        user = await deps.file.readJSON(userPath)
+        if (user['cli-engine']) return
+        for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
+          await this.addPlugin(name, tag)
+        }
+        user = await deps.file.readJSON(userPath)
+        user['cli-engine'] = { schema: 1 }
+        await deps.file.outputJSON(userPath, user)
+      } finally {
+        await this.lock.remove('write')
       }
-      user = await deps.file.readJSON(userPath)
-      user['cli-engine'] = { schema: 1 }
-      await deps.file.outputJSON(userPath, user)
     } finally {
-      await this.lock.remove('write')
+      await this.lock.remove('read')
     }
   }
 
   private async addPlugin(name: string, tag: string) {
+    let plugin = await this.loadPlugin(name, tag)
+    await plugin.reset(true)
     let plugins = await this.manifestPlugins()
     plugins[name] = { tag }
     await this.manifest.set('plugins', plugins)
