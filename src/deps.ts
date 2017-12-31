@@ -1,11 +1,9 @@
-import {Help as CLICommandHelp} from '@cli-engine/command/lib/help'
 import Heroku = require('@heroku-cli/command')
 import assync = require('assync')
 import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
-import stripAnsi = require('strip-ansi')
 
 import command = require('./command')
 import help = require('./commands/help')
@@ -22,12 +20,10 @@ import validate = require('./validate')
 
 export default {
   // remote
-  get CLICommandHelp (): typeof CLICommandHelp { return require('@cli-engine/command/lib/help').Help },
   get HTTP(): typeof HTTP { return fetch('http-call').HTTP },
   get moment(): typeof moment { return fetch('moment') },
   get klaw(): typeof klaw { return fetch('klaw') },
   get Heroku(): typeof Heroku { return fetch('@heroku-cli/command') },
-  get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
   get assync(): typeof assync.default { return fetch('assync').default },
   get filesize(): any { return fetch('filesize') },
