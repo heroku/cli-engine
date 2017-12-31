@@ -16,9 +16,10 @@ cli.on('error', handleErr)
 
 export async function run(argv: string[] = []) {
   // mock some things
-  nock('https://cli-assets.heroku.com:443')
+  nock('https://cli-assets.heroku.com')
     .get('/cli-engine-example/channels/stable/version')
     .reply(200, { channel: 'stable', version })
+
   cli.config.mock = true
 
   // run CLI

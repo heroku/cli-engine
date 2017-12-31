@@ -6,6 +6,8 @@ import { run, skipIfNode6 } from '../__test__/run'
 import Config from '../config'
 import * as fs from '../file'
 
+const { version } = require(path.join(__dirname, '../../example/package.json'))
+
 let api = nock('https://status.heroku.com:443')
 
 beforeEach(() => nock.cleanAll())
@@ -69,11 +71,15 @@ describe('migrate', () => {
 describe('update', () => {
   skipIfNode6('update heroku-cli-status', async () => {
     const config = new Config()
+    nock('https://cli-assets.heroku.com')
+      .get(`/cli-engine-example/channels/stable/${config.platform}-${config.arch}`)
+      .reply(200, { channel: 'stable', version })
+
     await run(['plugins:install', 'heroku-cli-status'])
     expect((await run(['plugins'])).stdout).not.toMatch(/heroku-cli-status 4.0.6/)
     await execa('yarn', ['add', 'heroku-cli-status@4'], { cwd: path.join(config.dataDir, 'plugins') })
     expect((await run(['plugins'])).stdout).toMatch(/heroku-cli-status 4.0.6/)
-    await run(['plugins:update'])
+    await run(['update'])
     expect((await run(['plugins'])).stdout).not.toMatch(/heroku-cli-status 4.0.6/)
   })
 })
