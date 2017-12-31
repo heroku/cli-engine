@@ -61,6 +61,8 @@ test('updates the CLI on windows', async () => {
 })
 
 test('validates the sha', async () => {
+  process.env.CLI_ENGINE_PLATFORM = 'darwin'
+  process.env.CLI_ENGINE_ARCH = 'x64'
   const config = new Config()
   api
     .get(`/cli-engine-example/channels/stable/${config.platform}-${config.arch}`)
