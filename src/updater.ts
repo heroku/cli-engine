@@ -1,5 +1,4 @@
 import { cli } from 'cli-ux'
-import { spawn } from 'cross-spawn'
 import * as path from 'path'
 import RWLockfile from 'rwlockfile'
 import _ from 'ts-lodash'
@@ -7,6 +6,7 @@ import _ from 'ts-lodash'
 import Config from './config'
 import deps from './deps'
 
+const { spawn } = require('cross-spawn')
 const debug = require('debug')('cli:updater')
 
 export interface IVersion {
