@@ -1,7 +1,8 @@
-import { Command } from '@cli-engine/command'
 import cli from 'cli-ux'
 
 import { CommandManager } from '../command'
+
+import Command from './base'
 
 export default class extends Command {
   static topic = 'which'

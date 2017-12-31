@@ -1,8 +1,10 @@
-import { Command, flags } from '@cli-engine/command'
+import { flags } from '@cli-engine/command'
 import { cli } from 'cli-ux'
 
 import { Hooks } from '../../hooks'
 import { Plugins } from '../../plugins'
+
+import Command from '../base'
 
 let examplePlugin = 'heroku-production-status'
 let bin = 'heroku'

@@ -1,14 +1,14 @@
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import RWLockfile, { rwlockfile } from 'rwlockfile'
 import _ from 'ts-lodash'
 
 import Config from '../config'
 import deps from '../deps'
-import { Lock } from '../lock'
 
 import { PluginManifest } from './manifest'
-import { IPluginPJSON, Plugin, PluginType } from './plugin'
+import { IPluginOptions, IPluginPJSON, Plugin, PluginType } from './plugin'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
@@ -42,29 +42,38 @@ async function getNewestJSFile(root: string): Promise<Date> {
 export class LinkPlugins {
   public plugins: LinkPlugin[]
   private manifest: PluginManifest
-  private lock: Lock
+  private lock: RWLockfile
   private debug: any
 
   constructor(private config: Config) {
     this.debug = require('debug')('cli:plugins:user')
+    this.manifest = new deps.PluginManifest({
+      name: 'link',
+      file: path.join(this.config.dataDir, 'plugins', 'link.json'),
+    })
+    this.lock = new RWLockfile(this.manifest.file, { ifLocked: status => this.debug(status.status) })
   }
 
+  @rwlockfile('lock', 'write')
   public async install(root: string): Promise<void> {
     cli.action.start(`Linking ${root}`)
     await this.init()
-    await this.lock.write()
-    const plugin = await this.loadPlugin(root, true)
-    await plugin!.load()
-    await this.addPlugin(plugin!.name, plugin!.root)
-    await this.lock.unwrite()
-    cli.action.stop()
+    try {
+      await this.lock.add('write', { reason: 'install' })
+      const plugin = await this.loadPlugin(root, true)
+      await plugin!.load()
+      await this.addPlugin(plugin!.name, plugin!.root)
+      cli.action.stop()
+    } finally {
+      await this.lock.remove('write')
+    }
   }
 
+  @rwlockfile('lock', 'write')
   public async uninstall(name: string): Promise<void> {
     await this.init()
-    await this.lock.write()
     await this.removePlugin(name)
-    await this.lock.unwrite()
+    cli.action.stop()
   }
 
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
@@ -79,34 +88,34 @@ export class LinkPlugins {
   }
 
   public async init(): Promise<void> {
-    if (this.plugins) return
+    if (!this.plugins) await this._init()
+  }
+
+  @rwlockfile('lock', 'read')
+  private async _init(): Promise<void> {
     this.debug('init')
-    this.manifest = new deps.PluginManifest({
-      name: 'link',
-      file: path.join(this.config.dataDir, 'plugins', 'link.json'),
-    })
-    this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
-    await this.lock.read()
     await this.migrate()
     this.plugins = _.compact(
       await Promise.all(deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root))),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
-    await this.lock.unread()
   }
 
   private async migrate() {
     const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
     if (!await deps.file.exists(linkedPath)) return
-    await this.lock.write()
-    this.debug('migrating link plugins')
-    let linked = await deps.file.readJSON(linkedPath)
-    for (let root of linked.plugins) {
-      const name = await deps.file.readJSON(path.join(root, 'package.json'))
-      await this.addPlugin(name, root)
+    try {
+      await this.lock.add('write', { reason: 'migrate' })
+      this.debug('migrating link plugins')
+      let linked = await deps.file.readJSON(linkedPath)
+      for (let root of linked.plugins) {
+        const name = await deps.file.readJSON(path.join(root, 'package.json'))
+        await this.addPlugin(name, root)
+      }
+      await deps.file.remove(linkedPath)
+    } finally {
+      await this.lock.remove('write')
     }
-    await deps.file.remove(linkedPath)
-    await this.lock.unwrite()
   }
 
   private async addPlugin(name: string, root: string) {
@@ -133,37 +142,27 @@ export class LinkPlugins {
       config: this.config,
       root,
       pjson: await linkPJSON(root),
+      type: 'link',
     })
-    await p.init(refresh)
+    await p.refresh(refresh)
     return p
   }
 }
 
 export class LinkPlugin extends Plugin {
   public type: PluginType = 'link'
-  protected lock: Lock
   private manifest: PluginManifest
 
-  public async resetCache() {
-    await this.init()
-    await this.lock.write()
-    await super.resetCache()
-    await this.manifest.set('lastUpdated', new Date().toISOString())
-    await this.manifest.save()
-    await this.lock.unwrite()
-  }
-
-  public async init(forceRefresh = false) {
-    if (this.manifest) return
-    await super.init()
+  constructor(opts: IPluginOptions) {
+    super(opts)
     this.manifest = new deps.PluginManifest({
       name: 'link',
       file: path.join(this.config.dataDir, 'plugins', 'link', `${this.name}.json`),
     })
-    await this.refresh(forceRefresh)
   }
 
-  private async refresh(force = false) {
+  @rwlockfile('lock', 'read')
+  public async refresh(force = false) {
     if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
     else if (await this.prepareNeeded()) await this.prepare()
     deps.validate.pluginPjson(this.pjson, this.pjsonPath)
@@ -184,8 +183,8 @@ export class LinkPlugin extends Plugin {
     return (await this.lastUpdated()) < (await getNewestJSFile(this.root))
   }
 
+  @rwlockfile('lock', 'write')
   private async updateNodeModules(): Promise<void> {
-    await this.lock.write()
     if (!cli.action.running) {
       cli.action.start(`Refreshing linked plugin ${this.name}`, 'yarn install')
     }
@@ -193,12 +192,11 @@ export class LinkPlugin extends Plugin {
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
     touch(path.join(this.root, 'node_modules'))
-    await this.resetCache()
-    await this.lock.unwrite()
+    await this.reset()
   }
 
+  @rwlockfile('lock', 'write')
   private async prepare() {
-    await this.lock.write()
     if (!cli.action.running) {
       cli.action.start(`Refreshing linked plugin ${this.name}`, 'yarn run prepare')
     }
@@ -207,8 +205,13 @@ export class LinkPlugin extends Plugin {
       const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
       await yarn.exec(['run', 'prepare'])
     }
+    await this.reset()
+  }
+
+  private async reset() {
     await this.resetCache()
-    await this.lock.unwrite()
+    await this.manifest.set('lastUpdated', new Date().toISOString())
+    await this.manifest.save()
   }
 
   private async lastUpdated(): Promise<Date> {

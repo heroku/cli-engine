@@ -1,8 +1,8 @@
-import { Command } from '@cli-engine/command'
 import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 
 import { CommandManager } from './command'
+import Command from './commands/base'
 import deps from './deps'
 
 export default class NotFound extends Command {

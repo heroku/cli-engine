@@ -105,6 +105,10 @@
   dependencies:
     chalk "*"
 
+"@types/debug@^0.0.30":
+  version "0.0.30"
+  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-0.0.30.tgz#dc1e40f7af3b9c815013a7860e6252f6352a84df"
+
 "@types/fs-extra@5.0.0":
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/@types/fs-extra/-/fs-extra-5.0.0.tgz#d3e225b35eb5c6d3a5a782c28219df365c781413"
@@ -117,9 +121,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jest@21.1.9":
-  version "21.1.9"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-21.1.9.tgz#a913d6224e9d8a1f24908af536f65b5bf4d489bc"
+"@types/jest@22.0.0":
+  version "22.0.0"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.0.0.tgz#23009941178aad7979a9591e026f7a96054d7bc0"
 
 "@types/klaw@2.1.1":
   version "2.1.1"
@@ -722,6 +726,24 @@ cli-ux@^2.0.16:
 cli-ux@^2.0.17:
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.17.tgz#8e510cf169f6ad5ea70ca7a430d166a9b6b33ddf"
+  dependencies:
+    "@cli-engine/screen" "^0.0.0"
+    "@heroku-cli/color" "^1.0.4"
+    "@heroku/linewrap" "^1.0.0"
+    ansi-escapes "^3.0.0"
+    ansi-styles "^3.2.0"
+    cardinal "^1.0.0"
+    chalk "^2.3.0"
+    lodash "^4.17.4"
+    moment "^2.20.1"
+    password-prompt "^1.0.3"
+    strip-ansi "^4.0.0"
+    supports-color "^5.1.0"
+    ts-lodash "^4.0.8"
+
+cli-ux@^2.0.20:
+  version "2.0.20"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.20.tgz#a210d1b0aceba4eab2ca2937f98487b703b9b563"
   dependencies:
     "@cli-engine/screen" "^0.0.0"
     "@heroku-cli/color" "^1.0.4"
@@ -2773,6 +2795,14 @@ rwlockfile@^1.4.12:
   resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-1.4.12.tgz#40cef17c915207c4315c1f535a006e0d1556bcd8"
   dependencies:
     fs-extra "^5.0.0"
+
+rwlockfile@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.6.tgz#7c04438183afa919cb72c68906765fcdd80026f0"
+  dependencies:
+    fs-extra "^5.0.0"
+    tslib "^1.8.1"
+    uuid "^3.1.0"
 
 safe-buffer@^5.0.1, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"

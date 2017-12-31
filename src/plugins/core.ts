@@ -21,6 +21,7 @@ export class CorePlugins {
         new CorePlugin({
           root: path.join(this.config.root!, 'node_modules', name),
           config: this.config,
+          type: 'core',
         }),
     )
   }

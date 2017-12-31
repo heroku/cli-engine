@@ -1,4 +1,4 @@
-import { Command, flags } from '@cli-engine/command'
+import { flags } from '@cli-engine/command'
 import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
@@ -7,6 +7,8 @@ import _ from 'ts-lodash'
 import { CommandManager } from '../command'
 import deps from '../deps'
 import { ICommandInfo, Topic } from '../plugins/topic'
+
+import Command from './base'
 
 function topicSort(a: any, b: any) {
   if (a[0] < b[0]) return -1

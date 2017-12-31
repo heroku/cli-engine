@@ -1,7 +1,8 @@
-import { Command } from '@cli-engine/command'
 import { cli } from 'cli-ux'
 
 import { Plugins } from '../../plugins'
+
+import Command from '../base'
 
 const g = global as any
 const bin: string = g.config ? g.config.bin : 'heroku'

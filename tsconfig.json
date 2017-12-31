@@ -2,6 +2,7 @@
   "compilerOptions": {
     "alwaysStrict": true,
     "declaration": true,
+    "experimentalDecorators": true,
     "importHelpers": true,
     "module": "commonjs",
     "noUnusedLocals": true,

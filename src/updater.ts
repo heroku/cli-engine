@@ -1,11 +1,11 @@
 import { spawn } from 'child_process'
 import { cli } from 'cli-ux'
 import * as path from 'path'
+import RWLockfile, { rwlockfile } from 'rwlockfile'
 import _ from 'ts-lodash'
 
 import Config from './config'
 import deps from './deps'
-import { Lock } from './lock'
 
 const debug = require('debug')('cli:updater')
 
@@ -32,12 +32,12 @@ function timestamp(msg: string): string {
 
 export class Updater {
   config: Config
-  lock: Lock
+  lock: RWLockfile
   http: typeof deps.HTTP
 
   constructor(config: Config) {
     this.config = config
-    this.lock = new deps.Lock(config, `${this.autoupdatefile}.lock`)
+    this.lock = new RWLockfile(this.autoupdatefile, { ifLocked: s => debug(s.status) })
     this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
   }
 
@@ -138,8 +138,9 @@ export class Updater {
       cli.warn(e, { context: 'autoupdate:' })
     }
   }
+
+  @rwlockfile('lock', 'write')
   async update(manifest: IManifest) {
-    await this.lock.write()
     let base = this.base(manifest)
 
     if (!this.s3Host) throw new Error('S3 host not defined')
@@ -174,7 +175,6 @@ export class Updater {
     await this._rename(path.join(this.clientRoot, base), output)
 
     await this._createBin(manifest)
-    await this.lock.unwrite()
   }
 
   public async tidy() {

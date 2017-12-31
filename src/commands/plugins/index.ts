@@ -1,9 +1,11 @@
-import { Command, flags } from '@cli-engine/command'
+import { flags } from '@cli-engine/command'
 import { color } from '@heroku-cli/color'
 import { cli } from 'cli-ux'
 
 import { Plugins } from '../../plugins'
 import { compare, objEntries } from '../../util'
+
+import Command from '../base'
 
 let examplePlugins = {
   'heroku-ci': { version: '1.8.0' },
@@ -39,6 +41,7 @@ ${examplePluginsHelp.join('\n')}
     for (let plugin of plugins) {
       let output = `${plugin.name} ${color.dim(plugin.version)}`
       if (plugin.type !== 'user') output += color.dim(` (${plugin.type})`)
+      if (plugin.type === 'link') output += ` ${plugin.root}`
       else if (plugin.tag !== 'latest') output += color.dim(` (${String(plugin.tag)})`)
       cli.log(output)
     }

@@ -8,7 +8,7 @@ export class Builtin extends Plugin {
   public type: PluginType = 'builtin'
 
   constructor(config: Config) {
-    super({ config, root: path.join(__dirname, '..', '..') })
+    super({ config, root: path.join(__dirname, '..', '..'), type: 'builtin' })
   }
 
   public get commandsDir() {

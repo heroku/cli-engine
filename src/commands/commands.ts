@@ -1,4 +1,4 @@
-import { Command, flags } from '@cli-engine/command'
+import { flags } from '@cli-engine/command'
 import { cli } from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -6,9 +6,11 @@ import * as path from 'path'
 import { CommandManager, ICommandInfo } from '../command'
 import deps from '../deps'
 
+import BuiltinCommand from './base'
+
 const debug = require('debug')('cli:commands')
 
-export default class Commands extends Command {
+export default class Commands extends BuiltinCommand {
   static topic = 'commands'
   static description = 'list all commands'
   static hidden = true

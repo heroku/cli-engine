@@ -11,7 +11,6 @@ import command = require('./command')
 import help = require('./commands/help')
 import file = require('./file')
 import Hooks = require('./hooks')
-import lock = require('./lock')
 import notFound = require('./not_found')
 import Plugins = require('./plugins')
 import Builtin = require('./plugins/builtin')
@@ -30,7 +29,6 @@ export default {
   get CLICommandHelp (): typeof CLICommandHelp { return require('@cli-engine/command/lib/help').Help },
   get HTTP(): typeof HTTP { return fetch('http-call').HTTP },
   get moment(): typeof moment { return fetch('moment') },
-  get rwlockfile(): any { return fetch('rwlockfile') },
   get klaw(): typeof klaw { return fetch('klaw') },
   get Heroku(): typeof Heroku { return fetch('@heroku-cli/command') },
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
@@ -41,7 +39,6 @@ export default {
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
   get Hooks(): typeof Hooks.Hooks { return fetch('./hooks').Hooks },
-  get Lock(): typeof lock.Lock { return fetch('./lock').Lock },
   get NotFound(): typeof notFound.default { return fetch('./not_found').default },
   get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
   get util(): typeof util { return fetch('./util') },

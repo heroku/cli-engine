@@ -6,7 +6,7 @@ export class MainPlugin extends Plugin {
   public type: PluginType = 'main'
 
   constructor(config: Config) {
-    super({ config, root: config.root! })
+    super({ config, root: config.root!, type: 'main' })
   }
 
   public get commandsDir() {

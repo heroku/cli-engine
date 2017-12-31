@@ -81,6 +81,7 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
     deps.validate.cliPjson(opts.pjson, f)
   }
   const config = new Config(opts)
+  config.plugins = new deps.Plugins(config)
   if (config.debug) cli.config.debug = true
   cli.config.errlog = config.errlog
   return new CLI(config).run(argv)

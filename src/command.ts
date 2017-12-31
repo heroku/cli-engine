@@ -5,7 +5,6 @@ import _ from 'ts-lodash'
 import Config from './config'
 import deps from './deps'
 import { Hooks } from './hooks'
-import { Plugins } from './plugins'
 import { ITopic, RootTopic, Topic } from './topic'
 
 export type RunFn = (argv: string[]) => Promise<void>
@@ -33,7 +32,7 @@ export interface ICommandManager {
 }
 
 export class CommandManager {
-  private managers = [new Plugins(this.config)]
+  private managers = [this.config.plugins]
   private hooks: Hooks
   private debug = require('debug')('cli:command')
   private result: RootTopic

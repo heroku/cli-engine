@@ -1,9 +1,9 @@
 import cli from 'cli-ux'
 import * as path from 'path'
+import RWLockfile, { rwlockfile } from 'rwlockfile'
 
 import Config from '../config'
 import deps from '../deps'
-import { Lock } from '../lock'
 
 import { PluginManifest } from './manifest'
 import { IPluginOptions, Plugin, PluginType } from './plugin'
@@ -13,11 +13,17 @@ export class UserPlugins {
   public plugins: UserPlugin[]
   public yarn: Yarn
   private manifest: PluginManifest
-  private lock: Lock
+  private lock: RWLockfile
   private debug: any
 
   constructor(private config: Config) {
     this.debug = require('debug')('cli:plugins:user')
+    this.manifest = new deps.PluginManifest({
+      name: 'user',
+      file: path.join(this.config.dataDir, 'plugins', 'user.json'),
+    })
+    this.lock = new RWLockfile(this.manifest.file, { ifLocked: status => this.debug(status.status) })
+    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
   }
 
   public async submanagers() {
@@ -25,25 +31,23 @@ export class UserPlugins {
     return this.plugins
   }
 
+  @rwlockfile('lock', 'write')
   public async update() {
     await this.init()
     if (this.plugins.length === 0) return
     cli.action.start(`${this.config.name}: Updating plugins`)
-    await this.lock.write()
     const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
-    await this.lock.unwrite()
   }
 
+  @rwlockfile('lock', 'write')
   public async install(name: string, tag: string): Promise<void> {
     cli.action.start(`Installing ${name}@${tag}`)
     await this.init()
-    await this.lock.write()
     await this.createPJSON()
     await this.yarn.exec(['add', `${name}@${tag}`])
     try {
       const plugin = await this.loadPlugin(name, tag)
-      await plugin.init()
       await plugin.resetCache()
       await plugin.load()
       await this.addPlugin(name, tag)
@@ -52,56 +56,50 @@ export class UserPlugins {
       await this.yarn.exec(['remove', name])
       throw err
     }
-    await this.lock.unwrite()
     cli.action.stop()
   }
 
+  @rwlockfile('lock', 'write')
   public async uninstall(name: string): Promise<void> {
     await this.init()
-    await this.lock.write()
     await this.removePlugin(name)
     await this.yarn.exec(['remove', name])
-    await this.lock.unwrite()
   }
 
   public async refresh() {
     if (!this.plugins.length) return
     if ((await this.yarnNodeVersion()) === process.version) return
     cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
-    await this.lock.write()
-    await this.yarn.exec()
-    for (let p of this.plugins.map(p => p.resetCache())) await p
-    await this.lock.unwrite()
+    await this.lock.add('write', { reason: 'refresh' })
+    try {
+      await this.yarn.exec()
+      for (let p of this.plugins.map(p => p.resetCache())) await p
+    } finally {
+      await this.lock.remove('write')
+    }
   }
 
+  @rwlockfile('lock', 'read')
   public async init() {
     if (this.plugins) return
     this.debug('init')
-    this.manifest = new deps.PluginManifest({
-      name: 'user',
-      file: path.join(this.config.dataDir, 'plugins', 'user.json'),
-    })
-    this.lock = new deps.Lock(this.config, this.manifest.file + '.lock')
-    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-    await this.lock.read()
     await this.migrate()
     this.plugins = await Promise.all(
       deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.refresh()
-    await this.lock.unread()
   }
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
     const pjson = await deps.file.fetchJSONFile(path.join(this.userPluginPath(name), 'package.json'))
     let p = new UserPlugin({
+      type: 'user',
       pjson,
       tag,
       root: this.userPluginPath(name),
       config: this.config,
     })
-    await p.init()
     return p
   }
 

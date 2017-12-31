@@ -1,11 +1,11 @@
 import { ICommand } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
+import RWLockfile, { rwlockfile } from 'rwlockfile'
 
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
 import Config from '../config'
 import deps from '../deps'
-import { Lock } from '../lock'
 import { ITopic, ITopics, topicsToArray } from '../topic'
 
 import { PluginManifest } from './manifest'
@@ -39,6 +39,7 @@ export interface IPluginOptions {
   config: Config
   root: string
   pjson?: IPluginPJSON
+  type: string
 }
 
 export abstract class Plugin implements ICommandManager {
@@ -50,50 +51,46 @@ export abstract class Plugin implements ICommandManager {
   public root: string
   protected config: Config
   protected debug: any
-  protected lock: Lock
+  protected lock: RWLockfile
   private _module: Promise<IPluginModule>
   private cache: PluginManifest
 
   constructor(opts: IPluginOptions) {
     this.config = opts.config
     this.root = opts.root
-    if (opts.pjson) this.pjson = opts.pjson
+    this.pjson = opts.pjson || require(path.join(opts.root, 'package.json'))
+    if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
+    this.name = this.name || this.pjson.name
+    this.version = this.version || this.pjson.version
+    let cacheKey = [this.config.version, this.version].join(path.sep)
+    let cacheFile = path.join(this.config.cacheDir, 'plugins', [opts.type, this.name + '.json'].join(path.sep))
+    this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
+    this.debug = require('debug')(`cli:plugins:${[opts.type, this.name, this.version].join(':')}`)
+    this.lock = new RWLockfile(cacheFile, { ifLocked: status => this.debug(status.status) })
   }
 
+  @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
-    await this.init()
     const results = {
       commands: await this.commands(),
       topics: await this.topics(),
     }
     if (this.cache.needsSave) {
-      await this.lock.write()
+      await this.lock.add('write', { reason: 'cache' })
       await this.cache.save()
-      await this.lock.unwrite()
+      await this.lock.remove('write')
     }
     return results
   }
 
+  @rwlockfile('lock', 'write')
   public async resetCache() {
-    await this.init()
     await this.cache.reset()
-  }
-
-  public async init() {
-    this.pjson = this.pjson || (await deps.file.fetchJSONFile(this.pjsonPath))
-    if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
-    this.name = this.name || this.pjson.name
-    this.version = this.version || this.pjson.version
-    let cacheKey = [this.config.version, this.version].join(path.sep)
-    let cacheFile = path.join(this.config.cacheDir, 'plugins', [this.type, this.name + '.json'].join(path.sep))
-    this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
-    this.lock = new deps.Lock(this.config, cacheFile + '.lock')
-    this.debug = require('debug')(`cli:plugins:${[this.type, this.name, this.version].join(':')}`)
-    this.debug('init')
   }
 
   public async findCommand(id: string, must: true): Promise<ICommand>
   public async findCommand(id: string, must?: boolean): Promise<ICommand | undefined>
+  @rwlockfile('lock', 'read')
   public async findCommand(id: string, must = false): Promise<ICommand | undefined> {
     let cmd = await this.findCommandInModule(id)
     if (!cmd) cmd = await this.findCommandInDir(id)
@@ -106,20 +103,18 @@ export abstract class Plugin implements ICommandManager {
 
   protected async commands(): Promise<ICommandInfo[]> {
     const cache: ICommandInfo[] = await this.cache.fetch('commands', async () => {
-      if (this.lock) await this.lock.read()
       this.debug('fetching commands')
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
       if (!commands.length) throw new Error(`${this.name} has no commands`)
       const r = await Promise.all(commands)
-      if (this.lock) await this.lock.unread()
       return r
     })
     return cache.map(c => ({
       ...c,
       run: async (argv: string[]) => {
-        if (this.lock) await this.lock.read()
+        await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
         let res
         if (!c._version || c._version === '0.0.0') {
@@ -131,7 +126,7 @@ export abstract class Plugin implements ICommandManager {
         } else {
           res = await cmd.run(argv.slice(3), this.config)
         }
-        if (this.lock) await this.lock.unread()
+        await this.lock.remove('read')
         return res
       },
     }))
@@ -139,10 +134,8 @@ export abstract class Plugin implements ICommandManager {
 
   protected async topics(): Promise<ITopic[]> {
     const cache: ITopic[] = await this.cache.fetch('topics', async () => {
-      if (this.lock) await this.lock.read()
       this.debug('fetching commands')
       const m = await this.fetchModule()
-      if (this.lock) await this.lock.unread()
       if (!m) return []
       return m.topics
     })
