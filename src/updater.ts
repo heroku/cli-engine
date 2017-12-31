@@ -1,7 +1,7 @@
 import { spawn } from 'child_process'
 import { cli } from 'cli-ux'
 import * as path from 'path'
-import RWLockfile, { rwlockfile } from 'rwlockfile'
+import RWLockfile from 'rwlockfile'
 import _ from 'ts-lodash'
 
 import Config from './config'
@@ -37,7 +37,6 @@ export class Updater {
 
   constructor(config: Config) {
     this.config = config
-    this.lock = new RWLockfile(this.autoupdatefile, { ifLocked: s => debug(s.status) })
     this.http = deps.HTTP.defaults({ headers: { 'user-agent': config.userAgent } })
   }
 
@@ -139,42 +138,46 @@ export class Updater {
     }
   }
 
-  @rwlockfile('lock', 'write')
   async update(manifest: IManifest) {
     let base = this.base(manifest)
+    const output = path.join(this.clientRoot, base)
+    const lock = new RWLockfile(this.autoupdatefile, { ifLocked: s => debug(s.status) })
 
     if (!this.s3Host) throw new Error('S3 host not defined')
 
-    let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
-    let { response: stream } = await this.http.stream(url)
+    await lock.add('write', { reason: 'update' })
 
-    let output = path.join(this.clientRoot, manifest.version)
+    try {
+      let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
+      let { response: stream } = await this.http.stream(url)
 
-    await this._mkdirp(this.clientRoot)
-    await this._remove(output)
+      await this._mkdirp(this.clientRoot)
+      await this._remove(output)
 
-    // TODO: use cli.action.type
-    if (deps.filesize && (cli.action as any).frames) {
-      // if spinner action
-      let total = stream.headers['content-length']
-      let current = 0
-      const updateStatus = _.throttle(
-        (newStatus: string) => {
-          cli.action.status = newStatus
-        },
-        500,
-        { leading: true, trailing: false },
-      )
-      stream.on('data', data => {
-        current += data.length
-        updateStatus(`${deps.filesize(current)}/${deps.filesize(total)}`)
-      })
+      // TODO: use cli.action.type
+      if (deps.filesize && (cli.action as any).frames) {
+        // if spinner action
+        let total = stream.headers['content-length']
+        let current = 0
+        const updateStatus = _.throttle(
+          (newStatus: string) => {
+            cli.action.status = newStatus
+          },
+          500,
+          { leading: true, trailing: false },
+        )
+        stream.on('data', data => {
+          current += data.length
+          updateStatus(`${deps.filesize(current)}/${deps.filesize(total)}`)
+        })
+      }
+
+      await this.extract(stream, this.clientRoot, manifest.sha256gz)
+
+      await this._createBin(manifest)
+    } finally {
+      await lock.remove('write')
     }
-
-    await this.extract(stream, this.clientRoot, manifest.sha256gz)
-    await this._rename(path.join(this.clientRoot, base), output)
-
-    await this._createBin(manifest)
   }
 
   public async tidy() {
@@ -254,10 +257,6 @@ export class Updater {
     })
   }
 
-  private async _rename(from: string, to: string) {
-    await deps.file.rename(from, to)
-  }
-
   private async _remove(dir: string) {
     if (await deps.file.exists(dir)) {
       await deps.file.remove(dir)
@@ -316,13 +315,13 @@ export class Updater {
     let dst = this.clientBin
     if (this.config.windows) {
       let body = `@echo off
-"%~dp0\\..\\${manifest.version}\\bin\\heroku.cmd" %*
+"%~dp0\\..\\${this.base(manifest)}\\bin\\${this.config.bin}.cmd" %*
 `
       await deps.file.outputFile(dst, body)
       return
     }
 
-    let src = path.join('..', manifest.version, 'bin', 'heroku')
+    let src = path.join('..', this.base(manifest), 'bin', this.config.bin)
     await deps.file.mkdirp(path.dirname(dst))
     await deps.file.remove(dst)
     await deps.file.symlink(src, dst)

@@ -6,6 +6,13 @@ import { Plugins } from './plugins'
 export class Config extends Base {
   plugins: Plugins
 
+  get platform() {
+    return (this.scopedEnvVar('PLATFORM') as any) || super.platform
+  }
+  get arch() {
+    return (this.scopedEnvVar('ARCH') as any) || super.arch
+  }
+
   get dataDir() {
     return this.scopedEnvVar('DATA_DIR') || super.dataDir
   }

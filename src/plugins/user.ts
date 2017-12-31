@@ -34,7 +34,7 @@ export class UserPlugins {
   @rwlockfile('lock', 'write')
   public async update() {
     await this.init()
-    if (this.plugins.length === 0) return
+    if (!this.plugins) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
