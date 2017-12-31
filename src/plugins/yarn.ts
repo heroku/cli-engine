@@ -50,13 +50,15 @@ export default class Yarn {
     return new Promise((resolve, reject) => {
       const { fork } = require('child_process')
       let forked = fork(modulePath, args, options)
-      let error = ''
+      let stdout = ''
+      let stderr = ''
 
       forked.stdout.setEncoding('utf8')
       forked.stdout.on('data', (data: string) => {
         if (this.config.debug) {
           cli.stdout.write(data)
         }
+        stdout += data
       })
 
       forked.stderr.setEncoding('utf8')
@@ -65,7 +67,7 @@ export default class Yarn {
           cli.stderr.write(data)
         }
 
-        error += data
+        stderr += data
       })
 
       forked.on('error', reject)
@@ -73,7 +75,7 @@ export default class Yarn {
         if (code === 0) {
           resolve()
         } else {
-          reject(new Error(`yarn ${args.join(' ')} exited with code ${code}\n${error}`))
+          reject(new Error(`yarn ${args.join(' ')} exited with code ${code}\n${stderr}\n${stdout}`))
         }
       })
 
