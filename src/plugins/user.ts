@@ -79,11 +79,20 @@ export class UserPlugins {
     }
   }
 
-  @rwlockfile('lock', 'read')
   public async init() {
-    if (this.plugins) return
-    this.debug('init')
     await this.migrate()
+    if (!this.plugins && (await this.hasPlugins())) await this.fetchPlugins()
+  }
+
+  private async hasPlugins(): Promise<boolean> {
+    if (await deps.file.exists(this.manifest.file)) return true
+    this.debug('no user plugins')
+    return false
+  }
+
+  @rwlockfile('lock', 'read')
+  private async fetchPlugins() {
+    this.debug('fetchPlugins')
     this.plugins = await Promise.all(
       deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
     )
@@ -123,18 +132,23 @@ export class UserPlugins {
   private async migrate() {
     const userPath = path.join(this.config.dataDir, 'plugins', 'package.json')
     if (!await deps.file.exists(userPath)) return
-    let user = await deps.file.readJSON(userPath)
-    if (!user.dependencies || user['cli-engine']) return
-    cli.action.start('Refreshing plugins')
-    this.debug('migrating user plugins')
-    user = await deps.file.readJSON(userPath)
-    if (user['cli-engine']) return
-    for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
-      await this.addPlugin(name, tag)
+    await this.lock.add('write', { reason: 'migrate' })
+    try {
+      let user = await deps.file.readJSON(userPath)
+      if (!user.dependencies || user['cli-engine']) return
+      cli.action.start('Refreshing plugins')
+      this.debug('migrating user plugins')
+      user = await deps.file.readJSON(userPath)
+      if (user['cli-engine']) return
+      for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
+        await this.addPlugin(name, tag)
+      }
+      user = await deps.file.readJSON(userPath)
+      user['cli-engine'] = { schema: 1 }
+      await deps.file.outputJSON(userPath, user)
+    } finally {
+      await this.lock.remove('write')
     }
-    user = await deps.file.readJSON(userPath)
-    user['cli-engine'] = { schema: 1 }
-    await deps.file.outputJSON(userPath, user)
   }
 
   private async addPlugin(name: string, tag: string) {

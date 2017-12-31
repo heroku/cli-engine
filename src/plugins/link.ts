@@ -86,13 +86,19 @@ export class LinkPlugins {
   }
 
   public async init(): Promise<void> {
-    if (!this.plugins) await this._init()
+    await this.migrate()
+    if (!this.plugins && (await this.hasPlugins())) await this._init()
+  }
+
+  private async hasPlugins(): Promise<boolean> {
+    if (await deps.file.exists(this.manifest.file)) return true
+    this.debug('no link plugins')
+    return false
   }
 
   @rwlockfile('lock', 'read')
   private async _init(): Promise<void> {
     this.debug('init')
-    await this.migrate()
     this.plugins = _.compact(
       await Promise.all(deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root))),
     )

@@ -69,16 +69,21 @@ export abstract class Plugin implements ICommandManager {
     this.lock = new RWLockfile(cacheFile, { ifLocked: status => this.debug(status.status) })
   }
 
-  @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
     const results = {
       commands: await this.commands(),
       topics: await this.topics(),
     }
     if (this.cache.needsSave) {
-      await this.lock.add('write', { reason: 'cache' })
-      await this.cache.save()
-      await this.lock.remove('write')
+      let canWrite = await this.lock.check('write')
+      if (canWrite.status === 'open') {
+        this.debug('saving cache')
+        await this.lock.add('write', { reason: 'cache' })
+        await this.cache.save()
+        await this.lock.remove('write')
+      } else {
+        this.debug(`cannot save cache: ${canWrite.status}`)
+      }
     }
     return results
   }
