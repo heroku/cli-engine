@@ -1,5 +1,6 @@
 module.exports = {
   setupTestFrameworkScriptFile: "<rootDir>/__test__/init.ts",
+  globalSetup: "<rootDir>/__test__/setup.js",
   mapCoverage: true,
   coverageDirectory: '<rootDir>/../coverage',
   coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/src/__test__'],

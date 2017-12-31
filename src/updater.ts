@@ -278,6 +278,7 @@ export class Updater {
       return m.isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
       if (err.code !== 'ENOENT') cli.error(err.stack)
+      if ((global as any).testing) return false
       debug('autoupdate ENOENT')
       return true
     }

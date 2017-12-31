@@ -60,9 +60,7 @@ export class LinkPlugins {
     await this.init()
     try {
       await this.lock.add('write', { reason: 'install' })
-      const plugin = await this.loadPlugin(root, true)
-      await plugin!.load()
-      await this.addPlugin(plugin!.name, plugin!.root)
+      await this.addPlugin(root)
       cli.action.stop()
     } finally {
       await this.lock.remove('write')
@@ -106,23 +104,29 @@ export class LinkPlugins {
     if (!await deps.file.exists(linkedPath)) return
     try {
       await this.lock.add('write', { reason: 'migrate' })
-      this.debug('migrating link plugins')
+      cli.action.start('migrating link plugins')
       let linked = await deps.file.readJSON(linkedPath)
       for (let root of linked.plugins) {
-        const name = await deps.file.readJSON(path.join(root, 'package.json'))
-        await this.addPlugin(name, root)
+        cli.action.status = root
+        await this.addPlugin(root)
       }
+      cli.action.stop()
       await deps.file.remove(linkedPath)
     } finally {
       await this.lock.remove('write')
     }
   }
 
-  private async addPlugin(name: string, root: string) {
+  private async addPlugin(root: string) {
+    const plugin = await this.loadPlugin(root, true)
+    if (!plugin) return
+    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${plugin.name}.json`))
+    await plugin.load()
     let plugins = await this.manifestPlugins()
-    plugins[name] = { root }
+    plugins[plugin.name] = { root }
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
+    delete this.plugins
   }
 
   private async removePlugin(name: string) {
@@ -130,6 +134,8 @@ export class LinkPlugins {
     delete plugins[name]
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
+    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${name}.json`))
+    delete this.plugins
   }
 
   private async manifestPlugins(): Promise<{ [k: string]: { root: string } }> {
