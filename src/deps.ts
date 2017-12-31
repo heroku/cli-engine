@@ -13,12 +13,8 @@ import file = require('./file')
 import Hooks = require('./hooks')
 import notFound = require('./not_found')
 import Plugins = require('./plugins')
-import Builtin = require('./plugins/builtin')
-import corePlugins = require('./plugins/core')
 import pluginLegacy = require('./plugins/legacy')
-import linkPlugins = require('./plugins/link')
 import pluginManifest = require('./plugins/manifest')
-import userPlugins = require('./plugins/user')
 import yarn = require('./plugins/yarn')
 import updater = require('./updater')
 import util = require('./util')
@@ -34,7 +30,7 @@ export default {
   get stripAnsi(): typeof stripAnsi { return fetch('strip-ansi') },
   get semver(): typeof semver { return fetch('semver') },
   get assync(): typeof assync.default { return fetch('assync').default },
-  get filesize(): any { return fetch('filesize', {optional: true}) },
+  get filesize(): any { return fetch('filesize') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
@@ -46,11 +42,7 @@ export default {
   get validate(): typeof validate { return fetch('./validate') },
 
   // plugins
-  get Builtin(): typeof Builtin.Builtin { return fetch('./plugins/builtin').Builtin },
-  get LinkPlugins(): typeof linkPlugins.LinkPlugins { return fetch('./plugins/link').LinkPlugins },
   get Plugins(): typeof Plugins.Plugins { return fetch('./plugins').Plugins },
-  get UserPlugins(): typeof userPlugins.UserPlugins { return fetch('./plugins/user').UserPlugins },
-  get CorePlugins(): typeof corePlugins.CorePlugins { return fetch('./plugins/core').CorePlugins },
   get Yarn(): typeof yarn.default { return fetch('./plugins/yarn').default },
   get PluginManifest(): typeof pluginManifest.PluginManifest { return fetch('./plugins/manifest').PluginManifest },
   get PluginLegacy(): typeof pluginLegacy.PluginLegacy { return fetch('./plugins/legacy').PluginLegacy },
@@ -59,12 +51,12 @@ export default {
 
 const cache: any = {}
 
-function fetch(s: string, {optional = false} = {}) {
+function fetch(s: string) {
   if (s in cache) return cache[s]
   try {
     return cache[s] = require(s)
   } catch (err) {
-    if (!optional || err.code !== 'ENOENT') throw err
+    if (err.code !== 'ENOENT') throw err
     cache[s] = undefined
   }
 }
