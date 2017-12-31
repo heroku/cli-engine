@@ -56,7 +56,7 @@ test('updates the CLI on windows', async () => {
   await run(['update'])
 
   expect(await fs.readFile(path.join(config.dataDir, 'client/bin/cli-engine.cmd'))).toEqual(
-    `@echo off\n\"%~dp0\\..\\cli-engine-example-v1.2.3-win32-x64\\bin\\cli-engine.cmd\" %*\n`,
+    `@echo off\n\"%~dp0\\..\\1.2.3\\bin\\cli-engine.cmd\" %*\n`,
   )
 })
 

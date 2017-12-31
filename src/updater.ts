@@ -140,7 +140,7 @@ export class Updater {
 
   async update(manifest: IManifest) {
     let base = this.base(manifest)
-    const output = path.join(this.clientRoot, base)
+    const output = path.join(this.clientRoot, manifest.version)
     const lock = new RWLockfile(this.autoupdatefile, { ifLocked: s => debug(s.status) })
 
     if (!this.s3Host) throw new Error('S3 host not defined')
@@ -153,6 +153,7 @@ export class Updater {
 
       await this._mkdirp(this.clientRoot)
       await this._remove(output)
+      await this._remove(path.join(this.clientRoot, base))
 
       // TODO: use cli.action.type
       if (deps.filesize && (cli.action as any).frames) {
@@ -173,6 +174,7 @@ export class Updater {
       }
 
       await this.extract(stream, this.clientRoot, manifest.sha256gz)
+      await deps.file.rename(path.join(this.clientRoot, base), output)
 
       await this._createBin(manifest)
     } finally {
@@ -315,13 +317,13 @@ export class Updater {
     let dst = this.clientBin
     if (this.config.windows) {
       let body = `@echo off
-"%~dp0\\..\\${this.base(manifest)}\\bin\\${this.config.bin}.cmd" %*
+"%~dp0\\..\\${manifest.version}\\bin\\${this.config.bin}.cmd" %*
 `
       await deps.file.outputFile(dst, body)
       return
     }
 
-    let src = path.join('..', this.base(manifest), 'bin', this.config.bin)
+    let src = path.join('..', manifest.version, 'bin', this.config.bin)
     await deps.file.mkdirp(path.dirname(dst))
     await deps.file.remove(dst)
     await deps.file.symlink(src, dst)
