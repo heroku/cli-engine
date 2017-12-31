@@ -24,7 +24,7 @@ skipIfWin32('updates the CLI on unix', async () => {
     .reply(200, {
       channel: 'stable',
       version: '1.2.3',
-      sha256gz: '83ee9ce76e691208f39716d74a8944bfcc6ba5358ec23d43034d13727524aee2',
+      sha256gz: 'd707e56f9f41f05fcb86396b31c1272d6e242e3748212a3ba373a74d13aaff1a',
     })
     .get(`/cli-engine-example/channels/stable/cli-engine-example-v1.2.3-darwin-x64.tar.gz`)
     .replyWithFile(200, path.join(__dirname, `./__test__/fixtures/cli-engine-example-v1.2.3-darwin-x64.tar.gz`))
@@ -46,7 +46,7 @@ test('updates the CLI on windows', async () => {
     .reply(200, {
       channel: 'stable',
       version: '1.2.3',
-      sha256gz: 'e1daa2045c1569fa798a30b90a2c3f06ecd50bc6bf0b9c24d6b47f5ef63c57bf',
+      sha256gz: '863802bbf1ebd16d48e0560a8f6cdad476881286bcab73c7633147bfd51600f4',
     })
     .get(`/cli-engine-example/channels/stable/cli-engine-example-v1.2.3-win32-x64.tar.gz`)
     .replyWithFile(200, path.join(__dirname, `./__test__/fixtures/cli-engine-example-v1.2.3-win32-x64.tar.gz`))
@@ -74,6 +74,6 @@ test('validates the sha', async () => {
     )
 
   await expect(run(['update'])).rejects.toThrowError(
-    /SHA mismatch: expected 83ee9ce76e691208f39716d74a8944bfcc6ba5358ec23d43034d13727524aee2 to be xxx/,
+    /SHA mismatch: expected d707e56f9f41f05fcb86396b31c1272d6e242e3748212a3ba373a74d13aaff1a to be xxx/,
   )
 })
