@@ -2783,9 +2783,9 @@ rwlockfile@^1.4.12:
   dependencies:
     fs-extra "^5.0.0"
 
-rwlockfile@^2.0.11:
-  version "2.0.11"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.11.tgz#43893f50a8867c8189b1e853589aa9411e292d98"
+rwlockfile@^2.0.12:
+  version "2.0.12"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.12.tgz#73c604b95b6173ac4837af10941c819bc7b0db1f"
   dependencies:
     fs-extra "^5.0.0"
     tslib "^1.8.1"

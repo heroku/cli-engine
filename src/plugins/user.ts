@@ -22,7 +22,7 @@ export class UserPlugins {
       name: 'user',
       file: path.join(this.config.dataDir, 'plugins', 'user.json'),
     })
-    this.lock = new RWLockfile(this.manifest.file, { ifLocked: status => this.debug(status.status) })
+    this.lock = new RWLockfile(this.manifest.file, { ifLocked: () => cli.action.start('Updating user plugins') })
     this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
   }
 

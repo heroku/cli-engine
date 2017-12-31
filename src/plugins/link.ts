@@ -51,7 +51,7 @@ export class LinkPlugins {
       name: 'link',
       file: path.join(this.config.dataDir, 'plugins', 'link.json'),
     })
-    this.lock = new RWLockfile(this.manifest.file, { ifLocked: status => this.debug(status.status) })
+    this.lock = new RWLockfile(this.manifest.file, { ifLocked: () => cli.action.start('Link plugins updating') })
   }
 
   @rwlockfile('lock', 'write')

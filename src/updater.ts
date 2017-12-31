@@ -141,7 +141,7 @@ export class Updater {
   async update(manifest: IManifest) {
     let base = this.base(manifest)
     const output = path.join(this.clientRoot, manifest.version)
-    const lock = new RWLockfile(this.autoupdatefile, { ifLocked: s => debug(s.status) })
+    const lock = new RWLockfile(this.autoupdatefile, { ifLocked: () => cli.action.start('CLI is updating') })
 
     if (!this.s3Host) throw new Error('S3 host not defined')
 

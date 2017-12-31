@@ -66,7 +66,7 @@ export abstract class Plugin implements ICommandManager {
     let cacheFile = path.join(this.config.cacheDir, 'plugins', [opts.type, this.name + '.json'].join(path.sep))
     this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
     this.debug = require('debug')(`cli:plugins:${[opts.type, this.name, this.version].join(':')}`)
-    this.lock = new RWLockfile(cacheFile, { ifLocked: status => this.debug(status.status) })
+    this.lock = new RWLockfile(cacheFile, { ifLocked: () => cli.action.start(`Plugin ${this.name} is updating...`) })
   }
 
   public async load(): Promise<ILoadResult> {
