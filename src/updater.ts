@@ -1,5 +1,5 @@
-import { spawn } from 'child_process'
 import { cli } from 'cli-ux'
+import { spawn } from 'cross-spawn'
 import * as path from 'path'
 import RWLockfile from 'rwlockfile'
 import _ from 'ts-lodash'

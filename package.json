@@ -18,6 +18,7 @@
     "@heroku-cli/color": "^1.0.4",
     "assync": "^1.0.4",
     "cli-ux": "^2.0.21",
+    "cross-spawn": "^5.1.0",
     "debug": "^3.1.0",
     "filesize": "^3.5.11",
     "fs-extra": "^5.0.0",
