@@ -10,13 +10,6 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@cli-engine/command@^12.0.1":
-  version "12.0.1"
-  resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.0.1.tgz#abb1dc4d68bf3a720ea39ce9a5032dfaa2e821f8"
-  dependencies:
-    chalk "^2.3.0"
-    cli-flags "^2.0.4"
-
 "@cli-engine/command@^12.0.3":
   version "12.0.3"
   resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.0.3.tgz#4bf3c0a9d126ee6c412e26b3404a353c7db7401b"
@@ -74,13 +67,13 @@
     chalk "^2.3.0"
     supports-color "^5.1.0"
 
-"@heroku-cli/command@^7.0.10":
-  version "7.0.10"
-  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.10.tgz#eecb8d4ed9c5346b4063827a6df86065b512adb1"
+"@heroku-cli/command@^7.0.11":
+  version "7.0.11"
+  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.11.tgz#0a76cf4775e07dbdee35934f85fc2808989c6a97"
   dependencies:
-    "@cli-engine/command" "^12.0.1"
+    "@cli-engine/command" "^12.0.3"
     "@cli-engine/config" "^5.0.10"
-    cli-ux "^2.0.16"
+    cli-ux "^2.0.21"
     heroku-client "3.0.5"
     http-call "^4.0.6"
     netrc-parser "^2.0.5"
@@ -697,36 +690,12 @@ ci-info@^1.0.0:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-1.1.2.tgz#03561259db48d0474c8bdc90f5b47b068b6bbfb4"
 
-cli-flags@^2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-2.0.4.tgz#bc8fcd1971d9843db50e5a97936e45287add0fc9"
-  dependencies:
-    "@heroku/linewrap" "^1.0.0"
-    ts-lodash "^4.0.8"
-
 cli-flags@^2.0.6:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-2.0.6.tgz#2fd0a355f22c3c829f8dc079a446b4b13f5d80a0"
   dependencies:
     "@cli-engine/screen" "^0.0.0"
     "@heroku/linewrap" "^1.0.0"
-    ts-lodash "^4.0.8"
-
-cli-ux@^2.0.16:
-  version "2.0.16"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.16.tgz#55ad2767e727974d960c0963dcc04241f71df48c"
-  dependencies:
-    "@heroku-cli/color" "^1.0.4"
-    "@heroku/linewrap" "^1.0.0"
-    ansi-escapes "^3.0.0"
-    ansi-styles "^3.2.0"
-    cardinal "^1.0.0"
-    chalk "^2.3.0"
-    lodash "^4.17.4"
-    moment "^2.20.1"
-    password-prompt "^1.0.3"
-    strip-ansi "^4.0.0"
-    supports-color "^5.1.0"
     ts-lodash "^4.0.8"
 
 cli-ux@^2.0.17:
@@ -2814,9 +2783,9 @@ rwlockfile@^1.4.12:
   dependencies:
     fs-extra "^5.0.0"
 
-rwlockfile@^2.0.10:
-  version "2.0.10"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.10.tgz#22e9f0608bf3238e5f7dc88f43a4bdaae07b2850"
+rwlockfile@^2.0.11:
+  version "2.0.11"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.11.tgz#43893f50a8867c8189b1e853589aa9411e292d98"
   dependencies:
     fs-extra "^5.0.0"
     tslib "^1.8.1"
