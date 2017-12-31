@@ -1,3 +1,4 @@
+import * as execa from 'execa'
 import * as nock from 'nock'
 import * as path from 'path'
 
@@ -62,5 +63,17 @@ describe('migrate', () => {
     })
     expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
     expect((await run(['help', 'plugins:generate'])).stdout).toMatch(/Usage: cli-engine plugins:generate NAME/)
+  })
+})
+
+describe('update', () => {
+  skipIfNode6('update heroku-cli-status', async () => {
+    const config = new Config()
+    await run(['plugins:install', 'heroku-cli-status'])
+    expect((await run(['plugins'])).stdout).not.toMatch(/heroku-cli-status 4.0.6/)
+    await execa('yarn', ['add', 'heroku-cli-status@4'], { cwd: path.join(config.dataDir, 'plugins') })
+    expect((await run(['plugins'])).stdout).toMatch(/heroku-cli-status 4.0.6/)
+    await run(['plugins:update'])
+    expect((await run(['plugins'])).stdout).not.toMatch(/heroku-cli-status 4.0.6/)
   })
 })
