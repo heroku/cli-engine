@@ -73,7 +73,6 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
     opts = arg1
     argv = opts.argv || process.argv
   }
-  if (!opts.reexecBin) opts.reexecBin = module.parent!.filename
   if (!opts.root) opts.root = path.join(module.parent!.filename, '..', '..')
   if (!opts.pjson) {
     const f = path.join(opts.root, 'package.json')
