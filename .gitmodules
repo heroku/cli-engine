@@ -7,3 +7,6 @@
 [submodule "plugins/heroku-kafka-jsplugin"]
 	path = plugins/heroku-kafka-jsplugin
 	url = https://github.com/heroku/heroku-kafka-jsplugin
+[submodule "plugins/heroku-apps"]
+	path = plugins/heroku-apps
+	url = https://github.com/heroku/heroku-apps

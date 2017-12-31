@@ -45,15 +45,7 @@ export class UserPlugins {
   public async install(name: string, tag: string): Promise<void> {
     cli.action.start(`Installing ${name}@${tag}`)
     await this.init()
-    await this.createPJSON()
-    await this.yarn.exec(['add', `${name}@${tag}`])
-    try {
-      await this.addPlugin(name, tag)
-    } catch (err) {
-      await this.removePlugin(name)
-      await this.yarn.exec(['remove', name])
-      throw err
-    }
+    await this.addPlugin(name, tag)
     cli.action.stop()
   }
 
@@ -61,13 +53,13 @@ export class UserPlugins {
   public async uninstall(name: string): Promise<void> {
     await this.init()
     await this.removePlugin(name)
-    await this.yarn.exec(['remove', name])
   }
 
   public async refresh(force = false) {
     if (!this.plugins.length) return
-    if (!force || (await this.yarnNodeVersion()) === process.version) return
-    cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
+    const nodeVersionChanged = (await this.yarnNodeVersion()) !== process.version
+    if (!force && !nodeVersionChanged) return
+    if (nodeVersionChanged) cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
     await this.lock.add('write', { reason: 'refresh' })
     try {
       await this.yarn.exec()
@@ -155,12 +147,19 @@ export class UserPlugins {
   }
 
   private async addPlugin(name: string, tag: string) {
-    let plugin = await this.loadPlugin(name, tag)
-    await plugin.reset(true)
-    let plugins = await this.manifestPlugins()
-    plugins[name] = { tag }
-    await this.manifest.set('plugins', plugins)
-    await this.manifest.save()
+    try {
+      await this.createPJSON()
+      await this.yarn.exec(['add', `${name}@${tag}`])
+      let plugin = await this.loadPlugin(name, tag)
+      await plugin.reset(true)
+      let plugins = await this.manifestPlugins()
+      plugins[name] = { tag }
+      await this.manifest.set('plugins', plugins)
+      await this.manifest.save()
+    } catch (err) {
+      await this.removePlugin(name).catch(err => this.debug(err))
+      throw err
+    }
   }
 
   private async removePlugin(name: string) {
@@ -168,6 +167,7 @@ export class UserPlugins {
     delete plugins[name]
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
+    await this.yarn.exec(['remove', name])
   }
 
   private async manifestPlugins(): Promise<{ [k: string]: { tag: string } }> {

@@ -1,6 +1,9 @@
 import * as nock from 'nock'
+import * as path from 'path'
 
 import { run } from '../__test__/run'
+import Config from '../config'
+import * as fs from '../file'
 
 let api = nock('https://status.heroku.com:443')
 
@@ -47,4 +50,17 @@ test('installs heroku-cli-status', async () => {
   // ensure plugin help is gone
   expect((await run(['help'])).stdout).not.toContain('status')
   await expect(run(['help', 'status'])).rejects.toThrow(/Exited with code: 127/)
+})
+
+describe('migrate', () => {
+  test('migrates heroku-apps and heroku-cli-plugin-generator', async () => {
+    const config = new Config()
+    const legacyPath = path.join(config.dataDir, 'plugins/package.json')
+    await fs.outputJSON(legacyPath, {
+      private: true,
+      dependencies: { 'heroku-cli-plugin-generator': 'latest', 'heroku-apps': 'latest' },
+    })
+    expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
+    expect((await run(['help', 'plugins:generate'])).stdout).toMatch(/Usage: cli-engine plugins:generate NAME/)
+  })
 })

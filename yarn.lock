@@ -741,9 +741,9 @@ cli-ux@^2.0.17:
     supports-color "^5.1.0"
     ts-lodash "^4.0.8"
 
-cli-ux@^2.0.20:
-  version "2.0.20"
-  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.20.tgz#a210d1b0aceba4eab2ca2937f98487b703b9b563"
+cli-ux@^2.0.21:
+  version "2.0.21"
+  resolved "https://registry.yarnpkg.com/cli-ux/-/cli-ux-2.0.21.tgz#a7231097af95356e79f5d6a380f04be889703083"
   dependencies:
     "@cli-engine/screen" "^0.0.0"
     "@heroku-cli/color" "^1.0.4"

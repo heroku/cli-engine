@@ -9,6 +9,10 @@ const debug = require('debug')
 const root = path.join(__dirname, '../../example')
 const { version } = require(path.join(root, 'package.json'))
 
+const handleErr = (err: Error) => require('debug')('test')(err)
+cli.on('warn', handleErr)
+cli.on('error', handleErr)
+
 export async function run(argv: string[] = []) {
   // mock some things
   nock('https://cli-assets.heroku.com:443')

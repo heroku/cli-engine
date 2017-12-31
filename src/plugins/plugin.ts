@@ -113,7 +113,7 @@ export abstract class Plugin implements ICommandManager {
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
-      if (!commands.length) throw new Error(`${this.name} has no commands`)
+      if (!commands.length) throw new Error(`${this.name} has no commands. Is this a CLI plugin?`)
       const r = await Promise.all(commands)
       return r
     })

@@ -83,8 +83,10 @@ export default class extends Command {
   }
 })
 
+const skipIfWin32 = process.platform === 'win32' ? test.skip : test
+
 describe('migrate', () => {
-  test('migrates heroku-kafka-jsplugin', async () => {
+  skipIfWin32('migrates heroku-kafka-jsplugin', async () => {
     const config = new Config()
     const legacyPath = path.join(config.dataDir, 'linked_plugins.json')
     await fs.outputJSON(legacyPath, {
@@ -95,6 +97,18 @@ describe('migrate', () => {
     expect((await run(['help', 'kafka'])).stdout).toMatch(
       /kafka:consumer-groups \[CLUSTER\] +lists available Kafka consumer groups/,
     )
+    await expect(fs.exists(legacyPath)).resolves.toBeFalsy()
+  })
+
+  test('migrates heroku-apps', async () => {
+    const config = new Config()
+    const legacyPath = path.join(config.dataDir, 'linked_plugins.json')
+    await fs.outputJSON(legacyPath, {
+      version: '1',
+      updated_at: '2017-12-28T00:26:11.624Z',
+      plugins: ['/Users/jdickey/src/github.com/heroku/cli-engine/plugins/heroku-apps'],
+    })
+    expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
     await expect(fs.exists(legacyPath)).resolves.toBeFalsy()
   })
 })
