@@ -92,7 +92,7 @@ describe('migrate', () => {
     await fs.outputJSON(legacyPath, {
       version: '1',
       updated_at: '2017-12-28T00:26:11.624Z',
-      plugins: ['/Users/jdickey/src/github.com/heroku/cli-engine/plugins/heroku-kafka-jsplugin'],
+      plugins: [path.join(__dirname, '../../plugins/heroku-kafka-jsplugin')],
     })
     expect((await run(['help', 'kafka'])).stdout).toMatch(
       /kafka:consumer-groups \[CLUSTER\] +lists available Kafka consumer groups/,
@@ -106,7 +106,7 @@ describe('migrate', () => {
     await fs.outputJSON(legacyPath, {
       version: '1',
       updated_at: '2017-12-28T00:26:11.624Z',
-      plugins: ['/Users/jdickey/src/github.com/heroku/cli-engine/plugins/heroku-apps'],
+      plugins: [path.join(__dirname, '../../plugins/heroku-apps')],
     })
     expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
     await expect(fs.exists(legacyPath)).resolves.toBeFalsy()
