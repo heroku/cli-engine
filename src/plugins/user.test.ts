@@ -1,7 +1,7 @@
 import * as nock from 'nock'
 import * as path from 'path'
 
-import { run } from '../__test__/run'
+import { run, skipIfNode6 } from '../__test__/run'
 import Config from '../config'
 import * as fs from '../file'
 
@@ -53,7 +53,7 @@ test('installs heroku-cli-status', async () => {
 })
 
 describe('migrate', () => {
-  test('migrates heroku-apps and heroku-cli-plugin-generator', async () => {
+  skipIfNode6('migrates heroku-apps and heroku-cli-plugin-generator', async () => {
     const config = new Config()
     const legacyPath = path.join(config.dataDir, 'plugins/package.json')
     await fs.outputJSON(legacyPath, {

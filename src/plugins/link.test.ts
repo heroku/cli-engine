@@ -1,6 +1,6 @@
 import * as path from 'path'
 
-import { run } from '../__test__/run'
+import { run, skipIfNode6, skipIfWin32 } from '../__test__/run'
 import Config from '../config'
 import * as fs from '../file'
 
@@ -83,8 +83,6 @@ export default class extends Command {
   }
 })
 
-const skipIfWin32 = process.platform === 'win32' ? test.skip : test
-
 describe('migrate', () => {
   skipIfWin32('migrates heroku-kafka-jsplugin', async () => {
     const config = new Config()
@@ -100,7 +98,7 @@ describe('migrate', () => {
     await expect(fs.exists(legacyPath)).resolves.toBeFalsy()
   })
 
-  test('migrates heroku-apps', async () => {
+  skipIfNode6('migrates heroku-apps', async () => {
     const config = new Config()
     const legacyPath = path.join(config.dataDir, 'linked_plugins.json')
     await fs.outputJSON(legacyPath, {

@@ -1,6 +1,7 @@
 import cli from 'cli-ux'
 import * as nock from 'nock'
 import * as path from 'path'
+import * as semver from 'semver'
 
 import { run as runCLI } from '../cli'
 
@@ -32,3 +33,6 @@ export async function run(argv: string[] = []) {
 
   return { stdout, stderr }
 }
+
+export const skipIfWin32 = process.platform === 'win32' ? test.skip : test
+export const skipIfNode6 = semver.lt(process.versions.node, '7.0.0') ? test.skip : test

@@ -10,3 +10,6 @@
 [submodule "plugins/heroku-apps"]
 	path = plugins/heroku-apps
 	url = https://github.com/heroku/heroku-apps
+[submodule "plugins/heroku-cli-status"]
+	path = plugins/heroku-cli-status
+	url = https://github.com/heroku/heroku-cli-status
