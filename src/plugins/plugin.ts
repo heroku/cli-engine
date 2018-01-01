@@ -140,7 +140,7 @@ export abstract class Plugin implements ICommandManager {
 
   protected async topics(): Promise<ITopic[]> {
     const cache: ITopic[] = await this.cache.fetch('topics', async () => {
-      this.debug('fetching commands')
+      this.debug('fetching topics')
       const m = await this.fetchModule()
       if (!m) return []
       return m.topics
