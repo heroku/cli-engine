@@ -152,6 +152,9 @@ export class Updater {
       let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
       let { response: stream } = await this.http.stream(url)
 
+      await deps.file.emptyDir(tmp)
+      let extraction = this.extract(stream, this.clientRoot, manifest.sha256gz)
+
       // TODO: use cli.action.type
       if (deps.filesize && (cli.action as any).frames) {
         // if spinner action
@@ -170,8 +173,7 @@ export class Updater {
         })
       }
 
-      await deps.file.emptyDir(tmp)
-      await this.extract(stream, this.clientRoot, manifest.sha256gz)
+      await extraction
       if (await deps.file.exists(output)) {
         await deps.file.rename(output, `${output}.old`)
       }
