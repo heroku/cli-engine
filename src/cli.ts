@@ -85,3 +85,6 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
   cli.config.errlog = config.errlog
   return new CLI(config).run(argv)
 }
+
+export { ICommandInfo } from './command'
+export { Hook } from './hooks'
