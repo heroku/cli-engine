@@ -1,14 +1,11 @@
 environment:
   nodejs_version: "9"
 cache:
-  # - C:\Users\appveyor\AppData\Local\Yarn -> appveyor.yml
-  # - node_modules -> package.json
-  - yarn
+  - '%LOCALAPPDATA%\Yarn -> appveyor.yml'
+  - node_modules -> package.json
 
 install:
   - ps: Install-Product node $env:nodejs_version x64
-  - set PATH=%LOCALAPPDATA%\Yarn\config\global\node_modules\.bin;%PATH%
-  - yarn global add yarn
   - yarn
   - git submodule sync
   - git submodule update --init --recursive --remote
