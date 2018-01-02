@@ -26,9 +26,9 @@
   version "5.0.11"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.11.tgz#b3b1393da09469fbcaaa99329064e775e275de24"
 
-"@cli-engine/engine@^6.1.10":
-  version "6.1.11"
-  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-6.1.11.tgz#99a71ac7905e91e4c62136269aa6ab8e9cf3390b"
+"@cli-engine/engine@^6.1.12":
+  version "6.1.12"
+  resolved "https://registry.yarnpkg.com/@cli-engine/engine/-/engine-6.1.12.tgz#4afafc1049823ef204cb63a68d1566a2b1056cb7"
   dependencies:
     "@heroku-cli/color" "^1.0.4"
     assync "^1.0.4"
@@ -54,13 +54,13 @@
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/@cli-engine/screen/-/screen-0.0.0.tgz#c2e847c7d4d998490c9097282bf21637d5162116"
 
-"@cli-engine/util@^1.0.10":
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.10.tgz#04003cc1d3fcf6a910a5984b8a54b52fc00ba852"
+"@cli-engine/util@^1.0.11":
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.0.11.tgz#b5bc3071d6b4feb3e63a2c6713517d1a6b4bc655"
   dependencies:
     "@cli-engine/command" "^12.0.3"
-    "@cli-engine/config" "^5.0.10"
-    "@cli-engine/engine" "^6.1.10"
+    "@cli-engine/config" "^5.0.11"
+    "@cli-engine/engine" "^6.1.12"
     cli-ux "^2.0.21"
     cross-spawn "^5.1.0"
     del "^3.0.0"
