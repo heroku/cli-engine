@@ -177,10 +177,10 @@ export class Updater {
       await deps.file.rename(path.join(this.clientRoot, base), output)
 
       await this._createBin(manifest)
-      await this.reexecUpdate()
     } finally {
       await lock.remove('write')
     }
+    await this.reexecUpdate()
   }
 
   public async tidy() {
