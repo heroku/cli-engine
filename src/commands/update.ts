@@ -11,12 +11,6 @@ import PluginsUpdate from './plugins/update'
 
 const debug = require('debug')('cli:update')
 
-function brew(...args: string[]) {
-  const cp = require('child_process')
-  debug('brew %o', args)
-  return cp.spawnSync('brew', args, { stdio: 'inherit' })
-}
-
 const g = global as any
 const cliBin = g.config ? g.config.bin : 'heroku'
 
