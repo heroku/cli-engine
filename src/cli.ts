@@ -45,8 +45,8 @@ export default class CLI {
     }
     process.once('uncaughtException', handleErr)
     process.once('unhandledRejection', handleErr)
-    const handleEPIPE = (err: Error) => {
-      if ((err as any).code !== 'EPIPE') throw err
+    const handleEPIPE = (err: NodeJS.ErrnoException) => {
+      if (err.code !== 'EPIPE') throw err
     }
     process.stdout.on('error', handleEPIPE)
     process.stderr.on('error', handleEPIPE)
