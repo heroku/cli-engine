@@ -43,7 +43,9 @@ skipIfWin32('updates the CLI on unix', async () => {
     if (err.code !== 0) throw err
   })
 
-  expect(spawn).toBeCalledWith('cli-engine', ['update'], { stdio: 'inherit' })
+  expect(spawn.mock.calls[0][0]).toEqual('cli-engine')
+  expect(spawn.mock.calls[0][1]).toEqual(['update'])
+  expect(spawn.mock.calls[0][2]).toMatchObject({ stdio: 'inherit', env: { CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1' } })
 
   expect(await fs.readFile(path.join(config.dataDir, 'client/bin/cli-engine'))).toContain('#!/usr/bin/env bash')
 })
@@ -66,7 +68,9 @@ test('updates the CLI on windows', async () => {
   await run(['update']).catch(err => {
     if (err.code !== 0) throw err
   })
-  expect(spawn).toBeCalledWith('cli-engine', ['update'], { stdio: 'inherit' })
+  expect(spawn.mock.calls[0][0]).toEqual('cli-engine')
+  expect(spawn.mock.calls[0][1]).toEqual(['update'])
+  expect(spawn.mock.calls[0][2]).toMatchObject({ stdio: 'inherit', env: { CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1' } })
 
   expect(await fs.readFile(path.join(config.dataDir, 'client/bin/cli-engine.cmd'))).toEqual(
     `@echo off\n\"%~dp0\\..\\1.2.3\\bin\\cli-engine.cmd\" %*\n`,

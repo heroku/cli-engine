@@ -307,7 +307,10 @@ export class Updater {
   private async reexecUpdate() {
     cli.action.stop()
     return new Promise((_, reject) => {
-      spawn(this.binPath, ['update'], { stdio: 'inherit' })
+      spawn(this.binPath, ['update'], {
+        stdio: 'inherit',
+        env: { ...process.env, CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1' },
+      })
         .on('error', reject)
         .on('close', (status: number) => {
           try {
