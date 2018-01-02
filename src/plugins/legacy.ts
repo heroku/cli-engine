@@ -2,7 +2,6 @@ import { flags as Flags } from '@cli-engine/command'
 import { Config, ICommand } from '@cli-engine/config'
 import { color } from '@heroku-cli/color'
 import { args as Args } from 'cli-flags'
-import { cli } from 'cli-ux'
 import _ from 'ts-lodash'
 import { inspect } from 'util'
 
