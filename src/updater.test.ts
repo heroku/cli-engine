@@ -20,14 +20,14 @@ let api = nock('https://cli-assets.heroku.com')
 
 beforeEach(() => nock.cleanAll())
 afterEach(() => {
-  delete process.env.CLI_ENGINE_PLATFORM
-  delete process.env.CLI_ENGINE_ARCH
+  delete process.env.CLI_ENGINE_PLATFORM_OVERRIDE
+  delete process.env.CLI_ENGINE_ARCH_OVERRIDE
   api.done()
 })
 
 skipIfWin32('updates the CLI on unix', async () => {
-  process.env.CLI_ENGINE_PLATFORM = 'darwin'
-  process.env.CLI_ENGINE_ARCH = 'x64'
+  process.env.CLI_ENGINE_PLATFORM_OVERRIDE = 'darwin'
+  process.env.CLI_ENGINE_ARCH_OVERRIDE = 'x64'
   const config = new Config()
   api
     .get(`/cli-engine-example/channels/stable/darwin-x64`)
@@ -51,8 +51,8 @@ skipIfWin32('updates the CLI on unix', async () => {
 })
 
 test('updates the CLI on windows', async () => {
-  process.env.CLI_ENGINE_PLATFORM = 'win32'
-  process.env.CLI_ENGINE_ARCH = 'x64'
+  process.env.CLI_ENGINE_PLATFORM_OVERRIDE = 'win32'
+  process.env.CLI_ENGINE_ARCH_OVERRIDE = 'x64'
 
   const config = new Config({ platform: 'win32', arch: 'x64' })
   api
@@ -78,8 +78,8 @@ test('updates the CLI on windows', async () => {
 })
 
 test('validates the sha', async () => {
-  process.env.CLI_ENGINE_PLATFORM = 'darwin'
-  process.env.CLI_ENGINE_ARCH = 'x64'
+  process.env.CLI_ENGINE_PLATFORM_OVERRIDE = 'darwin'
+  process.env.CLI_ENGINE_ARCH_OVERRIDE = 'x64'
   const config = new Config()
   api
     .get(`/cli-engine-example/channels/stable/${config.platform}-${config.arch}`)
