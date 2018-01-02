@@ -83,7 +83,7 @@
     "posttest": "cli-engine-util",
     "precommit": "cli-engine-util",
     "prepare": "cli-engine-util",
-    "pretest": "tsc",
+    "pretest": "set && tsc",
     "test": "jest --runInBand"
   },
   "types": "lib/cli.d.ts"
