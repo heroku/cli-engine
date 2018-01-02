@@ -307,6 +307,7 @@ export class Updater {
   private async reexecUpdate() {
     cli.action.stop()
     return new Promise((_, reject) => {
+      debug('restarting CLI after update')
       spawn(this.binPath, ['update'], {
         stdio: 'inherit',
         env: { ...process.env, CLI_ENGINE_HIDE_UPDATED_MESSAGE: '1' },
