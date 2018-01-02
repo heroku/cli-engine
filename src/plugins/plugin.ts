@@ -69,6 +69,7 @@ export abstract class Plugin implements ICommandManager {
     this.lock = new RWLockfile(cacheFile, { ifLocked: () => cli.action.start(`Plugin ${this.name} is updating...`) })
   }
 
+  @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
     const results = {
       commands: await this.commands(),
