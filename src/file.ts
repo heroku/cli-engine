@@ -62,6 +62,7 @@ export async function readFile(file: string) {
 }
 
 export async function remove(file: string) {
+  if (!await exists(file)) return
   debug('remove', file)
   return fs.remove(file)
 }
@@ -133,4 +134,9 @@ export function touch(p: string) {
 export function mkdirpSync(p: string) {
   debug('mkdirpSync', p)
   return fs.mkdirpSync(p)
+}
+
+export function emptyDir(p: string) {
+  debug('emptyDir', p)
+  return fs.emptyDir(p)
 }

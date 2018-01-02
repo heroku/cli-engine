@@ -141,6 +141,7 @@ export class Updater {
   async update(manifest: IManifest) {
     let base = this.base(manifest)
     const output = path.join(this.clientRoot, manifest.version)
+    const tmp = path.join(this.clientRoot, base)
     const lock = new RWLockfile(this.autoupdatefile, { ifLocked: () => cli.action.start('CLI is updating') })
 
     if (!this.s3Host) throw new Error('S3 host not defined')
@@ -150,10 +151,6 @@ export class Updater {
     try {
       let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
       let { response: stream } = await this.http.stream(url)
-
-      await this._mkdirp(this.clientRoot)
-      await this._remove(output)
-      await this._remove(path.join(this.clientRoot, base))
 
       // TODO: use cli.action.type
       if (deps.filesize && (cli.action as any).frames) {
@@ -173,8 +170,12 @@ export class Updater {
         })
       }
 
+      await deps.file.emptyDir(tmp)
       await this.extract(stream, this.clientRoot, manifest.sha256gz)
-      await deps.file.rename(path.join(this.clientRoot, base), output)
+      if (await deps.file.exists(output)) {
+        await deps.file.rename(output, `${output}.old`)
+      }
+      await deps.file.rename(tmp, output)
       await deps.file.touch(output)
 
       await this._createBin(manifest)
@@ -218,7 +219,7 @@ export class Updater {
       }
 
       let fail = (err: Error) => {
-        this._remove(dir).then(() => reject(err))
+        deps.file.remove(dir).then(() => reject(err))
       }
 
       let hasher = crypto.createHash('sha256')
@@ -258,16 +259,6 @@ export class Updater {
 
       stream.pipe(gunzip).pipe(extract)
     })
-  }
-
-  private async _remove(dir: string) {
-    if (await deps.file.exists(dir)) {
-      await deps.file.remove(dir)
-    }
-  }
-
-  private async _mkdirp(dir: string) {
-    await deps.file.mkdirp(dir)
   }
 
   private base(manifest: IManifest): string {
