@@ -129,12 +129,10 @@ export class PluginLegacy {
       static flags = convertFlagsFromV5(c.flags)
       static variableArgs = !!c.variableArgs
       static help = c.help
+      static aliases = c.aliases || []
       static usage = c.usage
 
       async run() {
-        if (c.aliases && c.aliases.length) {
-          cli.warn(`Using aliases: ${c.aliases}`)
-        }
         const ctx: ILegacyContext = {
           version: this.config.userAgent,
           supportsColor: color.enabled,
