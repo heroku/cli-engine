@@ -1,8 +1,8 @@
+import Config from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 
 import { ICommandInfo } from './command'
-import Config from './config'
 import deps from './deps'
 import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 
