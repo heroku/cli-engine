@@ -35,9 +35,7 @@ export default class Update extends Command {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
     this.updater = new Updater(this.config)
-    if (this.config.updateDisabled === 'Update CLI with `brew upgrade heroku`') {
-      this.migrateBrew()
-    } else if (this.config.updateDisabled) {
+    if (this.config.updateDisabled) {
       cli.warn(this.config.updateDisabled)
     } else {
       cli.action.start(`${this.config.name}: Updating CLI`)
@@ -76,23 +74,6 @@ export default class Update extends Command {
       await logChopper.chop(this.config.errlog)
     } catch (e) {
       debug(e.message)
-    }
-  }
-
-  migrateBrew() {
-    try {
-      debug('migrating from brew')
-      const fs = require('fs-extra')
-      let p = fs.realpathSync('/usr/local/bin/heroku')
-      if (p.match(/\/usr\/local\/Cellar\/heroku\/\d+\.\d+\.\d+\//)) {
-        // not on private tap, move to it
-        cli.action.start('Upgrading homebrew formula')
-        brew('tap', 'heroku/brew')
-        brew('upgrade', 'heroku/brew/heroku')
-        cli.action.stop()
-      }
-    } catch (err) {
-      debug(err)
     }
   }
 }
