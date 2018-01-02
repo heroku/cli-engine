@@ -9,7 +9,7 @@ import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 const debug = require('debug')('cli:hooks')
 
 export abstract class Hook<T extends keyof IHooks> {
-  constructor(protected config: Config, protected options: IHooks[T]) {}
+  constructor(protected config: Config, protected options: IHooks[T] = {}) {}
   public abstract run(): Promise<void>
 }
 
