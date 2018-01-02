@@ -3,7 +3,7 @@ module.exports = {
   globalSetup: "<rootDir>/__test__/setup.js",
   mapCoverage: true,
   coverageDirectory: '<rootDir>/../coverage',
-  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/src/__test__'],
+  coveragePathIgnorePatterns: ['/node_modules/', '<rootDir>/__test__'],
   moduleFileExtensions: ['ts', 'js'],
   rootDir: 'src',
   testMatch: ['**/*.test.ts'],
