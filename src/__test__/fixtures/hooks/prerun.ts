@@ -1,7 +1,7 @@
-import { Hook, IHooks } from '../../../hooks'
+import { Hook } from '../../../hooks'
 
 export default class PreRun extends Hook<'prerun'> {
-  async run(options: IHooks['prerun']) {
-    process.env.PRERUN_HOOK_ARGS = options.argv.join(' ')
+  async run() {
+    process.env.PRERUN_HOOK_ARGS = this.options.argv.join(' ')
   }
 }

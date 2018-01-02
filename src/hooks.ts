@@ -9,8 +9,8 @@ import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 const debug = require('debug')('cli:hooks')
 
 export abstract class Hook<T extends keyof IHooks> {
-  constructor(protected config: Config) {}
-  public abstract run(options: IHooks[T]): Promise<void>
+  constructor(protected config: Config, protected options: IHooks[T]) {}
+  public abstract run(): Promise<void>
 }
 
 export interface IHooks {
@@ -26,11 +26,11 @@ export interface IHooks {
   }
 }
 
-interface IConstructor<T> {
-  new (config: Config): T
+interface IConstructor<T, O> {
+  new (config: Config, options: O): T
 }
 type LegacyHook<T extends keyof IHooks> = (config: Config, options: IHooks[T]) => Promise<void>
-type HookConstructor<T extends keyof IHooks> = IConstructor<Hook<T>>
+type HookConstructor<T extends keyof IHooks> = IConstructor<Hook<T>, IHooks[T]>
 
 export class Hooks {
   constructor(private config: Config) {}
@@ -51,8 +51,8 @@ export class Hooks {
       if (this.isLegacyHook(Hook)) {
         await Hook(this.config, options)
       } else {
-        const hook = new Hook(this.config)
-        await hook.run(options)
+        const hook = new Hook(this.config, options)
+        await hook.run()
       }
     }
   }
