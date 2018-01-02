@@ -1,3 +1,4 @@
+import cli from 'cli-ux'
 import * as path from 'path'
 
 import { ICommandInfo } from './command'
@@ -40,7 +41,13 @@ export class Hooks {
     for (let script of scripts) {
       script = path.join(this.config.root, script)
       debug(`%s %s`, event, script)
-      const Hook: HookConstructor<T> | LegacyHook<T> = deps.util.undefault(require(script))
+      let Hook: HookConstructor<T> | LegacyHook<T>
+      try {
+        Hook = deps.util.undefault(require(script))
+      } catch (err) {
+        cli.warn(err, { context: `hook:${event} loading ${script}` })
+        continue
+      }
       if (this.isLegacyHook(Hook)) {
         await Hook(this.config, options)
       } else {
