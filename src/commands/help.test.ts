@@ -6,7 +6,7 @@ test('shows help by default', async () => {
 
 Help topics, type cli-engine help TOPIC for more details:
 
- cli
+ cli      example topic description
  jobs
  plugins  add/remove CLI plugins
 
@@ -19,7 +19,7 @@ test('run help --all', async () => {
 
 Help topics, type cli-engine help TOPIC for more details:
 
- cli
+ cli      example topic description
  jobs
  plugins  add/remove CLI plugins
 

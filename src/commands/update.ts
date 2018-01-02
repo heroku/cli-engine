@@ -54,13 +54,6 @@ export default class Update extends Command {
           )}${channel === 'stable' ? '' : ' (' + color.yellow(channel) + ')'}`,
         )
         await this.updater.update(manifest)
-        cli.action.stop()
-        try {
-          await this.updater.autoupdate(true)
-          cli.exit(0)
-        } catch (err) {
-          cli.warn(err, { context: 'post-install autoupdate failed' })
-        }
       }
     }
     debug('fetch version')

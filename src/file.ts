@@ -13,6 +13,10 @@ export function exists(f: string): Promise<boolean> {
   return fs.exists(f)
 }
 
+export function existsSync(f: string): boolean {
+  return fs.existsSync(f)
+}
+
 const jsonFiles: { [k: string]: Promise<any> } = {}
 export function fetchJSONFile(f: string): Promise<any> {
   if (!jsonFiles[f]) {
@@ -35,6 +39,11 @@ export async function mkdirp(dir: string): Promise<void> {
 export async function outputFile(file: string, data: any, options?: fs.WriteFileOptions | string): Promise<void> {
   debug('outputFile', file)
   return fs.outputFile(file, data, options)
+}
+
+export function outputFileSync(p: string, body: string) {
+  debug('outputFileSync')
+  return fs.outputFileSync(p, body)
 }
 
 export async function outputJSON(file: string, data: any, options: fs.WriteOptions = {}) {
@@ -118,4 +127,9 @@ export async function newestFileInDir(dir: string): Promise<Date> {
 
 export function symlink(src: string, dst: string): Promise<void> {
   return fs.symlink(src, dst)
+}
+
+export function utimesSync(p: string, atime: Date, mtime: Date) {
+  debug('utimeSync')
+  return fs.utimesSync(p, atime, mtime)
 }

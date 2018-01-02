@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as semver from 'semver'
 
 import { run as runCLI } from '../cli'
+import Config from '../config'
 
 const debug = require('debug')
 
@@ -33,6 +34,10 @@ export async function run(argv: string[] = []) {
   if (stderr) d(`stdout: ${stderr}`)
 
   return { stdout, stderr }
+}
+
+export function config() {
+  return new Config({ root })
 }
 
 export const skipIfWin32 = process.platform === 'win32' ? test.skip : test

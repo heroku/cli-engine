@@ -126,7 +126,7 @@ export class Updater {
         timestamp(`starting \`${this.binPath} update --autoupdate\` from ${process.argv.slice(1, 3).join(' ')}\n`),
       )
 
-      this.spawnBinPath(this.binPath, ['update', '--autoupdate'], {
+      spawn(this.binPath, ['update', '--autoupdate'], {
         detached: !this.config.windows,
         stdio: ['ignore', fd, fd],
         env: this.autoupdateEnv,
@@ -177,6 +177,7 @@ export class Updater {
       await deps.file.rename(path.join(this.clientRoot, base), output)
 
       await this._createBin(manifest)
+      await this.reexecUpdate()
     } finally {
       await lock.remove('write')
     }
@@ -189,7 +190,7 @@ export class Updater {
       if (!await file.exists(root)) return
       let files = await file.ls(root)
       let promises = files.map(async f => {
-        if (['client', this.config.version].includes(path.basename(f.path))) return
+        if (['bin', this.config.version].includes(path.basename(f.path))) return
         let mtime = f.stat.isDirectory() ? await file.newestFileInDir(f.path) : f.stat.mtime
         if (moment(mtime).isBefore(moment().subtract(24, 'hours'))) {
           await file.remove(f.path)
@@ -303,14 +304,19 @@ export class Updater {
     })
   }
 
-  private spawnBinPath(binPath: string, args: string[], options: any) {
-    debug(binPath, args)
-    if (this.config.windows) {
-      args = ['/c', binPath, ...args]
-      return spawn(process.env.comspec || 'cmd.exe', args, options)
-    } else {
-      return spawn(binPath, args, options)
-    }
+  private async reexecUpdate() {
+    cli.action.stop()
+    return new Promise((_, reject) => {
+      spawn(this.binPath, ['update'], { stdio: 'inherit' })
+        .on('error', reject)
+        .on('close', (status: number) => {
+          try {
+            cli.exit(status)
+          } catch (err) {
+            reject(err)
+          }
+        })
+    })
   }
 
   private async _createBin(manifest: IManifest) {
