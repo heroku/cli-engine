@@ -31,7 +31,7 @@ export class PluginManifest {
     this.needsSave = false
     this.debug('saving')
     if (!await this.canWrite()) {
-      throw new Error('manifest file modified, cannot save')
+      throw new Error(`manifest file ${this.file} modified, cannot save`)
     }
     await deps.file.outputJSON(this.file, this.body)
     delete this.body
