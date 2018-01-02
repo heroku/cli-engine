@@ -238,7 +238,7 @@ export class Updater {
         switch (header.type) {
           case 'directory':
           case 'file':
-            debug(header.name)
+            if (process.env.CLI_ENGINE_DEBUG_UPDATE_FILES) debug(header.name)
             return false
           case 'symlink':
             return true
