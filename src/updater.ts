@@ -175,6 +175,7 @@ export class Updater {
 
       await this.extract(stream, this.clientRoot, manifest.sha256gz)
       await deps.file.rename(path.join(this.clientRoot, base), output)
+      await deps.file.touch(output)
 
       await this._createBin(manifest)
     } finally {
@@ -191,8 +192,7 @@ export class Updater {
       let files = await file.ls(root)
       let promises = files.map(async f => {
         if (['bin', this.config.version].includes(path.basename(f.path))) return
-        let mtime = f.stat.isDirectory() ? await file.newestFileInDir(f.path) : f.stat.mtime
-        if (moment(mtime).isBefore(moment().subtract(24, 'hours'))) {
+        if (moment(f.stat.mtime).isBefore(moment().subtract(24, 'hours'))) {
           await file.remove(f.path)
         }
       })

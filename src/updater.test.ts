@@ -105,49 +105,58 @@ describe('tidy', () => {
       .toDate()
 
     const c = config()
-    const oldFiles = [
-      /* 0 keep */ '/client/1.0.0/subdir/old1',
-      /* 1 keep */ '/client/1.0.0/subdir/old2',
-      /* 2 keep */ '/client/1.0.1/old1',
-      /* 3 keep */ '/client/1.0.1/old2',
-      /* 4 keep */ '/old',
-      /* 5 keep */ '/client/bin/old',
-      /* 6 keep */ `/client/${c.version}/old`,
-      /* 7 rm */ '/client/old',
-      /* 8 rm */ '/client/1.0.2/old1',
-      /* 9 rm */ '/client/1.0.2/old2',
-    ].map(p => path.join(c.dataDir, p))
-    const newFiles = [/* 0 */ '/client/1.0.0/subdir/new', /* 1 */ '/client/1.0.1/new', /* 2 */ '/client/new'].map(p =>
-      path.join(c.dataDir, p),
-    )
 
-    withFiles(oldFiles.reduce((files, f) => ({ ...files, [f]: { mtime: oldDate } }), {}))
-    withFiles(newFiles.reduce((files, f) => ({ ...files, [f]: { mtime: newDate } }), {}))
+    withFiles({
+      [path.join(c.dataDir, '/client/1.0.0')]: { type: 'dir', mtime: oldDate },
+      [path.join(c.dataDir, '/client/1.0.1')]: { type: 'dir', mtime: newDate },
+      [path.join(c.dataDir, '/client/1.0.2/foo')]: { type: 'file', mtime: oldDate },
+      [path.join(c.dataDir, '/client/1.0.3/foo')]: { type: 'file', mtime: newDate },
+      [path.join(c.dataDir, '/client/1.0.4/foo')]: { type: 'file', mtime: newDate },
+      [path.join(c.dataDir, '/client/foo')]: { type: 'file', mtime: oldDate },
+      [path.join(c.dataDir, '/client/bar')]: { type: 'file', mtime: newDate },
+    })
 
+    fs.utimesSync(path.join(c.dataDir, '/client/1.0.4'), new Date(), oldDate)
     api
       .get(`/cli-engine-example/channels/stable/${c.platform}-${c.arch}`)
       .reply(200, { channel: 'stable', version: c.version })
 
-    const toBeRemoved = [...['/client/1.0.2', '/client/old'].map(p => path.join(c.dataDir, p))]
-    expect(toBeRemoved.map(fs.existsSync)).not.toContain(false)
+    const toBeRemoved = [...['1.0.0', '1.0.4', 'foo'].map(p => path.join(c.dataDir, 'client', p))]
+    const toRemain = [...['1.0.1', '1.0.2', '1.0.3', 'bar'].map(p => path.join(c.dataDir, 'client', p))]
+
+    expect([...toBeRemoved, ...toRemain].map(fs.existsSync)).not.toContain(false)
 
     await run(['update'])
 
     expect(toBeRemoved.map(fs.existsSync)).not.toContain(true)
-
-    expect([...newFiles, ...oldFiles.slice(0, 7)].map(fs.existsSync)).not.toContain(false)
+    expect(toRemain.map(fs.existsSync)).not.toContain(false)
   })
 })
 
 interface File {
-  content?: string
+  type: 'file'
+  content: string
   mtime?: Date
 }
 
-function withFiles(files: { [k: string]: File | string }) {
+interface Dir {
+  type: 'dir'
+  mtime?: Date
+}
+
+function withFiles(files: { [k: string]: Dir | Partial<File> | string }) {
   for (let p of Object.keys(files)) {
-    let file = typeof files[p] === 'string' ? ({ content: files[p] } as File) : (files[p] as File)
-    fs.outputFileSync(p, file.content || '')
+    let file: File | Dir
+    if (typeof files[p] === 'string') {
+      file = { content: files[p], type: 'file' } as File
+    } else {
+      file = files[p] as File | Dir
+    }
+    if (file.type === 'dir') {
+      fs.mkdirpSync(p)
+    } else {
+      fs.outputFileSync(p, file.content || '')
+    }
     if (file.mtime) fs.utimesSync(p, new Date(), file.mtime)
   }
 }

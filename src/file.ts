@@ -116,15 +116,6 @@ export async function cleanup(dir: string): Promise<void> {
   if (!files.length) await remove(dir)
 }
 
-export async function newestFileInDir(dir: string): Promise<Date> {
-  let files = await walk(dir)
-  return files.reduce((prev, f): Date => {
-    if (f.stats.isDirectory()) return prev
-    if (f.stats.mtime > prev) return f.stats.mtime
-    return prev
-  }, new Date(0))
-}
-
 export function symlink(src: string, dst: string): Promise<void> {
   return fs.symlink(src, dst)
 }
@@ -132,4 +123,14 @@ export function symlink(src: string, dst: string): Promise<void> {
 export function utimesSync(p: string, atime: Date, mtime: Date) {
   debug('utimeSync')
   return fs.utimesSync(p, atime, mtime)
+}
+
+export function touch(p: string) {
+  debug('touch', p)
+  return fs.utimes(p, new Date(), new Date())
+}
+
+export function mkdirpSync(p: string) {
+  debug('mkdirpSync', p)
+  return fs.mkdirpSync(p)
 }
