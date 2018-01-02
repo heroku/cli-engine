@@ -175,7 +175,9 @@ export class Updater {
 
       await extraction
       if (await deps.file.exists(output)) {
-        await deps.file.rename(output, `${output}.old`)
+        const old = `${output}.old`
+        await deps.file.remove(old)
+        await deps.file.rename(output, old)
       }
       await deps.file.rename(tmp, output)
       await deps.file.touch(output)
