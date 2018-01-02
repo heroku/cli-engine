@@ -1,5 +1,7 @@
 import * as path from 'path'
 
+console.log(process.env)
+throw new Error('x')
 import Config from './config'
 import { Hooks } from './hooks'
 
