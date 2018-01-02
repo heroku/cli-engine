@@ -2775,6 +2775,14 @@ rwlockfile@^2.0.13:
     tslib "^1.8.1"
     uuid "^3.1.0"
 
+rwlockfile@^2.0.15:
+  version "2.0.15"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.15.tgz#244949065df3a78d65a4f91d37452523e170e13f"
+  dependencies:
+    fs-extra "^5.0.0"
+    tslib "^1.8.1"
+    uuid "^3.1.0"
+
 safe-buffer@^5.0.1, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
