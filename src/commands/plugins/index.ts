@@ -34,7 +34,7 @@ ${examplePluginsHelp.join('\n')}
 
   async run() {
     let plugins = await this.fetchPlugins()
-    plugins = plugins.filter(p => p.type !== 'builtin')
+    plugins = plugins.filter(p => p.type !== 'builtin' && p.type !== 'main')
     plugins.sort(compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
     if (!plugins.length) cli.warn('no plugins installed')

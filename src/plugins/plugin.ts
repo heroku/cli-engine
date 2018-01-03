@@ -39,7 +39,7 @@ export interface IPluginOptions {
   config: Config
   root: string
   pjson: IPluginPJSON
-  type: string
+  type: PluginType
 }
 
 export abstract class Plugin implements ICommandManager {
@@ -67,6 +67,7 @@ export abstract class Plugin implements ICommandManager {
     this.cache = new deps.PluginManifest({ file: cacheFile, invalidate: cacheKey, name: this.name })
     this.debug = require('debug')(`cli:plugins:${[opts.type, this.name, this.version].join(':')}`)
     this.lock = new RWLockfile(cacheFile, { ifLocked: () => cli.action.start(`Plugin ${this.name} is updating`) })
+    this.type = opts.type
   }
 
   @rwlockfile('lock', 'read')
