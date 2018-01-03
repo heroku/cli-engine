@@ -55,7 +55,7 @@ test('installs heroku-cli-status', async () => {
   await expect(run(['help', 'status'])).rejects.toThrow(/Exited with code: 127/)
 })
 
-test('installs scoped @heroku/cli-status', async () => {
+test('installs scoped @heroku-cli/status', async () => {
   // install plugin
   await run(['plugins:install', '@heroku-cli/status'])
 
