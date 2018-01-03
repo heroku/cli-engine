@@ -104,7 +104,14 @@ export class LinkPlugins {
   private async _init(): Promise<void> {
     this.debug('init')
     this.plugins = _.compact(
-      await Promise.all(deps.util.objValues(await this.manifestPlugins()).map(v => this.loadPlugin(v.root))),
+      await Promise.all(
+        deps.util.objValues(await this.manifestPlugins()).map(v => {
+          return this.loadPlugin(v.root).catch(err => {
+            cli.warn(err)
+            return null
+          })
+        }),
+      ),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
   }

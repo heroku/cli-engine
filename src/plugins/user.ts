@@ -1,6 +1,7 @@
 import cli from 'cli-ux'
 import * as path from 'path'
 import RWLockfile, { rwlockfile } from 'rwlockfile'
+import _ from 'ts-lodash'
 
 import Config from '../config'
 import deps from '../deps'
@@ -83,8 +84,15 @@ export class UserPlugins {
   @rwlockfile('lock', 'read')
   private async fetchPlugins() {
     this.debug('fetchPlugins')
-    this.plugins = await Promise.all(
-      deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => this.loadPlugin(k, v.tag)),
+    this.plugins = _.compact(
+      await Promise.all(
+        deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => {
+          return this.loadPlugin(k, v.tag).catch(err => {
+            cli.warn(err)
+            return null
+          })
+        }),
+      ),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
     await this.refresh()
