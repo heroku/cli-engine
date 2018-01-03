@@ -90,7 +90,13 @@ export default class Yarn {
     if (args.length !== 0) await this.checkForYarnLock()
     if (args[0] !== 'run') {
       const cacheDir = path.join(this.config.cacheDir, 'yarn')
-      args = [...args, '--non-interactive', `--preferred-cache-folder=${cacheDir}`, ...this.proxyArgs()]
+      args = [
+        ...args,
+        '--non-interactive',
+        `--mutex=file:${path.join(this.cwd, 'yarn.lock')}`,
+        `--preferred-cache-folder=${cacheDir}`,
+        ...this.proxyArgs(),
+      ]
       if (this.config.npmRegistry) {
         args.push(`--registry=${this.config.npmRegistry}`)
       }
