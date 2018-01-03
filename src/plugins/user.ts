@@ -130,6 +130,8 @@ export class UserPlugins {
       try {
         cli.action.start('Refreshing plugins')
         await deps.file.remove(path.join(this.config.dataDir, 'plugins/node_modules'))
+        await this.createPJSON()
+        await this.yarn.exec()
         this.debug('migrating user plugins')
         for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
           await this.addPlugin(name, tag)
