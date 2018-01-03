@@ -35,7 +35,10 @@ export default class PluginsInstall extends Command {
   async run() {
     const plugins = new Plugins(this.config)
     for (let plugin of this.argv) {
-      const [name, tag = 'latest'] = plugin.split('@')
+      let scoped = plugin[0] === '@'
+      if (scoped) plugin = plugin.slice(1)
+      let [name, tag = 'latest'] = plugin.split('@')
+      if (scoped) name = `@${name}`
       cli.action.start(`Installing plugin ${name}${tag === 'latest' ? '' : '@' + tag}`)
       await plugins.install({ type: 'user', name, tag, force: this.flags.force })
       cli.action.stop()

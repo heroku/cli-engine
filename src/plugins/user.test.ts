@@ -55,6 +55,20 @@ test('installs heroku-cli-status', async () => {
   await expect(run(['help', 'status'])).rejects.toThrow(/Exited with code: 127/)
 })
 
+test('installs scoped @heroku-cli/status', async () => {
+  // install plugin
+  await run(['plugins:install', '@heroku-cli/status'])
+
+  // check for plugin
+  expect((await run(['plugins'])).stdout).toContain('@heroku-cli/status')
+
+  // uninstall plugin
+  await run(['plugins:uninstall', '@heroku-cli/status'])
+
+  // ensure plugin is gone
+  expect((await run(['plugins'])).stdout).not.toContain('@heroku-cli/status')
+})
+
 describe('migrate', () => {
   skipIfNode6('migrates heroku-apps and heroku-cli-plugin-generator', async () => {
     const config = new Config()
