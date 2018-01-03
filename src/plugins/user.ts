@@ -129,13 +129,11 @@ export class UserPlugins {
       await this.lock.add('write', { reason: 'migrate' })
       try {
         cli.action.start('Refreshing plugins')
+        await deps.file.remove(path.join(this.config.dataDir, 'plugins/node_modules'))
         this.debug('migrating user plugins')
-        user = await deps.file.readJSON(userPath)
-        if (user['cli-engine']) return
         for (let [name, tag] of deps.util.objEntries<string>(user.dependencies)) {
           await this.addPlugin(name, tag)
         }
-        user = await deps.file.readJSON(userPath)
         user['cli-engine'] = { schema: 1 }
         await deps.file.outputJSON(userPath, user)
       } finally {

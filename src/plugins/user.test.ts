@@ -66,6 +66,24 @@ describe('migrate', () => {
     expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
     expect((await run(['help', 'plugins:generate'])).stdout).toMatch(/Usage: cli-engine plugins:generate NAME/)
   })
+
+  skipIfNode6('deletes old node_modules only when migrating', async () => {
+    const config = new Config()
+    const legacyPath = path.join(config.dataDir, 'plugins/package.json')
+    await fs.outputJSON(legacyPath, {
+      private: true,
+      dependencies: { 'heroku-cli-plugin-generator': 'latest', 'heroku-apps': 'latest' },
+    })
+    const pluginPath = path.join(config.dataDir, 'plugins/node_modules/foo/bar')
+    await fs.outputFile(pluginPath, 'foo')
+    await run(['version'])
+    expect(fs.existsSync(pluginPath)).toEqual(false)
+
+    await fs.outputFile(pluginPath, 'foo')
+    await run(['version'])
+    // exists when not migrating
+    expect(fs.existsSync(pluginPath)).toEqual(true)
+  })
 })
 
 describe('update', () => {
