@@ -36,13 +36,14 @@ export default class Yarn {
   }
 
   // https://github.com/yarnpkg/yarn/blob/master/src/util/execute-lifecycle-script.js#L130-L154
-  pathEnv(): { [k: string]: string } {
+  env(): { [k: string]: string | undefined } {
     let pathKey = this.pathKey()
     const pathParts = (process.env[pathKey] || '').split(path.delimiter)
     pathParts.unshift(path.dirname(process.execPath))
 
     return {
-      pathKey: pathParts.join(path.delimiter),
+      ...process.env,
+      [pathKey]: pathParts.join(path.delimiter),
     }
   }
 
@@ -105,7 +106,7 @@ export default class Yarn {
     let options = {
       cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
-      env: { ...process.env, ...this.pathEnv() },
+      env: this.env(),
     }
 
     debug(`${this.cwd}: ${this.bin} ${args.join(' ')}`)
