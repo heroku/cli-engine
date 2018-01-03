@@ -101,9 +101,8 @@ export class UserPlugins {
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
     const pjsonPath = path.join(this.userPluginPath(name), 'package.json')
     if (!await deps.file.exists(pjsonPath)) {
-      cli.action.start(`Refreshing ${name}`)
+      cli.action.start(`Refreshing user plugins`)
       await this.addPlugin(name, tag)
-      cli.action.stop()
     }
     const pjson = await deps.file.readJSON(pjsonPath)
     let p = new UserPlugin({

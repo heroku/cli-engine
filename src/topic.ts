@@ -102,6 +102,7 @@ export class RootTopic extends TopicBase {
 
   public addTopics(topics: ITopic[] | { [k: string]: ITopic } | undefined) {
     for (let t of topicsToArray(topics)) {
+      if (!t.name) continue
       let topic = this.findOrCreateTopic(t.name)
       this.mergeTopics(topic, t)
       this.addTopics(topicsToArray(t.subtopics, t.name))
