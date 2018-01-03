@@ -38,12 +38,12 @@ export interface IPluginModule {
 export interface IPluginOptions {
   config: Config
   root: string
-  pjson?: IPluginPJSON
+  pjson: IPluginPJSON
   type: string
 }
 
 export abstract class Plugin implements ICommandManager {
-  public abstract type: PluginType
+  public type: PluginType
   public name: string
   public version: string
   public tag?: string
@@ -58,7 +58,7 @@ export abstract class Plugin implements ICommandManager {
   constructor(opts: IPluginOptions) {
     this.config = opts.config
     this.root = opts.root
-    this.pjson = opts.pjson || require(path.join(opts.root, 'package.json'))
+    this.pjson = opts.pjson
     if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
     this.name = this.name || this.pjson.name
     this.version = this.version || this.pjson.version
@@ -154,10 +154,6 @@ export abstract class Plugin implements ICommandManager {
   protected get commandsDir(): string | undefined {
     let d = this.pjson['cli-engine'].commands
     if (d) return path.join(this.root, d)
-  }
-
-  protected get pjsonPath() {
-    return path.join(this.root, 'package.json')
   }
 
   protected commandIDsFromDir(): Promise<string[]> {

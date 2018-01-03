@@ -2,13 +2,13 @@ import * as path from 'path'
 
 import Config from '../config'
 
-import { Plugin, PluginType } from './plugin'
+import { Plugin } from './plugin'
 
 export class Builtin extends Plugin {
-  public type: PluginType = 'builtin'
-
   constructor(config: Config) {
-    super({ config, root: path.join(__dirname, '..', '..'), type: 'builtin' })
+    const root = path.join(__dirname, '../..')
+    const pjson = require(path.join(root, 'package.json'))
+    super({ config, type: 'builtin', root, pjson })
   }
 
   public get commandsDir() {

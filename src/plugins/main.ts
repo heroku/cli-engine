@@ -1,12 +1,12 @@
 import Config from '../config'
 
-import { Plugin, PluginType } from './plugin'
+import { Plugin } from './plugin'
 
 export class MainPlugin extends Plugin {
-  public type: PluginType = 'main'
-
   constructor(config: Config) {
-    super({ config, root: config.root!, type: 'main' })
+    const root = config.root!
+    const pjson = require(`${root}/package.json`)
+    super({ config, type: 'main', root, pjson })
   }
 
   public get commandsDir() {

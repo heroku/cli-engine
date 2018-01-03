@@ -16,14 +16,15 @@ export class CorePlugins {
 
   public async init(): Promise<void> {
     if (this.plugins || !this.config.root) return
-    this.plugins = this.config.corePlugins.map(
-      name =>
-        new CorePlugin({
-          root: path.join(this.config.root!, 'node_modules', name),
-          config: this.config,
-          type: 'core',
-        }),
-    )
+    this.plugins = this.config.corePlugins.map(name => {
+      const pjsonPath = require.resolve(`${name}/package.json`)
+      return new CorePlugin({
+        pjson: require(pjsonPath),
+        root: path.dirname(pjsonPath),
+        config: this.config,
+        type: 'core',
+      })
+    })
   }
 }
 

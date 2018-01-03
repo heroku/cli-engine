@@ -14,8 +14,12 @@ function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
 }
 
+function pjsonPath(root: string) {
+  return path.join(root, 'package.json')
+}
+
 function linkPJSON(root: string): Promise<IPluginPJSON> {
-  return deps.file.readJSON(path.join(root, 'package.json'))
+  return deps.file.readJSON(pjsonPath(root))
 }
 
 export interface IManifestPlugin {
@@ -176,7 +180,7 @@ export class LinkPlugin extends Plugin {
   public async refresh(force = false) {
     if (force || (await this.updateNodeModulesNeeded())) await this.updateNodeModules()
     else if (await this.prepareNeeded()) await this.prepare()
-    deps.validate.pluginPjson(this.pjson, this.pjsonPath)
+    deps.validate.pluginPjson(this.pjson, pjsonPath(this.root))
   }
 
   @rwlockfile('lock', 'write')
