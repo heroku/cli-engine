@@ -81,7 +81,7 @@ export class LinkPlugins {
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
     await this.init()
     root = path.resolve(root)
-    return this.plugins.find(p => path.resolve(p.root) === root)
+    return this.plugins && this.plugins.find(p => path.resolve(p.root) === root)
   }
 
   public async submanagers() {

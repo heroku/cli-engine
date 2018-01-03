@@ -8,6 +8,7 @@ import Config from './config'
 import * as fs from './file'
 
 jest.mock('cross-spawn')
+jest.setTimeout(60000)
 
 const { spawn } = require('cross-spawn')
 spawn.mockImplementation(() => {
