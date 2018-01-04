@@ -128,7 +128,7 @@ export abstract class Plugin implements ICommandManager {
         if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
-        } else if (deps_1.default.semver.lt(c._version || '', '10.0.0')) {
+        } else if (deps.semver.lt(c._version || '', '10.0.0')) {
           // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ argv: argv.slice(1) })
         } else if (deps.semver.lt(c._version || '', '11.0.0-beta.0')) {
