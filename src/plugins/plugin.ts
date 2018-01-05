@@ -130,7 +130,8 @@ export abstract class Plugin implements ICommandManager {
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
         } else if (deps.semver.lt(c._version || '', '10.0.0')) {
           // this.debug('legacy @cli-engine/command version', c._version)
-          res = await (cmd as any).run({ argv: argv.slice(1) })
+          let cvrtConfig = this.convertConfig(this.config)
+          res = await (cmd as any).run({ ...cvrtConfig, argv: argv.slice(1) })
         } else if (deps.semver.lt(c._version || '', '11.0.0-beta.0')) {
           // this.debug(`legacy @cli-engine/command version`, c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(2) })
@@ -263,5 +264,39 @@ export abstract class Plugin implements ICommandManager {
 
       return legacy.convert(m)
     })())
+  }
+
+  private convertConfig(config: Config): any {
+    return {
+      argv: config.argv(),
+      bin: config.bin(),
+      channel: config.channel(),
+      name: config.name(),
+      reexecBin: config.reexecBin(),
+      root: config.root(),
+      version: config.version(),
+      arch: config.arch(),
+      platform: config.platform(),
+      windows: config.windows(),
+      corePlugins: config.corePlugins(),
+      defaultCommand: config.defaultCommand(),
+      hooks: config.hooks(),
+      npmRegistry: config.npmRegistry(),
+      topics: config.topics(),
+      userPluginsEnabled: config.userPluginsEnabled(),
+      s3: config.s3(),
+      dirname: config.dirname(),
+      home: config.home(),
+      cacheDir: config.cacheDir(),
+      configDir: config.configDir(),
+      dataDir: config.dataDir(),
+      errlog: config.errlog(),
+      pjson: config.pjson(),
+      userAgent: config.userAgent(),
+      commandsDir: config.commandsDir(),
+      updateDisabled: config.updateDisabled(),
+      shell: config.shell(),
+      debug: config.debug(),
+    }
   }
 }
