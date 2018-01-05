@@ -9,6 +9,7 @@ import * as fs from './file'
 
 jest.mock('cross-spawn')
 jest.setTimeout(60000)
+const { version } = require(path.join(__dirname, '../example/package.json'))
 
 const { spawn } = require('cross-spawn')
 spawn.mockImplementation(() => {
@@ -109,6 +110,7 @@ describe('tidy', () => {
       .subtract(20, 'hours')
       .toDate()
 
+    process.env.CLI_ENGINE_CLI_BINPATH = path.join(process.env.CLI_ENGINE_DATA_DIR!, `/client/${version}/foo`)
     const c = config()
 
     withFiles({
@@ -117,6 +119,7 @@ describe('tidy', () => {
       [path.join(c.dataDir, '/client/1.0.2/foo')]: { type: 'file', mtime: oldDate },
       [path.join(c.dataDir, '/client/1.0.3/foo')]: { type: 'file', mtime: newDate },
       [path.join(c.dataDir, '/client/1.0.4/foo')]: { type: 'file', mtime: newDate },
+      [path.join(c.dataDir, `/client/${version}/foo`)]: { type: 'file', mtime: oldDate },
       [path.join(c.dataDir, '/client/foo')]: { type: 'file', mtime: oldDate },
       [path.join(c.dataDir, '/client/bar')]: { type: 'file', mtime: newDate },
     })
@@ -127,7 +130,7 @@ describe('tidy', () => {
       .reply(200, { channel: 'stable', version: c.version })
 
     const toBeRemoved = [...['1.0.0', '1.0.4', 'foo'].map(p => path.join(c.dataDir, 'client', p))]
-    const toRemain = [...['1.0.1', '1.0.2', '1.0.3', 'bar'].map(p => path.join(c.dataDir, 'client', p))]
+    const toRemain = [...['1.0.1', '1.0.2', '1.0.3', version, 'bar'].map(p => path.join(c.dataDir, 'client', p))]
 
     expect([...toBeRemoved, ...toRemain].map(fs.existsSync)).not.toContain(false)
 
