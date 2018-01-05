@@ -72,10 +72,27 @@ export class LinkPlugins {
   }
 
   @rwlockfile('lock', 'write')
-  public async uninstall(name: string): Promise<void> {
-    await this.init()
-    await this.removePlugin(name)
-    cli.action.stop()
+  public async uninstall(nameOrRoot: string): Promise<boolean> {
+    let plugins = await this.manifestPlugins()
+    let deleted
+    if (nameOrRoot in plugins) {
+      delete plugins[nameOrRoot]
+      deleted = nameOrRoot
+    } else {
+      const root = path.resolve(nameOrRoot)
+      for (let name of Object.keys(plugins)) {
+        if (root === path.resolve(plugins[name].root)) {
+          delete plugins[name]
+          deleted = name
+        }
+      }
+    }
+    if (!deleted) return false
+    await this.manifest.set('plugins', plugins)
+    await this.manifest.save()
+    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${deleted}.json`))
+    delete this.plugins
+    return true
   }
 
   public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
@@ -102,14 +119,23 @@ export class LinkPlugins {
 
   @rwlockfile('lock', 'read')
   private async _init(): Promise<void> {
+    if (this.plugins) return
     this.debug('init')
+    const manifest = await this.manifestPlugins()
     this.plugins = _.compact(
       await Promise.all(
-        deps.util.objValues(await this.manifestPlugins()).map(v => {
-          return this.loadPlugin(v.root).catch(err => {
+        deps.util.objEntries(manifest).map(async ([k, v]) => {
+          let plugin = await this.loadPlugin(v.root).catch(err => {
             cli.warn(err)
             return null
           })
+          if (plugin && plugin.name !== k) {
+            delete manifest[k]
+            manifest[plugin.name] = v
+            await this.manifest.set('plugins', manifest)
+            await this.manifest.save()
+          }
+          return plugin
         }),
       ),
     )
@@ -142,15 +168,6 @@ export class LinkPlugins {
     plugins[plugin.name] = { root }
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
-    delete this.plugins
-  }
-
-  private async removePlugin(name: string) {
-    let plugins = await this.manifestPlugins()
-    delete plugins[name]
-    await this.manifest.set('plugins', plugins)
-    await this.manifest.save()
-    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${name}.json`))
     delete this.plugins
   }
 

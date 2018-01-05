@@ -51,9 +51,8 @@ export class UserPlugins {
   }
 
   @rwlockfile('lock', 'write')
-  public async uninstall(name: string): Promise<void> {
-    await this.init()
-    await this.removePlugin(name)
+  public async uninstall(name: string): Promise<boolean> {
+    return await this.removePlugin(name)
   }
 
   public async refresh(force = false) {
@@ -175,12 +174,14 @@ export class UserPlugins {
     }
   }
 
-  private async removePlugin(name: string) {
+  private async removePlugin(name: string): Promise<boolean> {
     let plugins = await this.manifestPlugins()
+    if (!plugins[name]) return false
     delete plugins[name]
     await this.manifest.set('plugins', plugins)
     await this.manifest.save()
     await this.yarn.exec(['remove', name])
+    return true
   }
 
   private async manifestPlugins(): Promise<{ [k: string]: { tag: string } }> {

@@ -2,7 +2,6 @@ import { flags } from '@cli-engine/command'
 import { color } from '@heroku-cli/color'
 import { cli } from 'cli-ux'
 
-import { Plugins } from '../../plugins'
 import { compare, objEntries } from '../../util'
 
 import Command from '../base'
@@ -33,7 +32,7 @@ ${examplePluginsHelp.join('\n')}
 `
 
   async run() {
-    let plugins = await this.fetchPlugins()
+    let plugins = await this.config.plugins.list()
     plugins = plugins.filter(p => p.type !== 'builtin' && p.type !== 'main')
     plugins.sort(compare('name'))
     if (!this.flags.core) plugins = plugins.filter(p => p.type !== 'core')
@@ -45,10 +44,5 @@ ${examplePluginsHelp.join('\n')}
       else if (plugin.tag !== 'latest') output += color.dim(` (${String(plugin.tag)})`)
       cli.log(output)
     }
-  }
-
-  private fetchPlugins() {
-    const plugins = new Plugins(this.config)
-    return plugins.list()
   }
 }

@@ -1,7 +1,5 @@
 import { cli } from 'cli-ux'
 
-import { Plugins } from '../../plugins'
-
 import Command from '../base'
 
 const g = global as any
@@ -17,12 +15,9 @@ export default class PluginsUninstall extends Command {
     $ ${bin} plugins:uninstall heroku-accounts
 `
 
-  plugins: Plugins
-
   async run() {
     const [plugin] = this.argv
     cli.action.start(`Uninstalling ${plugin}`)
-    this.plugins = new Plugins(this.config)
-    await this.plugins.uninstall(plugin)
+    await this.config.plugins.uninstall(plugin)
   }
 }
