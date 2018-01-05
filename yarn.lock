@@ -18,10 +18,6 @@
     chalk "^2.3.0"
     cli-flags "^2.0.6"
 
-"@cli-engine/config@^5.0.10":
-  version "5.0.10"
-  resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.10.tgz#f8420b9c4cd44e4feafeb90165d9557168bb484c"
-
 "@cli-engine/config@^5.0.11":
   version "5.0.11"
   resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.11.tgz#b3b1393da09469fbcaaa99329064e775e275de24"
@@ -75,21 +71,22 @@
     chalk "^2.3.0"
     supports-color "^5.1.0"
 
-"@heroku-cli/command@^7.0.11":
-  version "7.0.11"
-  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.11.tgz#0a76cf4775e07dbdee35934f85fc2808989c6a97"
+"@heroku-cli/command@^7.0.12":
+  version "7.0.12"
+  resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.12.tgz#a1fea2c1dcd715ce071a98c92da1bcc5d535b2dc"
   dependencies:
     "@cli-engine/command" "^12.0.3"
-    "@cli-engine/config" "^5.0.10"
+    "@cli-engine/config" "^5.0.11"
     cli-ux "^2.0.21"
-    heroku-client "3.0.5"
+    heroku-client "3.0.6"
     http-call "^4.0.6"
-    netrc-parser "^2.0.5"
+    netrc-parser "^2.0.6"
 
-"@heroku-cli/tslint@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@heroku-cli/tslint/-/tslint-1.0.3.tgz#a7258f8a365ea2d0e9199b73328f913bf2656443"
+"@heroku-cli/tslint@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@heroku-cli/tslint/-/tslint-1.1.2.tgz#65a5738608d1d687df1a594f059b9d66ff52eddc"
   dependencies:
+    tslint "^5.8.0"
     tslint-config-prettier "*"
 
 "@heroku/linewrap@^1.0.0":
@@ -128,9 +125,9 @@
   dependencies:
     "@types/node" "*"
 
-"@types/jest@22.0.0":
-  version "22.0.0"
-  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.0.0.tgz#23009941178aad7979a9591e026f7a96054d7bc0"
+"@types/jest@22.0.1":
+  version "22.0.1"
+  resolved "https://registry.yarnpkg.com/@types/jest/-/jest-22.0.1.tgz#6370a6d60cce3845e4cd5d00bf65f654264685bc"
 
 "@types/klaw@2.1.1":
   version "2.1.1"
@@ -138,13 +135,13 @@
   dependencies:
     "@types/node" "*"
 
-"@types/lodash@4.14.91":
-  version "4.14.91"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.91.tgz#794611b28056d16b5436059c6d800b39d573cd3a"
+"@types/lodash@4.14.92":
+  version "4.14.92"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.92.tgz#6e3cb0b71a1e12180a47a42a744e856c3ae99a57"
 
-"@types/nock@9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@types/nock/-/nock-9.1.0.tgz#f2f0b1da56507cb469fa08225ee78f5453b910d6"
+"@types/nock@9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@types/nock/-/nock-9.1.1.tgz#0a1d5df5b9fe5b5ac90926156c58f1544ddd3cf5"
   dependencies:
     "@types/node" "*"
 
@@ -1377,9 +1374,9 @@ hawk@~6.0.2:
     hoek "4.x.x"
     sntp "2.x.x"
 
-heroku-client@3.0.5:
-  version "3.0.5"
-  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.5.tgz#3a8a9445236cfc0e418bf795f51a2228610a575d"
+heroku-client@3.0.6:
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/heroku-client/-/heroku-client-3.0.6.tgz#bf603716a9d469682d4f7f80489276d82b896305"
   dependencies:
     is-retry-allowed "^1.0.0"
     tunnel-agent "^0.6.0"
@@ -1592,6 +1589,10 @@ is-posix-bracket@^0.1.0:
 is-primitive@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-primitive/-/is-primitive-2.0.0.tgz#207bab91638499c07b2adf240a41a87210034575"
+
+is-process-active@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/is-process-active/-/is-process-active-1.0.0.tgz#d21529792e950d1120369442867e0d7608ca2aac"
 
 is-regex@^1.0.4:
   version "1.0.4"
@@ -2228,9 +2229,9 @@ natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
 
-netrc-parser@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.5.tgz#28484c0f6e47a9f386a0953bcb7b9b55d8a83f9e"
+netrc-parser@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/netrc-parser/-/netrc-parser-2.0.6.tgz#0a21b96810dbb2c3ac42fac0a260bf838d20ef2f"
   dependencies:
     lex "^1.7.9"
 
@@ -2775,11 +2776,12 @@ rwlockfile@^2.0.15:
     tslib "^1.8.1"
     uuid "^3.1.0"
 
-rwlockfile@^2.0.16:
-  version "2.0.16"
-  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.16.tgz#0327c8c51b19baac7af0057d0adda6f4a726a485"
+rwlockfile@^2.0.17:
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.17.tgz#8905f09144d440833877fbb614e57607979b81e9"
   dependencies:
     fs-extra "^5.0.0"
+    is-process-active "^1.0.0"
     tslib "^1.8.1"
     uuid "^3.1.0"
 
@@ -3125,6 +3127,12 @@ ts-jest@^22.0.0:
 ts-lodash@4.0.8, ts-lodash@^4.0.8:
   version "4.0.8"
   resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.8.tgz#4f424e687f9c89a3dcf1473779a251f134170f6a"
+  dependencies:
+    lodash "^4.17.4"
+
+ts-lodash@4.0.9:
+  version "4.0.9"
+  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.9.tgz#088d7ceefbf36c8c4bcdf28372249015ccafd429"
   dependencies:
     lodash "^4.17.4"
 
