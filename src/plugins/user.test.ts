@@ -79,7 +79,7 @@ describe('migrate', () => {
     })
     expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
     expect((await run(['help', 'plugins:generate'])).stdout).toMatch(
-      /^Usage: cli-engine plugins:generate \[NAME\] \[flags\]/,
+      /^Usage: cli-engine plugins:generate NAME \[flags\]/,
     )
   })
 
