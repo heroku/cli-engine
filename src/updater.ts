@@ -191,6 +191,8 @@ export class Updater {
 
   public async tidy() {
     try {
+      if (!this.config.reexecBin) return
+      if (!this.config.reexecBin.includes(this.config.version)) return
       const { moment, file } = deps
       let root = this.clientRoot
       if (!await file.exists(root)) return
