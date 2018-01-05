@@ -1,5 +1,3 @@
-import { Plugins } from '../../plugins'
-
 import Command from '../base'
 
 export default class PluginsUpdate extends Command {
@@ -7,10 +5,7 @@ export default class PluginsUpdate extends Command {
   static command = 'update'
   static description = 'update installed plugins'
 
-  plugins: Plugins
-
   async run() {
-    this.plugins = new Plugins(this.config)
-    await this.plugins.update()
+    await this.config.plugins.update()
   }
 }

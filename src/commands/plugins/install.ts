@@ -2,7 +2,6 @@ import { flags } from '@cli-engine/command'
 import { cli } from 'cli-ux'
 
 import { Hooks } from '../../hooks'
-import { Plugins } from '../../plugins'
 
 import Command from '../base'
 
@@ -33,7 +32,7 @@ export default class PluginsInstall extends Command {
   }
 
   async run() {
-    const plugins = new Plugins(this.config)
+    const plugins = this.config.plugins
     for (let plugin of this.argv) {
       let scoped = plugin[0] === '@'
       if (scoped) plugin = plugin.slice(1)

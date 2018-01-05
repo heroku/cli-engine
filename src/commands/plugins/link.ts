@@ -3,7 +3,6 @@ import { cli } from 'cli-ux'
 import * as path from 'path'
 
 import { Hooks } from '../../hooks'
-import { Plugins } from '../../plugins'
 
 import Command from '../base'
 
@@ -27,10 +26,9 @@ export default class PluginsLink extends Command {
     Running prepare script for /Users/dickeyxxx/src/github.com/heroku/heroku-status... done`
 
   async run() {
-    const plugins = new Plugins(this.config)
     let p = path.resolve(this.argv[0] || process.cwd())
     cli.action.start(`Linking ${p}`)
-    await plugins.install({ type: 'link', root: p, force: this.flags.force })
+    await this.config.plugins.install({ type: 'link', root: p, force: this.flags.force })
     const hooks = new Hooks(this.config)
     await hooks.run('update')
   }

@@ -76,16 +76,9 @@ export class Plugins {
 
   public async uninstall(name: string): Promise<void> {
     await this.init()
-    const type = await this.pluginType(name)
-    if (!type) {
-      const linked = await this.link.findByRoot(name)
-      if (linked) {
-        name = linked.name
-      } else throw new Error(`${name} is not installed`)
-    }
-    cli.action.start(`Uninstalling ${name}`)
-    if (type === 'user') await this.user.uninstall(name)
-    else await this.link.uninstall(name)
+    let user = await this.user.uninstall(name)
+    let link = await this.link.uninstall(name)
+    if (!user && !link) throw new Error(`${name} is not installed`)
     cli.action.stop()
   }
 
@@ -100,7 +93,6 @@ export class Plugins {
     await Promise.all(managers.map(m => m.init()))
     const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
     this.plugins = _.compact([...plugins, this.builtin])
-    await await this.plugins.map(p => p.load())
   }
 
   private async getLinkedPackageName(root: string): Promise<string> {
