@@ -78,7 +78,9 @@ describe('migrate', () => {
       dependencies: { 'heroku-cli-plugin-generator': 'latest', 'heroku-apps': 'latest' },
     })
     expect((await run(['help', 'config:get'])).stdout).toMatch(/Usage: cli-engine config:get KEY \[flags\]/)
-    expect((await run(['help', 'plugins:generate'])).stdout).toMatch(/Usage: cli-engine plugins:generate NAME/)
+    expect((await run(['help', 'plugins:generate'])).stdout).toMatch(
+      /^Usage: cli-engine plugins:generate \[NAME\] \[flags\]/,
+    )
   })
 
   skipIfNode6('deletes old node_modules only when migrating', async () => {
