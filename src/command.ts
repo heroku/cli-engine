@@ -118,7 +118,12 @@ export class CommandManager {
     this.result = new RootTopic()
     await this.hooks.run('init')
     let managers = await this.submanagers()
-    let loads = managers.filter(m => m.load).map(m => m.load!().catch(err => cli.warn(err)))
+    let loads = managers.filter(m => m.load).map(m =>
+      m.load!().catch(err => {
+        if (err.code === 'ENOCOMMANDS') this.debug(err)
+        else cli.warn(err)
+      }),
+    )
     for (let r of loads) {
       let result = await r
       if (result) this.addResult(result)
