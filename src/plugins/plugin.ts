@@ -42,6 +42,14 @@ export interface IPluginOptions {
   type: PluginType
 }
 
+export class NoCommandsError extends Error {
+  code = 'ENOCOMMANDS'
+
+  constructor(name: string) {
+    super(`${name} has no commands. Is this a CLI plugin?`)
+  }
+}
+
 export abstract class Plugin implements ICommandManager {
   public type: PluginType
   public name: string
@@ -115,7 +123,7 @@ export abstract class Plugin implements ICommandManager {
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
-      if (!commands.length) throw new Error(`${this.name} has no commands. Is this a CLI plugin?`)
+      if (!commands.length) throw new NoCommandsError(this.name)
       const r = await Promise.all(commands)
       return r
     })

@@ -87,7 +87,8 @@ export class UserPlugins {
       await Promise.all(
         deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => {
           return this.loadPlugin(k, v.tag).catch(err => {
-            cli.warn(err)
+            if (err.code === 'ENOCOMMANDS') this.debug(err)
+            else cli.warn(err)
             return null
           })
         }),
