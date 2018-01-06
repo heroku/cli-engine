@@ -11,7 +11,7 @@ install:
   - git submodule update --init --recursive --remote
   - cd example && yarn
 test_script:
-  - yarn test
+  - yarn test --coverage
 after_test:
   - ps: |
       $env:PATH = 'C:\msys64\usr\bin;' + $env:PATH
