@@ -10,17 +10,17 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@cli-engine/command@^12.0.3":
-  version "12.0.3"
-  resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.0.3.tgz#4bf3c0a9d126ee6c412e26b3404a353c7db7401b"
+"@cli-engine/command@^12.0.3", "@cli-engine/command@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.1.0.tgz#86300ad3c7f51b1c539f9c7b998204f52016e0a7"
   dependencies:
     "@cli-engine/screen" "^0.0.0"
     chalk "^2.3.0"
-    cli-flags "^2.0.6"
+    cli-flags "^2.0.7"
 
-"@cli-engine/config@^5.0.11":
-  version "5.0.11"
-  resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.0.11.tgz#b3b1393da09469fbcaaa99329064e775e275de24"
+"@cli-engine/config@^5.0.11", "@cli-engine/config@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@cli-engine/config/-/config-5.1.0.tgz#d8ac7122317bc505dc09e7fd778777602d6b7568"
 
 "@cli-engine/engine@^6.1.25":
   version "6.1.29"
@@ -718,7 +718,7 @@ ci-info@^1.0.0:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-1.1.2.tgz#03561259db48d0474c8bdc90f5b47b068b6bbfb4"
 
-cli-flags@^2.0.6:
+cli-flags@^2.0.7:
   version "2.0.7"
   resolved "https://registry.yarnpkg.com/cli-flags/-/cli-flags-2.0.7.tgz#215b3f8d911142c3e4833eaf7f2f96ab97fd22cf"
   dependencies:
