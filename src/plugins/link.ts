@@ -43,6 +43,14 @@ async function getNewestJSFile(root: string): Promise<Date> {
   }, new Date(0))
 }
 
+export class NoCommandsError extends Error {
+  code = 'ENOCOMMANDS'
+
+  constructor(name: string) {
+    super(`${name} has no commands. Is this a CLI plugin?`)
+  }
+}
+
 export class LinkPlugins {
   public plugins: LinkPlugin[]
   private manifest: PluginManifest
@@ -65,6 +73,7 @@ export class LinkPlugins {
     try {
       await this.lock.add('write', { reason: 'install' })
       await this.addPlugin(root)
+      // TODO: if (!commands.length) throw new NoCommandsError(this.name)
       cli.action.stop()
     } finally {
       await this.lock.remove('write')

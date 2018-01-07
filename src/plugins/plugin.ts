@@ -2,6 +2,7 @@ import { ICommand } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 import RWLockfile, { rwlockfile } from 'rwlockfile'
+import _ from 'ts-lodash'
 
 import { ICommandInfo, ICommandManager, ILoadResult } from '../command'
 import Config from '../config'
@@ -42,14 +43,6 @@ export interface IPluginOptions {
   type: PluginType
 }
 
-export class NoCommandsError extends Error {
-  code = 'ENOCOMMANDS'
-
-  constructor(name: string) {
-    super(`${name} has no commands. Is this a CLI plugin?`)
-  }
-}
-
 export abstract class Plugin implements ICommandManager {
   public type: PluginType
   public name: string
@@ -60,6 +53,8 @@ export abstract class Plugin implements ICommandManager {
   protected config: Config
   protected debug: any
   protected lock: RWLockfile
+  protected result: ILoadResult
+  protected skipCache?: boolean
   private _module: Promise<IPluginModule>
   private cache: PluginManifest
 
@@ -80,7 +75,8 @@ export abstract class Plugin implements ICommandManager {
 
   @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
-    const results = {
+    if (this.result) return this.result
+    this.result = {
       commands: await this.commands(),
       topics: await this.topics(),
     }
@@ -95,7 +91,7 @@ export abstract class Plugin implements ICommandManager {
         this.debug(`cannot save cache: ${canWrite.status}`)
       }
     }
-    return results
+    return this.result
   }
 
   @rwlockfile('lock', 'write')
@@ -118,12 +114,11 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async commands(): Promise<ICommandInfo[]> {
-    const cache: ICommandInfo[] = await this.cache.fetch('commands', async () => {
+    const cache: ICommandInfo[] = await this.cacheFetch('commands', async () => {
       this.debug('fetching commands')
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
         .flatMap<ICommandInfo>()
-      // if (!commands.length) throw new NoCommandsError(this.name)
       const r = await Promise.all(commands)
       return r
     })
@@ -153,7 +148,7 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async topics(): Promise<ITopic[]> {
-    const cache: ITopic[] = await this.cache.fetch('topics', async () => {
+    const cache: ITopic[] = await this.cacheFetch('topics', async () => {
       this.debug('fetching topics')
       const m = await this.fetchModule()
       if (!m) return []
@@ -169,29 +164,16 @@ export abstract class Plugin implements ICommandManager {
     if (d) return path.join(this.root, d)
   }
 
-  protected commandIDsFromDir(): Promise<string[]> {
+  protected async commandIDsFromDir(): Promise<string[]> {
     const d = this.commandsDir
     if (!d) return Promise.resolve([])
-    return new Promise((resolve, reject) => {
-      let ids: string[] = []
-      deps
-        .klaw(d, { depthLimit: 10 })
-        .on('data', f => {
-          if (
-            !f.stats.isDirectory() &&
-            (f.path.endsWith('.js') || (f.path.endsWith('.ts') && this.type === 'builtin')) &&
-            !f.path.endsWith('.d.ts') &&
-            !f.path.endsWith('.test.js')
-          ) {
-            let parsed = path.parse(f.path)
-            let p = path.relative(d, path.join(parsed.dir, parsed.name))
-            if (path.basename(p) === 'index') p = path.dirname(p)
-            ids.push(p.split(path.sep).join(':'))
-          }
-        })
-        .on('error', reject)
-        .on('end', () => resolve(ids))
-    })
+    this.debug(`loading IDs from ${d}`)
+    const files = await deps.globby(['**/*.+(js|ts)', '!**/*.+(d.ts|test.ts|test.js)'], { nodir: true, cwd: d })
+    const ids = files
+      .map(path.parse)
+      .map(p => _.compact([...p.dir.split(path.sep), p.name === 'index' ? '' : p.name]).join(':'))
+    this.debug(`commandIDsFromDir dir:%s, ids:%o`, d, ids)
+    return ids
   }
 
   private commandPath(id: string): string {
@@ -272,6 +254,10 @@ export abstract class Plugin implements ICommandManager {
 
       return legacy.convert(m)
     })())
+  }
+
+  private cacheFetch<T>(key: string, fn: () => Promise<T>) {
+    return this.skipCache ? fn() : this.cache.fetch(key, fn)
   }
 
   private convertConfig(config: Config): Partial<Config> {

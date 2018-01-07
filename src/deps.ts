@@ -1,5 +1,6 @@
 import Heroku = require('@heroku-cli/command')
 import assync = require('assync')
+import globby = require('globby')
 import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
 import * as moment from 'moment'
@@ -27,6 +28,7 @@ export default {
   get semver(): typeof semver { return fetch('semver') },
   get assync(): typeof assync.default { return fetch('assync').default },
   get filesize(): any { return fetch('filesize') },
+  get globby(): typeof globby { return fetch('globby') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
