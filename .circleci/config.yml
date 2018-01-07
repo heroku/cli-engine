@@ -13,12 +13,14 @@ jobs:
             - v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
             - v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-
             - v1-yarn-{{ .Environment.CIRCLE_JOB }}-master
+      - run: yarn global add greenkeeper-lockfile@1 && greenkeeper-lockfile-update
       - run: yarn
       - run: yarn link
       - run: cd example && yarn link @cli-engine/engine && yarn
       - run: ./bin/run version
       - run: cd example && ./bin/run version
       - run: yarn test --coverage
+      - run: greenkeeper-lockfile-upload
       - run: curl -s https://codecov.io/bash | bash
       - save_cache:
           key: v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
