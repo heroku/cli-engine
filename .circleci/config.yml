@@ -14,7 +14,7 @@ jobs:
             - v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-
             - v1-yarn-{{ .Environment.CIRCLE_JOB }}-master
       - run: yarn global add greenkeeper-lockfile@1 && greenkeeper-lockfile-update
-      - run: yarn
+      - run: yarn --frozen-lockfile
       - run: yarn link
       - run: cd example && yarn link @cli-engine/engine && yarn
       - run: ./bin/run version
