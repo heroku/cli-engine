@@ -7,12 +7,7 @@ import { Plugin } from './plugin'
 export class Builtin extends Plugin {
   constructor(config: Config) {
     const root = path.join(__dirname, '../..')
-    const pjson = require(path.join(root, 'package.json'))
-    super({ config, type: 'builtin', root, pjson })
-  }
-
-  public get commandsDir() {
-    return path.join(__dirname, '..', 'commands')
+    super({ config, type: 'builtin', root })
   }
 
   protected async commandIDsFromDir(): Promise<string[]> {

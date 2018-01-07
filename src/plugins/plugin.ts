@@ -39,8 +39,15 @@ export interface IPluginModule {
 export interface IPluginOptions {
   config: Config
   root: string
-  pjson: IPluginPJSON
+  pjson?: IPluginPJSON
   type: PluginType
+}
+
+interface TSConfig {
+  compilerOptions: {
+    rootDir?: string
+    outDir?: string
+  }
 }
 
 export abstract class Plugin implements ICommandManager {
@@ -50,18 +57,19 @@ export abstract class Plugin implements ICommandManager {
   public tag?: string
   public pjson: IPluginPJSON
   public root: string
+  public commandsDir?: string
   protected config: Config
   protected debug: any
   protected lock: RWLockfile
   protected result: ILoadResult
-  protected skipCache?: boolean
   private _module: Promise<IPluginModule>
   private cache: PluginManifest
+  private tsconfig?: TSConfig
 
   constructor(opts: IPluginOptions) {
     this.config = opts.config
     this.root = opts.root
-    this.pjson = opts.pjson
+    this.pjson = opts.pjson || deps.readPkg.sync(this.root)
     if (!this.pjson['cli-engine']) this.pjson['cli-engine'] = {}
     this.name = this.name || this.pjson.name
     this.version = this.version || this.pjson.version
@@ -76,6 +84,8 @@ export abstract class Plugin implements ICommandManager {
   @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
     if (this.result) return this.result
+    this.tsconfig = await this.fetchTSConfig()
+    this.commandsDir = this.fetchCommandsDir()
     this.result = {
       commands: await this.commands(),
       topics: await this.topics(),
@@ -114,7 +124,7 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async commands(): Promise<ICommandInfo[]> {
-    const cache: ICommandInfo[] = await this.cacheFetch('commands', async () => {
+    const cache: ICommandInfo[] = await this.cache.fetch('commands', async () => {
       this.debug('fetching commands')
       const commands = await deps
         .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
@@ -148,7 +158,7 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async topics(): Promise<ITopic[]> {
-    const cache: ITopic[] = await this.cacheFetch('topics', async () => {
+    const cache: ITopic[] = await this.cache.fetch('topics', async () => {
       this.debug('fetching topics')
       const m = await this.fetchModule()
       if (!m) return []
@@ -159,9 +169,27 @@ export abstract class Plugin implements ICommandManager {
     return cache
   }
 
-  protected get commandsDir(): string | undefined {
-    let d = this.pjson['cli-engine'].commands
-    if (d) return path.join(this.root, d)
+  protected fetchCommandsDir(): string | undefined {
+    let commandsDir = this.pjson['cli-engine'].commands
+    if (!commandsDir) return
+    commandsDir = path.join(this.root, commandsDir)
+    if (this.tsconfig) {
+      this.debug('tsconfig.json found, skipping cache for main commands')
+      let { rootDir, outDir } = this.tsconfig.compilerOptions
+      if (rootDir && outDir) {
+        try {
+          this.debug('using ts files')
+          require('ts-node').register()
+          const lib = path.join(this.root, outDir)
+          const src = path.join(this.root, rootDir)
+          const relative = path.relative(lib, commandsDir)
+          commandsDir = path.join(src, relative)
+        } catch (err) {
+          this.debug(err)
+        }
+      }
+    }
+    return commandsDir
   }
 
   protected async commandIDsFromDir(): Promise<string[]> {
@@ -256,8 +284,13 @@ export abstract class Plugin implements ICommandManager {
     })())
   }
 
-  private cacheFetch<T>(key: string, fn: () => Promise<T>) {
-    return this.skipCache ? fn() : this.cache.fetch(key, fn)
+  private async fetchTSConfig(): Promise<TSConfig | undefined> {
+    try {
+      const tsconfig = await deps.file.readJSON(path.join(this.root, 'tsconfig.json'))
+      return tsconfig.compilerOptions && tsconfig
+    } catch (err) {
+      if (err.code !== 'ENOENT') throw err
+    }
   }
 
   private convertConfig(config: Config): Partial<Config> {

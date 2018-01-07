@@ -8,7 +8,7 @@ import Config from '../config'
 import deps from '../deps'
 
 import { PluginManifest } from './manifest'
-import { IPluginOptions, IPluginPJSON, Plugin, PluginType } from './plugin'
+import { IPluginOptions, Plugin, PluginType } from './plugin'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
@@ -16,10 +16,6 @@ function touch(f: string) {
 
 function pjsonPath(root: string) {
   return path.join(root, 'package.json')
-}
-
-function linkPJSON(root: string): Promise<IPluginPJSON> {
-  return deps.file.readJSON(pjsonPath(root))
 }
 
 export interface IManifestPlugin {
@@ -186,10 +182,11 @@ export class LinkPlugins {
 
   private async loadPlugin(root: string, refresh = false) {
     if (!await deps.file.exists(root)) return
+    const pkg = await deps.readPkg(root)
     let p = new LinkPlugin({
       config: this.config,
       root,
-      pjson: await linkPJSON(root),
+      pjson: pkg.pkg,
       type: 'link',
     })
     await p.refresh(refresh)
