@@ -8,7 +8,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "./lib",
-    "rootDir": "./src",
+    "rootDirs": ["./src"],
     "strict": true,
     "target": "es2016"
   },

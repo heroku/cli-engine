@@ -28,6 +28,7 @@
     "klaw": "^2.1.1",
     "log-chopper": "^1.0.2",
     "moment": "^2.20.1",
+    "read-pkg": "^3.0.0",
     "rwlockfile": "^2.0.17",
     "semver": "5.4.1",
     "string-similarity": "^1.2.0",
@@ -38,8 +39,8 @@
   "devDependencies": {
     "@cli-engine/command": "^12.1.0",
     "@cli-engine/config": "^5.1.0",
-    "@cli-engine/util": "^1.0.13",
-    "@heroku-cli/command": "^7.0.12",
+    "@cli-engine/util": "^1.1.2",
+    "@heroku-cli/command": "^7.0.13",
     "@heroku-cli/tslint": "^1.1.2",
     "@types/ansi-styles": "^2.0.30",
     "@types/chalk": "^2.2.0",
@@ -64,6 +65,7 @@
     "tar-fs": "^1.16.0",
     "ts-jest": "^22.0.1",
     "ts-node": "4.1.0",
+    "tsconfig-paths": "^2.7.3",
     "tslint": "^5.8.0",
     "typescript": "2.6.2"
   },

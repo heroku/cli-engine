@@ -5,6 +5,7 @@ import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
 import * as moment from 'moment'
 import semver = require('semver')
+// import readPkg = require('read-pkg')
 
 import command = require('./command')
 import help = require('./commands/help')
@@ -29,6 +30,7 @@ export default {
   get assync(): typeof assync.default { return fetch('assync').default },
   get filesize(): any { return fetch('filesize') },
   get globby(): typeof globby { return fetch('globby') },
+  get readPkg(): any { return fetch('read-pkg') },
 
   // local
   get Help(): typeof help.default { return fetch('./commands/help').default },
