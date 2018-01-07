@@ -1,6 +1,8 @@
 cli-engine
 ==========
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/heroku/cli-engine.svg)](https://greenkeeper.io/)
+
 ![Heroku logo](https://d4yt8xl9b7in.cloudfront.net/assets/home/logotype-heroku.png)
 
 [![CircleCI](https://circleci.com/gh/heroku/cli-engine/tree/master.svg?style=svg)](https://circleci.com/gh/heroku/cli-engine/tree/master)
