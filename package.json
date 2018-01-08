@@ -52,7 +52,7 @@
     "@types/klaw": "2.1.1",
     "@types/lodash": "4.14.92",
     "@types/nock": "9.1.1",
-    "@types/node": "8.5.7",
+    "@types/node": "8.5.8",
     "@types/semver": "5.4.0",
     "@types/strip-ansi": "3.0.0",
     "@types/supports-color": "3.1.0",
