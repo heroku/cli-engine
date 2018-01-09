@@ -273,6 +273,7 @@ export class Updater {
 
   private async autoupdateNeeded(): Promise<boolean> {
     try {
+      if (require('is-ci').isCI) return false
       const m = await mtime(this.autoupdatefile)
       return m.isBefore(deps.moment().subtract(5, 'hours'))
     } catch (err) {
