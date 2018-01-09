@@ -127,6 +127,7 @@ export abstract class Plugin implements ICommandManager {
       run: async (argv: string[]) => {
         await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
+        process.title = [this.config.bin, c.id, argv.slice(3)].join(' ')
         let res
         if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy @cli-engine/command version', c._version)
