@@ -1,41 +1,21 @@
 import cli from 'cli-ux'
 import * as path from 'path'
 import RWLockfile, { rwlockfile } from 'rwlockfile'
-import _ from 'ts-lodash'
 
 import Config from '../config'
 import deps from '../deps'
 
-import { PluginManifest } from './manifest'
-import { IPluginOptions, Plugin, PluginType } from './plugin'
 import Yarn from './yarn'
 
-export class UserPlugins {
-  public plugins: UserPlugin[]
-  public yarn: Yarn
-  private manifest: PluginManifest
+export default class UserPlugins {
+  public yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
   private lock: RWLockfile
-  private debug: any
+  private debug = require('debug')('cli:plugins:user')
 
-  constructor(private config: Config) {
-    this.debug = require('debug')('cli:plugins:user')
-    this.manifest = new deps.PluginManifest({
-      name: 'user',
-      file: path.join(this.config.dataDir, 'plugins', 'user.json'),
-    })
-    this.lock = new RWLockfile(this.manifest.file, { ifLocked: () => cli.action.start('Updating user plugins') })
-    this.yarn = new Yarn({ config: this.config, cwd: this.userPluginsDir })
-  }
-
-  public async submanagers() {
-    await this.init()
-    return this.plugins
-  }
+  constructor(private config: Config) {}
 
   @rwlockfile('lock', 'write')
   public async update() {
-    await this.init()
-    if (!this.plugins) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => `${k}@${v.tag}`)
     await this.yarn.exec(['upgrade', ...packages])
@@ -45,18 +25,16 @@ export class UserPlugins {
   @rwlockfile('lock', 'write')
   public async install(name: string, tag: string): Promise<void> {
     cli.action.start(`Installing ${name}@${tag}`)
-    await this.init()
     await this.addPlugin(name, tag)
     cli.action.stop()
   }
 
   @rwlockfile('lock', 'write')
-  public async uninstall(name: string): Promise<boolean> {
+  public async uninstall(name: string) {
     return await this.removePlugin(name)
   }
 
   public async refresh(force = false) {
-    if (!this.plugins.length) return
     const nodeVersionChanged = (await this.yarnNodeVersion()) !== process.version
     if (!force && !nodeVersionChanged) return
     if (nodeVersionChanged) cli.action.start(`Updating plugins, node version changed to ${process.versions.node}`)
@@ -67,56 +45,6 @@ export class UserPlugins {
     } finally {
       await this.lock.remove('write')
     }
-  }
-
-  public async init() {
-    await this.migrate()
-    if (!this.plugins && (await this.hasPlugins())) await this.fetchPlugins()
-  }
-
-  private async hasPlugins(): Promise<boolean> {
-    if (await deps.file.exists(this.manifest.file)) return true
-    this.debug('no user plugins')
-    return false
-  }
-
-  @rwlockfile('lock', 'read')
-  private async fetchPlugins() {
-    this.debug('fetchPlugins')
-    this.plugins = _.compact(
-      await Promise.all(
-        deps.util.objEntries(await this.manifestPlugins()).map(([k, v]) => {
-          return this.loadPlugin(k, v.tag).catch(err => {
-            if (err.code === 'ENOCOMMANDS') this.debug(err)
-            else cli.warn(err)
-            return null
-          })
-        }),
-      ),
-    )
-    if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
-    await this.refresh()
-  }
-
-  private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
-    const pjsonPath = path.join(this.userPluginPath(name), 'package.json')
-    if (!await deps.file.exists(pjsonPath)) {
-      cli.action.start(`Refreshing user plugins`)
-      await this.addPlugin(name, tag)
-    }
-    const pjson = await deps.file.readJSON(pjsonPath)
-    let p = new UserPlugin({
-      type: 'user',
-      pjson,
-      tag,
-      root: this.userPluginPath(name),
-      config: this.config,
-    })
-    return p
-  }
-
-  private userPluginPath(name: string): string {
-    return path.join(this.userPluginsDir, 'node_modules', name)
   }
 
   private get userPluginsDir() {
@@ -163,30 +91,14 @@ export class UserPlugins {
     try {
       await this.createPJSON()
       await this.yarn.exec(['add', `${name}@${tag}`])
-      let plugin = await this.loadPlugin(name, tag)
-      await plugin.reset(true)
-      let plugins = await this.manifestPlugins()
-      plugins[name] = { tag }
-      await this.manifest.set('plugins', plugins)
-      await this.manifest.save()
     } catch (err) {
       await this.removePlugin(name).catch(err => this.debug(err))
       throw err
     }
   }
 
-  private async removePlugin(name: string): Promise<boolean> {
-    let plugins = await this.manifestPlugins()
-    if (!plugins[name]) return false
-    delete plugins[name]
-    await this.manifest.set('plugins', plugins)
-    await this.manifest.save()
+  private async removePlugin(name: string) {
     await this.yarn.exec(['remove', name])
-    return true
-  }
-
-  private async manifestPlugins(): Promise<{ [k: string]: { tag: string } }> {
-    return (await this.manifest.get('plugins')) || {}
   }
 
   private async yarnNodeVersion(): Promise<string | undefined> {
@@ -196,19 +108,5 @@ export class UserPlugins {
     } catch (err) {
       if (err.code !== 'ENOENT') throw err
     }
-  }
-}
-
-export type UserPluginOptions = IPluginOptions & {
-  tag: string
-}
-
-export class UserPlugin extends Plugin {
-  public type: PluginType = 'user'
-  public tag: string
-
-  constructor(opts: UserPluginOptions) {
-    super(opts)
-    this.tag = opts.tag || 'latest'
   }
 }

@@ -18,12 +18,15 @@ export default class Update extends Command {
   static topic = 'update'
   static description = `update the ${cliBin} CLI`
   static args = [{ name: 'channel', optional: true }]
+  // we never want updates to fail, so don't validate
+  static variableArgs = true
   static flags: flags.Input = {
     autoupdate: flags.boolean({ hidden: true }),
   }
   updater: Updater
 
   async run() {
+    if (this.argv.length > 1) cli.warn(`Unexpected argument: ${this.argv.slice(1).join(' ')}`)
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')

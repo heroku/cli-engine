@@ -1,14 +1,10 @@
 import cli from 'cli-ux'
 import * as fs from 'fs-extra'
 import * as path from 'path'
-import RWLockfile, { rwlockfile } from 'rwlockfile'
-import _ from 'ts-lodash'
+import { rwlockfile } from 'rwlockfile'
 
 import Config from '../config'
 import deps from '../deps'
-
-import { PluginManifest } from './manifest'
-import { IPluginOptions, Plugin, PluginType } from './plugin'
 
 function touch(f: string) {
   fs.utimesSync(f, new Date(), new Date())
@@ -47,150 +43,36 @@ export class NoCommandsError extends Error {
   }
 }
 
-export class LinkPlugins {
-  public plugins: LinkPlugin[]
-  private manifest: PluginManifest
-  private lock: RWLockfile
-  private debug: any
+export default class LinkPlugins {
+  // private debug = require('debug')('cli:plugins:link')
 
-  constructor(private config: Config) {
-    this.debug = require('debug')('cli:plugins:user')
-    this.manifest = new deps.PluginManifest({
-      name: 'link',
-      file: path.join(this.config.dataDir, 'plugins', 'link.json'),
-    })
-    this.lock = new RWLockfile(this.manifest.file, { ifLocked: () => cli.action.start('Link plugins updating') })
-  }
+  constructor(private _: Config) {}
 
   @rwlockfile('lock', 'write')
   public async install(root: string): Promise<void> {
     cli.action.start(`Linking ${root}`)
-    await this.init()
-    try {
-      await this.lock.add('write', { reason: 'install' })
-      await this.addPlugin(root)
-      // TODO: if (!commands.length) throw new NoCommandsError(this.name)
-      cli.action.stop()
-    } finally {
-      await this.lock.remove('write')
-    }
   }
 
   @rwlockfile('lock', 'write')
-  public async uninstall(nameOrRoot: string): Promise<boolean> {
-    let plugins = await this.manifestPlugins()
-    let deleted
-    if (nameOrRoot in plugins) {
-      delete plugins[nameOrRoot]
-      deleted = nameOrRoot
-    } else {
-      const root = path.resolve(nameOrRoot)
-      for (let name of Object.keys(plugins)) {
-        if (root === path.resolve(plugins[name].root)) {
-          delete plugins[name]
-          deleted = name
-        }
-      }
-    }
-    if (!deleted) return false
-    await this.manifest.set('plugins', plugins)
-    await this.manifest.save()
-    await deps.file.remove(path.join(this.config.dataDir, 'plugins', 'link', `${deleted}.json`))
-    delete this.plugins
-    return true
-  }
-
-  public async findByRoot(root: string): Promise<LinkPlugin | undefined> {
-    await this.init()
-    root = path.resolve(root)
-    return this.plugins && this.plugins.find(p => path.resolve(p.root) === root)
-  }
-
-  public async submanagers() {
-    await this.init()
-    return this.plugins
-  }
-
-  public async init(): Promise<void> {
-    await this.migrate()
-    if (!this.plugins && (await this.hasPlugins())) await this._init()
-  }
-
-  private async hasPlugins(): Promise<boolean> {
-    if (await deps.file.exists(this.manifest.file)) return true
-    this.debug('no link plugins')
-    return false
-  }
-
-  @rwlockfile('lock', 'read')
-  private async _init(): Promise<void> {
-    if (this.plugins) return
-    this.debug('init')
-    const manifest = await this.manifestPlugins()
-    this.plugins = _.compact(
-      await Promise.all(
-        deps.util.objEntries(manifest).map(async ([k, v]) => {
-          let plugin = await this.loadPlugin(v.root).catch(err => {
-            cli.warn(err)
-            return null
-          })
-          if (plugin && plugin.name !== k) {
-            delete manifest[k]
-            manifest[plugin.name] = v
-            await this.manifest.set('plugins', manifest)
-            await this.manifest.save()
-          }
-          return plugin
-        }),
-      ),
-    )
-    if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
+  public async uninstall(_: string) {
   }
 
   private async migrate() {
-    const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
-    if (!await deps.file.exists(linkedPath)) return
-    try {
-      await this.lock.add('write', { reason: 'migrate' })
-      cli.action.start('migrating link plugins')
-      let linked = await deps.file.readJSON(linkedPath)
-      for (let root of linked.plugins) {
-        cli.action.status = root
-        await this.addPlugin(root)
-      }
-      cli.action.stop()
-      await deps.file.remove(linkedPath)
-    } finally {
-      await this.lock.remove('write')
-    }
-  }
-
-  private async addPlugin(root: string) {
-    const plugin = await this.loadPlugin(root, true)
-    if (!plugin) return
-    await plugin.load()
-    let plugins = await this.manifestPlugins()
-    plugins[plugin.name] = { root }
-    await this.manifest.set('plugins', plugins)
-    await this.manifest.save()
-    delete this.plugins
-  }
-
-  private async manifestPlugins(): Promise<{ [k: string]: { root: string } }> {
-    return (await this.manifest.get('plugins')) || {}
-  }
-
-  private async loadPlugin(root: string, refresh = false) {
-    if (!await deps.file.exists(root)) return
-    const pkg = await deps.readPkg(root)
-    let p = new LinkPlugin({
-      config: this.config,
-      root,
-      pjson: pkg.pkg,
-      type: 'link',
-    })
-    await p.refresh(refresh)
-    return p
+    // const linkedPath = path.join(this.config.dataDir, 'linked_plugins.json')
+    // if (!await deps.file.exists(linkedPath)) return
+    // try {
+    //   // await this.lock.add('write', { reason: 'migrate' })
+    //   cli.action.start('migrating link plugins')
+    //   let linked = await deps.file.readJSON(linkedPath)
+    //   for (let root of linked.plugins) {
+    //     cli.action.status = root
+    //     await this.addPlugin(root)
+    //   }
+    //   cli.action.stop()
+    //   await deps.file.remove(linkedPath)
+    // } finally {
+    //   // await this.lock.remove('write')
+    // }
   }
 }
 

@@ -1,113 +1,54 @@
-import * as fs from 'fs-extra'
+import * as path from 'path'
+import { rwlockfile } from 'rwlockfile'
+import _ from 'ts-lodash'
 
-import deps from '../deps'
+import Config from '../config'
 
-export interface IManifestOpts {
-  file: string
-  invalidate?: string
+import File from './file'
+
+export interface UserPlugin {
+  type: 'user'
   name: string
+  tag: string
+}
+export interface LinkPlugin {
+  type: 'link'
+  name: string
+  root: string
 }
 
-export class PluginManifest {
-  public needsSave: boolean = false
-  public file: string
-  public invalidate: string | undefined
-  public name: string
-  private body: { [k: string]: any }
-  private mtime?: number
-  private saving?: Promise<void>
-  private debug: any
+export type Plugin = LinkPlugin | UserPlugin
 
-  constructor(opts: IManifestOpts) {
-    this.file = opts.file
-    this.invalidate = opts.invalidate
-    this.name = opts.name
-    this.debug = require('debug')(`cli:manifest:${this.name}`)
+export default class PluginManifest extends File {
+  constructor(config: Config) {
+    super('plugin:manifest', path.join(config.dataDir, 'plugins', 'plugins.json'))
   }
 
-  public async save(): Promise<void> {
-    await this.init()
-    if (!this.needsSave) return
-    this.needsSave = false
-    this.debug('saving')
-    if (!await this.canWrite()) {
-      throw new Error(`manifest file ${this.file} modified, cannot save`)
+  @rwlockfile('lock', 'read')
+  async list(): Promise<Plugin[]> {
+    const plugins = (await this.get<Plugin[]>('plugins') || [])
+    const [link, user] = _.partition(plugins, ['type', 'link'])
+    return [...link, ...user]
+  }
+
+  @rwlockfile('lock', 'write')
+  async add(plugin: UserPlugin | LinkPlugin) {
+    this.debug('add', plugin)
+    await this.remove(plugin)
+    let plugins = await this.list()
+    await this.set(['plugins', plugins])
+  }
+
+  @rwlockfile('lock', 'write')
+  async remove({ name, root }: { name?: string; root: string } | { name: string; root?: string }) {
+    this.debug('remove', { name, root })
+    let plugins = await this.list()
+    let length = plugins.length
+    plugins = plugins.filter(p => p.name !== name)
+    if (root) {
+      plugins = plugins.filter(p => p.type === 'link' && p.root !== root)
     }
-    await deps.file.outputJSON(this.file, this.body)
-    delete this.body
-    delete this.mtime
-  }
-
-  public async fetch<T>(key: string, fn: () => Promise<T>): Promise<T> {
-    await this.init()
-    let v = await this.get(key)
-    if (!v) {
-      this.debug('fetching', key)
-      await this.set(key, await fn())
-    }
-    return await this.get(key)
-  }
-
-  public async get(key: string) {
-    await this.init()
-    return this.body.manifest[key]
-  }
-
-  public async set(key: string, v: any) {
-    this.debug('set', key)
-    if (!key) throw new Error('key is empty')
-    await this.init()
-    this.body.manifest[key] = v
-    this.needsSave = true
-    return this.body.manifest[key]
-  }
-
-  public async reset() {
-    this.debug('reset')
-    await deps.file.remove(this.file)
-    delete this.body
-    this.needsSave = false
-  }
-
-  private async init() {
-    await this.saving
-    if (this.body) return this.body
-    this.body = (await this.read()) || {
-      invalidate: this.invalidate,
-      manifest: {},
-    }
-  }
-
-  private async read(): Promise<any> {
-    try {
-      this.mtime = await this.getLastUpdated()
-      let body = await fs.readJSON(this.file)
-      if (body.invalidate !== this.invalidate) {
-        this.debug('manifest version mismatch')
-        return
-      }
-      if (!body.manifest) this.body.manifest = {}
-      return body
-    } catch (err) {
-      if (err.code === 'ENOENT') this.debug('manifest not found')
-      else {
-        await deps.file.remove(this.file)
-        throw err
-      }
-    }
-  }
-
-  private async canWrite() {
-    if (!this.mtime) return true
-    return (await this.getLastUpdated()) === this.mtime
-  }
-
-  private async getLastUpdated(): Promise<number | undefined> {
-    try {
-      const stat = await deps.file.stat(this.file)
-      return stat.mtime.getTime()
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-    }
+    if (length === plugins.length) return
+    await this.set(['plugins', plugins])
   }
 }

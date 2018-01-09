@@ -1,3 +1,5 @@
+import {Observable} from 'rxjs/Observable'
+
 import deps from './deps'
 const debug = require('debug')('util')
 
@@ -49,4 +51,8 @@ export function minorVersionGreater(fromString: string, toString: string): boole
   if (from.major < to.major) return true
   if (from.major === to.major && from.minor < to.minor) return true
   return false
+}
+
+export const collect = <T>(input: Observable<T>): Observable<T[]> => {
+  return input.reduce((a: T[], i: T) => a.concat(i), [])
 }

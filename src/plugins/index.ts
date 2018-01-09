@@ -1,107 +1,226 @@
 import cli from 'cli-ux'
 import * as path from 'path'
-import _ from 'ts-lodash'
+import { Package } from 'read-pkg'
+import RWLockfile from 'rwlockfile'
+import { Observable } from 'rxjs/Observable'
+import * as Rx from 'rxjs/Rx'
 
-import Config from '../config'
+import Config, { ICommand, IPluginManager, IPluginPJSON, ITopic } from '../config'
 import deps from '../deps'
 
-import { Builtin } from './builtin'
-import { CorePlugins } from './core'
-import { LinkPlugins } from './link'
-import { MainPlugin } from './main'
-import { Plugin, PluginType } from './plugin'
-import { UserPlugins } from './user'
+import PluginTopics from './topics'
+import PluginCommands from './commands'
 
-export type InstallOptions = ILinkInstallOptions | IUserInstallOptions
-export interface IUserInstallOptions {
-  type: 'user'
+const debug = require('debug')('cli:plugins')
+
+export type Debug = (...args: any[]) => void
+
+export interface Plugin {
+  type: 'builtin' | 'main' | 'core' | 'user' | 'link'
   name: string
-  tag: string
-  force?: boolean
-}
-export interface ILinkInstallOptions {
-  type: 'link'
+  version: string
   root: string
-  force?: boolean
+  pjson: IPluginPJSON
+  debug: Debug
+  lock?: RWLockfile
+  commandsDir?: string
+  tag?: string
 }
 
-export class Plugins {
-  public builtin: Builtin
-  public main: MainPlugin
-  public core: CorePlugins
-  public user: UserPlugins
-  public link: LinkPlugins
+interface PartialPlugin {
+  name?: string
+  type: string
+  root: string
+}
+
+interface TSConfig {
+  compilerOptions: {
+    rootDir?: string
+    outDir?: string
+  }
+}
+
+const getDebug = (type: string, pjson: IPluginPJSON) =>
+  require('debug')(['cli', 'plugins', type, pjson.name, pjson.version].join(':'))
+
+export default class PluginManager implements IPluginManager {
   protected debug = require('debug')('cli:plugins')
-  private plugins: Plugin[]
+  private _pluginTopics: PluginTopics
+  private _pluginCommands: PluginCommands
 
-  constructor(private config: Config) {
-    this.builtin = new Builtin(this.config)
-    if (config.commandsDir) {
-      this.main = new MainPlugin(this.config)
-    }
-    if (config.corePlugins) {
-      this.core = new CorePlugins(this.config)
-    }
-    if (config.userPluginsEnabled) {
-      this.user = new UserPlugins(this.config)
-      this.link = new LinkPlugins(this.config)
-    }
+  constructor(private config: Config) {}
+
+  get commandIDs(): Observable<string> {
+    return this.pluginCommands.commandIDs
   }
 
-  public async submanagers() {
-    return _.compact([this.builtin, this.main, this.core, this.user, this.link])
+  get commands(): Observable<ICommand> {
+    return this.pluginCommands.commands
   }
 
-  public async install(options: InstallOptions) {
-    await this.init()
-    let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
-    let currentType = await this.pluginType(name)
-    if (currentType) {
-      if (!options.force) {
-        throw new Error(`${name} is already installed, run with --force to install anyway`)
-      } else if (['link', 'user'].includes(currentType)) {
-        await this.uninstall(name)
+  get topics(): Observable<ITopic> {
+    return this.pluginTopics.topics
+  }
+
+  get plugins(): Observable<Plugin> {
+    const builtinPlugin = () => {
+      const root = path.join(__dirname, '../..')
+      debug('builtin', root)
+      return [{ type: 'builtin', root }]
+    }
+
+    const mainPlugin = () => {
+      if (!this.config.commandsDir || !this.config.root) return Rx.Observable.empty()
+      const root = this.config.root
+      debug('main', root)
+      return [{ type: 'main', root }]
+    }
+
+    const corePlugins = (): Rx.Observable<PartialPlugin> => {
+      return Rx.Observable.from(this.config.corePlugins)
+        .map(name => ({ type: 'core', name, root: pkgRoot(this.config.root!, name) }))
+        .pipe(deps.util.collect)
+        .do(core => debug('core', core.map(p => p.name)))
+        .concatMap(c => c)
+    }
+
+    const manifestPlugins = () => {
+      try {
+        if (!this.config.userPluginsEnabled) return Rx.Observable.empty()
+        const manifest = new deps.PluginManifest(this.config)
+        return Rx.Observable.from(manifest.list())
+          .concatMap(a => a)
+          .map(p => {
+            const root = path.join(this.config.dataDir, 'plugins/node_modules', p.name)
+            const lockRoot =
+              p.type === 'link'
+                ? path.join(root, '.cli-engine')
+                : path.join(this.config.dataDir, 'plugins', 'plugins.json')
+            const lock = new deps.rwlockfile.RWLockfile(lockRoot)
+            return {
+              root,
+              ...p,
+              lock,
+            }
+          })
+      } catch (err) {
+        cli.warn(err, { context: 'manifestPlugins' })
+        return Rx.Observable.empty()
       }
     }
-    if (options.type === 'link') {
-      await this.link.install(options.root)
-    } else {
-      await this.user.install(name, options.tag)
-    }
+
+    return Rx.Observable.concat<PartialPlugin>(manifestPlugins(), corePlugins(), mainPlugin(), builtinPlugin())
+      .map(async p => {
+        const pjson = populatePJSON(await deps.readPkg(p.root))
+        const debug = getDebug(p.type, pjson)
+        if (p.name && p.name !== pjson.name) await handleNameChange(p, pjson)
+        let plugin = { ...p, pjson, name: pjson.name, version: pjson.version, debug } as Plugin
+        plugin.commandsDir = await fetchCommandsDir(plugin)
+        return plugin
+      })
+      .concatMap(a => a.catch(err => cli.warn(err)))
+      .filter((p): p is Plugin => !!p)
+  }
+
+  public async install(options) {
+    // let name = options.type === 'user' ? options.name : await this.getLinkedPackageName(options.root)
+    // let currentType = await this.pluginType(name)
+    // if (currentType) {
+    //   if (!options.force) {
+    //     throw new Error(`${name} is already installed, run with --force to install anyway`)
+    //   } else if (['link', 'user'].includes(currentType)) {
+    //     await this.uninstall(name)
+    //   }
+    // }
+    // if (options.type === 'link') {
+    //   await this.link.install(options.root)
+    // } else {
+    //   await this.user.install(name, options.tag)
+    // }
   }
 
   public async update(): Promise<void> {
-    await this.user.update()
+    // await this.user.update()
   }
 
   public async uninstall(name: string): Promise<void> {
-    await this.init()
-    let user = await this.user.uninstall(name)
-    let link = await this.link.uninstall(name)
-    if (!user && !link) throw new Error(`${name} is not installed`)
-    cli.action.stop()
+    // let user = await this.user.uninstall(name)
+    // let link = await this.link.uninstall(name)
+    // if (!user && !link) throw new Error(`${name} is not installed`)
+    // cli.action.stop()
   }
 
-  public async list() {
-    await this.init()
-    return this.plugins
+  private get pluginCommands() {
+    return this._pluginCommands || (this._pluginCommands = new deps.pluginCommands(this.config))
+  }
+  private get pluginTopics() {
+    return this._pluginTopics || (this._pluginTopics = new deps.PluginTopics(this.config))
+  }
+}
+
+function pkgRoot(initialRoot: string, name: string): string {
+  function* updir() {
+    for (let root = initialRoot; root !== '/'; root = path.dirname(root)) {
+      yield root
+    }
   }
 
-  private async init() {
-    if (this.plugins) return
-    const managers = _.compact([this.core, this.user, this.link])
-    await Promise.all(managers.map(m => m.init()))
-    const plugins = managers.reduce((o, i) => o.concat(i.plugins), [] as Plugin[])
-    this.plugins = _.compact([...plugins, this.builtin])
+  for (let root of updir()) {
+    try {
+      const p = require.resolve(path.join(root, 'node_modules', name, 'package.json'))
+      if (p) return path.dirname(p)
+    } catch (err) {
+      if (err.code === 'MODULE_NOT_FOUND') continue
+      throw err
+    }
   }
+  // this basically just throws the original error
+  return require.resolve(path.join(initialRoot, 'node_modules', name, 'package.json'))
+}
 
-  private async getLinkedPackageName(root: string): Promise<string> {
-    const pjson = await deps.file.fetchJSONFile(path.join(root, 'package.json'))
-    return pjson.name
-  }
+function populatePJSON(pjson: Package): IPluginPJSON {
+  pjson['cli-engine'] = pjson['cli-engine'] || {}
+  pjson['cli-engine'].topics = pjson['cli-engine'].topics || {}
+  return pjson as IPluginPJSON
+}
 
-  private pluginType(name: string): PluginType | undefined {
-    const plugin = this.plugins.find(p => p.name === name)
-    return plugin && plugin.type
+async function fetchCommandsDir(plugin: {
+  pjson: IPluginPJSON
+  root: string
+  debug: Debug
+}): Promise<string | undefined> {
+  let commandsDir = plugin.pjson['cli-engine'].commands
+  if (!commandsDir) return
+  commandsDir = path.join(plugin.root, commandsDir)
+  let tsconfig = await fetchTSConfig(plugin.root)
+  if (tsconfig) {
+    plugin.debug('tsconfig.json found')
+    let { rootDir, outDir } = tsconfig.compilerOptions
+    if (rootDir && outDir) {
+      try {
+        plugin.debug('using ts files')
+        require('ts-node').register()
+        const lib = path.join(plugin.root, outDir)
+        const src = path.join(plugin.root, rootDir)
+        const relative = path.relative(lib, commandsDir)
+        commandsDir = path.join(src, relative)
+      } catch (err) {
+        plugin.debug(err)
+      }
+    }
   }
+  return commandsDir
+}
+
+async function fetchTSConfig(root: string): Promise<TSConfig | undefined> {
+  try {
+    const tsconfig = await deps.file.readJSON(path.join(root, 'tsconfig.json'))
+    return tsconfig.compilerOptions && tsconfig
+  } catch (err) {
+    if (err.code !== 'ENOENT') throw err
+  }
+}
+
+async function handleNameChange(_: PartialPlugin, pjson: IPluginPJSON) {
+  cli.warn(`name changed on ${pjson.name}`)
 }

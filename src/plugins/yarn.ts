@@ -19,34 +19,6 @@ export default class Yarn {
     return require.resolve('yarn/bin/yarn.js')
   }
 
-  // https://github.com/yarnpkg/yarn/blob/master/src/constants.js#L73-L90
-  pathKey(env: { [k: string]: string | undefined } = process.env): string {
-    let pathKey = 'PATH'
-
-    // windows calls its path "Path" usually, but this is not guaranteed.
-    if (this.config.windows) {
-      pathKey = 'Path'
-      for (const key in env) {
-        if (key.toLowerCase() === 'path') {
-          pathKey = key
-        }
-      }
-    }
-    return pathKey
-  }
-
-  // https://github.com/yarnpkg/yarn/blob/master/src/util/execute-lifecycle-script.js#L130-L154
-  env(): { [k: string]: string | undefined } {
-    let pathKey = this.pathKey()
-    const pathParts = (process.env[pathKey] || '').split(path.delimiter)
-    pathParts.unshift(path.dirname(process.execPath))
-
-    return {
-      ...process.env,
-      [pathKey]: pathParts.join(path.delimiter),
-    }
-  }
-
   fork(modulePath: string, args: string[] = [], options: any = {}): Promise<void> {
     return new Promise((resolve, reject) => {
       const { fork } = require('child_process')
@@ -94,7 +66,7 @@ export default class Yarn {
       args = [
         ...args,
         '--non-interactive',
-        `--mutex=file:${path.join(this.cwd, 'yarn.lock')}`,
+        `--mutex=file:${path.join(this.cwd, '.yarn.lock.mutex')}`,
         `--preferred-cache-folder=${cacheDir}`,
         ...this.proxyArgs(),
       ]
@@ -106,7 +78,7 @@ export default class Yarn {
     let options = {
       cwd: this.cwd,
       stdio: [null, null, null, 'ipc'],
-      env: this.env(),
+      env: deps.npmRunPath.env({cwd: this.cwd}),
     }
 
     debug(`${this.cwd}: ${this.bin} ${args.join(' ')}`)

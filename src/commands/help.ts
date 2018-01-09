@@ -4,9 +4,7 @@ import cli from 'cli-ux'
 import { renderList } from 'cli-ux/lib/list'
 import _ from 'ts-lodash'
 
-import { CommandManager } from '../command'
 import deps from '../deps'
-import { ICommandInfo, Topic } from '../plugins/topic'
 
 import Command from './base'
 
@@ -26,17 +24,14 @@ export default class Help extends Command {
     all: flags.boolean({ description: 'show all commands' }),
   }
 
-  cm: CommandManager
-
   async run() {
-    this.cm = new CommandManager(this.config)
     let subject = this.args.subject
     if (!subject) {
       await this.topics()
       if (this.flags.all) {
-        let rootCmds = await this.cm.rootCommands()
+        let rootCmds = await this.config.engine.rootCommands
         if (rootCmds) {
-          let rootTopics = await this.cm.rootTopics()
+          let rootTopics = await this.config.engine.rootTopics
           rootCmds = rootCmds.filter(r => !Object.keys(rootTopics).includes(r.id))
           await this.listCommandsHelp(rootCmds)
         }

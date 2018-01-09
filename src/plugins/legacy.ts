@@ -7,7 +7,7 @@ import { inspect } from 'util'
 
 import deps from '../deps'
 
-import { IPluginModule, IPluginTopic } from './plugin'
+import { PluginModule, PluginTopic } from './commands'
 
 export interface ILegacyTopic {
   id?: string
@@ -44,7 +44,7 @@ export interface IFlowCommand {
 
 export type LegacyCommand = IV5Command | IFlowCommand
 
-export type AnyTopic = IPluginTopic | ILegacyTopic
+export type AnyTopic = PluginTopic | ILegacyTopic
 export type AnyCommand = ICommand | LegacyCommand
 
 export interface IV5Command {
@@ -88,9 +88,9 @@ const debug = require('debug')('cli:legacy')
 export class PluginLegacy {
   constructor(_: Config) {}
 
-  public convert(m: IPluginModule | ILegacyModule): IPluginModule {
+  public convert(m: PluginModule | ILegacyModule): PluginModule {
     m.commands = this.convertCommands(m.commands)
-    return m as IPluginModule
+    return m as PluginModule
   }
 
   private convertCommands(c: AnyCommand[]): ICommand[] {

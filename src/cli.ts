@@ -3,8 +3,10 @@ import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 import * as path from 'path'
 
-import { Config, ConfigOptions } from './config'
+import Config, { ConfigOptions } from './config'
 import deps from './deps'
+
+export const VERSION = deps.readPkgUp.sync().pkg.version
 
 export default class CLI {
   constructor(private config: Config) {}
@@ -14,13 +16,16 @@ export default class CLI {
     this.setupHandlers()
     const id = argv[2]
 
-    if (id !== 'update') {
+    if (id === 'update') {
+      // short circuit everything so updates won't fail
+      return await deps.UpdateCommand.run(argv.slice(3), this.config)
+    } else {
       const updater = new deps.Updater(this.config)
       await updater.autoupdate()
     }
+    await this.config.engine.hooks.run('init')
 
-    const commands = new deps.CommandManager(this.config)
-    const result = await commands.run(argv)
+    const result = await this.config.engine.run(argv)
     await this.exitAfterStdoutFlush()
     return result
   }
@@ -34,7 +39,7 @@ export default class CLI {
   }
 
   private setupHandlers() {
-    process.env.CLI_ENGINE_VERSION = require('../package.json').version
+    process.env.CLI_ENGINE_VERSION = VERSION
     if (this.global.testing) return
     process.once('SIGINT', () => {
       if (cli.action.task) cli.action.stop(color.red('ctrl-c'))
@@ -79,12 +84,11 @@ export function run(arg1: string[] | ConfigOptions = process.argv, opts: ConfigO
     opts.pjson = require(f)
     deps.validate.cliPjson(opts.pjson, f)
   }
+  opts.parent = module.parent
   const config = new Config(opts)
-  config.plugins = new deps.Plugins(config)
   if (config.debug) cli.config.debug = true
   cli.config.errlog = config.errlog
   return new CLI(config).run(argv)
 }
 
-export { ICommandInfo } from './command'
 export { Hook } from './hooks'

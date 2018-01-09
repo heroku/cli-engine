@@ -1,22 +1,17 @@
 import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 
-import { CommandManager } from './command'
 import Command from './commands/base'
-import deps from './deps'
 
 export default class NotFound extends Command {
   static variableArgs = true
 
-  cm: CommandManager
-
   async run() {
-    this.cm = new deps.CommandManager(this.config)
     let closest
     let binHelp = `${this.config.bin} help`
     let id = this.argv[0]
     let idSplit = id.split(':')
-    if (await this.cm.findTopic(idSplit[0])) {
+    if (await this.config.engine.findTopic(idSplit[0])) {
       // if valid topic, update binHelp with topic
       binHelp = `${binHelp} ${idSplit[0]}`
       // if topic:COMMAND present, try closest for id
@@ -34,7 +29,7 @@ ${perhaps}Run ${color.cmd(binHelp)} for a list of available commands.`,
   }
 
   private async allCommands() {
-    let commands = await this.cm.commands()
+    let commands = await this.config.engine.commands
     return commands.map(c => c.id)
     // TODO add aliases
     // return this.commandManager.listCommandIDs().reduce((commands, c) => {

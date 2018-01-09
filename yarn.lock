@@ -50,9 +50,9 @@
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/@cli-engine/screen/-/screen-0.0.0.tgz#c2e847c7d4d998490c9097282bf21637d5162116"
 
-"@cli-engine/util@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.1.2.tgz#c76be91343ec5bb9dde7b4add9522b8bde7fdd29"
+"@cli-engine/util@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.1.5.tgz#6bb79740d00bc234446a87cae371b2cede3bd0c3"
   dependencies:
     "@cli-engine/command" "^12.1.0"
     "@cli-engine/config" "^5.1.0"
@@ -66,7 +66,7 @@
     handlebars "^4.0.11"
     jest-diff "^22.0.3"
     read-pkg-up "^3.0.0"
-    ts-lodash "^4.0.9"
+    ts-lodash "^4.0.10"
     tslib "^1.8.1"
 
 "@heroku-cli/color@^1.0.4", "@heroku-cli/color@^1.1.1":
@@ -89,9 +89,9 @@
     http-call "^4.0.8"
     netrc-parser "^3.0.0"
 
-"@heroku-cli/tslint@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@heroku-cli/tslint/-/tslint-1.1.2.tgz#65a5738608d1d687df1a594f059b9d66ff52eddc"
+"@heroku-cli/tslint@^1.1.4":
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/@heroku-cli/tslint/-/tslint-1.1.4.tgz#32f75496df3e3ecd7e14716c4250302025c7840f"
   dependencies:
     tslint "^5.8.0"
     tslint-config-prettier "*"
@@ -174,9 +174,33 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@8.5.7":
+"@types/node@*":
   version "8.5.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.5.7.tgz#9c498c35af354dcfbca3790fb2e81129e93cf0e2"
+
+"@types/node@9.3.0":
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-9.3.0.tgz#3a129cda7c4e5df2409702626892cb4b96546dd5"
+
+"@types/normalize-package-data@*", "@types/normalize-package-data@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
+
+"@types/pkg-dir@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/pkg-dir/-/pkg-dir-2.0.0.tgz#c75b68f7e5be4cd1b9deb490add2f5bd52135c32"
+
+"@types/read-pkg-up@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/read-pkg-up/-/read-pkg-up-3.0.0.tgz#d8ef96f335f505e1d38c2eda92f097565e7da168"
+  dependencies:
+    "@types/normalize-package-data" "*"
+
+"@types/read-pkg@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/read-pkg/-/read-pkg-3.0.0.tgz#17ab6f0b396a58a5567ee387f558f2caedc8ae53"
+  dependencies:
+    "@types/normalize-package-data" "*"
 
 "@types/semver@5.4.0":
   version "5.4.0"
@@ -873,6 +897,10 @@ dashdash@^1.12.0:
   resolved "https://registry.yarnpkg.com/dashdash/-/dashdash-1.14.1.tgz#853cfa0f7cbe2fed5de20326b8dd581035f6e2f0"
   dependencies:
     assert-plus "^1.0.0"
+
+date-fns@^1.29.0:
+  version "1.29.0"
+  resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-1.29.0.tgz#12e609cdcb935127311d04d33334e2960a2a54e6"
 
 debug@^2.2.0, debug@^2.6.8:
   version "2.6.9"
@@ -1645,7 +1673,7 @@ is-primitive@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-primitive/-/is-primitive-2.0.0.tgz#207bab91638499c07b2adf240a41a87210034575"
 
-is-process-active@^1.0.0:
+is-process-active@^1.0.0, is-process-active@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/is-process-active/-/is-process-active-1.0.1.tgz#63616541f447d84b71783cb2002360cf7e690b4f"
   dependencies:
@@ -2306,9 +2334,9 @@ netrc-parser@^3.0.0:
     graceful-fs "^4.1.11"
     lex "^1.7.9"
 
-nock@^9.1.5:
-  version "9.1.5"
-  resolved "https://registry.yarnpkg.com/nock/-/nock-9.1.5.tgz#9e4878e0e1c050bdd93ae1e326e89461ea15618b"
+nock@^9.1.6:
+  version "9.1.6"
+  resolved "https://registry.yarnpkg.com/nock/-/nock-9.1.6.tgz#16395af4c45b0fd84d1a4a9668154e16fa6624db"
   dependencies:
     chai ">=1.9.2 <4.0.0"
     debug "^2.2.0"
@@ -2375,7 +2403,7 @@ normalize-path@^2.0.0, normalize-path@^2.0.1:
   dependencies:
     remove-trailing-separator "^1.0.1"
 
-npm-run-path@^2.0.0:
+npm-run-path@^2.0.0, npm-run-path@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/npm-run-path/-/npm-run-path-2.0.2.tgz#35a9232dfa35d7067b4cb2ddf2357b1871536c5f"
   dependencies:
@@ -2882,6 +2910,21 @@ rwlockfile@^2.0.17:
     tslib "^1.8.1"
     uuid "^3.1.0"
 
+rwlockfile@^2.0.19:
+  version "2.0.19"
+  resolved "https://registry.yarnpkg.com/rwlockfile/-/rwlockfile-2.0.19.tgz#33c9b06521db6646548aca8d9cc754685ae6fa6e"
+  dependencies:
+    fs-extra "^5.0.0"
+    is-process-active "^1.0.1"
+    tslib "^1.8.1"
+    uuid "^3.1.0"
+
+rxjs@^5.5.6:
+  version "5.5.6"
+  resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.6.tgz#e31fb96d6fd2ff1fd84bcea8ae9c02d007179c02"
+  dependencies:
+    symbol-observable "1.0.1"
+
 safe-buffer@^5.0.1, safe-buffer@^5.1.1, safe-buffer@~5.1.0, safe-buffer@~5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
@@ -3125,6 +3168,10 @@ supports-color@^5.1.0:
   dependencies:
     has-flag "^2.0.0"
 
+symbol-observable@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
+
 symbol-tree@^3.2.1:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.2.tgz#ae27db38f660a7ae2e1c3b7d1bc290819b8519e6"
@@ -3221,9 +3268,21 @@ ts-jest@^22.0.1:
     source-map-support "^0.5.0"
     yargs "^10.0.3"
 
-ts-lodash@4.0.9, ts-lodash@^4.0.8, ts-lodash@^4.0.9:
+ts-lodash@4.0.11:
+  version "4.0.11"
+  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.11.tgz#f668e2ad4b6cb3bcbeceb894cf0a8cde48b3cd85"
+  dependencies:
+    lodash "^4.17.4"
+
+ts-lodash@4.0.9, ts-lodash@^4.0.8:
   version "4.0.9"
   resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.9.tgz#088d7ceefbf36c8c4bcdf28372249015ccafd429"
+  dependencies:
+    lodash "^4.17.4"
+
+ts-lodash@^4.0.10:
+  version "4.0.10"
+  resolved "https://registry.yarnpkg.com/ts-lodash/-/ts-lodash-4.0.10.tgz#64df9c4febea204de6ce66ac614a6f1f160c2931"
   dependencies:
     lodash "^4.17.4"
 

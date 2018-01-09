@@ -1,10 +1,8 @@
-import Config from '@cli-engine/config'
+import Config, { ICommand, IPluginModule, IPluginPJSON } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
 
-import { ICommandInfo } from './command'
 import deps from './deps'
-import { IPluginModule, IPluginPJSON } from './plugins/plugin'
 
 const debug = require('debug')('cli:hooks')
 
@@ -21,7 +19,7 @@ export interface IHooks {
     pjson: IPluginPJSON
   }
   prerun: {
-    Command: ICommandInfo
+    Command: ICommand
     argv: string[]
   }
 }
@@ -32,7 +30,7 @@ interface IConstructor<T, O> {
 type LegacyHook<T extends keyof IHooks> = (config: Config, options: IHooks[T]) => Promise<void>
 type HookConstructor<T extends keyof IHooks> = IConstructor<Hook<T>, IHooks[T]>
 
-export class Hooks {
+export default class Hooks {
   constructor(private config: Config) {}
 
   async run<T extends keyof IHooks>(event: T, options: IHooks[T] = {}): Promise<void> {
