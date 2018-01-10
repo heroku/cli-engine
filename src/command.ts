@@ -1,3 +1,4 @@
+import { ICommand } from '@cli-engine/config'
 import assync from 'assync'
 import cli from 'cli-ux'
 import _ from 'ts-lodash'
@@ -6,10 +7,9 @@ import Config from './config'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { ITopic, RootTopic, Topic } from './topic'
-import { ICommand } from '@cli-engine/config'
 
 export type RunFn = (argv: string[]) => Promise<void>
-export type GetCommandFn = () => Promise<ICommand| void>
+export type GetCommandFn = () => Promise<ICommand | void>
 export interface ICommandInfo {
   _version?: string
   id: string
