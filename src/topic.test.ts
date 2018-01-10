@@ -1,4 +1,5 @@
 import { ICommandInfo } from './command'
+import Version from './commands/version'
 import { Plugin } from './plugins/plugin'
 import { RootTopic } from './topic'
 
@@ -34,8 +35,8 @@ test('it adds commands', () => {
     helpLine: ['foo', 'bar'],
     hidden: false,
     id: 'foo:bar:baz:bak',
+    fetchCommand: async () => Version,
     run: async () => {},
-    fetchCommand: async () => {},
     aliases: [],
     plugin: {} as Plugin,
   }
