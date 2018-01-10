@@ -206,6 +206,7 @@ export abstract class Plugin implements ICommandManager {
       aliases: icommand.aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
+      icommand,
       run: async () => cli.warn(`run ${this.name}`),
     }
   }

@@ -6,6 +6,7 @@ import Config from './config'
 import deps from './deps'
 import { Hooks } from './hooks'
 import { ITopic, RootTopic, Topic } from './topic'
+import { ICommand } from '@cli-engine/config'
 
 export type RunFn = (argv: string[]) => Promise<void>
 export interface ICommandInfo {
@@ -18,6 +19,7 @@ export interface ICommandInfo {
   description: string | undefined
   usage: string | undefined
   plugin: { name: string; version: string }
+  icommand: ICommand
   run: RunFn
 }
 
