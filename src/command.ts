@@ -1,3 +1,4 @@
+import { ICommand } from '@cli-engine/config'
 import assync from 'assync'
 import cli from 'cli-ux'
 import _ from 'ts-lodash'
@@ -8,6 +9,7 @@ import { Hooks } from './hooks'
 import { ITopic, RootTopic, Topic } from './topic'
 
 export type RunFn = (argv: string[]) => Promise<void>
+export type GetCommandFn = () => Promise<ICommand>
 export interface ICommandInfo {
   _version?: string
   id: string
@@ -18,6 +20,7 @@ export interface ICommandInfo {
   description: string | undefined
   usage: string | undefined
   plugin: { name: string; version: string }
+  fetchCommand: GetCommandFn
   run: RunFn
 }
 

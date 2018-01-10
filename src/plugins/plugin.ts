@@ -122,6 +122,7 @@ export abstract class Plugin implements ICommandManager {
     })
     return cache.map(c => ({
       ...c,
+      fetchCommand: () => this.findCommand(c.id, true),
       run: async (argv: string[]) => {
         // await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
@@ -179,13 +180,13 @@ export abstract class Plugin implements ICommandManager {
     return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
   }
 
-  private async commandsFromModule(): Promise<ICommandInfo[]> {
+  private async commandsFromModule(): Promise<Partial<ICommandInfo>[]> {
     const m = await this.fetchModule()
     if (!m) return []
     return deps.assync(m.commands).map(c => this.commandInfoFromICommand(c))
   }
 
-  private async commandsFromDir(): Promise<ICommandInfo[]> {
+  private async commandsFromDir(): Promise<Partial<ICommandInfo>[]> {
     const ids = await this.commandIDsFromDir()
     return deps
       .assync(ids)
@@ -193,7 +194,7 @@ export abstract class Plugin implements ICommandManager {
       .map(({ cmd, id }) => this.commandInfoFromICommand(cmd, id))
   }
 
-  private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<ICommandInfo> {
+  private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<Partial<ICommandInfo>> {
     return {
       id,
       _version: icommand._version,
@@ -204,7 +205,6 @@ export abstract class Plugin implements ICommandManager {
       aliases: icommand.aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
-      run: async () => cli.warn(`run ${this.name}`),
     }
   }
 
