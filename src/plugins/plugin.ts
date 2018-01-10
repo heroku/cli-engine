@@ -194,7 +194,7 @@ export abstract class Plugin implements ICommandManager {
       .map(({ cmd, id }) => this.commandInfoFromICommand(cmd, id))
   }
 
-  private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<ICommandInfo> {
+  private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<Partial<ICommandInfo>> {
     return {
       id,
       _version: icommand._version,
@@ -205,8 +205,6 @@ export abstract class Plugin implements ICommandManager {
       aliases: icommand.aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
-      fetchCommand: async () => {},
-      run: async () => cli.warn(`run ${this.name}`),
     }
   }
 

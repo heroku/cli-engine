@@ -9,7 +9,7 @@ import { Hooks } from './hooks'
 import { ITopic, RootTopic, Topic } from './topic'
 
 export type RunFn = (argv: string[]) => Promise<void>
-export type GetCommandFn = () => Promise<ICommand | void>
+export type GetCommandFn = () => Promise<ICommand>
 export interface ICommandInfo {
   _version?: string
   id: string
