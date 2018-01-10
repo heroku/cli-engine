@@ -35,6 +35,7 @@ test('it adds commands', () => {
     hidden: false,
     id: 'foo:bar:baz:bak',
     run: async () => {},
+    fetchCommand: async () => {},
     aliases: [],
     plugin: {} as Plugin,
   }
