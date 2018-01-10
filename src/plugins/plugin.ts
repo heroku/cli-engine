@@ -180,13 +180,13 @@ export abstract class Plugin implements ICommandManager {
     return require.resolve(path.join(this.commandsDir, id.split(':').join(path.sep)))
   }
 
-  private async commandsFromModule(): Promise<ICommandInfo[]> {
+  private async commandsFromModule(): Promise<Partial<ICommandInfo>[]> {
     const m = await this.fetchModule()
     if (!m) return []
     return deps.assync(m.commands).map(c => this.commandInfoFromICommand(c))
   }
 
-  private async commandsFromDir(): Promise<ICommandInfo[]> {
+  private async commandsFromDir(): Promise<Partial<ICommandInfo>[]> {
     const ids = await this.commandIDsFromDir()
     return deps
       .assync(ids)
