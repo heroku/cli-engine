@@ -80,7 +80,6 @@ export class UserPlugins {
     return false
   }
 
-  @rwlockfile('lock', 'read')
   private async fetchPlugins() {
     this.debug('fetchPlugins')
     this.plugins = _.compact(

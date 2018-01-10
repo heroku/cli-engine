@@ -126,7 +126,6 @@ export class LinkPlugins {
     return false
   }
 
-  @rwlockfile('lock', 'read')
   private async _init(): Promise<void> {
     if (this.plugins) return
     this.debug('init')
