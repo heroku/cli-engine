@@ -124,6 +124,9 @@ export abstract class Plugin implements ICommandManager {
     })
     return cache.map(c => ({
       ...c,
+      fetchCommand: async () => {
+        return await this.findCommand(c.id, true)
+      },
       run: async (argv: string[]) => {
         await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
@@ -206,7 +209,7 @@ export abstract class Plugin implements ICommandManager {
       aliases: icommand.aliases || [],
       help: await icommand.buildHelp(this.config),
       helpLine: await icommand.buildHelpLine(this.config),
-      icommand,
+      fetchCommand: async () => {},
       run: async () => cli.warn(`run ${this.name}`),
     }
   }

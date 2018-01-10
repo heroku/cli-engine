@@ -9,6 +9,7 @@ import { ITopic, RootTopic, Topic } from './topic'
 import { ICommand } from '@cli-engine/config'
 
 export type RunFn = (argv: string[]) => Promise<void>
+export type GetCommandFn = () => Promise<ICommand| void>
 export interface ICommandInfo {
   _version?: string
   id: string
@@ -19,7 +20,7 @@ export interface ICommandInfo {
   description: string | undefined
   usage: string | undefined
   plugin: { name: string; version: string }
-  icommand: ICommand
+  fetchCommand: GetCommandFn
   run: RunFn
 }
 
