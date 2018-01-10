@@ -73,7 +73,6 @@ export abstract class Plugin implements ICommandManager {
     this.type = opts.type
   }
 
-  @rwlockfile('lock', 'read')
   public async load(): Promise<ILoadResult> {
     if (this.result) return this.result
     this.result = {
@@ -102,7 +101,6 @@ export abstract class Plugin implements ICommandManager {
 
   public async findCommand(id: string, must: true): Promise<ICommand>
   public async findCommand(id: string, must?: boolean): Promise<ICommand | undefined>
-  @rwlockfile('lock', 'read')
   public async findCommand(id: string, must = false): Promise<ICommand | undefined> {
     let cmd = await this.findCommandInModule(id)
     if (!cmd) cmd = await this.findCommandInDir(id)
@@ -125,7 +123,7 @@ export abstract class Plugin implements ICommandManager {
     return cache.map(c => ({
       ...c,
       run: async (argv: string[]) => {
-        await this.lock.add('read', { reason: 'running plugin' })
+        // await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
         let res
         if (!c._version || c._version === '0.0.0') {
@@ -141,7 +139,7 @@ export abstract class Plugin implements ICommandManager {
         } else {
           res = await cmd.run(argv.slice(3), this.config)
         }
-        await this.lock.remove('read')
+        // await this.lock.remove('read')
         return res
       },
     }))
