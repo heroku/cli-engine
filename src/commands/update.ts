@@ -30,11 +30,9 @@ export default class Update extends Command {
     if (!this.flags.autoupdate) {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     } else {
-      // stage an autoupdate to run if one not already staged
-      const lastrunfile = this.updater.lastrunfile
-      const m = await this.mtime(lastrunfile)
-      const outsideWaitWindow = m.isBefore(deps.moment().subtract(1, 'hours'))
-      if (!outsideWaitWindow) return
+      const m = await this.mtime(this.updater.lastrunfile)
+      const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
+      if (!waitedLongEnough) return
     }
 
     if (this.config.updateDisabled) {

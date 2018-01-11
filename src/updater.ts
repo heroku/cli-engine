@@ -138,7 +138,7 @@ export class Updater {
         })
           .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
           .unref()}
-      , 360000).unref()
+      , 3600000).unref() // one hour
     } catch (e) {
       cli.warn(e, { context: 'autoupdate:' })
     }
