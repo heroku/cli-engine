@@ -130,15 +130,13 @@ export class Updater {
         timestamp(`starting \`${this.binPath} update --autoupdate\` from ${process.argv.slice(1, 3).join(' ')}\n`),
       )
 
-      setTimeout(() => {
-        spawn(this.binPath, ['update', '--autoupdate'], {
-          detached: !this.config.windows,
-          stdio: ['ignore', fd, fd],
-          env: this.autoupdateEnv,
-        })
-          .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
-          .unref()}
-      , 3600000).unref() // one hour
+      spawn(this.binPath, ['update', '--autoupdate'], {
+        detached: !this.config.windows,
+        stdio: ['ignore', fd, fd],
+        env: this.autoupdateEnv,
+      })
+        .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
+        .unref()
     } catch (e) {
       cli.warn(e, { context: 'autoupdate:' })
     }

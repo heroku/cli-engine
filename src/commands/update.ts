@@ -6,6 +6,7 @@ import * as path from 'path'
 import deps from '../deps'
 import { Hooks } from '../hooks'
 import { Updater } from '../updater'
+import { wait } from '../util'
 
 import Command from './base'
 import PluginsUpdate from './plugins/update'
@@ -30,9 +31,15 @@ export default class Update extends Command {
     if (!this.flags.autoupdate) {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     } else {
-      const m = await this.mtime(this.updater.lastrunfile)
-      const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
-      if (!waitedLongEnough) return
+      let waiting = true
+      while (waiting) {
+        wait(3600000)
+        let fd = await deps.file.open(this.updater.autoupdatelogfile, 'a')
+        deps.file.write(fd, 'Waited one hour...')
+        const m = await this.mtime(this.updater.lastrunfile)
+        const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
+        if (waitedLongEnough) waiting = false
+      }
     }
 
     if (this.config.updateDisabled) {
