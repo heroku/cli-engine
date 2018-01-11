@@ -118,6 +118,7 @@ export class Updater {
 
   public async autoupdate(force: boolean = false) {
     try {
+      await this.touchLastRun()
       await this.warnIfUpdateAvailable()
 
       // has it been 5 hours since last autoupdate try?
@@ -238,7 +239,7 @@ export class Updater {
       cli.warn(err)
     }
   }
-  
+
   private async logAndSpawnAutoupdate() {
     debug('autoupdate running')
     await deps.file.outputFile(this.autoupdatefile, '')
@@ -258,6 +259,14 @@ export class Updater {
     })
       .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
       .unref()
+  }
+
+  private async touchLastRun(): Promise<void> {
+    try {
+      await deps.file.touch(this.lastrunfile)
+    } catch (w){
+      await deps.file.outputFile(this.lastrunfile, '')
+    }
   }
 
   private extract(stream: NodeJS.ReadableStream, dir: string, sha: string): Promise<void> {
