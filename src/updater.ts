@@ -115,7 +115,7 @@ export class Updater {
 
   public async autoupdate(force: boolean = false) {
     try {
-      await this.touchLastRun()
+      await deps.file.touch(this.lastrunfile)
       await this.warnIfUpdateAvailable()
       if (!force && !await this.autoupdateNeeded()) return
 
@@ -210,14 +210,6 @@ export class Updater {
       for (let p of promises) await p
     } catch (err) {
       cli.warn(err)
-    }
-  }
-
-  private async touchLastRun(): Promise<void> {
-    try {
-      await deps.file.touch(this.lastrunfile)
-    } catch (w){
-      await deps.file.outputFile(this.lastrunfile, '')
     }
   }
 
