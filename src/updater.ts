@@ -52,9 +52,6 @@ export class Updater {
   get lastrunfile(): string {
     return path.join(this.config.cacheDir, 'lastrun')
   }
-  get updateStagedfile(): string {
-    return path.join(this.config.cacheDir, 'updatestaged')
-  }
 
   private get clientRoot(): string {
     return path.join(this.config.dataDir, 'client')
@@ -120,50 +117,26 @@ export class Updater {
     try {
       await this.touchLastRun()
       await this.warnIfUpdateAvailable()
-
-      // has it been 5 hours since last autoupdate try?
       if (!force && !await this.autoupdateNeeded()) return
 
-      // are you forcing autoupdate to run?
-      if (force) {
-        await this.logAndSpawnAutoupdate()
-        return
-      }
+      debug('autoupdate running')
+      await deps.file.outputFile(this.autoupdatefile, '')
 
-      // stage an autoupdate to run if one not already staged
-      if (!deps.file.exists(this.updateStagedfile)) {
-        const oneHour = 3600000
-        const lastrunfile = this.lastrunfile
-        const updateStagedfile = this.updateStagedfile
-        const logAndSpawnAutoupdate = this.logAndSpawnAutoupdate
+      debug(`spawning autoupdate on ${this.binPath}`)
 
-        // try autoupdate now or try again later closure
-        const tryUpdateFn = async (stage: boolean = false) => {
-          const m = await mtime(lastrunfile)
-          const outsideWaitWindow = m.isBefore(deps.moment().subtract(1, 'hours'))
-          if (outsideWaitWindow && !stage) {
-            deps.file.remove(updateStagedfile)
-            await logAndSpawnAutoupdate()
-          } else {
-            const timer = setTimeout(async () => {
-              await tryUpdateFn()
-            }, oneHour)
-            timer.unref()
-          }
-        }
+      let fd = await deps.file.open(this.autoupdatelogfile, 'a')
+      deps.file.write(
+        fd,
+        timestamp(`starting \`${this.binPath} update --autoupdate\` from ${process.argv.slice(1, 3).join(' ')}\n`),
+      )
 
-        // create stage file so multiple stages are not created
-        await deps.file.outputFile(this.updateStagedfile, '')
-        // stage closure to try in an hour
-        await tryUpdateFn(true)
-        return
-      }
-
-      // if more than 24 hours remove potential stage block
-      const m = await mtime(this.updateStagedfile)
-      const tooOld = m.isBefore(deps.moment().subtract(24, 'hours'))
-      if (tooOld) deps.file.remove(this.updateStagedfile)
-
+      spawn(this.binPath, ['update', '--autoupdate'], {
+        detached: !this.config.windows,
+        stdio: ['ignore', fd, fd],
+        env: this.autoupdateEnv,
+      })
+        .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
+        .unref()
     } catch (e) {
       cli.warn(e, { context: 'autoupdate:' })
     }
@@ -238,27 +211,6 @@ export class Updater {
     } catch (err) {
       cli.warn(err)
     }
-  }
-
-  private async logAndSpawnAutoupdate() {
-    debug('autoupdate running')
-    await deps.file.outputFile(this.autoupdatefile, '')
-
-    debug(`spawning autoupdate on ${this.binPath}`)
-
-    let fd = await deps.file.open(this.autoupdatelogfile, 'a')
-    deps.file.write(
-      fd,
-      timestamp(`starting \`${this.binPath} update --autoupdate\` from ${process.argv.slice(1, 3).join(' ')}\n`),
-    )
-
-    spawn(this.binPath, ['update', '--autoupdate'], {
-      detached: !this.config.windows,
-      stdio: ['ignore', fd, fd],
-      env: this.autoupdateEnv,
-    })
-      .on('error', (e: Error) => cli.warn(e, { context: 'autoupdate:' }))
-      .unref()
   }
 
   private async touchLastRun(): Promise<void> {

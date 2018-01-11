@@ -3,6 +3,7 @@ import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 import * as path from 'path'
 
+import deps from '../deps'
 import { Hooks } from '../hooks'
 import { Updater } from '../updater'
 
@@ -24,11 +25,18 @@ export default class Update extends Command {
   updater: Updater
 
   async run() {
+    this.updater = new Updater(this.config)
     // on manual run, also log to file
     if (!this.flags.autoupdate) {
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
+    } else {
+      // stage an autoupdate to run if one not already staged
+      const lastrunfile = this.updater.lastrunfile
+      const m = await this.mtime(lastrunfile)
+      const outsideWaitWindow = m.isBefore(deps.moment().subtract(1, 'hours'))
+      if (!outsideWaitWindow) return
     }
-    this.updater = new Updater(this.config)
+
     if (this.config.updateDisabled) {
       cli.warn(this.config.updateDisabled)
     } else {
@@ -69,5 +77,10 @@ export default class Update extends Command {
     } catch (e) {
       debug(e.message)
     }
+  }
+
+  private async mtime(f: string) {
+    const { mtime } = await deps.file.stat(f)
+    return deps.moment(mtime)
   }
 }
