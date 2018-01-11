@@ -16,6 +16,7 @@ export default class CLI {
 
     if (id !== 'update') {
       const updater = new deps.Updater(this.config)
+      await this.touchLastRun(updater.lastrunfile)
       await updater.autoupdate()
     }
 
@@ -61,6 +62,14 @@ export default class CLI {
     let p = new Promise(resolve => process.stdout.once('drain', resolve))
     process.stdout.write('')
     return p
+  }
+
+  private async touchLastRun(lastrunfile: string): Promise<void> {
+    try {
+      await deps.file.touch(lastrunfile)
+    } catch (w){
+      await deps.file.outputFile(lastrunfile, '')
+    }
   }
 }
 
