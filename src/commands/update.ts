@@ -28,9 +28,7 @@ export default class Update extends Command {
   async run() {
     this.updater = new Updater(this.config)
     // on manual run, also log to file
-    if (!this.flags.autoupdate) {
-      cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
-    } else {
+    if (this.flags.autoupdate) {
       let waiting = true
       while (waiting) {
         wait(3600000)
@@ -40,6 +38,8 @@ export default class Update extends Command {
         const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
         if (waitedLongEnough) waiting = false
       }
+    } else {
+      cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
 
     if (this.config.updateDisabled) {
