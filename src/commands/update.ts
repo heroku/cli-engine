@@ -3,8 +3,10 @@ import { color } from '@heroku-cli/color'
 import cli from 'cli-ux'
 import * as path from 'path'
 
+import deps from '../deps'
 import { Hooks } from '../hooks'
 import { Updater } from '../updater'
+import { wait } from '../util'
 
 import Command from './base'
 import PluginsUpdate from './plugins/update'
@@ -24,11 +26,22 @@ export default class Update extends Command {
   updater: Updater
 
   async run() {
-    // on manual run, also log to file
-    if (!this.flags.autoupdate) {
+    this.updater = new Updater(this.config)
+    if (this.flags.autoupdate) {
+      let waiting = true
+      while (waiting) {
+        wait(3600000)
+        let fd = await deps.file.open(this.updater.autoupdatelogfile, 'a')
+        deps.file.write(fd, 'Waited one hour...')
+        const m = await this.mtime(this.updater.lastrunfile)
+        const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
+        if (waitedLongEnough) waiting = false
+      }
+    } else {
+      // on manual run, also log to file
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
-    this.updater = new Updater(this.config)
+
     if (this.config.updateDisabled) {
       cli.warn(this.config.updateDisabled)
     } else {
@@ -69,5 +82,10 @@ export default class Update extends Command {
     } catch (e) {
       debug(e.message)
     }
+  }
+
+  private async mtime(f: string) {
+    const { mtime } = await deps.file.stat(f)
+    return deps.moment(mtime)
   }
 }

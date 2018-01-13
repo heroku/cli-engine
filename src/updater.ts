@@ -49,6 +49,9 @@ export class Updater {
   get versionFile(): string {
     return path.join(this.config.cacheDir, `${this.config.channel}.version`)
   }
+  get lastrunfile(): string {
+    return path.join(this.config.cacheDir, 'lastrun')
+  }
 
   private get clientRoot(): string {
     return path.join(this.config.dataDir, 'client')
@@ -112,6 +115,7 @@ export class Updater {
 
   public async autoupdate(force: boolean = false) {
     try {
+      await deps.file.touch(this.lastrunfile)
       await this.warnIfUpdateAvailable()
       if (!force && !await this.autoupdateNeeded()) return
 

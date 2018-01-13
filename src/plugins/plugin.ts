@@ -170,7 +170,7 @@ export abstract class Plugin implements ICommandManager {
     const files = await deps.globby(['**/*.+(js|ts)', '!**/*.+(d.ts|test.ts|test.js)'], { nodir: true, cwd: d })
     const ids = files
       .map(path.parse)
-      .map(p => _.compact([...p.dir.split(path.sep), p.name === 'index' ? '' : p.name]).join(':'))
+      .map((p: any) => _.compact([...p.dir.split(path.sep), p.name === 'index' ? '' : p.name]).join(':'))
     this.debug(`commandIDsFromDir dir:%s, ids:%o`, d, ids)
     return ids
   }

@@ -128,7 +128,11 @@ export function utimesSync(p: string, atime: Date, mtime: Date) {
 
 export function touch(p: string) {
   debug('touch', p)
-  return fs.utimes(p, new Date(), new Date())
+  try {
+    return fs.utimes(p, new Date(), new Date())
+  } catch (err){
+    return outputFile(p, '')
+  }
 }
 
 export function mkdirpSync(p: string) {
