@@ -24,7 +24,7 @@
     "fs-extra": "^5.0.0",
     "globby": "^7.1.1",
     "graceful-fs": "^4.1.11",
-    "http-call": "^4.0.8",
+    "http-call": "^5.0.0",
     "klaw": "^2.1.1",
     "log-chopper": "^1.0.2",
     "moment": "^2.20.1",
