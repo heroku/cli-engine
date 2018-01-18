@@ -50,9 +50,9 @@
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/@cli-engine/screen/-/screen-0.0.0.tgz#c2e847c7d4d998490c9097282bf21637d5162116"
 
-"@cli-engine/util@^1.2.11":
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.2.11.tgz#ffe8faae5d9c5d4486a691701d2c926bcce37d21"
+"@cli-engine/util@^1.2.12":
+  version "1.2.12"
+  resolved "https://registry.yarnpkg.com/@cli-engine/util/-/util-1.2.12.tgz#5aca39b09785fa6ac80895fd6dbc2533b641ee21"
   dependencies:
     "@cli-engine/command" "^12.1.0"
     "@cli-engine/config" "^5.1.0"
@@ -65,7 +65,7 @@
     execa "^0.8.0"
     fs-extra "^5.0.0"
     handlebars "^4.0.11"
-    jest-diff "^22.0.3"
+    jest-diff "^22.0.5"
     npm-run-path "^2.0.2"
     read-pkg-up "^3.0.0"
     shelljs "^0.7.8"
