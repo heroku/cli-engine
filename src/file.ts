@@ -126,10 +126,10 @@ export function utimesSync(p: string, atime: Date, mtime: Date) {
   return fs.utimesSync(p, atime, mtime)
 }
 
-export function touch(p: string) {
+export async function touch(p: string) {
   debug('touch', p)
   try {
-    return fs.utimes(p, new Date(), new Date())
+    return await fs.utimes(p, new Date(), new Date())
   } catch (err) {
     return outputFile(p, '')
   }
