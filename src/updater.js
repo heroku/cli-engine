@@ -65,9 +65,9 @@ export class Updater {
   s3url (channel: string, p: string): string {
     if (!this.config.s3.host) throw new Error('S3 host not defined')
     if (/^https?:\/\/.*/.test(this.config.s3.host)) {
-      return ${this.config.s3.host}/${this.config.name}/channels/${channel}/${p}       
-    } else { 
-      return `https://${this.config.s3.host}/${this.config.name}/channels/${channel}/${p}`
+      return `${(this.config.s3.host: any)}/${this.config.name}/channels/${channel}/${p}`
+    } else {
+      return `https://${(this.config.s3.host: any)}/${this.config.name}/channels/${channel}/${p}`
     }
   }
 
