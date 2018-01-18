@@ -46,6 +46,7 @@ export class PluginManifest {
       const value = await fn()
       try {
         await this.set(key, value)
+        if (await this.canWrite()) await this.save()
       } catch (err) {
         this.debug(err)
         return value

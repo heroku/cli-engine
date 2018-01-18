@@ -79,17 +79,6 @@ export abstract class Plugin implements ICommandManager {
       commands: await this.commands(),
       topics: await this.topics(),
     }
-    if (this.cache.needsSave) {
-      let canWrite = await this.lock.check('write')
-      if (canWrite.status === 'open') {
-        this.debug('saving cache')
-        await this.lock.add('write', { reason: 'cache' })
-        await this.cache.save()
-        await this.lock.remove('write')
-      } else {
-        this.debug(`cannot save cache: ${canWrite.status}`)
-      }
-    }
     return this.result
   }
 
