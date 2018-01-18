@@ -5,7 +5,7 @@ import * as path from 'path'
 
 import deps from '../deps'
 import { Hooks } from '../hooks'
-import { Updater } from '../updater'
+import { IManifest, Updater } from '../updater'
 import { wait } from '../util'
 
 import Command from './base'
@@ -52,7 +52,7 @@ export default class Update extends Command {
         if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
           cli.action.stop(`already on latest version: ${this.config.version}`)
         }
-      } else {
+      } else if (this.shouldUpdate(manifest)) {
         cli.action.start(
           `${this.config.name}: Updating CLI from ${color.green(this.config.version)} to ${color.green(
             manifest.version,
@@ -87,5 +87,18 @@ export default class Update extends Command {
   private async mtime(f: string) {
     const { mtime } = await deps.file.stat(f)
     return deps.moment(mtime)
+  }
+
+  private shouldUpdate(manifest: IManifest): boolean {
+    try {
+      const chance = Math.random() * 100
+      if (this.flags.autoupdate && manifest.priority && chance < manifest.priority) {
+        cli.log(`skipping update. priority is ${manifest.priority} but chance is ${chance}`)
+        return false
+      }
+    } catch (err) {
+      cli.warn(err)
+    }
+    return true
   }
 }

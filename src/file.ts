@@ -130,7 +130,7 @@ export function touch(p: string) {
   debug('touch', p)
   try {
     return fs.utimes(p, new Date(), new Date())
-  } catch (err){
+  } catch (err) {
     return outputFile(p, '')
   }
 }

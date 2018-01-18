@@ -19,6 +19,7 @@ export interface IManifest {
   version: string
   channel: string
   sha256gz: string
+  priority?: number
 }
 
 async function mtime(f: string) {
