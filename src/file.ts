@@ -144,3 +144,8 @@ export function emptyDir(p: string) {
   debug('emptyDir', p)
   return fs.emptyDir(p)
 }
+
+export function close(p: number) {
+  debug('close', p)
+  return fs.close(p)
+}

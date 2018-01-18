@@ -30,9 +30,10 @@ export default class Update extends Command {
     if (this.flags.autoupdate) {
       let waiting = true
       while (waiting) {
-        wait(3600000)
+        await wait(3600000)
         let fd = await deps.file.open(this.updater.autoupdatelogfile, 'a')
         deps.file.write(fd, 'Waited one hour...')
+        await deps.file.close(fd)
         const m = await this.mtime(this.updater.lastrunfile)
         const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
         if (waitedLongEnough) waiting = false
