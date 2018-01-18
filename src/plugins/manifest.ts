@@ -43,7 +43,13 @@ export class PluginManifest {
     let v = await this.get(key)
     if (!v) {
       this.debug('fetching', key)
-      await this.set(key, await fn())
+      const value = await fn()
+      try {
+        await this.set(key, value)
+      } catch (err) {
+        this.debug(err)
+        return value
+      }
     }
     return await this.get(key)
   }

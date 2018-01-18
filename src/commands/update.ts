@@ -27,17 +27,8 @@ export default class Update extends Command {
 
   async run() {
     this.updater = new Updater(this.config)
-    if (this.flags.autoupdate) {
-      let waiting = true
-      while (waiting) {
-        wait(3600000)
-        let fd = await deps.file.open(this.updater.autoupdatelogfile, 'a')
-        deps.file.write(fd, 'Waited one hour...')
-        const m = await this.mtime(this.updater.lastrunfile)
-        const waitedLongEnough = m.isBefore(deps.moment().subtract(1, 'hours'))
-        if (waitedLongEnough) waiting = false
-      }
-    } else {
+    if (this.flags.autoupdate) await this.debounce()
+    else {
       // on manual run, also log to file
       cli.config.errlog = path.join(this.config.cacheDir, 'autoupdate')
     }
@@ -100,5 +91,16 @@ export default class Update extends Command {
       cli.warn(err)
     }
     return true
+  }
+
+  private async debounce(): Promise<void> {
+    const m = await this.mtime(this.updater.lastrunfile)
+    const waitUntil = m.add(1, 'hour')
+    if (waitUntil.isAfter(deps.moment())) {
+      await cli.log(`waiting until ${waitUntil.toISOString()} to update`)
+      await wait(60 * 1000) // wait 1 minute
+      return this.debounce()
+    }
+    cli.log(`time to update`)
   }
 }
