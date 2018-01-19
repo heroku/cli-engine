@@ -168,8 +168,9 @@ export class PluginLegacy {
       V5.flags.remote = deps.Heroku.flags.remote()
     }
     if (c.needsOrg || c.wantsOrg) {
-      let opts = { required: !!c.needsOrg, hidden: false, description: 'organization to use' }
-      V5.flags.org = deps.Heroku.flags.org(opts)
+      let opts = { required: !!c.needsOrg, hidden: false, description: 'team to use' }
+      V5.flags.team = deps.Heroku.flags.team(opts)
+      V5.flags.org = V5.flags.team
     }
     return V5
   }
