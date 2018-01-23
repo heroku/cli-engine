@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@heroku-cli/color": "^1.1.1",
+    "@types/load-json-file": "^2.0.7",
     "assync": "^1.0.4",
     "cli-ux": "^2.0.21",
     "cross-spawn": "^5.1.0",
@@ -26,6 +27,7 @@
     "graceful-fs": "^4.1.11",
     "http-call": "^4.0.8",
     "klaw": "^2.1.1",
+    "load-json-file": "^4.0.0",
     "log-chopper": "^1.0.2",
     "moment": "^2.20.1",
     "rwlockfile": "^2.0.19",

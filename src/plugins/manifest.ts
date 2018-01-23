@@ -1,4 +1,4 @@
-import * as fs from 'fs-extra'
+import * as loadJSON from 'load-json-file'
 
 import deps from '../deps'
 
@@ -88,7 +88,7 @@ export class PluginManifest {
   private async read(): Promise<any> {
     try {
       this.mtime = await this.getLastUpdated()
-      let body = await fs.readJSON(this.file)
+      let body = await loadJSON(this.file)
       if (body.invalidate !== this.invalidate) {
         this.debug('manifest version mismatch')
         return
@@ -96,11 +96,8 @@ export class PluginManifest {
       if (!body.manifest) this.body.manifest = {}
       return body
     } catch (err) {
-      if (err.code === 'ENOENT') this.debug('manifest not found')
-      else {
-        await deps.file.remove(this.file)
-        throw err
-      }
+      this.debug(err)
+      await deps.file.remove(this.file)
     }
   }
 
