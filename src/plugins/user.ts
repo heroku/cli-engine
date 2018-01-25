@@ -38,7 +38,7 @@ export class UserPlugins {
     if (!this.plugins) return
     cli.action.start(`${this.config.name}: Updating plugins`)
     const packages = deps.util.objEntries(await this.manifestPlugins()).map(([k]) => `${k}@latest`)
-    await this.yarn.exec(['upgrade', ...packages])
+    await this.yarn.exec(['add', ...packages])
     await this.refresh(true)
   }
 
