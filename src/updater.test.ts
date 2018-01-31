@@ -102,7 +102,7 @@ test('validates the sha', async () => {
 })
 
 describe('tidy', () => {
-  test('deletes old directories', async () => {
+  test.skip('deletes old directories', async () => {
     const oldDate = moment()
       .subtract(48, 'hours')
       .toDate()
