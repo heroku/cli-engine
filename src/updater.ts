@@ -117,6 +117,10 @@ export class Updater {
   public async autoupdate(force: boolean = false) {
     try {
       await deps.file.touch(this.lastrunfile)
+      const clientDir = path.join(this.clientRoot, this.config.version)
+      if (await deps.file.exists(clientDir)) {
+        await deps.file.touch(clientDir)
+      }
       await this.warnIfUpdateAvailable()
       if (!force && !await this.autoupdateNeeded()) return
 
@@ -204,7 +208,7 @@ export class Updater {
       let files = await file.ls(root)
       let promises = files.map(async f => {
         if (['bin', this.config.version].includes(path.basename(f.path))) return
-        if (moment(f.stat.mtime).isBefore(moment().subtract(24, 'hours'))) {
+        if (moment(f.stat.mtime).isBefore(moment().subtract(7, 'days'))) {
           await file.remove(f.path)
         }
       })
