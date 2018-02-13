@@ -109,9 +109,7 @@ export class Updater {
     let base = this.base(manifest)
     const filesize = require('filesize')
 
-    if (!this.config.s3.host) throw new Error('S3 host not defined')
-
-    let url = `https://${this.config.s3.host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
+    let url = this.s3url(manifest.channel, `${base}.tar.gz`)
     let {response: stream} = await deps.HTTP.stream(url)
 
     if (this.cli.action.frames) { // if spinner action
