@@ -50,9 +50,6 @@ export class Updater {
   get versionFile(): string {
     return path.join(this.config.cacheDir, `${this.config.channel}.version`)
   }
-  get lastrunfile(): string {
-    return path.join(this.config.cacheDir, 'lastrun')
-  }
 
   private get clientRoot(): string {
     return path.join(this.config.dataDir, 'client')
@@ -116,7 +113,6 @@ export class Updater {
 
   public async autoupdate(force: boolean = false) {
     try {
-      await deps.file.touch(this.lastrunfile)
       const clientDir = path.join(this.clientRoot, this.config.version)
       if (await deps.file.exists(clientDir)) {
         await deps.file.touch(clientDir)
@@ -125,7 +121,6 @@ export class Updater {
       if (!force && !await this.autoupdateNeeded()) return
 
       debug('autoupdate running')
-      await deps.file.outputFile(this.autoupdatefile, '')
 
       debug(`spawning autoupdate on ${this.binPath}`)
 
@@ -144,6 +139,8 @@ export class Updater {
         .unref()
     } catch (e) {
       cli.warn(e, { context: 'autoupdate:' })
+    } finally {
+      await deps.file.touch(this.autoupdatefile)
     }
   }
 

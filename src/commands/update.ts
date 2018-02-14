@@ -94,7 +94,7 @@ export default class Update extends Command {
   }
 
   private async debounce(): Promise<void> {
-    const m = await this.mtime(this.updater.lastrunfile)
+    const m = await this.mtime(this.updater.autoupdatefile)
     const waitUntil = m.add(1, 'hour')
     if (waitUntil.isAfter(deps.moment())) {
       await cli.log(`waiting until ${waitUntil.toISOString()} to update`)
