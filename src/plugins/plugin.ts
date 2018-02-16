@@ -19,6 +19,10 @@ export interface IPluginPJSON {
   version: string
   main?: string
   scripts?: { [k: string]: string }
+  oclif: {
+    commands?: string
+    topics?: ITopics
+  }
   'cli-engine': {
     commands?: string
     topics?: ITopics
@@ -146,13 +150,15 @@ export abstract class Plugin implements ICommandManager {
       if (!m) return []
       return m.topics
     })
-    let pjsonTopics = this.pjson['cli-engine'].topics
+    let pjson = this.pjson.oclif || this.pjson['cli-engine']
+    let pjsonTopics = pjson.topics
     if (pjsonTopics) return cache.concat(topicsToArray(pjsonTopics))
     return cache
   }
 
   protected get commandsDir(): string | undefined {
-    let d = this.pjson['cli-engine'].commands
+    let pjson = this.pjson.oclif || this.pjson['cli-engine']
+    let d = pjson.commands
     if (d) return path.join(this.root, d)
   }
 
