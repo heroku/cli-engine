@@ -1,12 +1,14 @@
 // @flow
 
 import type {Config, Arg, Flag} from 'cli-engine-config'
+import {Command} from 'cli-engine-command'
 import type Cache, {CachedPlugin, CachedCommand, CachedTopic} from './cache'
 import {convertFlagsFromV5, type LegacyFlag} from './legacy'
 import path from 'path'
 import {CLI} from 'cli-ux'
 import {Hooks} from '../hooks'
 import Help from 'cli-engine-command/lib/help'
+import fs from 'fs-extra'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
 
@@ -148,6 +150,7 @@ export class PluginPath {
   }
 
   async require (): Promise<ParsedPlugin> {
+    if (await fs.pathExists(path.join(this.path, '.oclif.manifest.json'))) return this.requireOCLIF()
     let required
     try {
       required = require(this.path)
@@ -200,6 +203,28 @@ export class PluginPath {
   async repair (err: Error): Promise<boolean> {
     debug(err)
     return false
+  }
+
+  async requireOCLIF (): any {
+    let p = this.path
+    let manifest = fs.readJSONSync(path.join(p, '.oclif.manifest.json'))
+    let Config = require('@oclif/config')
+    let config = await Config.load()
+    config.loadPlugins(p, this.type, [{root: p}], {must: true})
+    let topics = config.topics
+    let commands = Object.entries(manifest.commands).map(([id, c]: [string, any]) => {
+      return class extends Command<*> {
+        static get id () { return id }
+        static topic = id.split(':').slice(0, -1).join(':')
+        static command = id.split(':').pop()
+        static description = c.description
+        static variableArgs = true
+        async run () {
+          config.runCommand(id, process.argv.slice(3))
+        }
+      }
+    })
+    return {topics, commands}
   }
 }
 

@@ -111,8 +111,8 @@ export default class UserPlugins extends Manager {
     try {
       await this.yarn.exec()
       let path = this.userPluginPath(name)
-      let plugin = require(path)
-      if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)
+      // let plugin = require(path)
+      // if (!plugin.commands) throw new Error(`${name} does not appear to be a ${this.config.bin} CLI plugin`)
       return path
     } catch (err) {
       this.removePackageFromPJSON(name)

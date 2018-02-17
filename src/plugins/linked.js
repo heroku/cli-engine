@@ -53,8 +53,8 @@ export default class LinkedPlugins extends Manager {
 
     await this.prepare(p)
 
-    let m = require(p)
-    if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
+    // let m = require(p)
+    // if (!m.commands) throw new Error(`${p} does not appear to be a CLI plugin`)
     if (this._data.plugins.includes(p)) throw new Error(`${p} is already linked`)
 
     this._data.plugins.push(p)
@@ -122,9 +122,8 @@ export default class LinkedPlugins extends Manager {
   async prepare (p: string): Promise<boolean> {
     let pjson = this._pjson(p)
     await this._install(p)
-    if (!pjson.main) throw new Error(`No main script specified in ${path.join(p, 'package.json')}`)
-    let main = path.join(p, pjson.main)
-
+    let main: ?string
+    if (pjson.main) main = path.join(p, pjson.main)
     if (!this._needsPrepare(p, main)) return false
 
     if (pjson.scripts && pjson.scripts.prepare) {
@@ -149,14 +148,14 @@ export default class LinkedPlugins extends Manager {
     return modulesInfo.mtime < pjsonInfo.mtime
   }
 
-  _needsPrepare (p: string, main: string): boolean {
-    if (!fs.existsSync(main)) return true
+  _needsPrepare (p: string, main: ?string): boolean {
+    if (main && !fs.existsSync(main)) return true
 
     return !!klaw(p, {
       noRecurseOnFailedFilter: true,
       filter: f => !['.git', 'node_modules', 'flow-typed'].includes(path.basename(f.path))
     })
-      .filter(f => f.path.endsWith('.js'))
+      .filter(f => f.path.endsWith('.js') || f.path.endsWith('.ts'))
       .find(f => f.stats.mtime > this._data.updated_at)
   }
 
