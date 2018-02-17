@@ -210,8 +210,8 @@ export class PluginPath {
     let manifest = fs.readJSONSync(path.join(p, '.oclif.manifest.json'))
     let Config = require('@oclif/config')
     let config = await Config.load()
-    config.loadPlugins(p, this.type, [{root: p}], {must: true})
-    let topics = config.topics
+    await config.loadPlugins(p, this.type, [{root: p}], {must: true})
+    let topics = config.topics.map(t => ({id: t.name, ...t}))
     let commands = Object.entries(manifest.commands).map(([id, c]: [string, any]) => {
       return class extends Command<*> {
         static get id () { return id }

@@ -153,7 +153,7 @@ export default class LinkedPlugins extends Manager {
 
     return !!klaw(p, {
       noRecurseOnFailedFilter: true,
-      filter: f => !['.git', 'node_modules', 'flow-typed'].includes(path.basename(f.path))
+      filter: f => !['.git', 'node_modules', 'flow-typed', '/lib/'].includes(path.basename(f.path))
     })
       .filter(f => f.path.endsWith('.js') || f.path.endsWith('.ts'))
       .find(f => f.stats.mtime > this._data.updated_at)
