@@ -170,7 +170,7 @@ export class PluginLegacy {
     if (c.needsOrg || c.wantsOrg) {
       let opts = { required: !!c.needsOrg, hidden: false, description: 'team to use' }
       if (!V5.flags.team) V5.flags.team = deps.Heroku.flags.team(opts)
-      if (!V5.flags.org) V5.flags.org = V5.flags.team
+      if (!V5.flags.org) V5.flags.org = deps.Heroku.flags.team(Object.assign(opts, {char: 'o'}))
     }
     return V5
   }
