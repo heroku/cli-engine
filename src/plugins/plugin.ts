@@ -1,3 +1,4 @@
+import { Help } from '@cli-engine/command/lib/help'
 import { ICommand } from '@cli-engine/config'
 import cli from 'cli-ux'
 import * as path from 'path'
@@ -18,6 +19,10 @@ export interface IPluginPJSON {
   version: string
   main?: string
   scripts?: { [k: string]: string }
+  oclif: {
+    commands?: string
+    topics?: ITopics
+  }
   'cli-engine': {
     commands?: string
     topics?: ITopics
@@ -116,7 +121,10 @@ export abstract class Plugin implements ICommandManager {
         // await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
         let res
-        if (!c._version || c._version === '0.0.0') {
+        let base = (cmd as any)._base
+        if (base && base.startsWith('@oclif')) {
+          res = await cmd.run(argv.slice(3) as any, { root: cmd.plugin!.root } as any)
+        } else if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
         } else if (deps.semver.lt(c._version || '', '10.0.0')) {
@@ -142,13 +150,15 @@ export abstract class Plugin implements ICommandManager {
       if (!m) return []
       return m.topics
     })
-    let pjsonTopics = this.pjson['cli-engine'].topics
+    let pjson = this.pjson.oclif || this.pjson['cli-engine']
+    let pjsonTopics = pjson.topics
     if (pjsonTopics) return cache.concat(topicsToArray(pjsonTopics))
     return cache
   }
 
   protected get commandsDir(): string | undefined {
-    let d = this.pjson['cli-engine'].commands
+    let pjson = this.pjson.oclif || this.pjson['cli-engine']
+    let d = pjson.commands
     if (d) return path.join(this.root, d)
   }
 
@@ -184,6 +194,8 @@ export abstract class Plugin implements ICommandManager {
   }
 
   private async commandInfoFromICommand(icommand: ICommand, id = icommand.id): Promise<Partial<ICommandInfo>> {
+    let help = await (icommand.buildHelp ? icommand.buildHelp(this.config) : this.buildHelp(icommand))
+    let helpLine = await (icommand.buildHelpLine ? icommand.buildHelpLine(this.config) : this.buildHelpLine(icommand))
     return {
       id,
       _version: icommand._version,
@@ -192,9 +204,17 @@ export abstract class Plugin implements ICommandManager {
       plugin: { name: this.name, version: this.version },
       hidden: icommand.hidden,
       aliases: icommand.aliases || [],
-      help: await icommand.buildHelp(this.config),
-      helpLine: await icommand.buildHelpLine(this.config),
+      help,
+      helpLine,
     }
+  }
+
+  private async buildHelp(c: ICommand): Promise<string> {
+    return new Help(this.config).command(c)
+  }
+
+  private async buildHelpLine(c: ICommand) {
+    return new Help(this.config).commandLine(c)
   }
 
   private findCommandInDir(id: string): ICommand {
