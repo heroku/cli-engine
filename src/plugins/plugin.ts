@@ -106,14 +106,8 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async commands(): Promise<ICommandInfo[]> {
-    const cache: ICommandInfo[] = await this.cacheFetch('commands', async () => {
-      this.debug('fetching commands')
-      const commands = await deps
-        .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
-        .flatMap<ICommandInfo>()
-      const r = await Promise.all(commands)
-      return r
-    })
+    let cache: ICommandInfo[] = await this.cacheFetch('commands', this.cacheFetchCallback)
+    if (!cache) cache = await this.cacheFetchCallback()
     return cache.map(c => ({
       ...c,
       fetchCommand: () => this.findCommand(c.id, true),
@@ -172,6 +166,15 @@ export abstract class Plugin implements ICommandManager {
       .map((p: any) => _.compact([...p.dir.split(path.sep), p.name === 'index' ? '' : p.name]).join(':'))
     this.debug(`commandIDsFromDir dir:%s, ids:%o`, d, ids)
     return ids
+  }
+
+  private async cacheFetchCallback(): Promise<ICommandInfo[]> {
+    this.debug('fetching commands')
+    const commands = await deps
+      .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
+      .flatMap<ICommandInfo>()
+    const r = await Promise.all(commands)
+    return r
   }
 
   private commandPath(id: string): string {
