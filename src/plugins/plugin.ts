@@ -106,14 +106,14 @@ export abstract class Plugin implements ICommandManager {
   }
 
   protected async commands(): Promise<ICommandInfo[]> {
-    let cacheFetchCallback = async (): Promise<ICommandInfo[]>  => {
-        this.debug('fetching commands')
-        const commands = await deps
-          .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
-          .flatMap<ICommandInfo>()
-        const r = await Promise.all(commands)
-        return r
-      }
+    let cacheFetchCallback = async (): Promise<ICommandInfo[]> => {
+      this.debug('fetching commands')
+      const commands = await deps
+        .assync<any>([this.commandsFromModule(), this.commandsFromDir()])
+        .flatMap<ICommandInfo>()
+      const r = await Promise.all(commands)
+      return r
+    }
 
     let cache: ICommandInfo[] = await this.cacheFetch('commands', cacheFetchCallback)
 
