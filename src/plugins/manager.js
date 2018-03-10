@@ -62,7 +62,7 @@ function buildHelp (c: ParsedCommand, config: Config): string {
 }
 
 function buildHelpOCLIF (c: ParsedCommand, config: Config): string {
-  const help = new CommandHelp(config);
+  const help = new CommandHelp(config)
   return help.command(c)
 }
 
