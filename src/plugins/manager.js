@@ -8,6 +8,7 @@ import path from 'path'
 import {CLI} from 'cli-ux'
 import {Hooks} from '../hooks'
 import Help from 'cli-engine-command/lib/help'
+import CommandHelp from '@oclif/plugin-help'
 import fs from 'fs-extra'
 
 export type PluginType = | "builtin" | "core" | "user" | "link"
@@ -58,6 +59,11 @@ function buildHelp (c: ParsedCommand, config: Config): string {
   if ((c: any).buildHelp) return (c: any).buildHelp(config)
   const help = new Help(config)
   return help.command((c: any))
+}
+
+function buildHelpOCLIF (c: ParsedCommand, config: Config): string {
+  const help = new CommandHelp(config)
+  return help.command(c)
 }
 
 function buildHelpLine (c: ParsedCommand, config: Config): [string, ?string] {
@@ -219,6 +225,7 @@ export class PluginPath {
         static command = id.split(':').pop()
         static description = c.description
         static variableArgs = true
+        static buildHelp = conf => buildHelpOCLIF(c, conf)
         async run () {
           config.runCommand(id, process.argv.slice(3))
         }
