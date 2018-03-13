@@ -227,7 +227,7 @@ export class PluginPath {
         static variableArgs = true
         static buildHelp = conf => buildHelpOCLIF(c, conf)
         async run () {
-          config.runCommand(id, process.argv.slice(3))
+          return config.runCommand(id, process.argv.slice(3))
         }
       }
     })
