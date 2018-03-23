@@ -1,5 +1,6 @@
 import Heroku = require('@heroku-cli/command')
 import assync = require('assync')
+import * as FS from 'fs-extra'
 import globby = require('globby')
 import { HTTP } from 'http-call'
 import * as klaw from 'klaw'
@@ -37,6 +38,7 @@ export default {
   get Updater(): typeof updater.Updater { return fetch('./updater').Updater },
   get util(): typeof util { return fetch('./util') },
   get file(): typeof file { return fetch('./file') },
+  get fs(): typeof FS { return fetch('fs-extra') },
   get validate(): typeof validate { return fetch('./validate') },
 
   // plugins

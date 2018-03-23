@@ -333,13 +333,29 @@ export class Updater {
 "%~dp0\\..\\${manifest.version}\\bin\\${this.config.bin}.cmd" %*
 `
       await deps.file.outputFile(dst, body)
-      return
-    }
+    } else {
+      let body = `#!/usr/bin/env bash
+set -e
+get_script_dir () {
+  SOURCE="\${BASH_SOURCE[0]}"
+  # While $SOURCE is a symlink, resolve it
+  while [ -h "$SOURCE" ]; do
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$( readlink "$SOURCE" )"
+    # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  echo "$DIR"
+}
+DIR=$(get_script_dir)
+HEROKU_CLI_REDIRECTED=1 "$DIR/../${manifest.version}/bin/${this.config.bin}" "$@"
+`
 
-    let src = path.join('..', manifest.version, 'bin', this.config.bin)
-    await deps.file.mkdirp(path.dirname(dst))
-    await deps.file.remove(dst)
-    await deps.file.symlink(src, dst)
+      await deps.file.remove(dst)
+      await deps.file.outputFile(dst, body)
+      await deps.fs.chmod(dst, 0o755)
+    }
   }
 
   private async _catch(fn: () => {}) {
