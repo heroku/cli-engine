@@ -94,7 +94,8 @@ export class UserPlugins {
       ),
     )
     if (this.plugins.length) this.debug('plugins:', this.plugins.map(p => p.name).join(', '))
-    await this.refresh()
+    // skip plugin rebuilding for now
+    // await this.refresh()
   }
 
   private async loadPlugin(name: string, tag: string): Promise<UserPlugin> {
