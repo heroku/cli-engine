@@ -81,6 +81,7 @@ export interface ILegacyFlag {
   required?: boolean
   optional?: boolean
   parse?: any
+  default?: any
 }
 
 const debug = require('debug')('cli:legacy')
@@ -208,6 +209,7 @@ function convertFlagsFromV5(flags: ILegacyFlag[] | Flags.Input | undefined): Fla
         hidden: flag.hidden,
         required: flag.required || flag.optional === false,
         parse: flag.parse,
+        default: flag.default,
       }
       for (let [k, v] of deps.util.objEntries(opts)) {
         if (v === undefined) delete (opts as any)[k]
