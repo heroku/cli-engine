@@ -223,7 +223,7 @@ export class LinkPlugin extends Plugin {
   }
 
   private async updateNodeModulesNeeded(): Promise<boolean> {
-    if ((await this.yarnNodeVersion()) !== process.version) return true
+    // if ((await this.yarnNodeVersion()) !== process.version) return true
     let modules = path.join(this.root, 'node_modules')
     if (!await deps.file.exists(modules)) return true
     let modulesInfo = await fs.stat(modules)
@@ -245,6 +245,7 @@ export class LinkPlugin extends Plugin {
     this.debug('update node modules')
     const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
     await yarn.exec()
+    await this.prepare()
     touch(path.join(this.root, 'node_modules'))
     await this.reset()
   }
@@ -255,24 +256,14 @@ export class LinkPlugin extends Plugin {
       cli.action.start(`Refreshing linked plugin ${this.name}`, 'yarn run prepare')
     }
     const { scripts } = this.pjson
-    if (scripts && scripts.prepare) {
-      const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
-      await yarn.exec(['run', 'prepare'])
-    }
+    const yarn = new deps.Yarn({ config: this.config, cwd: this.root })
+    if (scripts && scripts.prepare) await yarn.exec(['run', 'prepare'])
+    if (scripts && scripts.prepublishOnly) await yarn.exec(['run', 'prepublishOnly'])
     await this.reset()
   }
 
   private async lastUpdated(): Promise<Date> {
     const lastUpdated = await this.manifest.get('lastUpdated')
     return lastUpdated ? new Date(lastUpdated) : new Date(0)
-  }
-
-  private async yarnNodeVersion(): Promise<string | undefined> {
-    try {
-      let f = await deps.file.readJSON(path.join(this.root, 'node_modules', '.yarn-integrity'))
-      return f.nodeVersion
-    } catch (err) {
-      if (err.code !== 'ENOENT') throw err
-    }
   }
 }
