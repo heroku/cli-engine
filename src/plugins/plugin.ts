@@ -128,7 +128,7 @@ export abstract class Plugin implements ICommandManager {
         let res
         let base = (cmd as any)._base
         if (base && base.startsWith('@oclif')) {
-          res = await cmd.run(argv.slice(3) as any, { root: cmd.plugin!.root } as any)
+          res = await cmd.run(argv.slice(3) as any, { root: cmd.plugin!.root, devPlugins: false } as any)
         } else if (!c._version || c._version === '0.0.0') {
           // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
