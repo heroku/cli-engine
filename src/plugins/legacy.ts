@@ -132,6 +132,7 @@ export class PluginLegacy {
       static help = c.help
       static aliases = c.aliases || []
       static usage = c.usage
+      static legacy = true
 
       async run() {
         const ctx: ILegacyContext = {

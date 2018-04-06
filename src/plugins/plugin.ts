@@ -127,16 +127,17 @@ export abstract class Plugin implements ICommandManager {
         let cmd = await this.findCommand(c.id, true)
         let res
         let base = (cmd as any)._base
-        if (base && base.startsWith('@oclif')) {
+        let legacy = (cmd as any).legacy
+        if (!legacy && base && base.startsWith('@oclif')) {
           res = await cmd.run(argv.slice(3) as any, { root: cmd.plugin!.root, devPlugins: false } as any)
-        } else if (!c._version || c._version === '0.0.0') {
+        } else if ((!legacy && !c._version) || c._version === '0.0.0') {
           // this.debug('legacy @cli-engine/command version', c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(4) })
-        } else if (deps.semver.lt(c._version || '', '10.0.0')) {
+        } else if (!legacy && deps.semver.lt(c._version || '', '10.0.0')) {
           // this.debug('legacy @cli-engine/command version', c._version)
           let cvrtConfig = this.convertConfig(this.config)
           res = await (cmd as any).run({ ...cvrtConfig, argv: argv.slice(1) })
-        } else if (deps.semver.lt(c._version || '', '11.0.0-beta.0')) {
+        } else if (!legacy && deps.semver.lt(c._version || '', '11.0.0-beta.0')) {
           // this.debug(`legacy @cli-engine/command version`, c._version)
           res = await (cmd as any).run({ ...this.config, argv: argv.slice(2) })
         } else {
