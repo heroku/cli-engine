@@ -15,8 +15,10 @@
     }
   },
   "dependencies": {
+    "@cli-engine/command": "12.1.1",
+    "@cli-engine/config": "^5.1.0",
     "@heroku-cli/color": "^1.1.1",
-    "@heroku-cli/command": "^7.0.13",
+    "@heroku-cli/command": "7.0.13",
     "@types/load-json-file": "^2.0.7",
     "assync": "^1.0.4",
     "cli-ux": "^2.0.21",
@@ -39,8 +41,6 @@
     "yarn": "^1.3.2"
   },
   "devDependencies": {
-    "@cli-engine/command": "^12.1.0",
-    "@cli-engine/config": "^5.1.0",
     "@cli-engine/util": "^1.2.11",
     "@heroku-cli/tslint": "^1.1.4",
     "@types/ansi-styles": "^2.0.30",

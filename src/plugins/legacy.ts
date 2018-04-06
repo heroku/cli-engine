@@ -1,6 +1,7 @@
 import { flags as Flags } from '@cli-engine/command'
 import { Config, ICommand } from '@cli-engine/config'
 import { color } from '@heroku-cli/color'
+import * as Heroku from '@heroku-cli/command'
 import { args as Args } from 'cli-flags'
 import _ from 'ts-lodash'
 import { inspect } from 'util'
@@ -118,7 +119,7 @@ export class PluginLegacy {
   }
 
   private convertFromV5(c: IV5Command): ICommand {
-    class V5 extends deps.Heroku.Command {
+    class V5 extends Heroku.Command {
       static id = _.compact([c.topic, c.command]).join(':')
       static description = c.description
       static hidden = !!c.hidden
@@ -145,12 +146,12 @@ export class PluginLegacy {
           org: this.flags.org,
           team: this.flags.team,
           config: this.config,
-          apiUrl: deps.Heroku.vars.apiUrl,
+          apiUrl: Heroku.vars.apiUrl,
           herokuDir: this.config.cacheDir,
           apiToken: this.heroku.auth,
-          apiHost: deps.Heroku.vars.apiHost,
-          gitHost: deps.Heroku.vars.gitHost,
-          httpGitHost: deps.Heroku.vars.httpGitHost,
+          apiHost: Heroku.vars.apiHost,
+          gitHost: Heroku.vars.gitHost,
+          httpGitHost: Heroku.vars.httpGitHost,
           cwd: process.cwd(),
         }
         ctx.auth.password = ctx.apiToken
@@ -165,12 +166,12 @@ export class PluginLegacy {
     }
 
     if (c.needsApp || c.wantsApp) {
-      V5.flags.app = deps.Heroku.flags.app({ required: !!c.needsApp })
-      V5.flags.remote = deps.Heroku.flags.remote()
+      V5.flags.app = Heroku.flags.app({ required: !!c.needsApp })
+      V5.flags.remote = Heroku.flags.remote()
     }
     if (c.needsOrg || c.wantsOrg) {
       let opts = { required: !!c.needsOrg, hidden: false, description: 'team to use' }
-      if (!V5.flags.team) V5.flags.team = deps.Heroku.flags.team(opts)
+      if (!V5.flags.team) V5.flags.team = Heroku.flags.team(opts)
       if (!V5.flags.org) {
         const org = Object.assign({}, V5.flags.team)
         org.char = 'o'

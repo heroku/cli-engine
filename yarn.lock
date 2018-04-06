@@ -10,6 +10,14 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
+"@cli-engine/command@12.1.1":
+  version "12.1.1"
+  resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.1.1.tgz#bb6262f849b59531ec386414b2ea763fd9385415"
+  dependencies:
+    "@cli-engine/screen" "^0.0.0"
+    chalk "^2.3.0"
+    cli-flags "^2.0.7"
+
 "@cli-engine/command@^12.1.0":
   version "12.1.0"
   resolved "https://registry.yarnpkg.com/@cli-engine/command/-/command-12.1.0.tgz#86300ad3c7f51b1c539f9c7b998204f52016e0a7"
@@ -81,7 +89,7 @@
     strip-ansi "^4.0.0"
     supports-color "^5.1.0"
 
-"@heroku-cli/command@^7.0.13":
+"@heroku-cli/command@7.0.13":
   version "7.0.13"
   resolved "https://registry.yarnpkg.com/@heroku-cli/command/-/command-7.0.13.tgz#d2eafe24e4a0e1857f8ac81e84791e5ca392b6b9"
   dependencies:
