@@ -5,7 +5,7 @@ import * as path from 'path'
 
 import deps from '../deps'
 import { Hooks } from '../hooks'
-import { IManifest, Updater } from '../updater'
+import { Updater } from '../updater'
 import { wait } from '../util'
 
 import Command from './base'
@@ -38,18 +38,19 @@ export default class Update extends Command {
     } else {
       cli.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
-      let manifest = await this.updater.fetchManifest(channel)
+      const oclif = channel === 'oclif' || this.updateToOclif()
+      let manifest = await this.updater.fetchManifest(channel, oclif)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
           cli.action.stop(`already on latest version: ${this.config.version}`)
         }
-      } else if (this.shouldUpdate(manifest)) {
+      } else {
         cli.action.start(
           `${this.config.name}: Updating CLI from ${color.green(this.config.version)} to ${color.green(
             manifest.version,
           )}${channel === 'stable' ? '' : ' (' + color.yellow(channel) + ')'}`,
         )
-        await this.updater.update(manifest)
+        await this.updater.update(manifest, oclif)
       }
     }
     debug('fetch version')
@@ -80,17 +81,17 @@ export default class Update extends Command {
     return deps.moment(mtime)
   }
 
-  private shouldUpdate(manifest: IManifest): boolean {
+  private updateToOclif(): boolean {
     try {
+      const rollout = parseInt((this.config.pjson as any).oclif.update.autoupdate.rollout, 10)
+      if (!rollout) return false
       const chance = Math.random() * 100
-      if (this.flags.autoupdate && manifest.priority && chance < manifest.priority) {
-        cli.log(`skipping update. priority is ${manifest.priority} but chance is ${chance}`)
-        return false
-      }
+      debug({ oclif_rollout: { chance, rollout } })
+      return chance > rollout
     } catch (err) {
       cli.warn(err)
     }
-    return true
+    return false
   }
 
   private async debounce(): Promise<void> {

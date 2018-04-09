@@ -19,7 +19,7 @@ export interface IManifest {
   version: string
   channel: string
   sha256gz: string
-  priority?: number
+  rollout?: number
 }
 
 async function mtime(f: string) {
@@ -72,9 +72,13 @@ export class Updater {
     return `https://${this.s3Host}/${this.config.name}/channels/${channel}/${p}`
   }
 
-  async fetchManifest(channel: string): Promise<IManifest> {
+  async fetchManifest(channel: string, oclif: boolean): Promise<IManifest> {
     try {
-      let { body } = await this.http.get(this.s3url(channel, `${this.config.platform}-${this.config.arch}`))
+      let url = this.s3url(channel, `${this.config.platform}-${this.config.arch}`)
+      if (oclif) {
+        url = `https://${this.s3Host}/${this.config.name}/${this.config.platform}-${this.config.arch}`
+      }
+      let { body } = await this.http.get(url)
       return body
     } catch (err) {
       if (err.statusCode === 403) throw new Error(`HTTP 403: Invalid channel ${channel}`)
@@ -144,18 +148,22 @@ export class Updater {
     }
   }
 
-  async update(manifest: IManifest) {
-    let base = this.base(manifest)
-    const output = path.join(this.clientRoot, manifest.version)
-    const tmp = path.join(this.clientRoot, base)
-    const lock = new RWLockfile(this.autoupdatefile, { ifLocked: () => cli.action.start('CLI is updating') })
-
+  async update(manifest: IManifest, oclif: boolean) {
     if (!this.s3Host) throw new Error('S3 host not defined')
+    const base = this.base(manifest)
+    const output = path.join(this.clientRoot, manifest.version)
+    let tmp = path.join(this.clientRoot, base)
+    const lock = new RWLockfile(this.autoupdatefile, { ifLocked: () => cli.action.start('CLI is updating') })
+    let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
+
+    if (oclif) {
+      tmp = this.config.bin
+      url = (manifest as any).gz
+    }
 
     await lock.add('write', { reason: 'update' })
 
     try {
-      let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
       let { response: stream } = await this.http.stream(url)
 
       await deps.file.emptyDir(tmp)
