@@ -157,7 +157,7 @@ export class Updater {
     let url = `https://${this.s3Host}/${this.config.name}/channels/${manifest.channel}/${base}.tar.gz`
 
     if (oclif) {
-      tmp = this.config.bin
+      tmp = path.join(this.clientRoot, this.config.bin)
       url = (manifest as any).gz
     }
 
