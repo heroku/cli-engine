@@ -76,7 +76,7 @@ export class Updater {
     try {
       let url = this.s3url(channel, `${this.config.platform}-${this.config.arch}`)
       if (oclif) {
-        url = `https://${this.s3Host}/${this.config.name}/${this.config.platform}-${this.config.arch}`
+        url = `https://${this.s3Host}/${this.config.platform}-${this.config.arch}`
       }
       let { body } = await this.http.get(url)
       return body
