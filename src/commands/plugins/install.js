@@ -29,10 +29,21 @@ export default class PluginsInstall extends Command<*> {
 
   async run () {
     this.plugins = new Plugins(this.config)
-    const [plugin, tag = 'latest'] = this.argv[0].split('@')
+    const [plugin, tag = 'latest'] = this.parsePlugin(this.argv[0])
     if (!this.config.debug) this.out.action.start(`Installing plugin ${plugin}${tag === 'latest' ? '' : '@' + tag}`)
     await this.plugins.install(plugin, tag)
     const hooks = new Hooks({config: this.config})
     await hooks.run('update')
+  }
+
+  parsePlugin (input: string) {
+    if (input.includes('/')) {
+      input = input.slice(1)
+      let [name, tag = 'latest'] = input.split('@')
+      return ['@' + name, tag]
+    } else {
+      let [name, tag = 'latest'] = input.split('@')
+      return [name, tag]
+    }
   }
 }
