@@ -38,7 +38,7 @@ export default class Update extends Command {
     } else {
       cli.action.start(`${this.config.name}: Updating CLI`)
       let channel = this.argv[0] || this.config.channel
-      const oclif = channel === 'oclif' || this.updateToOclif()
+      const oclif = channel === 'oclif' || channel === 'beta' || this.updateToOclif()
       let manifest = await this.updater.fetchManifest(channel, oclif)
       if (this.config.version === manifest.version && channel === this.config.channel) {
         if (!process.env.CLI_ENGINE_HIDE_UPDATED_MESSAGE) {
