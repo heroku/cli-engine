@@ -156,7 +156,7 @@ export class PluginPath {
   }
 
   async require (): Promise<ParsedPlugin> {
-    if (await fs.pathExists(path.join(this.path, '.oclif.manifest.json'))) return this.requireOCLIF()
+    if (await fs.pathExists(path.join(this.path, '.oclif.manifest.json')) || await fs.pathExists(path.join(this.path, 'oclif.manifest.json'))) return this.requireOCLIF()
     let required
     try {
       required = require(this.path)
@@ -213,7 +213,12 @@ export class PluginPath {
 
   async requireOCLIF (): any {
     let p = this.path
-    let manifest = fs.readJSONSync(path.join(p, '.oclif.manifest.json'))
+    let manifest
+    try {
+      manifest = fs.readJSONSync(path.join(p, '.oclif.manifest.json'))
+    } catch (e) {
+      manifest = fs.readJSONSync(path.join(p, 'oclif.manifest.json'))
+    }
     let Config = require('@oclif/config')
     let config = await Config.load()
     await config.loadPlugins(p, this.type, [{root: p}], {must: true})
