@@ -21,7 +21,6 @@ jobs:
       - run: cd example && ./bin/run version
       - run: yarn test --coverage
       - run: greenkeeper-lockfile-upload
-      - run: curl -s https://codecov.io/bash | bash
       - save_cache:
           key: v1-yarn-{{ .Environment.CIRCLE_JOB }}-{{ .Branch }}-{{checksum "yarn.lock"}}
           paths:
