@@ -125,6 +125,7 @@ export abstract class Plugin implements ICommandManager {
       run: async (argv: string[]) => {
         // await this.lock.add('read', { reason: 'running plugin' })
         let cmd = await this.findCommand(c.id, true)
+        process.title = [this.config.bin, c.id, argv.slice(3)].join(' ')
         let res
         let base = (cmd as any)._base
         let legacy = (cmd as any).legacy
