@@ -34,7 +34,7 @@
     "log-chopper": "^1.0.2",
     "moment": "^2.20.1",
     "rwlockfile": "^2.0.19",
-    "semver": "5.4.1",
+    "semver": "5.5.0",
     "string-similarity": "^1.2.0",
     "strip-ansi": "4.0.0",
     "ts-lodash": "4.0.11",
